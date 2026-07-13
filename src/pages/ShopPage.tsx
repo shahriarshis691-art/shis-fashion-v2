@@ -6,24 +6,45 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { getCategoryBySlug, getProductsByCategory, shopCategories, shopProducts } from '../data/shopData'
 
+const sortOptions = [
+  { value: 'featured', label: 'Featured' },
+  { value: 'price-asc', label: 'Price: Low to high' },
+  { value: 'price-desc', label: 'Price: High to low' },
+  { value: 'name', label: 'Name' },
+] as const
+
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const slug = location.pathname.split('/').filter(Boolean).at(-1)
   const category = slug && slug !== 'shop' ? getCategoryBySlug(slug) : undefined
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortOrder, setSortOrder] = useState<(typeof sortOptions)[number]['value']>('featured')
   const visibleCategories = shopCategories.slice(0, 6)
 
   const products = useMemo(() => {
     const baseProducts = slug && slug !== 'shop' ? getProductsByCategory(slug) : shopProducts
     const query = searchQuery.trim().toLowerCase()
 
-    if (!query) {
-      return baseProducts
-    }
+    const filtered = query
+      ? baseProducts.filter((product) => [product.name, product.description, product.category].some((value) => value.toLowerCase().includes(query)))
+      : baseProducts
 
-    return baseProducts.filter((product) => [product.name, product.description, product.category].some((value) => value.toLowerCase().includes(query)))
-  }, [searchQuery, slug])
+    const sorted = [...filtered].sort((left, right) => {
+      if (sortOrder === 'price-asc') {
+        return Number.parseFloat(left.price.replace('$', '')) - Number.parseFloat(right.price.replace('$', ''))
+      }
+      if (sortOrder === 'price-desc') {
+        return Number.parseFloat(right.price.replace('$', '')) - Number.parseFloat(left.price.replace('$', ''))
+      }
+      if (sortOrder === 'name') {
+        return left.name.localeCompare(right.name)
+      }
+      return 0
+    })
+
+    return sorted
+  }, [searchQuery, slug, sortOrder])
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -39,7 +60,7 @@ export default function ShopPage() {
                 {category?.description ?? 'Discover premium essentials crafted for modern dressing and timeless comfort.'}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <input
                 type="search"
                 value={searchQuery}
@@ -47,6 +68,17 @@ export default function ShopPage() {
                 placeholder="Search collection"
                 className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none ring-0 sm:w-56"
               />
+              <select
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value as (typeof sortOptions)[number]['value'])}
+                className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <Button to="/shop" variant="secondary" className="px-4 py-2.5">
                 All
               </Button>
@@ -90,11 +122,22 @@ export default function ShopPage() {
             ))}
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {products.length ? (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/70 px-6 py-12 text-center shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">No matches</p>
+              <h3 className="mt-3 text-xl font-semibold text-[var(--color-text)]">Nothing matched your search yet</h3>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--color-muted)]">Try a broader term or reset the filters to see more of the collection.</p>
+              <div className="mt-6 flex justify-center">
+                <Button onClick={() => setSearchQuery('')} variant="secondary">Reset search</Button>
+              </div>
+            </div>
+          )}
         </div>
       </Container>
     </section>

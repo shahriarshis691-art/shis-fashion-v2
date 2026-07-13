@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
       <Container>
         <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-3">
-            <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[420px]" />
+            <img src={product.image} alt={product.name} loading="eager" decoding="async" className="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[420px]" />
             <div className="grid grid-cols-3 gap-3">
               {gallery.map((image, index) => (
                 <img key={`${image}-${index}`} src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" decoding="async" className="h-24 w-full rounded-[1.2rem] object-cover" />
@@ -87,7 +87,7 @@ export default function ProductDetailPage() {
           <div className="mt-5 grid gap-5 md:grid-cols-3">
             {related.map((item) => (
               <Link key={item.id} to={`/shop/${item.category}/${item.slug}`} className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90">
-                <img src={item.image} alt={item.name} className="h-40 w-full object-cover" />
+                <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
                 <div className="p-4">
                   <h3 className="text-base font-semibold text-[var(--color-text)]">{item.name}</h3>
                   <p className="mt-2 text-sm text-[var(--color-muted)]">{item.price}</p>

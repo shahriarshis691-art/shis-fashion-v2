@@ -1,8 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-import { lazy, Suspense, type ReactElement } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
+import { onAdminAuthChanged } from './firebase/adminService'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
@@ -18,6 +19,30 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 const withSuspense = (element: ReactElement) => <Suspense fallback={<Loading />}>{element}</Suspense>
+
+function AdminRouteGuard({ children }: { children: ReactElement }) {
+  const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = onAdminAuthChanged((nextUser) => {
+      setUser(nextUser)
+      setReady(true)
+    })
+
+    return unsubscribe
+  }, [])
+
+  if (!ready) {
+    return <Loading />
+  }
+
+  if (!user) {
+    return <Navigate to="/shis-admin/login" replace />
+  }
+
+  return children
+}
 
 export const router = createBrowserRouter([
   {
@@ -81,7 +106,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'dashboard',
-            element: withSuspense(<AdminPage initialView="dashboard" />),
+            element: withSuspense(<AdminRouteGuard><AdminPage initialView="dashboard" /></AdminRouteGuard>),
           },
         ],
       },

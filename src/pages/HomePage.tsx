@@ -84,9 +84,9 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(201,162,39,0.2),_transparent_35%)]" />
               <div className="relative space-y-5">
                 {homepageContent.heroVideo ? (
-                  <video src={homepageContent.heroVideo} autoPlay muted loop playsInline className="h-56 w-full rounded-[1.5rem] object-cover" />
+                  <video src={homepageContent.heroVideo} autoPlay muted loop playsInline preload="metadata" className="h-56 w-full rounded-[1.5rem] object-cover" />
                 ) : homepageContent.heroImage ? (
-                  <img src={homepageContent.heroImage} alt="Hero media" className="h-56 w-full rounded-[1.5rem] object-cover" />
+                  <img src={homepageContent.heroImage} alt="Hero media" loading="eager" decoding="async" className="h-56 w-full rounded-[1.5rem] object-cover" />
                 ) : (
                   <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[0_26px_80px_rgba(0,0,0,0.08)] sm:p-6">
                     <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">New arrival</p>
@@ -117,7 +117,7 @@ export default function HomePage() {
             {homepageContent.categories.map((category, index) => (
               <motion.div key={category.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>
                 <Card className="h-full rounded-[1.5rem]">
-                  {category.image ? <img src={category.image} alt={category.title} className="h-28 w-full rounded-[1.25rem] object-cover" /> : <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />}
+                  {category.image ? <img src={category.image} alt={category.title} loading="lazy" decoding="async" className="h-28 w-full rounded-[1.25rem] object-cover" /> : <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />}
                   <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.title}</h3>
                   <p className="mt-2 text-sm text-[var(--color-muted)]">{category.caption}</p>
                 </Card>
@@ -182,7 +182,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(201,162,39,0.16),rgba(255,255,255,0.6))] p-6">
-              {homepageContent.bannerImage ? <img src={homepageContent.bannerImage} alt="Featured banner" className="mb-4 h-36 w-full rounded-[1.25rem] object-cover" /> : null}
+              {homepageContent.bannerImage ? <img src={homepageContent.bannerImage} alt="Featured banner" loading="lazy" decoding="async" className="mb-4 h-36 w-full rounded-[1.25rem] object-cover" /> : null}
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Signature promise</p>
               <p className="mt-3 text-lg leading-8 text-[var(--color-text)]">Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight.</p>
             </div>

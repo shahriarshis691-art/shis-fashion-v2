@@ -17,7 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       className="overflow-hidden rounded-[1.6rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 shadow-[0_18px_55px_rgba(0,0,0,0.06)]"
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="block">
-        <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-56 w-full object-cover sm:h-64" />
+        <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-56 w-full object-cover sm:h-64" fetchPriority="low" />
         <div className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
