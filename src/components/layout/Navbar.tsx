@@ -3,14 +3,12 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useCart } from '../../context/CartContext'
-import Button from '../ui/Button'
 
 const links = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Admin', href: '/admin' },
 ]
 
 function IconButton({ label, children, onClick }: { label: string; children: React.ReactNode; onClick?: () => void }) {
@@ -94,9 +92,6 @@ export default function Navbar() {
             >
               {theme === 'luxury' ? 'Midnight' : 'Luxury'}
             </button>
-            <Button to="/admin" variant="secondary" className="hidden px-4 py-2.5 sm:inline-flex">
-              Admin
-            </Button>
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((value) => !value)}
@@ -149,9 +144,6 @@ export default function Navbar() {
                   <span>Theme</span>
                   <span className="text-[var(--color-accent)]">{theme === 'luxury' ? 'Midnight' : 'Luxury'}</span>
                 </button>
-                <Button to="/admin" variant="primary" className="w-full justify-center">
-                  Admin Access
-                </Button>
               </div>
             </div>
           </motion.div>

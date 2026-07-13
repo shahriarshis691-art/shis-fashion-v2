@@ -6,7 +6,6 @@ const quickLinks = [
   { label: 'Shop', href: '/shop' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Admin', href: '/admin' },
 ]
 
 const socialLinks = [

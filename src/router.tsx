@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy, Suspense, type ReactElement } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 
@@ -66,7 +66,24 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: withSuspense(<AdminPage />),
+        element: <Navigate to="/shis-admin/login" replace />,
+      },
+      {
+        path: 'shis-admin',
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/shis-admin/login" replace />,
+          },
+          {
+            path: 'login',
+            element: withSuspense(<AdminPage initialView="login" />),
+          },
+          {
+            path: 'dashboard',
+            element: withSuspense(<AdminPage initialView="dashboard" />),
+          },
+        ],
       },
       {
         path: '*',

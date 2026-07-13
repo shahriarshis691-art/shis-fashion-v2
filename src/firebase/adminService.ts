@@ -14,7 +14,7 @@ import {
   updateDoc,
   type Firestore,
 } from 'firebase/firestore'
-import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
+import { deleteBlob, uploadToBlob } from '../lib/blob'
 
 export interface AdminProduct {
   id: string
@@ -49,7 +49,10 @@ export interface HomepageContent {
   heroTitle: string
   heroSubtitle: string
   heroCta: string
-  categories: Array<{ title: string; caption: string }>
+  heroImage?: string
+  heroVideo?: string
+  bannerImage?: string
+  categories: Array<{ title: string; caption: string; image?: string }>
   newArrivalsTitle: string
   newArrivalsSubtitle: string
   featuredTitle: string
@@ -69,17 +72,15 @@ const hasFirebaseConfig = Object.values(firebaseConfig).every(Boolean)
 
 let firebaseAuth: ReturnType<typeof getAuth> | null = null
 let firebaseDb: Firestore | null = null
-let firebaseStorage: ReturnType<typeof getStorage> | null = null
 
 if (hasFirebaseConfig) {
   const firebaseApp: FirebaseApp = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
   firebaseAuth = getAuth(firebaseApp)
   firebaseDb = getFirestore(firebaseApp)
-  firebaseStorage = getStorage(firebaseApp)
 }
 
 export function isFirebaseConfigured() {
-  return Boolean(firebaseAuth && firebaseDb && firebaseStorage)
+  return Boolean(firebaseAuth && firebaseDb)
 }
 
 const PRODUCTS_KEY = 'shis-admin-products'
@@ -143,10 +144,13 @@ const defaultHomepage: HomepageContent = {
   heroTitle: 'Style Meets Comfort.',
   heroSubtitle: 'Discover elevated staples designed for modern living, with premium materials and effortless lines.',
   heroCta: 'Shop collection',
+  heroImage: '',
+  heroVideo: '',
+  bannerImage: '',
   categories: [
-    { title: 'Tailored Layers', caption: 'Soft authority' },
-    { title: 'Everyday Luxe', caption: 'Refined comfort' },
-    { title: 'Evening Edit', caption: 'Quiet glamour' },
+    { title: 'Tailored Layers', caption: 'Soft authority', image: '' },
+    { title: 'Everyday Luxe', caption: 'Refined comfort', image: '' },
+    { title: 'Evening Edit', caption: 'Quiet glamour', image: '' },
   ],
   newArrivalsTitle: 'Freshly composed for the season',
   newArrivalsSubtitle: 'Newly released pieces with an effortless, sculpted feel.',
@@ -327,25 +331,30 @@ export async function updateHomepageContent(content: HomepageContent) {
 }
 
 export async function uploadAssets(files: File[], folder: string) {
-  if (!firebaseStorage) {
-    const readers = files.map(
-      (file) =>
-        new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.readAsDataURL(file)
-        }),
-    )
-
-    return Promise.all(readers)
+  if (typeof window === 'undefined') {
+    return []
   }
 
-  const urls: string[] = []
-  for (const file of files) {
-    const storageRef = ref(firebaseStorage, `${folder}/${Date.now()}-${file.name}`)
-    const result = await uploadBytes(storageRef, file)
-    urls.push(await getDownloadURL(result.ref))
+  const uploaded = await uploadToBlob(files, folder)
+  return uploaded.map((entry) => entry.url)
+}
+
+export async function deleteAsset(url: string) {
+  if (typeof window === 'undefined') {
+    return
   }
 
-  return urls
+  const pathname = (() => {
+    try {
+      return new URL(url).pathname
+    } catch {
+      return url
+    }
+  })()
+
+  if (!pathname || pathname.startsWith('data:')) {
+    return
+  }
+
+  await deleteBlob(pathname)
 }

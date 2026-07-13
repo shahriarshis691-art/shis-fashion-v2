@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
 import {
   createProduct,
+  deleteAsset,
   deleteProduct,
   isFirebaseConfigured,
   signInAdmin,
@@ -37,9 +39,14 @@ const emptyProductForm = {
   hero: false,
 }
 
-export default function AdminPage() {
+interface AdminPageProps {
+  initialView?: 'login' | 'dashboard'
+}
+
+export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
+  const navigate = useNavigate()
   const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
-  const [authMode, setAuthMode] = useState<'login' | 'dashboard'>('login')
+  const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
   const [loginForm, setLoginForm] = useState({ email: 'admin@shisfashion.com', password: 'luxury123' })
   const [loading, setLoading] = useState(false)
   const [products, setProducts] = useState<AdminProduct[]>([])
@@ -55,11 +62,23 @@ export default function AdminPage() {
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
       setUser(nextUser)
-      setAuthMode(nextUser ? 'dashboard' : 'login')
+
+      if (nextUser) {
+        setAuthMode('dashboard')
+        if (initialView === 'login') {
+          navigate('/shis-admin/dashboard', { replace: true })
+        }
+        return
+      }
+
+      setAuthMode('login')
+      if (initialView === 'dashboard') {
+        navigate('/shis-admin/login', { replace: true })
+      }
     })
 
     return unsubscribe
-  }, [])
+  }, [initialView, navigate])
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
@@ -91,6 +110,7 @@ export default function AdminPage() {
       await signInAdmin(loginForm.email, loginForm.password)
       setAuthMode('dashboard')
       setMessage('Welcome back. Your dashboard is ready.')
+      navigate('/shis-admin/dashboard', { replace: true })
     } catch {
       setMessage('Sign-in failed. Try the demo credentials or confirm Firebase is configured.')
     } finally {
@@ -102,6 +122,7 @@ export default function AdminPage() {
     await signOutAdmin()
     setAuthMode('login')
     setUser(null)
+    navigate('/shis-admin/login', { replace: true })
   }
 
   const resetForm = () => {
@@ -109,7 +130,11 @@ export default function AdminPage() {
     setIsEditing(null)
   }
 
-  const handleUpload = async (files: FileList | null) => {
+  const handleUpload = async (
+    files: FileList | null,
+    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | null = null,
+    categoryIndex?: number,
+  ) => {
     if (!files?.length) {
       return
     }
@@ -125,19 +150,53 @@ export default function AdminPage() {
 
     setUploading(true)
     try {
-      const uploadedImages = imageFiles.length ? await uploadAssets(imageFiles, 'products') : []
-      const uploadedVideos = videoFiles.length ? await uploadAssets(videoFiles, 'products') : []
-      setForm((current) => ({ ...current, images: [...current.images, ...uploadedImages], videos: [...current.videos, ...uploadedVideos] }))
+      const uploadedImages = imageFiles.length ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' ? 'homepage' : 'products') : []
+      const uploadedVideos = videoFiles.length ? await uploadAssets(videoFiles, target === 'hero-video' ? 'homepage' : 'products') : []
+
+      if (target === 'hero-image') {
+        setHomepageContent((current) => (current ? { ...current, heroImage: uploadedImages[0] ?? current.heroImage } : current))
+      } else if (target === 'hero-video') {
+        setHomepageContent((current) => (current ? { ...current, heroVideo: uploadedVideos[0] ?? current.heroVideo } : current))
+      } else if (target === 'banner-image') {
+        setHomepageContent((current) => (current ? { ...current, bannerImage: uploadedImages[0] ?? current.bannerImage } : current))
+      } else if (target === 'category-image') {
+        setHomepageContent((current) => {
+          if (!current) {
+            return current
+          }
+          const nextCategories = [...current.categories]
+          const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextCategories.length - 1) : 0
+          nextCategories[safeIndex] = { ...nextCategories[safeIndex], image: uploadedImages[0] ?? nextCategories[safeIndex].image }
+          return { ...current, categories: nextCategories }
+        })
+      } else {
+        setForm((current) => ({ ...current, images: [...current.images, ...uploadedImages], videos: [...current.videos, ...uploadedVideos] }))
+      }
+
       setMessage('Assets uploaded successfully.')
     } finally {
       setUploading(false)
     }
   }
 
-  const handleDrop = async (event: DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | null = null) => {
     event.preventDefault()
     setDragActive(false)
-    await handleUpload(event.dataTransfer.files)
+    await handleUpload(event.dataTransfer.files, target)
+  }
+
+  const handleRemoveMedia = async (value: string, kind: 'image' | 'video') => {
+    try {
+      await deleteAsset(value)
+      if (kind === 'image') {
+        setForm((current) => ({ ...current, images: current.images.filter((entry) => entry !== value) }))
+      } else {
+        setForm((current) => ({ ...current, videos: current.videos.filter((entry) => entry !== value) }))
+      }
+      setMessage('Media removed.')
+    } catch {
+      setMessage('Unable to remove media right now.')
+    }
   }
 
   const handleSaveProduct = async (event: FormEvent<HTMLFormElement>) => {
@@ -278,16 +337,26 @@ export default function AdminPage() {
               <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
               <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma separated)" />
               <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
-              <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={handleDrop} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+              <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, null)} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
                 <label className="cursor-pointer">
-                  <input type="file" multiple accept="image/*,video/*" onChange={(event) => handleUpload(event.target.files)} className="hidden" />
+                  <input type="file" multiple accept="image/*,video/*" onChange={(event) => handleUpload(event.target.files, null)} className="hidden" />
                   Drag and drop images or videos here, or tap to upload.
                 </label>
                 {uploading ? <p className="mt-2 text-[var(--color-accent)]">Uploading…</p> : null}
               </div>
               <div className="flex flex-wrap gap-3">
-                {form.images.map((image) => <span key={image} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-muted)]">Image ready</span>)}
-                {form.videos.map((video) => <span key={video} className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-muted)]">Video ready</span>)}
+                {form.images.map((image) => (
+                  <span key={image} className="flex items-center gap-2 rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-muted)]">
+                    <span>Image ready</span>
+                    <button type="button" onClick={() => handleRemoveMedia(image, 'image')} className="text-[var(--color-accent)]">×</button>
+                  </span>
+                ))}
+                {form.videos.map((video) => (
+                  <span key={video} className="flex items-center gap-2 rounded-full border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-muted)]">
+                    <span>Video ready</span>
+                    <button type="button" onClick={() => handleRemoveMedia(video, 'video')} className="text-[var(--color-accent)]">×</button>
+                  </span>
+                ))}
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
                 <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.featured} onChange={() => setForm({ ...form, featured: !form.featured })} /> Featured</label>
@@ -371,6 +440,20 @@ export default function AdminPage() {
                 <input value={homepageContent.heroTitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero title" />
                 <textarea value={homepageContent.heroSubtitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroSubtitle: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero subtitle" />
                 <input value={homepageContent.heroCta} onChange={(event) => setHomepageContent({ ...homepageContent, heroCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero CTA" />
+                <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'hero-image')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+                  <label className="cursor-pointer">
+                    <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'hero-image')} className="hidden" />
+                    Drop hero image or tap to replace.
+                  </label>
+                </div>
+                {homepageContent.heroImage ? <img src={homepageContent.heroImage} alt="Hero preview" className="h-40 w-full rounded-[1.25rem] object-cover" /> : null}
+                <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'hero-video')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+                  <label className="cursor-pointer">
+                    <input type="file" accept="video/*" onChange={(event) => handleUpload(event.target.files, 'hero-video')} className="hidden" />
+                    Drop hero video or tap to replace.
+                  </label>
+                </div>
+                {homepageContent.heroVideo ? <video src={homepageContent.heroVideo} controls className="h-40 w-full rounded-[1.25rem] object-cover" /> : null}
                 {homepageContent.categories.map((category, index) => (
                   <div key={`${category.title}-${index}`} className="grid gap-3 sm:grid-cols-2">
                     <input value={category.title} onChange={(event) => {
@@ -383,6 +466,13 @@ export default function AdminPage() {
                       nextCategories[index] = { ...nextCategories[index], caption: event.target.value }
                       setHomepageContent({ ...homepageContent, categories: nextCategories })
                     }} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category caption" />
+                    <div className="sm:col-span-2">
+                      <label className="cursor-pointer text-sm text-[var(--color-muted)]">
+                        <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'category-image', index)} className="hidden" />
+                        Set category image
+                      </label>
+                      {category.image ? <img src={category.image} alt={`${category.title} preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover" /> : null}
+                    </div>
                   </div>
                 ))}
               </div>
