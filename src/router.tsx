@@ -6,6 +6,9 @@ import Loading from './components/ui/Loading'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
+const ShopCategoryPage = lazy(() => import('./pages/ShopCategoryPage'))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
+const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
@@ -25,6 +28,18 @@ export const router = createBrowserRouter([
       {
         path: 'shop',
         element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'shop/new-arrivals',
+        element: withSuspense(<NewArrivalsPage />),
+      },
+      {
+        path: 'shop/:slug',
+        element: withSuspense(<ShopCategoryPage />),
+      },
+      {
+        path: 'shop/:category/:productSlug',
+        element: withSuspense(<ProductDetailPage />),
       },
       {
         path: 'about',
