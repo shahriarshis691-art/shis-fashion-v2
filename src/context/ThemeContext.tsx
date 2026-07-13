@@ -1,17 +1,17 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { ThemeContext } from './ThemeContextValue'
 
 export type ThemeName = 'luxury' | 'midnight'
 
-interface ThemeContextValue {
+export interface ThemeContextValue {
   theme: ThemeName
   setTheme: (value: ThemeName) => void
   toggleTheme: () => void
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 const STORAGE_KEY = 'shis-fashion-theme'
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
     if (typeof window === 'undefined') {
       return 'luxury'
@@ -45,14 +45,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext)
-
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider')
-  }
-
-  return context
 }

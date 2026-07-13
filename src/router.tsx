@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { lazy, Suspense, type ReactElement } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
@@ -10,7 +11,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
-const withSuspense = (element: React.ReactElement) => <Suspense fallback={<Loading />}>{element}</Suspense>
+const withSuspense = (element: ReactElement) => <Suspense fallback={<Loading />}>{element}</Suspense>
 
 export const router = createBrowserRouter([
   {
