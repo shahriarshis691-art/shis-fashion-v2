@@ -1,7 +1,16 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
-import HomePage from './pages/HomePage'
-import NotFoundPage from './pages/NotFoundPage'
+import Loading from './components/ui/Loading'
+
+const HomePage = lazy(() => import('./pages/HomePage'))
+const ShopPage = lazy(() => import('./pages/ShopPage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
+const ContactPage = lazy(() => import('./pages/ContactPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+
+const withSuspense = (element: React.ReactElement) => <Suspense fallback={<Loading />}>{element}</Suspense>
 
 export const router = createBrowserRouter([
   {
@@ -10,11 +19,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: withSuspense(<HomePage />),
+      },
+      {
+        path: 'shop',
+        element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'about',
+        element: withSuspense(<AboutPage />),
+      },
+      {
+        path: 'contact',
+        element: withSuspense(<ContactPage />),
+      },
+      {
+        path: 'admin',
+        element: withSuspense(<AdminPage />),
       },
       {
         path: '*',
-        element: <NotFoundPage />,
+        element: withSuspense(<NotFoundPage />),
       },
     ],
   },
