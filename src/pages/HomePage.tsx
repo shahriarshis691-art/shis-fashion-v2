@@ -1,14 +1,25 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import { subscribeToHomepageContent, type HomepageContent } from '../firebase/adminService'
 
-const categories = [
-  { name: 'Tailored Layers', caption: 'Soft authority' },
-  { name: 'Everyday Luxe', caption: 'Refined comfort' },
-  { name: 'Evening Edit', caption: 'Quiet glamour' },
-]
+const defaultHomepage: HomepageContent = {
+  heroTitle: 'Style Meets Comfort.',
+  heroSubtitle: 'Discover elevated staples designed for modern living, with premium materials and an effortless silhouette that turns every look into a statement.',
+  heroCta: 'Shop Collection',
+  categories: [
+    { title: 'Tailored Layers', caption: 'Soft authority' },
+    { title: 'Everyday Luxe', caption: 'Refined comfort' },
+    { title: 'Evening Edit', caption: 'Quiet glamour' },
+  ],
+  newArrivalsTitle: 'Freshly composed for the season',
+  newArrivalsSubtitle: 'Newly released pieces with an effortless, sculpted feel.',
+  featuredTitle: 'The pieces clients return for',
+  featuredSubtitle: 'Soft structure, refined texture, and everyday ease in every silhouette.',
+}
 
 const bestSellers = [
   { name: 'Velvet Wrap Coat', price: '$280' },
@@ -40,6 +51,13 @@ const stats = [
 ]
 
 export default function HomePage() {
+  const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
+
+  useEffect(() => {
+    const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
+    return unsubscribe
+  }, [])
+
   return (
     <>
       <section className="relative overflow-hidden px-4 pb-16 pt-6 sm:px-6 sm:pt-10 lg:px-8 lg:pb-24 lg:pt-16">
@@ -48,13 +66,13 @@ export default function HomePage() {
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">SHIS FASHION</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl lg:text-7xl">
-              Style Meets Comfort.
+              {homepageContent.heroTitle}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--color-muted)]">
-              Discover elevated staples designed for modern living, with premium materials and an effortless silhouette that turns every look into a statement.
+              {homepageContent.heroSubtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button to="/shop">Shop Collection</Button>
+              <Button to="/shop">{homepageContent.heroCta}</Button>
               <Button to="/about" variant="secondary">
                 Discover More
               </Button>
@@ -90,11 +108,11 @@ export default function HomePage() {
         <Container>
           <SectionTitle eyebrow="Curated essentials" title="Premium categories for every moment" description="A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look." align="center" />
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {categories.map((category, index) => (
-              <motion.div key={category.name} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>
+            {homepageContent.categories.map((category, index) => (
+              <motion.div key={category.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>
                 <Card className="h-full rounded-[1.5rem]">
                   <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />
-                  <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.name}</h3>
+                  <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.title}</h3>
                   <p className="mt-2 text-sm text-[var(--color-muted)]">{category.caption}</p>
                 </Card>
               </motion.div>
@@ -105,7 +123,7 @@ export default function HomePage() {
 
       <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         <Container>
-          <SectionTitle eyebrow="Best sellers" title="The pieces clients return for" description="Soft structure, refined texture, and everyday ease in every silhouette." />
+          <SectionTitle eyebrow="Best sellers" title={homepageContent.featuredTitle} description={homepageContent.featuredSubtitle} />
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             {bestSellers.map((item, index) => (
               <motion.div key={item.name} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>
@@ -127,7 +145,7 @@ export default function HomePage() {
 
       <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
         <Container>
-          <SectionTitle eyebrow="New arrivals" title="Freshly composed for the season" description="Newly released pieces with an effortless, sculpted feel." />
+          <SectionTitle eyebrow="New arrivals" title={homepageContent.newArrivalsTitle} description={homepageContent.newArrivalsSubtitle} />
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             {arrivals.map((item, index) => (
               <motion.div key={item.name} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>

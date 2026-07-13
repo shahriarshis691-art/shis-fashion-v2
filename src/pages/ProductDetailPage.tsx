@@ -26,10 +26,10 @@ export default function ProductDetailPage() {
       <Container>
         <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-3">
-            <img src={product.image} alt={product.name} className="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[420px]" />
+            <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[420px]" />
             <div className="grid grid-cols-3 gap-3">
               {gallery.map((image, index) => (
-                <img key={`${image}-${index}`} src={image} alt={`${product.name} view ${index + 1}`} className="h-24 w-full rounded-[1.2rem] object-cover" />
+                <img key={`${image}-${index}`} src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" decoding="async" className="h-24 w-full rounded-[1.2rem] object-cover" />
               ))}
             </div>
           </div>

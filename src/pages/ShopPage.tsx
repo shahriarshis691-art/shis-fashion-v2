@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -10,8 +11,19 @@ export default function ShopPage() {
   const navigate = useNavigate()
   const slug = location.pathname.split('/').filter(Boolean).at(-1)
   const category = slug && slug !== 'shop' ? getCategoryBySlug(slug) : undefined
-  const products = slug && slug !== 'shop' ? getProductsByCategory(slug) : shopProducts
+  const [searchQuery, setSearchQuery] = useState('')
   const visibleCategories = shopCategories.slice(0, 6)
+
+  const products = useMemo(() => {
+    const baseProducts = slug && slug !== 'shop' ? getProductsByCategory(slug) : shopProducts
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) {
+      return baseProducts
+    }
+
+    return baseProducts.filter((product) => [product.name, product.description, product.category].some((value) => value.toLowerCase().includes(query)))
+  }, [searchQuery, slug])
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -30,7 +42,9 @@ export default function ShopPage() {
             <div className="flex items-center gap-3">
               <input
                 type="search"
-                placeholder="Search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search collection"
                 className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none ring-0 sm:w-56"
               />
               <Button to="/shop" variant="secondary" className="px-4 py-2.5">
@@ -67,7 +81,7 @@ export default function ShopPage() {
                 onClick={() => navigate(`/shop/${item.slug}`)}
                 className="min-w-[180px] overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 text-left shadow-[0_14px_40px_rgba(0,0,0,0.05)]"
               >
-                <img src={item.image} alt={item.title} className="h-28 w-full object-cover" />
+                <img src={item.image} alt={item.title} loading="lazy" decoding="async" className="h-28 w-full object-cover" />
                 <div className="p-4">
                   <h3 className="text-sm font-semibold text-[var(--color-text)]">{item.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{item.description}</p>
