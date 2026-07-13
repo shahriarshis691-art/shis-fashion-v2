@@ -15,7 +15,20 @@ export default function ProductDetailPage() {
   const product = shopProducts.find((entry) => entry.slug === productSlug)
 
   if (!product) {
-    return null
+    return (
+      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+        <Container>
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-10">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Product unavailable</p>
+            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">This piece is no longer available.</h1>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--color-muted)]">The product you requested could not be found. Return to the collection to continue browsing.</p>
+            <div className="mt-8 flex justify-center">
+              <Button to="/shop">Browse collection</Button>
+            </div>
+          </div>
+        </Container>
+      </section>
+    )
   }
 
   const related = getProductsByCategory(product.category).filter((entry) => entry.id !== product.id).slice(0, 3)

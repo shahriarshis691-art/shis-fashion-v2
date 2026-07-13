@@ -50,6 +50,10 @@ export async function DELETE(request: Request) {
     return Response.json({ error: 'No blob path provided.' }, { status: 400 })
   }
 
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return Response.json({ ok: true })
+  }
+
   await del(pathname)
   return Response.json({ ok: true })
 }

@@ -49,7 +49,7 @@ export default function Footer() {
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
               {socialLinks.map((link) => (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="text-sm text-[var(--color-muted)] transition hover:text-[var(--color-accent)]">
+                <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--color-muted)] transition hover:text-[var(--color-accent)]">
                   {link.label}
                 </a>
               ))}

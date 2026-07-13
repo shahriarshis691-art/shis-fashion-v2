@@ -9,6 +9,23 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
   const [form, setForm] = useState({ name: '', email: '', address: '' })
 
+  if (!items.length) {
+    return (
+      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+        <Container>
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-10">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Checkout</p>
+            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Your bag is empty.</h1>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--color-muted)]">Select a piece from the collection before trying to place an order.</p>
+            <div className="mt-8 flex justify-center">
+              <Button to="/shop">Continue shopping</Button>
+            </div>
+          </div>
+        </Container>
+      </section>
+    )
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     clearCart()
