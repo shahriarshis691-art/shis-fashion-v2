@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
+import { useCart } from '../../context/CartContext'
 import Button from '../ui/Button'
 
 const links = [
@@ -29,6 +30,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
+  const { itemCount } = useCart()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 16)
@@ -76,13 +78,14 @@ export default function Navbar() {
                 <path d="M15.5 15.5 20 20" />
               </svg>
             </IconButton>
-            <IconButton label="Cart">
+            <Link to="/cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]" aria-label="Cart">
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-            </IconButton>
+              {itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-semibold text-black">{itemCount}</span> : null}
+            </Link>
             <button
               type="button"
               onClick={toggleTheme}

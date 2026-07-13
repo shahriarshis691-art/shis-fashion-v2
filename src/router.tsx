@@ -9,6 +9,9 @@ const ShopPage = lazy(() => import('./pages/ShopPage'))
 const ShopCategoryPage = lazy(() => import('./pages/ShopCategoryPage'))
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
+const CartPage = lazy(() => import('./pages/CartPage'))
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
+const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
@@ -40,6 +43,18 @@ export const router = createBrowserRouter([
       {
         path: 'shop/:category/:productSlug',
         element: withSuspense(<ProductDetailPage />),
+      },
+      {
+        path: 'cart',
+        element: withSuspense(<CartPage />),
+      },
+      {
+        path: 'checkout',
+        element: withSuspense(<CheckoutPage />),
+      },
+      {
+        path: 'order-success',
+        element: withSuspense(<OrderSuccessPage />),
       },
       {
         path: 'about',
