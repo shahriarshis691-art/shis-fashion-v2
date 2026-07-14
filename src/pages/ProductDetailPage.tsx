@@ -1,18 +1,94 @@
-import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
+import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
-import { getProductsByCategory, shopProducts } from '../data/shopData'
+import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
+import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+function toProduct(product: AdminProduct) {
+  const discountMatch = product.description.match(/(\d{1,2}%\s*off|save\s*\d{1,2}%)/i)
+
+  return {
+    id: product.id,
+    slug: slugify(product.name),
+    name: product.name,
+    price: product.price,
+    category: product.category,
+    image: product.images[0] ?? '',
+    description: product.description,
+    galleryImages: product.images,
+    sizes: product.sizes,
+    stock: product.stock,
+    discount: discountMatch?.[0],
+  }
+}
+
+function buildHighlights(description: string, stock: number, sizes: string[]) {
+  const sentenceHighlights = description
+    .split(/[.!?]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+
+  const stockLine = stock <= 0
+    ? 'Currently out of stock for immediate dispatch.'
+    : stock <= 5
+      ? 'Limited stock available in select sizes.'
+      : 'Ready for quick dispatch with Cash on Delivery.'
+
+  const sizeLine = sizes.length
+    ? `Available sizes: ${sizes.join(', ')}.`
+    : 'Standard sizing available for this piece.'
+
+  return [...sentenceHighlights, sizeLine, stockLine].slice(0, 4)
+}
 
 export default function ProductDetailPage() {
   const { productSlug } = useParams()
+  const decodedSlug = decodeURIComponent(productSlug ?? '')
   const navigate = useNavigate()
   const { addToCart } = useCart()
-  const [size, setSize] = useState('M')
-  const [color, setColor] = useState('Ivory')
+  const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
+  const [ready, setReady] = useState(false)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
-  const product = shopProducts.find((entry) => entry.slug === productSlug)
+  const [activeImage, setActiveImage] = useState('')
+  const [isZoomOpen, setIsZoomOpen] = useState(false)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts) => {
+      setProducts(nextProducts.map(toProduct))
+      setReady(true)
+    })
+    return unsubscribe
+  }, [])
+
+  const product = useMemo(() => products.find((entry) => entry.slug === decodedSlug), [decodedSlug, products])
+
+  if (!ready) {
+    return (
+      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+        <Container>
+          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-10">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Loading</p>
+            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Preparing product details...</h1>
+          </div>
+        </Container>
+      </section>
+    )
+  }
 
   if (!product) {
     return (
@@ -31,47 +107,96 @@ export default function ProductDetailPage() {
     )
   }
 
-  const related = getProductsByCategory(product.category).filter((entry) => entry.id !== product.id).slice(0, 3)
-  const gallery = [product.image, product.image, product.image]
+  const sameCategoryRelated = products.filter((entry) => entry.category === product.category && entry.id !== product.id)
+  const fallbackRelated = products.filter((entry) => entry.id !== product.id && entry.category !== product.category)
+  const related = [...sameCategoryRelated, ...fallbackRelated].slice(0, 3)
+  const galleryImages = [
+    product.galleryImages?.[0] ?? product.image,
+    product.galleryImages?.[1] ?? product.galleryImages?.[0] ?? product.image,
+    product.galleryImages?.[2] ?? product.galleryImages?.[1] ?? product.galleryImages?.[0] ?? product.image,
+  ].filter(Boolean)
+  const normalizedGalleryImages = galleryImages.map((image) => normalizeCatalogImageUrl(image, 1200, 1400))
+  const resolvedActiveImage = activeImage && normalizedGalleryImages.includes(activeImage) ? activeImage : normalizedGalleryImages[0] ?? normalizeCatalogImageUrl(product.image, 1200, 1400)
+  const size = selectedSize && product.sizes.includes(selectedSize) ? selectedSize : (product.sizes[0] ?? 'M')
+  const stockStatus = product.stock <= 0 ? 'Out of stock' : product.stock <= 5 ? 'Low stock' : 'In stock'
+  const highlights = buildHighlights(product.description, product.stock, product.sizes)
+
+  const handleSwipeEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) {
+      return
+    }
+
+    const delta = event.changedTouches[0].clientX - touchStartX
+    if (delta > 50) {
+      const currentIndex = normalizedGalleryImages.findIndex((image) => image === activeImage)
+      const previousIndex = currentIndex <= 0 ? normalizedGalleryImages.length - 1 : currentIndex - 1
+      setActiveImage(normalizedGalleryImages[previousIndex])
+    } else if (delta < -50) {
+      const currentIndex = normalizedGalleryImages.findIndex((image) => image === activeImage)
+      const nextIndex = currentIndex >= normalizedGalleryImages.length - 1 ? 0 : currentIndex + 1
+      setActiveImage(normalizedGalleryImages[nextIndex])
+    }
+
+    setTouchStartX(null)
+  }
+
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800"%3E%3Crect width="800" height="800" fill="%23f8f5ed"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="40" fill="%23c9a227"%3EImage unavailable%3C/text%3E%3C/svg%3E'
+    event.currentTarget.src = placeholder
+  }
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-3">
-            <img src={product.image} alt={product.name} loading="eager" decoding="async" className="h-[320px] w-full rounded-[1.5rem] object-cover sm:h-[420px]" />
+            <div className="relative" onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)} onTouchEnd={handleSwipeEnd}>
+              <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-[var(--color-bg)]">
+                <img
+                  src={resolvedActiveImage}
+                  alt={product.name}
+                  loading="eager"
+                  decoding="async"
+                  onError={handleImageError}
+                  onClick={() => setIsZoomOpen(true)}
+                  fetchPriority="high"
+                  sizes="(max-width: 1023px) 100vw, 52vw"
+                  className={`h-full w-full cursor-zoom-in object-cover transition-opacity duration-300 ${isDemoImageUrl(resolvedActiveImage) ? 'shis-media-tone' : ''}`}
+                />
+              </div>
+              <button type="button" onClick={() => setIsZoomOpen(true)} className="absolute right-3 top-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">
+                Zoom
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-3">
-              {gallery.map((image, index) => (
-                <img key={`${image}-${index}`} src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" decoding="async" className="h-24 w-full rounded-[1.2rem] object-cover" />
+              {normalizedGalleryImages.map((image, index) => (
+                <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(image)} className={`overflow-hidden rounded-[1.2rem] border ${resolvedActiveImage === image ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}>
+                  <div className="aspect-[4/5] bg-[var(--color-bg)]">
+                    <img src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`} />
+                  </div>
+                </button>
               ))}
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Product detail</p>
             <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">{product.name}</h1>
-            <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">{product.description}</p>
-            <div className="mt-6 flex items-center justify-between gap-4">
-              <span className="text-2xl font-semibold text-[var(--color-accent)]">{product.price}</span>
-              <Link to="/shop" className="text-sm font-semibold text-[var(--color-text)]">Back to shop</Link>
+            <div className="mt-5 space-y-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+              <div>
+                <p className="text-sm text-[var(--color-muted)]">Price</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-2xl font-semibold text-[var(--color-text)]">{product.price}</span>
+                </div>
+              </div>
+              {product.discount ? <p className="text-sm font-semibold text-[var(--color-accent)]">{product.discount}</p> : null}
+              <p className={`text-sm font-semibold ${product.stock <= 0 ? 'text-red-600' : product.stock <= 5 ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]'}`}>{stockStatus}</p>
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)]/92 p-4 sticky bottom-3 z-20 md:static md:bg-transparent md:border-0 md:p-0">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">Size</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {['S', 'M', 'L', 'XL'].map((option) => (
-                    <button key={option} type="button" onClick={() => setSize(option)} className={`rounded-full border px-3 py-2 text-sm ${size === option ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}>
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">Color</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {['Ivory', 'Black', 'Stone'].map((option) => (
-                    <button key={option} type="button" onClick={() => setColor(option)} className={`rounded-full border px-3 py-2 text-sm ${color === option ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}>
+                  {product.sizes.map((option) => (
+                    <button key={option} type="button" onClick={() => setSelectedSize(option)} className={`rounded-full border px-3 py-2 text-sm ${size === option ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}>
                       {option}
                     </button>
                   ))}
@@ -88,24 +213,55 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={() => { addToCart(product, { size, color, quantity }); navigate('/cart') }} className="justify-center">Add to cart</Button>
-              <Button onClick={() => { addToCart(product, { size, color, quantity }); navigate('/checkout') }} variant="secondary" className="justify-center">Buy now</Button>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button onClick={() => { addToCart(product, { size, color: 'Default', quantity }); navigate('/cart') }} className="justify-center">Add to cart</Button>
+              <Button onClick={() => { addToCart(product, { size, color: 'Default', quantity }); navigate('/checkout') }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
             </div>
           </div>
         </div>
 
+        {isZoomOpen ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(5,5,5,0.88)] px-4 py-6" onClick={() => setIsZoomOpen(false)}>
+            <div className="relative w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
+              <button type="button" onClick={() => setIsZoomOpen(false)} className="absolute right-3 top-3 z-10 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-2 text-sm font-semibold text-[var(--color-text)]">
+                Close
+              </button>
+              <img src={resolvedActiveImage} alt={`${product.name} zoom`} onError={handleImageError} className={`max-h-[80vh] w-full rounded-[1.8rem] object-contain ${isDemoImageUrl(resolvedActiveImage) ? 'shis-media-tone' : ''}`} />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-10 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 sm:p-6">
+          <h2 className="text-xl font-semibold text-[var(--color-text)]">Description</h2>
+          <ul className="mt-4 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+            {highlights.map((item) => (
+              <li key={item} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Cash on Delivery available</p>
+        </div>
+
         <div className="mt-10">
           <h2 className="text-xl font-semibold text-[var(--color-text)]">You may also like</h2>
-          <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <div className="mt-5 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
             {related.map((item) => (
-              <Link key={item.id} to={`/shop/${item.category}/${item.slug}`} className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90">
-                <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
-                <div className="p-4">
-                  <h3 className="text-base font-semibold text-[var(--color-text)]">{item.name}</h3>
-                  <p className="mt-2 text-sm text-[var(--color-muted)]">{item.price}</p>
-                </div>
-              </Link>
+              <ProductCard
+                key={item.id}
+                product={{
+                  id: item.id,
+                  slug: item.slug,
+                  name: item.name,
+                  price: item.price,
+                  category: item.category,
+                  image: item.image,
+                  description: item.description,
+                  galleryImages: item.galleryImages,
+                  discount: item.discount,
+                }}
+              />
             ))}
           </div>
         </div>
