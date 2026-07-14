@@ -5,15 +5,35 @@ import Container from '../components/ui/Container'
 import { useCart } from '../context/CartContext'
 import { createOrder } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
+import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, type BangladeshDivision } from '../utils/bangladeshAddress'
+
+interface CheckoutFormState {
+  name: string
+  phone: string
+  email: string
+  division: BangladeshDivision
+  district: string
+  streetAddress: string
+  deliveryNote: string
+}
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
-  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', notes: '' })
+  const [form, setForm] = useState<CheckoutFormState>({
+    name: '',
+    phone: '',
+    email: '',
+    division: bangladeshDivisions[0],
+    district: getDistrictsForDivision(bangladeshDivisions[0])[0],
+    streetAddress: '',
+    deliveryNote: '',
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const submissionLockRef = useRef(false)
-  const deliveryCharge = 0
+  const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
   const grandTotal = subtotal + deliveryCharge
+  const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
 
   if (!items.length) {
     return (
@@ -48,8 +68,15 @@ export default function CheckoutPage() {
         customerName: form.name.trim(),
         customerPhone: form.phone.trim(),
         customerEmail: form.email.trim(),
-        address: form.address.trim(),
-        notes: form.notes.trim(),
+        address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
+        deliveryAddress: {
+          division: form.division as BangladeshDivision,
+          district: form.district,
+          streetAddress: form.streetAddress.trim(),
+          deliveryNote: form.deliveryNote.trim(),
+        },
+        deliveryCharge,
+        notes: form.deliveryNote.trim(),
         items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity })),
         total: grandTotal,
         status: 'new',
@@ -87,11 +114,56 @@ export default function CheckoutPage() {
                 <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
               </div>
 
-              <textarea required autoComplete="street-address" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Delivery address" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">Division</span>
+                  <select
+                    required
+                    value={form.division}
+                    onChange={(event) => {
+                      const nextDivision = event.target.value as BangladeshDivision
+                      const nextDistricts = getDistrictsForDivision(nextDivision)
+                      setForm({
+                        ...form,
+                        division: nextDivision,
+                        district: nextDistricts[0],
+                      })
+                    }}
+                    className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  >
+                    {bangladeshDivisions.map((division) => <option key={division} value={division}>{division}</option>)}
+                  </select>
+                </label>
+                <label className="space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">District / Zilla</span>
+                  <select
+                    required
+                    value={form.district}
+                    onChange={(event) => setForm({ ...form, district: event.target.value })}
+                    className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  >
+                    {districtOptions.map((district) => <option key={district} value={district}>{district}</option>)}
+                  </select>
+                </label>
+              </div>
+
+              <textarea
+                required
+                autoComplete="street-address"
+                value={form.streetAddress}
+                onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
+                className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                placeholder="House/Road/Village/Area, Union, Thana, Landmark"
+              />
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <input type="email" inputMode="email" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Email (optional)" />
-                <textarea value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Order notes (optional)" />
+                <input type="email" inputMode="email" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Email Address (optional)" />
+                <textarea
+                  value={form.deliveryNote}
+                  onChange={(event) => setForm({ ...form, deliveryNote: event.target.value })}
+                  className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  placeholder="Apartment, Floor, Landmark or Special Delivery Instructions"
+                />
               </div>
 
               <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
@@ -108,6 +180,7 @@ export default function CheckoutPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[var(--color-text)]">{item.name}</p>
                     <p className="text-xs text-[var(--color-muted)]">Qty: {item.quantity}</p>
+                    <p className="text-xs text-[var(--color-muted)]">Price: {item.price}</p>
                   </div>
                   <span className="shrink-0 font-semibold text-[var(--color-text)]">{formatBDT(item.quantity * parseBDT(item.price))}</span>
                 </div>
@@ -120,7 +193,7 @@ export default function CheckoutPage() {
               </div>
               <div className="mt-3 flex items-center justify-between">
                 <span>Delivery charge</span>
-                <span className="text-[var(--color-text)]">{deliveryCharge === 0 ? 'Free' : formatBDT(deliveryCharge)}</span>
+                <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
               </div>
               <div className="mt-3 flex items-center justify-between text-base font-semibold text-[var(--color-text)]">
                 <span>Grand total</span>

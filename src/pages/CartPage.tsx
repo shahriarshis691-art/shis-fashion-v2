@@ -82,7 +82,7 @@ export default function CartPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span>Shipping</span>
-                <span className="text-[var(--color-text)]">Free</span>
+                <span className="text-[var(--color-text)]">Calculated at checkout</span>
               </div>
               <div className="flex items-center justify-between pt-3 text-base font-semibold text-[var(--color-text)]">
                 <span>Total</span>
