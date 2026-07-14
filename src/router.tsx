@@ -4,11 +4,10 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 import { onAdminAuthChanged } from './firebase/adminService'
+import HomePage from './pages/HomePage'
+import ShopPage from './pages/ShopPage'
+import ProductDetailPage from './pages/ProductDetailPage'
 
-const HomePage = lazy(() => import('./pages/HomePage'))
-const ShopPage = lazy(() => import('./pages/ShopPage'))
-const ShopCategoryPage = lazy(() => import('./pages/ShopCategoryPage'))
-const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
@@ -51,11 +50,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: withSuspense(<HomePage />),
+        element: <HomePage />,
       },
       {
         path: 'shop',
-        element: withSuspense(<ShopPage />),
+        element: <ShopPage />,
       },
       {
         path: 'shop/new-arrivals',
@@ -63,11 +62,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'shop/:slug',
-        element: withSuspense(<ShopCategoryPage />),
+        element: <ShopPage />,
       },
       {
         path: 'shop/:category/:productSlug',
-        element: withSuspense(<ProductDetailPage />),
+        element: <ProductDetailPage />,
+      },
+      {
+        path: 'product/:productSlug',
+        element: <ProductDetailPage />,
       },
       {
         path: 'cart',
