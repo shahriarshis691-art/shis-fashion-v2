@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { useCart } from '../context/CartContext'
+import { formatBDT, parseBDT } from '../utils/currency'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -40,9 +42,15 @@ export default function CartPage() {
             </div>
 
             {items.map((item) => (
-              <div key={item.id} className="rounded-[1.8rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:p-5">
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-[1.8rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:p-5"
+              >
                 <div className="flex gap-4">
-                  <img src={item.image} alt={item.name} className="h-24 w-24 rounded-[1.2rem] object-cover sm:h-28 sm:w-28" />
+                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-24 w-24 rounded-[1.2rem] object-cover sm:h-28 sm:w-28" />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -57,11 +65,11 @@ export default function CartPage() {
                         <span className="min-w-8 text-center text-sm font-semibold text-[var(--color-text)]">{item.quantity}</span>
                         <button type="button" onClick={() => updateQuantity(item.id, 1)} className="h-8 w-8 text-lg text-[var(--color-text)]">+</button>
                       </div>
-                      <p className="text-base font-semibold text-[var(--color-accent)]">{item.price}</p>
+                      <p className="text-base font-semibold text-[var(--color-accent)]">{formatBDT(parseBDT(item.price) * item.quantity)}</p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -70,7 +78,7 @@ export default function CartPage() {
             <div className="mt-5 space-y-3 text-sm text-[var(--color-muted)]">
               <div className="flex items-center justify-between">
                 <span>Subtotal</span>
-                <span className="text-[var(--color-text)]">${subtotal.toFixed(2)}</span>
+                <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Shipping</span>
@@ -78,7 +86,7 @@ export default function CartPage() {
               </div>
               <div className="flex items-center justify-between pt-3 text-base font-semibold text-[var(--color-text)]">
                 <span>Total</span>
-                <span className="text-[var(--color-accent)]">${subtotal.toFixed(2)}</span>
+                <span className="text-[var(--color-accent)]">{formatBDT(subtotal)}</span>
               </div>
             </div>
             <div className="mt-6 space-y-3">

@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ShopProduct } from '../data/shopData'
+import { parseBDT } from '../utils/currency'
 
 export interface CartItem extends Omit<ShopProduct, 'id'> {
   id: string
@@ -78,11 +79,14 @@ function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const clearCart = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY)
+    }
     setItems([])
   }
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = items.reduce((sum, item) => sum + Number.parseFloat(item.price.replace(/[^0-9.]/g, '')) * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
 
   const value = useMemo<CartContextValue>(
     () => ({
