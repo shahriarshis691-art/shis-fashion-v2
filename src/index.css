@@ -115,3 +115,103 @@ span {
   filter: saturate(0.9) contrast(1.03) brightness(0.98);
   transition: filter 0.3s ease;
 }
+
+/* Premium Button Styling */
+button {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gold accent button hover */
+button[class*="accent"],
+button[style*="accent"] {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+button[class*="accent"]:hover,
+button[style*="accent"]:hover {
+  box-shadow: 0 12px 28px rgba(201, 162, 39, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Card Elevation & Shadows */
+article,
+[class*="Card"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+article:hover,
+[class*="Card"]:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Premium Image Zoom */
+article img {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s ease;
+}
+
+article:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.02);
+}
+
+/* Header Enhancements */
+header {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+/* Premium Typography */
+h1, h2, h3, h4, h5, h6 {
+  transition: color 0.3s ease;
+  font-weight: 700;
+}
+
+/* Gold Accent Text */
+[class*="accent"], 
+[style*="accent"] {
+  color: var(--color-accent);
+}
+
+/* Smooth Page Transitions */
+main {
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Link Hover Effects */
+a {
+  transition: color 0.3s ease, text-decoration-color 0.3s ease;
+  position: relative;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* Form Elements Premium */
+input, textarea, select {
+  transition: all 0.3s ease;
+  border-color: var(--color-border);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
+  outline: none;
+}

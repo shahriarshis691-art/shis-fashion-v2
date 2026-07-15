@@ -40,9 +40,9 @@ const defaultHomepage: HomepageContent = {
   brandSignatureText: 'Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight.',
   footerBrandTitle: 'Style Meets Comfort',
   footerDescription: 'A refined digital presence for modern luxury, designed with comfort, clarity, and effortless elegance in mind.',
-  footerContactEmail: 'hello@shisfashion.com',
-  footerContactPhone: '+234 800 000 0000',
-  footerContactAddress: 'Abuja, Nigeria',
+  footerContactEmail: 'shisfashion18@gmail.com',
+  footerContactPhone: '+88 01887848304',
+  footerContactAddress: 'Mirpur, Dhaka',
   footerBottomText: 'Crafted for premium, calm, and timeless browsing.',
   sections: [
     { key: 'hero', label: 'Hero', enabled: true, order: 0 },
