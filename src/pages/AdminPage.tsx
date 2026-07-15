@@ -236,7 +236,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         window.alert('Access Denied')
         setMessage('Access Denied')
         navigate('/', { replace: true })
-      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
+      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
         setMessage('Invalid email or password.')
       } else if (errorCode === 'auth/firebase-not-configured') {
         setMessage('Admin login is unavailable. Firebase authentication is not configured.')
