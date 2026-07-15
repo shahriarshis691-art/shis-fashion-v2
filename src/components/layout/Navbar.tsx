@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
+import { metaPixel } from '../../services/metaPixel'
 
 const links = [
   { label: 'Home', href: '/' },
@@ -139,6 +140,9 @@ export default function Navbar() {
                     if (event.key === 'Enter') {
                       event.preventDefault()
                       const query = searchTerm.trim()
+                      if (query) {
+                        metaPixel.search({ search_string: query })
+                      }
                       navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
                       setIsSearchOpen(false)
                       setSearchTerm('')
@@ -151,6 +155,9 @@ export default function Navbar() {
                   type="button"
                   onClick={() => {
                     const query = searchTerm.trim()
+                    if (query) {
+                      metaPixel.search({ search_string: query })
+                    }
                     navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
                     setIsSearchOpen(false)
                     setSearchTerm('')

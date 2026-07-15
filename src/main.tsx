@@ -5,6 +5,10 @@ import './index.css'
 import { ThemeProvider } from './context/ThemeContext'
 import { CartProvider } from './context/CartContext'
 import { router } from './router'
+import { metaPixel } from './services/metaPixel'
+
+// Initialize Meta Pixel
+metaPixel.initialize()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

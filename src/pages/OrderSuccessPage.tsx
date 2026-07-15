@@ -1,8 +1,30 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import { useCart } from '../context/CartContext'
+import { parseBDT } from '../utils/currency'
+import { metaPixel } from '../services/metaPixel'
 
 export default function OrderSuccessPage() {
+  const { items } = useCart()
+
+  useEffect(() => {
+    // Fire Purchase event only when order is successfully placed
+    if (items.length > 0) {
+      const totalValue = items.reduce((sum, item) => sum + (parseBDT(item.price) * item.quantity), 0)
+      const contentIds = items.map(item => String(item.id))
+      
+      metaPixel.purchase({
+        value: totalValue,
+        currency: 'BDT',
+        content_type: 'product',
+        content_ids: contentIds,
+        content_name: items.length === 1 ? items[0].name : `${items.length} items`,
+      })
+    }
+  }, [items])
+
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>

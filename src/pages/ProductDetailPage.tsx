@@ -6,6 +6,8 @@ import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { parseBDT } from '../utils/currency'
+import { metaPixel } from '../services/metaPixel'
 
 function slugify(value: string) {
   return value
@@ -76,6 +78,19 @@ export default function ProductDetailPage() {
   }, [])
 
   const product = useMemo(() => products.find((entry) => entry.slug === decodedSlug), [decodedSlug, products])
+
+  // Track ViewContent on product details page
+  useEffect(() => {
+    if (product && ready) {
+      metaPixel.viewContent({
+        content_name: product.name,
+        content_ids: [String(product.id)],
+        content_type: 'product',
+        value: parseBDT(product.price),
+        currency: 'BDT',
+      })
+    }
+  }, [product, ready])
 
   if (!ready) {
     return (
@@ -214,8 +229,26 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={() => { addToCart(product, { size, color: 'Default', quantity }); navigate('/cart') }} className="justify-center">Add to cart</Button>
-              <Button onClick={() => { addToCart(product, { size, color: 'Default', quantity }); navigate('/checkout') }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
+              <Button onClick={() => { 
+                addToCart(product, { size, color: 'Default', quantity })
+                metaPixel.addToCart({
+                  content_name: product.name,
+                  content_ids: [String(product.id)],
+                  content_type: 'product',
+                  value: parseBDT(product.price) * quantity,
+                  currency: 'BDT',
+                })
+                navigate('/cart') 
+              }} className="justify-center">Add to cart</Button>
+              <Button onClick={() => { 
+                addToCart(product, { size, color: 'Default', quantity })
+                metaPixel.initiateCheckout({
+                  value: parseBDT(product.price) * quantity,
+                  currency: 'BDT',
+                  content_type: 'product',
+                })
+                navigate('/checkout') 
+              }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
             </div>
           </div>
         </div>
