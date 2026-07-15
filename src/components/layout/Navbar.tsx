@@ -14,12 +14,6 @@ const links = [
   { label: 'Contact', href: '/contact' },
 ]
 
-const socialLinks = [
-  { label: 'Instagram', href: 'https://instagram.com', icon: 'instagram' },
-  { label: 'Pinterest', href: 'https://pinterest.com', icon: 'pinterest' },
-  { label: 'TikTok', href: 'https://tiktok.com', icon: 'tiktok' },
-]
-
 function IconButton({ label, children, onClick }: { label: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
@@ -34,7 +28,6 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
 }
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -43,13 +36,6 @@ export default function Navbar() {
   const { itemCount } = useCart()
   const navigate = useNavigate()
   const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 16)
-    handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -80,16 +66,15 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">
-          <div className="flex items-center justify-between h-12 rounded-lg border border-[var(--color-border)]/40 px-3 bg-[var(--color-surface)]/70 backdrop-blur-sm shadow-sm">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-accent)] text-white font-bold text-xs">
-                S
-              </div>
-              <div className="hidden sm:block leading-tight">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
-                <p className="text-[8px] uppercase tracking-wider text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
-              </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center justify-between h-20 md:h-24 rounded-lg border border-[var(--color-border)]/40 px-3 bg-[var(--color-surface)]/70 backdrop-blur-sm shadow-sm">
+            <Link to="/" className="flex items-center justify-center group flex-shrink-0">
+              <img 
+                src="/shis-logo.svg" 
+                alt="SHIS Fashion - Premium Essentials" 
+                className="h-14 md:h-16 lg:h-20 w-auto object-contain"
+                loading="eager"
+              />
             </Link>
 
             <nav className="hidden items-center gap-8 md:flex">

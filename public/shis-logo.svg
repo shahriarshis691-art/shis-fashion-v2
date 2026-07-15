@@ -1,0 +1,14 @@
+<svg viewBox="0 0 456 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Arabic text "شـــيـــس" -->
+  <text x="228" y="110" font-family="Arial, sans-serif" font-size="100" font-weight="bold" text-anchor="middle" fill="#111111" letter-spacing="-1">شـــيـــس</text>
+  
+  <!-- Decorative dots above -->
+  <g fill="#111111">
+    <circle cx="340" cy="35" r="8"/>
+    <circle cx="365" cy="45" r="7"/>
+    <circle cx="380" cy="60" r="7.5"/>
+  </g>
+  
+  <!-- "S H I S" text below -->
+  <text x="228" y="175" font-family="Arial, sans-serif" font-size="28" font-weight="300" text-anchor="middle" fill="#111111" letter-spacing="5">S H I S</text>
+</svg>
