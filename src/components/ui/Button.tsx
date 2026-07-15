@@ -12,15 +12,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border border-[var(--color-accent)] bg-[var(--color-accent)] text-black shadow-[0_12px_40px_rgba(201,162,39,0.25)] hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgba(201,162,39,0.35)]',
+    'border border-[#111111] bg-[#111111] text-white shadow-[0_4px_12px_rgba(17,17,17,0.16)] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(17,17,17,0.20)]',
   secondary:
-    'border border-[var(--color-border)] bg-[var(--color-surface)]/90 text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]',
+    'border border-[var(--color-border)] bg-[var(--color-surface)]/90 text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[#111111] hover:text-[#111111]',
   ghost:
-    'border border-transparent bg-transparent text-[var(--color-text)] hover:bg-[rgba(201,162,39,0.12)] hover:text-[var(--color-accent)]',
+    'border border-transparent bg-transparent text-[var(--color-text)] hover:bg-[rgba(17,17,17,0.08)] hover:text-[#111111]',
 }
 
 export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {
-  const sharedClasses = `inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`
+  const sharedClasses = `inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`
 
   if (to) {
     return (

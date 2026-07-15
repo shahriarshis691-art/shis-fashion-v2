@@ -13,23 +13,23 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-bg: #f8f5ed;
+  --color-bg: #F8F6F2;
   --color-surface: #ffffff;
   --color-text: #111111;
-  --color-muted: #5f5d57;
-  --color-border: #e8e0cf;
-  --color-accent: #4a9b8e;
+  --color-muted: #666666;
+  --color-border: #E8E3DA;
+  --color-accent: #C8A96A;
   color: var(--color-text);
   background-color: var(--color-bg);
 }
 
 :root[data-theme='midnight'] {
-  --color-bg: #050505;
-  --color-surface: #121212;
-  --color-text: #f8f5ed;
-  --color-muted: #b8b0a2;
-  --color-border: #242424;
-  --color-accent: #5cb3a3;
+  --color-bg: #0A0A0A;
+  --color-surface: #1A1A1A;
+  --color-text: #F8F6F2;
+  --color-muted: #999999;
+  --color-border: #2A2A2A;
+  --color-accent: #C8A96A;
 }
 
 html {
@@ -123,21 +123,21 @@ button {
   overflow: hidden;
 }
 
-/* Clean accent button styling */
+/* Matte black button styling */
 button[class*="accent"],
 button[style*="accent"] {
-  background: var(--color-accent);
+  background: #111111;
   color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.05em;
-  box-shadow: 0 4px 12px rgba(74, 155, 142, 0.18);
+  box-shadow: 0 4px 12px rgba(17, 17, 17, 0.16);
 }
 
 button[class*="accent"]:hover,
 button[style*="accent"]:hover {
-  box-shadow: 0 8px 20px rgba(74, 155, 142, 0.22);
+  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.20);
   transform: translateY(-1px);
-  filter: brightness(1.08);
+  filter: brightness(1.12);
 }
 
 /* Card Elevation & Shadows */
