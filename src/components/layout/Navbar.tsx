@@ -18,7 +18,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
     >
       {children}
     </button>
@@ -62,16 +62,16 @@ export default function Navbar() {
   }, [isMobileMenuOpen])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--color-border)]/30">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white font-bold text-sm">
+    <header className="sticky top-0 z-50 w-full">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">
+        <div className="flex items-center justify-between h-12 rounded-lg border border-[var(--color-border)]/40 px-3 bg-[var(--color-surface)]/70 backdrop-blur-sm shadow-sm">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--color-accent)] text-white font-bold text-xs">
               S
             </div>
             <div className="hidden sm:block leading-tight">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
+              <p className="text-[8px] uppercase tracking-wider text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
             </div>
           </Link>
 
@@ -89,25 +89,25 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
             <IconButton label="Search" onClick={() => setIsSearchOpen((value) => !value)}>
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <circle cx="11" cy="11" r="5.5" />
                 <path d="M15.5 15.5 20 20" />
               </svg>
             </IconButton>
-            <Link to="/cart" className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8" aria-label="Cart">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+            <Link to="/cart" className="relative flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8" aria-label="Cart">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-              {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[9px] font-bold text-white">{itemCount}</span> : null}
+              {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[8px] font-bold text-white">{itemCount}</span> : null}
             </Link>
             <button
               type="button"
               onClick={toggleTheme}
-              className="hidden sm:flex h-9 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
+              className="hidden sm:flex h-8 items-center justify-center rounded-lg px-2 text-xs font-semibold text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
               aria-label="Toggle theme"
             >
               {theme === 'luxury' ? '🌙' : '☀️'}
@@ -115,12 +115,12 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((value) => !value)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8 md:hidden"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8 md:hidden"
               aria-label="Toggle navigation"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-navigation"
             >
-              <span aria-hidden className="text-xl">{isMobileMenuOpen ? '×' : '☰'}</span>
+              <span aria-hidden className="text-lg">{isMobileMenuOpen ? '×' : '☰'}</span>
             </button>
           </div>
         </div>

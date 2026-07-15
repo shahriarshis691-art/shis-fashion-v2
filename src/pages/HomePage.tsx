@@ -268,7 +268,7 @@ export default function HomePage() {
 
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,9,0.08)_0%,rgba(9,9,9,0.36)_52%,rgba(9,9,9,0.72)_100%)]" />
 
-          <Container className="relative z-10 flex h-full items-end px-4 pb-10 pt-24 sm:px-6 sm:pb-12 lg:px-8 lg:pb-14">
+          <Container className="relative z-10 flex h-full items-end px-4 pb-8 pt-16 sm:px-6 sm:pb-12 lg:px-8 lg:pb-14">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -276,7 +276,7 @@ export default function HomePage() {
               className="max-w-[20rem] sm:max-w-xl"
             >
               <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-white/90 sm:text-xs">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
-              <h1 className="mt-3 text-[2rem] font-semibold leading-[0.98] tracking-[-0.01em] text-white sm:mt-4 sm:text-5xl lg:text-6xl">{homepageContent.heroTitle}</h1>
+              <h1 className="mt-2 text-[2rem] font-semibold leading-[0.98] tracking-[-0.01em] text-white sm:mt-4 sm:text-5xl lg:text-6xl">{homepageContent.heroTitle}</h1>
               <p className="mt-3 max-w-md text-sm leading-7 text-white/86 sm:mt-5 sm:text-base">{homepageContent.heroSubtitle}</p>
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
                 <Button to={homepageContent.heroPrimaryLink ?? '/shop'} className="min-w-[11rem]">{homepageContent.heroCta}</Button>
