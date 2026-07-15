@@ -18,7 +18,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+      className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
     >
       {children}
     </button>
@@ -62,30 +62,26 @@ export default function Navbar() {
   }, [isMobileMenuOpen])
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div
-        className={`mx-auto max-w-7xl px-3 pt-3 transition-all duration-300 sm:px-6 lg:px-8 ${isScrolled ? 'translate-y-0' : 'translate-y-0'}`}
-      >
-        <div
-          className={`flex items-center justify-between rounded-full border px-3 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl transition-all duration-300 sm:px-4 ${isScrolled ? 'border-[var(--color-border)] bg-[var(--color-surface)]/80' : 'border-transparent bg-[rgba(255,255,255,0.12)]'}`}
-        >
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-sm font-semibold text-[var(--color-accent)]">
-              SF
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--color-border)]/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white font-bold text-sm">
+              S
             </div>
-            <div className="leading-none">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
+            <div className="hidden sm:block leading-tight">
+              <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav className="hidden items-center gap-8 md:flex">
             {links.map((link) => (
               <NavLink
                 key={link.label}
                 to={link.href}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors duration-300 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:text-[var(--color-accent)]'}`
+                  `text-sm font-medium transition-colors duration-200 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:text-[var(--color-accent)]'}`
                 }
               >
                 {link.label}
@@ -93,38 +89,38 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <IconButton label="Search" onClick={() => setIsSearchOpen((value) => !value)}>
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="5.5" />
                 <path d="M15.5 15.5 20 20" />
               </svg>
             </IconButton>
-            <Link to="/cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]" aria-label="Cart">
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <Link to="/cart" className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8" aria-label="Cart">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-              {itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-semibold text-black">{itemCount}</span> : null}
+              {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[9px] font-bold text-white">{itemCount}</span> : null}
             </Link>
             <button
               type="button"
               onClick={toggleTheme}
-              className="hidden h-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 px-3 text-sm font-medium text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] sm:flex"
+              className="hidden sm:flex h-9 items-center justify-center rounded-lg px-2.5 text-sm font-medium text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
               aria-label="Toggle theme"
             >
-              {theme === 'luxury' ? 'Midnight' : 'Luxury'}
+              {theme === 'luxury' ? '🌙' : '☀️'}
             </button>
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((value) => !value)}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8 md:hidden"
               aria-label="Toggle navigation"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-navigation"
             >
-              <span aria-hidden>{isMobileMenuOpen ? '×' : '☰'}</span>
+              <span aria-hidden className="text-xl">{isMobileMenuOpen ? '×' : '☰'}</span>
             </button>
           </div>
         </div>
@@ -132,8 +128,8 @@ export default function Navbar() {
 
       <AnimatePresence>
         {isSearchOpen ? (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mx-auto mt-3 max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-2 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/95 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.08)] sm:flex-row">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mx-auto px-4 sm:px-6 lg:px-8 py-3 border-b border-[var(--color-border)]/30">
+            <div className="max-w-7xl mx-auto flex gap-2">
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -147,7 +143,7 @@ export default function Navbar() {
                   }
                 }}
                 placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none"
+                className="flex-1 rounded-lg border border-[var(--color-border)]/30 bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-text)] outline-none transition hover:border-[var(--color-border)]/50 focus:border-[var(--color-accent)]/50 focus:bg-[var(--color-accent)]/5"
               />
               <button
                 type="button"
@@ -157,7 +153,7 @@ export default function Navbar() {
                   setIsSearchOpen(false)
                   setSearchTerm('')
                 }}
-                className="rounded-full border border-[var(--color-border)] bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-black"
+                className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-accent)]/90"
               >
                 Search
               </button>
@@ -172,43 +168,41 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-[var(--color-bg)]/95 px-4 pb-6 pt-24 backdrop-blur-2xl md:hidden"
+            className="fixed inset-0 z-[60] bg-[var(--color-bg)]/95 px-4 pb-6 pt-24 backdrop-blur-xl md:hidden"
             role="dialog"
             aria-modal="true"
             id="mobile-navigation"
           >
-            <div className="mx-auto flex h-full max-w-5xl flex-col justify-between rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
-              <div className="space-y-2">
+            <div className="mx-auto flex h-full max-w-sm flex-col justify-between rounded-2xl border border-[var(--color-border)]/30 bg-[var(--color-surface)]/80 p-6">
+              <div className="space-y-1">
                 {links.map((link, index) => (
                   <motion.div
                     key={link.label}
-                    initial={{ opacity: 0, y: 12 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.04, duration: 0.2 }}
+                    transition={{ delay: index * 0.05, duration: 0.2 }}
                   >
                     <NavLink
                       to={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
                       ref={index === 0 ? firstMobileLinkRef : undefined}
                       className={({ isActive }) =>
-                        `flex items-center justify-between rounded-2xl px-4 py-5 text-base font-medium transition ${isActive ? 'bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(201,162,39,0.08)]'}`
+                        `block rounded-lg px-4 py-3 text-base font-medium transition ${isActive ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[var(--color-accent)]/5'}`
                       }
                     >
-                      <span>{link.label}</span>
-                      <span className="text-sm text-[var(--color-muted)]">↗</span>
+                      {link.label}
                     </NavLink>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 pt-4 border-t border-[var(--color-border)]/30">
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="flex w-full items-center justify-between rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-medium text-[var(--color-text)]"
+                  className="w-full rounded-lg border border-[var(--color-border)]/30 px-4 py-3 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-accent)]/5"
                 >
-                  <span>Theme</span>
-                  <span className="text-[var(--color-accent)]">{theme === 'luxury' ? 'Midnight' : 'Luxury'}</span>
+                  {theme === 'luxury' ? '🌙 Midnight' : '☀️ Luxury'}
                 </button>
               </div>
             </div>
