@@ -18,7 +18,7 @@
   --color-text: #111111;
   --color-muted: #5f5d57;
   --color-border: #e8e0cf;
-  --color-accent: #2d5a4f;
+  --color-accent: #4a9b8e;
   color: var(--color-text);
   background-color: var(--color-bg);
 }
@@ -29,7 +29,7 @@
   --color-text: #f8f5ed;
   --color-muted: #b8b0a2;
   --color-border: #242424;
-  --color-accent: #3d8b7d;
+  --color-accent: #5cb3a3;
 }
 
 html {
@@ -123,19 +123,21 @@ button {
   overflow: hidden;
 }
 
-/* Gold accent button hover */
+/* Clean accent button styling */
 button[class*="accent"],
 button[style*="accent"] {
   background: var(--color-accent);
   color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(74, 155, 142, 0.18);
 }
 
 button[class*="accent"]:hover,
 button[style*="accent"]:hover {
-  box-shadow: 0 12px 28px rgba(201, 162, 39, 0.25);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(74, 155, 142, 0.22);
+  transform: translateY(-1px);
+  filter: brightness(1.08);
 }
 
 /* Card Elevation & Shadows */
