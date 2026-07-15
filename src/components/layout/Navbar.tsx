@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useCart } from '../../context/CartContext'
+import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
 
 const links = [
   { label: 'Home', href: '/' },
@@ -27,8 +28,13 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { theme, toggleTheme } = useTheme()
   const { itemCount } = useCart()
+  const navigate = useNavigate()
+  const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 16)
@@ -36,6 +42,24 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
+    return unsubscribe
+  }, [])
+
+  // Focus the first link when mobile menu opens and handle Escape key
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      firstMobileLinkRef.current?.focus()
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isMobileMenuOpen])
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -50,8 +74,8 @@ export default function Navbar() {
               SF
             </div>
             <div className="leading-none">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--color-text)]">Shis</p>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">Fashion</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--color-text)]">{homepageContent?.navbarBrandPrimary ?? 'Shis'}</p>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">{homepageContent?.navbarBrandSecondary ?? 'Fashion'}</p>
             </div>
           </Link>
 
@@ -70,7 +94,7 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <IconButton label="Search">
+            <IconButton label="Search" onClick={() => setIsSearchOpen((value) => !value)}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <circle cx="11" cy="11" r="5.5" />
                 <path d="M15.5 15.5 20 20" />
@@ -95,14 +119,52 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((value) => !value)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] md:hidden"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/80 text-[var(--color-text)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] md:hidden"
               aria-label="Toggle navigation"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
-              {isMobileMenuOpen ? '×' : '☰'}
+              <span aria-hidden>{isMobileMenuOpen ? '×' : '☰'}</span>
             </button>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isSearchOpen ? (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mx-auto mt-3 max-w-7xl px-3 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-2 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/95 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.08)] sm:flex-row">
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    const query = searchTerm.trim()
+                    navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
+                    setIsSearchOpen(false)
+                    setSearchTerm('')
+                  }
+                }}
+                placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
+                className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const query = searchTerm.trim()
+                  navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
+                  setIsSearchOpen(false)
+                  setSearchTerm('')
+                }}
+                className="rounded-full border border-[var(--color-border)] bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-black"
+              >
+                Search
+              </button>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isMobileMenuOpen ? (
@@ -111,6 +173,9 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-[var(--color-bg)]/95 px-4 pb-6 pt-24 backdrop-blur-2xl md:hidden"
+            role="dialog"
+            aria-modal="true"
+            id="mobile-navigation"
           >
             <div className="mx-auto flex h-full max-w-5xl flex-col justify-between rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
               <div className="space-y-2">
@@ -124,8 +189,9 @@ export default function Navbar() {
                     <NavLink
                       to={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
+                      ref={index === 0 ? firstMobileLinkRef : undefined}
                       className={({ isActive }) =>
-                        `flex items-center justify-between rounded-2xl px-4 py-4 text-base font-medium transition ${isActive ? 'bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(201,162,39,0.08)]'}`
+                        `flex items-center justify-between rounded-2xl px-4 py-5 text-base font-medium transition ${isActive ? 'bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(201,162,39,0.08)]'}`
                       }
                     >
                       <span>{link.label}</span>

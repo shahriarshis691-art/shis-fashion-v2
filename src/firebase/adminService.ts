@@ -114,6 +114,7 @@ const CATEGORIES_KEY = 'shis-admin-categories'
 const DATA_MODE_KEY = 'shis-admin-data-mode'
 const LEGACY_AUTH_KEY = 'shis-admin-auth'
 const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
+const LAUNCH_MODE_USER_KEY = 'shis-launch-mode-user'
 
 function parseConfiguredAdminEmails() {
   const rawValue = (import.meta.env.VITE_ADMIN_EMAILS ?? '') as string
@@ -126,6 +127,55 @@ function parseConfiguredAdminEmails() {
 }
 
 const configuredAdminEmails = parseConfiguredAdminEmails()
+
+/**
+ * TEMPORARY LAUNCH MODE - Environment-based admin authentication
+ * 
+ * This is a temporary authentication mechanism to bypass Firebase API issues during launch.
+ * It allows admin access for configured emails only when VITE_LAUNCH_MODE is enabled.
+ * 
+ * This will be replaced with full Firebase Authentication once the Firebase API issues are resolved.
+ * To restore Firebase Authentication:
+ * 1. Set VITE_LAUNCH_MODE to false or remove it
+ * 2. Ensure Firebase API key is valid and Authentication API is enabled
+ * 3. Create the admin user account in Firebase
+ */
+
+function isLaunchModeEnabled() {
+  return (import.meta.env.VITE_LAUNCH_MODE ?? 'false') === 'true'
+}
+
+function getLaunchModeUser(): { uid: string; email: string } | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    const stored = window.sessionStorage.getItem(LAUNCH_MODE_USER_KEY)
+    return stored ? (JSON.parse(stored) as { uid: string; email: string }) : null
+  } catch {
+    return null
+  }
+}
+
+function setLaunchModeUser(email: string) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  // Generate a pseudo-uid from email for launch mode
+  const pseudoUid = `launch-mode-${email.replace(/[^a-z0-9]/gi, '')}`
+  const user = { uid: pseudoUid, email }
+  window.sessionStorage.setItem(LAUNCH_MODE_USER_KEY, JSON.stringify(user))
+}
+
+function clearLaunchModeUser() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.removeItem(LAUNCH_MODE_USER_KEY)
+}
 
 function readStored<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') {
@@ -608,6 +658,19 @@ export function onAdminAuthChanged(callback: (user: { uid: string; email: string
   ensureSeedData()
   clearLegacyAdminBypassState()
 
+  // TEMPORARY LAUNCH MODE - Check for Launch Mode auth first
+  if (isLaunchModeEnabled()) {
+    const launchUser = getLaunchModeUser()
+    if (launchUser) {
+      callback(launchUser)
+      // Still return a cleanup function for compatibility
+      return () => undefined
+    }
+    // If no Launch Mode user, fall through to callback(null)
+    callback(null)
+    return () => undefined
+  }
+
   if (!firebaseAuth) {
     callback(null)
     return () => undefined
@@ -662,6 +725,20 @@ export function onAdminAuthChanged(callback: (user: { uid: string; email: string
 export async function signInAdmin(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase()
 
+  // TEMPORARY LAUNCH MODE - Bypass Firebase if configured
+  if (isLaunchModeEnabled()) {
+    if (configuredAdminEmails.has(normalizedEmail)) {
+      setLaunchModeUser(normalizedEmail)
+      return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail }
+    } else {
+      markAccessDenied()
+      const error = new Error('Access Denied')
+      ;(error as Error & { code?: string }).code = 'auth/forbidden-admin'
+      throw error
+    }
+  }
+
+  // Standard Firebase authentication path
   if (!firebaseAuth) {
     const error = new Error('Firebase authentication is not configured for this environment.')
     ;(error as Error & { code?: string }).code = 'auth/firebase-not-configured'
@@ -684,6 +761,8 @@ export async function signInAdmin(email: string, password: string) {
 
 export async function signOutAdmin() {
   clearLegacyAdminBypassState()
+  // TEMPORARY LAUNCH MODE - Clear launch mode session
+  clearLaunchModeUser()
 
   if (!firebaseAuth) {
     return

@@ -182,3 +182,50 @@
     border-right-color: var(--border);
   }
 }
+
+/* Hero background video styles */
+.hero-video-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-video-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+}
+
+.hero-video-overlay {
+  /* keeps the normal document flow for content */
+}
+
+/* Mobile: disable background video to save data & improve performance */
+@media (max-width: 768px) {
+  .hero-video-wrapper {
+    display: none;
+  }
+
+  /* Slightly increase hero section padding on mobile for breathing room */
+  section.relative.overflow-hidden.px-4.pb-16.pt-6 {
+    padding-top: 28px;
+    padding-bottom: 44px;
+  }
+
+  /* Ensure hero text remains legible on small screens */
+  h1 {
+    font-size: 1.75rem; /* ~28px */
+    line-height: 1.05;
+  }
+}

@@ -87,7 +87,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       if (nextUser) {
         setAuthMode('dashboard')
         if (initialView === 'login') {
-          navigate('/shis-admin/dashboard', { replace: true })
+          navigate('/admin', { replace: true })
         }
         return
       }
@@ -226,22 +226,24 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       await signInAdmin(loginForm.email, loginForm.password)
       setAuthMode('dashboard')
       setMessage('Welcome back. Your dashboard is ready.')
-      navigate('/shis-admin/dashboard', { replace: true })
+      navigate('/admin', { replace: true })
     } catch (error) {
       const errorCode = typeof error === 'object' && error !== null && 'code' in error
         ? String((error as { code?: unknown }).code ?? '')
         : ''
+      const errorMessage = error instanceof Error ? error.message : String(error ?? '')
+      const debugError = `Error code: ${errorCode || 'unknown'} | Message: ${errorMessage || 'No error message'}`
 
       if (errorCode === 'auth/forbidden-admin') {
-        window.alert('Access Denied')
-        setMessage('Access Denied')
+        window.alert(debugError)
+        setMessage(debugError)
         navigate('/', { replace: true })
       } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
-        setMessage('Invalid email or password.')
+        setMessage(debugError)
       } else if (errorCode === 'auth/firebase-not-configured') {
-        setMessage('Admin login is unavailable. Firebase authentication is not configured.')
+        setMessage(debugError)
       } else {
-        setMessage('Sign-in failed. Please try again.')
+        setMessage(debugError)
       }
     } finally {
       setLoading(false)

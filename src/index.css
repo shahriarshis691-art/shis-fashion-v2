@@ -1,7 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 :root {
-  font-family: Inter, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Manrope', 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Manrope', 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --tracking-label: 0.22em;
+  --tracking-heading: -0.01em;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -33,6 +38,8 @@ html {
 
 body {
   overflow-x: hidden;
+  font-family: var(--font-sans);
+  letter-spacing: 0.01em;
 }
 
 * {
@@ -60,6 +67,35 @@ input,
 textarea,
 select {
   font: inherit;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-heading);
+  line-height: 1.08;
+  font-weight: 600;
+}
+
+p,
+li,
+a,
+button,
+input,
+textarea,
+select,
+label,
+span {
+  letter-spacing: 0.01em;
+}
+
+[class*='uppercase'] {
+  letter-spacing: var(--tracking-label);
 }
 
 #root {
@@ -73,4 +109,9 @@ select {
 ::selection {
   background: rgba(201, 162, 39, 0.3);
   color: var(--color-text);
+}
+
+.shis-media-tone {
+  filter: saturate(0.9) contrast(1.03) brightness(0.98);
+  transition: filter 0.3s ease;
 }

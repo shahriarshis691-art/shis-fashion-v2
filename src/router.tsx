@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: <Navigate to="/shis-admin/login" replace />,
+        element: withSuspense(<AdminRouteGuard><AdminPage initialView="dashboard" /></AdminRouteGuard>),
       },
       {
         path: 'shis-admin',
@@ -110,10 +110,6 @@ export const router = createBrowserRouter([
           {
             path: 'login',
             element: withSuspense(<AdminPage initialView="login" />),
-          },
-          {
-            path: 'dashboard',
-            element: withSuspense(<AdminRouteGuard><AdminPage initialView="dashboard" /></AdminRouteGuard>),
           },
         ],
       },

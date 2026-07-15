@@ -1,7 +1,6 @@
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import { initializeApp, getApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -10,14 +9,21 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
 }
 
-let app: FirebaseApp | undefined
+const hasFirebaseConfig = [
+  firebaseConfig.apiKey,
+  firebaseConfig.authDomain,
+  firebaseConfig.projectId,
+  firebaseConfig.storageBucket,
+  firebaseConfig.messagingSenderId,
+  firebaseConfig.appId,
+].every(Boolean)
 
-if (import.meta.env.VITE_FIREBASE_API_KEY) {
-  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
-}
+export const app: FirebaseApp | undefined = hasFirebaseConfig
+  ? (getApps().length ? getApp() : initializeApp(firebaseConfig))
+  : undefined
 
 export const auth = app ? getAuth(app) : undefined
 export const db = app ? getFirestore(app) : undefined
-export const storage = app ? getStorage(app) : undefined

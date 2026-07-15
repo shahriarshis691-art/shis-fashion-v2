@@ -11,5 +11,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 4173,
+    watch: {
+      ignored: ['**/public/media/hero-fallback.mp4'],
+      ignorePermissionErrors: true,
+    },
   },
 })
