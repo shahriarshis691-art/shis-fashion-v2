@@ -1,9 +1,10 @@
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -14,6 +15,15 @@ import {
 import { uploadMultipleAssets } from '../services/cloudinary'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
+
+export type HomepageSectionKey = 'hero' | 'featuredCollection' | 'newArrivals' | 'bestSellers' | 'brandPromise'
+
+export interface HomepageSectionConfig {
+  key: HomepageSectionKey
+  label: string
+  enabled: boolean
+  order: number
+}
 
 export interface AdminProduct {
   id: string
@@ -59,10 +69,13 @@ export interface HomepageContent {
   navbarBrandPrimary?: string
   navbarBrandSecondary?: string
   navbarSearchPlaceholder?: string
+  heroEyebrow?: string
   heroTitle: string
   heroSubtitle: string
   heroCta: string
+  heroPrimaryLink?: string
   heroSecondaryCta?: string
+  heroSecondaryLink?: string
   heroImage?: string
   heroVideo?: string
   bannerImage?: string
@@ -87,6 +100,7 @@ export interface HomepageContent {
   footerContactPhone?: string
   footerContactAddress?: string
   footerBottomText?: string
+  sections: HomepageSectionConfig[]
 }
 
 export function isFirebaseConfigured() {
@@ -97,10 +111,21 @@ const PRODUCTS_KEY = 'shis-admin-products'
 const ORDERS_KEY = 'shis-admin-orders'
 const HOMEPAGE_KEY = 'shis-admin-homepage'
 const CATEGORIES_KEY = 'shis-admin-categories'
-const AUTH_KEY = 'shis-admin-auth'
 const DATA_MODE_KEY = 'shis-admin-data-mode'
-const DEMO_ADMIN_EMAIL = 'admin@shisfashion.com'
-const DEMO_ADMIN_PASSWORD = 'luxury123'
+const LEGACY_AUTH_KEY = 'shis-admin-auth'
+const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
+
+function parseConfiguredAdminEmails() {
+  const rawValue = (import.meta.env.VITE_ADMIN_EMAILS ?? '') as string
+  return new Set(
+    rawValue
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter(Boolean),
+  )
+}
+
+const configuredAdminEmails = parseConfiguredAdminEmails()
 
 function readStored<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') {
@@ -121,19 +146,119 @@ function writeStored<T>(key: string, value: T) {
   }
 }
 
-function isLocalAdminSession() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-  return Boolean(window.localStorage.getItem(AUTH_KEY))
-}
-
 function isLocalFirstDataMode() {
   if (typeof window === 'undefined') {
     return false
   }
 
-  return window.localStorage.getItem(DATA_MODE_KEY) === 'local-first' || isLocalAdminSession()
+  return window.localStorage.getItem(DATA_MODE_KEY) === 'local-first'
+}
+
+function markAccessDenied() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.setItem(ACCESS_DENIED_KEY, '1')
+}
+
+export function consumeAdminAccessDeniedFlag() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const denied = window.sessionStorage.getItem(ACCESS_DENIED_KEY) === '1'
+  if (denied) {
+    window.sessionStorage.removeItem(ACCESS_DENIED_KEY)
+  }
+  return denied
+}
+
+function clearLegacyAdminBypassState() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.removeItem(LEGACY_AUTH_KEY)
+}
+
+function normalizeRoleValues(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [] as string[]
+  }
+
+  return value
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map((entry) => entry.toLowerCase())
+}
+
+function includesAdminRole(role: unknown, roles: unknown) {
+  if (typeof role === 'string' && role.toLowerCase() === 'admin') {
+    return true
+  }
+
+  return normalizeRoleValues(roles).includes('admin')
+}
+
+function listIncludesIdentifier(value: unknown, identifier: string) {
+  if (!identifier) {
+    return false
+  }
+
+  if (!Array.isArray(value)) {
+    return false
+  }
+
+  return value
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map((entry) => entry.trim().toLowerCase())
+    .includes(identifier)
+}
+
+async function isAdminUser(user: User) {
+  const normalizedEmail = user.email?.trim().toLowerCase() ?? ''
+
+  if (configuredAdminEmails.size > 0) {
+    return normalizedEmail ? configuredAdminEmails.has(normalizedEmail) : false
+  }
+
+  const tokenResult = await user.getIdTokenResult()
+  const claims = tokenResult.claims as Record<string, unknown>
+  if (claims.admin === true || includesAdminRole(claims.role, claims.roles)) {
+    return true
+  }
+
+  if (!firebaseDb) {
+    return false
+  }
+
+  const [adminDocSnapshot, adminsSettingsSnapshot] = await Promise.all([
+    getDoc(doc(firebaseDb, 'admins', user.uid)),
+    getDoc(doc(firebaseDb, 'settings', 'admins')),
+  ])
+
+  if (adminDocSnapshot.exists()) {
+    const adminDocData = adminDocSnapshot.data()
+    const isActive = adminDocData.active !== false
+    if (isActive && includesAdminRole(adminDocData.role, adminDocData.roles)) {
+      return true
+    }
+  }
+
+  if (adminsSettingsSnapshot.exists()) {
+    const settingsData = adminsSettingsSnapshot.data()
+    if (listIncludesIdentifier(settingsData.emails, normalizedEmail)) {
+      return true
+    }
+    if (listIncludesIdentifier(settingsData.uids, user.uid.toLowerCase())) {
+      return true
+    }
+    if (listIncludesIdentifier(settingsData.admins, normalizedEmail) || listIncludesIdentifier(settingsData.admins, user.uid.toLowerCase())) {
+      return true
+    }
+  }
+
+  return false
 }
 
 function subscribeToStored<T>(key: string, fallback: T, callback: (value: T) => void) {
@@ -361,10 +486,13 @@ const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
   navbarBrandSecondary: 'Fashion',
   navbarSearchPlaceholder: 'Search products',
+  heroEyebrow: 'SHIS FASHION',
   heroTitle: 'Style Meets Comfort.',
   heroSubtitle: 'Discover elevated staples designed for modern living, with premium materials and effortless lines.',
   heroCta: 'Shop collection',
+  heroPrimaryLink: '/shop',
   heroSecondaryCta: 'New arrivals',
+  heroSecondaryLink: '/shop/new-arrivals',
   heroImage: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1800&q=80',
   heroVideo: '',
   bannerImage: 'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1800&q=80',
@@ -393,6 +521,13 @@ const defaultHomepage: HomepageContent = {
   footerContactPhone: '+234 800 000 0000',
   footerContactAddress: 'Abuja, Nigeria',
   footerBottomText: 'Crafted for premium, calm, and timeless browsing.',
+  sections: [
+    { key: 'hero', label: 'Hero', enabled: true, order: 0 },
+    { key: 'featuredCollection', label: 'Featured collection', enabled: true, order: 1 },
+    { key: 'newArrivals', label: 'New arrivals', enabled: true, order: 2 },
+    { key: 'bestSellers', label: 'Best sellers', enabled: true, order: 3 },
+    { key: 'brandPromise', label: 'Brand promise', enabled: true, order: 4 },
+  ],
 }
 
 function normalizeHomepageContent(content: Partial<HomepageContent> | undefined): HomepageContent {
@@ -405,7 +540,14 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
   return {
     ...defaultHomepage,
     ...(content ?? {}),
+    heroEyebrow: content?.heroEyebrow ?? defaultHomepage.heroEyebrow,
+    heroPrimaryLink: content?.heroPrimaryLink ?? defaultHomepage.heroPrimaryLink,
+    heroSecondaryLink: content?.heroSecondaryLink ?? defaultHomepage.heroSecondaryLink,
     categories: mergedCategories,
+    sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
+      ...defaultHomepage.sections[index],
+      ...section,
+    })).sort((left, right) => left.order - right.order),
   }
 }
 
@@ -464,54 +606,84 @@ function ensureSeedData() {
 
 export function onAdminAuthChanged(callback: (user: { uid: string; email: string | null } | null) => void) {
   ensureSeedData()
-
-  const localAdminEmail = typeof window !== 'undefined' ? window.localStorage.getItem(AUTH_KEY) : null
-  if (localAdminEmail) {
-    callback({ uid: 'local-admin', email: localAdminEmail })
-    return () => undefined
-  }
+  clearLegacyAdminBypassState()
 
   if (!firebaseAuth) {
     callback(null)
     return () => undefined
   }
 
-  return onAuthStateChanged(firebaseAuth, (user) => {
-    if (!user) {
-      callback(null)
-      return
-    }
+  const auth = firebaseAuth
 
-    callback({ uid: user.uid, email: user.email })
+  let isActive = true
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    void (async () => {
+      try {
+        if (!isActive) {
+          return
+        }
+
+        if (!user) {
+          callback(null)
+          return
+        }
+
+        const hasAdminAccess = await isAdminUser(user)
+        if (!isActive) {
+          return
+        }
+
+        if (!hasAdminAccess) {
+          markAccessDenied()
+          await signOut(auth)
+          if (!isActive) {
+            return
+          }
+          callback(null)
+          return
+        }
+
+        callback({ uid: user.uid, email: user.email })
+      } catch {
+        if (!isActive) {
+          return
+        }
+        callback(null)
+      }
+    })()
   })
+
+  return () => {
+    isActive = false
+    unsubscribe()
+  }
 }
 
 export async function signInAdmin(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase()
-  const isDemoCredentials = normalizedEmail === DEMO_ADMIN_EMAIL && password === DEMO_ADMIN_PASSWORD
-
-  // Keep demo access available even when Firebase is configured.
-  if (isDemoCredentials) {
-    window.localStorage.setItem(AUTH_KEY, normalizedEmail)
-    window.localStorage.setItem(DATA_MODE_KEY, 'local-first')
-    return { uid: 'local-admin', email: normalizedEmail }
-  }
 
   if (!firebaseAuth) {
-    window.localStorage.setItem(AUTH_KEY, normalizedEmail)
-    window.localStorage.setItem(DATA_MODE_KEY, 'local-first')
-    return { uid: 'local-admin', email: normalizedEmail }
+    const error = new Error('Firebase authentication is not configured for this environment.')
+    ;(error as Error & { code?: string }).code = 'auth/firebase-not-configured'
+    throw error
   }
 
-  window.localStorage.setItem(DATA_MODE_KEY, 'local-first')
   const result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
+  const hasAdminAccess = await isAdminUser(result.user)
+
+  if (!hasAdminAccess) {
+    markAccessDenied()
+    await signOut(firebaseAuth)
+    const error = new Error('Access Denied')
+    ;(error as Error & { code?: string }).code = 'auth/forbidden-admin'
+    throw error
+  }
+
   return { uid: result.user.uid, email: result.user.email }
 }
 
 export async function signOutAdmin() {
-  if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(AUTH_KEY)
-  }
+  clearLegacyAdminBypassState()
 
   if (!firebaseAuth) {
     return

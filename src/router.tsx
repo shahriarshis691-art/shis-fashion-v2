@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
-import { onAdminAuthChanged } from './firebase/adminService'
+import { consumeAdminAccessDeniedFlag, onAdminAuthChanged } from './firebase/adminService'
 import HomePage from './pages/HomePage'
 import ShopPage from './pages/ShopPage'
 import ProductDetailPage from './pages/ProductDetailPage'
@@ -37,6 +37,10 @@ function AdminRouteGuard({ children }: { children: ReactElement }) {
   }
 
   if (!user) {
+    if (consumeAdminAccessDeniedFlag()) {
+      return <Navigate to="/" replace state={{ adminAccessDenied: true }} />
+    }
+
     return <Navigate to="/shis-admin/login" replace />
   }
 

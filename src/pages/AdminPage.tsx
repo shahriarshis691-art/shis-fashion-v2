@@ -6,6 +6,7 @@ import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
 import { formatBDT } from '../utils/currency'
 import {
+  consumeAdminAccessDeniedFlag,
   createCategory,
   createProduct,
   deleteCategory,
@@ -29,6 +30,7 @@ import {
   type AdminProduct,
   type AdminCategory,
   type HomepageContent,
+  type HomepageSectionConfig,
   onAdminAuthChanged,
 } from '../firebase/adminService'
 
@@ -55,9 +57,10 @@ interface AdminPageProps {
 
 export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const navigate = useNavigate()
+  const firebaseReady = isFirebaseConfigured()
   const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
-  const [loginForm, setLoginForm] = useState({ email: 'admin@shisfashion.com', password: 'luxury123' })
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
@@ -75,6 +78,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [uploadError, setUploadError] = useState('')
   const [orderEdits, setOrderEdits] = useState<Record<string, Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'notes' | 'trackingNumber'>>>>({})
   const [customerEdits, setCustomerEdits] = useState<Record<string, { name: string; phone: string; email: string }>>({})
+  const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | AdminOrder['status']>('all')
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -90,6 +94,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
       setAuthMode('login')
       if (initialView === 'dashboard') {
+        if (consumeAdminAccessDeniedFlag()) {
+          window.alert('Access Denied')
+          navigate('/', { replace: true })
+          return
+        }
         navigate('/shis-admin/login', { replace: true })
       }
     })
@@ -98,6 +107,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }, [initialView, navigate])
 
   useEffect(() => {
+    if (!user || authMode !== 'dashboard') {
+      return () => undefined
+    }
+
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => setHomepageContent(nextContent))
@@ -109,7 +122,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       unsubscribeHomepage()
       unsubscribeCategories()
     }
-  }, [])
+  }, [authMode, user])
 
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
@@ -132,6 +145,46 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return Array.from(byIdentity.values())
   }, [orders])
 
+  const getOrderDate = (createdAt?: string | { seconds: number }) => {
+    if (!createdAt) {
+      return null
+    }
+
+    const parsed = typeof createdAt === 'string' ? new Date(createdAt) : new Date(createdAt.seconds * 1000)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
+
+  const isSameLocalDay = (left: Date, right: Date) =>
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+
+  const dashboardSummary = useMemo(() => {
+    const today = new Date()
+    const todayOrders = orders.filter((order) => {
+      const orderDate = getOrderDate(order.createdAt)
+      return orderDate ? isSameLocalDay(orderDate, today) : false
+    })
+
+    const revenue = orders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
+    const todayRevenue = todayOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
+    const outOfStockProducts = products.filter((product) => product.stock <= 0).length
+
+    return {
+      todayOrders: todayOrders.length,
+      pendingOrders: orders.filter((order) => order.status === 'new').length,
+      confirmedOrders: orders.filter((order) => order.status === 'confirmed').length,
+      processingOrders: orders.filter((order) => order.status === 'processing').length,
+      deliveredOrders: orders.filter((order) => order.status === 'delivered').length,
+      cancelledOrders: orders.filter((order) => order.status === 'cancelled').length,
+      totalRevenue: revenue,
+      todayRevenue,
+      totalProducts: products.length,
+      outOfStockProducts,
+      totalCustomers: customers.length,
+    }
+  }, [customers.length, orders, products])
+
   const filteredOrders = useMemo(() => {
     const query = search.toLowerCase()
     return orders.filter((order) => [
@@ -145,8 +198,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       order.deliveryAddress?.deliveryNote,
       order.notes,
       order.status,
-    ].some((value) => (value ?? '').toLowerCase().includes(query)))
-  }, [orders, search])
+    ].some((value) => (value ?? '').toLowerCase().includes(query)) && (orderStatusFilter === 'all' || order.status === orderStatusFilter))
+  }, [orders, orderStatusFilter, search])
 
   const formatOrderDateTime = (createdAt?: string | { seconds: number }) => {
     if (!createdAt) {
@@ -174,8 +227,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setAuthMode('dashboard')
       setMessage('Welcome back. Your dashboard is ready.')
       navigate('/shis-admin/dashboard', { replace: true })
-    } catch {
-      setMessage('Sign-in failed. Try the demo credentials or confirm Firebase is configured.')
+    } catch (error) {
+      const errorCode = typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code ?? '')
+        : ''
+
+      if (errorCode === 'auth/forbidden-admin') {
+        window.alert('Access Denied')
+        setMessage('Access Denied')
+        navigate('/', { replace: true })
+      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
+        setMessage('Invalid email or password.')
+      } else if (errorCode === 'auth/firebase-not-configured') {
+        setMessage('Admin login is unavailable. Firebase authentication is not configured.')
+      } else {
+        setMessage('Sign-in failed. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -368,6 +435,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleDeleteProduct = async (productId: string) => {
     await deleteProduct(productId)
+    if (isEditing === productId) {
+      resetForm()
+    }
     setMessage('Product removed.')
   }
 
@@ -441,6 +511,61 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setEditingCategoryId(null)
   }
 
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleSummaryCardClick = (target: 'orders' | 'products' | 'homepage' | 'categories' | 'customers', filter?: 'all' | AdminOrder['status']) => {
+    if (typeof filter !== 'undefined') {
+      setOrderStatusFilter(filter)
+    }
+
+    if (target === 'orders') {
+      scrollToSection('orders-management')
+    } else if (target === 'products') {
+      scrollToSection('products-management')
+    } else if (target === 'homepage') {
+      scrollToSection('homepage-management')
+    } else if (target === 'categories') {
+      scrollToSection('categories-management')
+    } else if (target === 'customers') {
+      scrollToSection('customers-management')
+    }
+  }
+
+  const homepageSections = useMemo(() => {
+    const defaultSections = homepageContent?.sections ?? []
+    return [...defaultSections].sort((left, right) => left.order - right.order)
+  }, [homepageContent?.sections])
+
+  const updateHomepageSection = (key: HomepageSectionConfig['key'], updates: Partial<HomepageSectionConfig>) => {
+    if (!homepageContent) {
+      return
+    }
+
+    const nextSections = homepageContent.sections.map((section) => (section.key === key ? { ...section, ...updates } : section))
+    setHomepageContent({ ...homepageContent, sections: nextSections })
+  }
+
+  const reorderHomepageSection = (key: HomepageSectionConfig['key'], direction: -1 | 1) => {
+    if (!homepageContent) {
+      return
+    }
+
+    const nextSections = [...homepageContent.sections].sort((left, right) => left.order - right.order)
+    const currentIndex = nextSections.findIndex((section) => section.key === key)
+    const targetIndex = currentIndex + direction
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= nextSections.length) {
+      return
+    }
+
+    const currentOrder = nextSections[currentIndex].order
+    nextSections[currentIndex].order = nextSections[targetIndex].order
+    nextSections[targetIndex].order = currentOrder
+    setHomepageContent({ ...homepageContent, sections: nextSections })
+  }
+
   const handleEditCategory = (category: AdminCategory) => {
     setEditingCategoryId(category.id)
     setCategoryName(category.name)
@@ -464,9 +589,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             <form className="space-y-4" onSubmit={handleLogin}>
               <input required value={loginForm.email} onChange={(event) => setLoginForm({ ...loginForm, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Email" />
               <input required type="password" value={loginForm.password} onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Password" />
-              <Button type="submit" disabled={loading} className="w-full justify-center">{loading ? 'Signing in…' : 'Enter dashboard'}</Button>
+              <Button type="submit" disabled={loading || !firebaseReady} className="w-full justify-center">{loading ? 'Signing in…' : 'Enter dashboard'}</Button>
             </form>
-            <p className="mt-4 text-sm text-[var(--color-muted)]">{isFirebaseConfigured() ? 'Firebase is active.' : 'Using local-first admin storage for a fast demo experience.'}</p>
+            <p className="mt-4 text-sm text-[var(--color-muted)]">{firebaseReady ? 'Firebase is active.' : 'Admin login requires Firebase authentication configuration.'}</p>
             {message ? <p className="mt-3 text-sm text-[var(--color-accent)]">{message}</p> : null}
           </Card>
         </Container>
@@ -493,96 +618,125 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         {uploading ? <p className="mt-2 text-sm text-[var(--color-muted)]">Uploading media... {uploadProgress}%</p> : null}
         {uploadError ? <p className="mt-2 text-sm text-[var(--color-accent)]">{uploadError}</p> : null}
 
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <Card className="rounded-[1.6rem] p-4">
-            <p className="text-sm uppercase tracking-[0.25em] text-[var(--color-accent)]">Products</p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text)]">{products.length}</h2>
-          </Card>
-          <Card className="rounded-[1.6rem] p-4">
-            <p className="text-sm uppercase tracking-[0.25em] text-[var(--color-accent)]">Orders</p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text)]">{orders.length}</h2>
-          </Card>
-          <Card className="rounded-[1.6rem] p-4">
-            <p className="text-sm uppercase tracking-[0.25em] text-[var(--color-accent)]">Live status</p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text)]">{isFirebaseConfigured() ? 'Firebase' : 'Local'}</h2>
-          </Card>
+        <div className="mt-6 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <SectionTitle
+              eyebrow="Dashboard summary"
+              title="Operations at a glance"
+              description="Tap a card to jump directly to the matching management area."
+            />
+            <div className="flex flex-wrap gap-3">
+              <Button variant="secondary" onClick={() => { setForm(emptyProductForm); setIsEditing(null); scrollToSection('products-management') }}>Add New Product</Button>
+              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Upload Hero Image</Button>
+              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Upload Hero Video</Button>
+              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Edit Homepage</Button>
+              <Button variant="secondary" onClick={() => handleSummaryCardClick('orders', 'new')}>View New Orders</Button>
+              <Button variant="secondary" onClick={() => scrollToSection('categories-management')}>Manage Categories</Button>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {[
+              { label: "Today's Orders", value: dashboardSummary.todayOrders, target: () => handleSummaryCardClick('orders') },
+              { label: 'Pending Orders', value: dashboardSummary.pendingOrders, target: () => handleSummaryCardClick('orders', 'new' as const) },
+              { label: 'Confirmed Orders', value: dashboardSummary.confirmedOrders, target: () => handleSummaryCardClick('orders', 'confirmed') },
+              { label: 'Processing Orders', value: dashboardSummary.processingOrders, target: () => handleSummaryCardClick('orders', 'processing') },
+              { label: 'Delivered Orders', value: dashboardSummary.deliveredOrders, target: () => handleSummaryCardClick('orders', 'delivered') },
+              { label: 'Cancelled Orders', value: dashboardSummary.cancelledOrders, target: () => handleSummaryCardClick('orders', 'cancelled') },
+              { label: 'Total Revenue', value: formatBDT(dashboardSummary.totalRevenue), target: () => handleSummaryCardClick('orders') },
+              { label: "Today's Revenue", value: formatBDT(dashboardSummary.todayRevenue), target: () => handleSummaryCardClick('orders') },
+              { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products') },
+              { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products') },
+              { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers') },
+              { label: 'Live Mode', value: firebaseReady ? 'Firebase' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
+            ].map((card) => (
+              <button key={card.label} type="button" onClick={card.target} className="text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
+                <Card className="h-full rounded-[1.6rem] p-4">
+                  <p className="text-sm uppercase tracking-[0.25em] text-[var(--color-accent)]">{card.label}</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-[var(--color-text)]">{card.value}</h2>
+                </Card>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <Card className="rounded-[2rem] p-5 sm:p-7">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Product CRUD</p>
-                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Add or refine your catalog</h2>
+          <div id="products-management">
+            <Card className="rounded-[2rem] p-5 sm:p-7">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Product CRUD</p>
+                  <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Add or refine your catalog</h2>
+                </div>
+                <Button onClick={resetForm} variant="secondary">Reset</Button>
               </div>
-              <Button onClick={resetForm} variant="secondary">Reset</Button>
-            </div>
 
-            <form className="mt-6 space-y-4" onSubmit={handleSaveProduct}>
-              <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Product name" />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
-                <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
-              </div>
-              <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category" />
-              <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
-              <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma separated)" />
-              <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
-              <div className="space-y-3">
-                {galleryLabels.map((label, index) => (
-                  <div key={label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--color-text)]">{label}</p>
-                        <p className="mt-1 text-xs text-[var(--color-muted)]">Upload, replace, or remove this image.</p>
+              <form className="mt-6 space-y-4" onSubmit={handleSaveProduct}>
+                <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Product name" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
+                  <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
+                </div>
+                <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category" />
+                <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
+                <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma separated)" />
+                <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
+                <div className="space-y-3">
+                  {galleryLabels.map((label, index) => (
+                    <div key={label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--color-text)]">{label}</p>
+                          <p className="mt-1 text-xs text-[var(--color-muted)]">Upload, replace, or remove this image.</p>
+                        </div>
+                        {form.images[index] ? (
+                          <button type="button" onClick={() => handleRemoveGalleryImage(index)} className="text-sm font-semibold text-[var(--color-accent)]">
+                            Remove
+                          </button>
+                        ) : null}
                       </div>
-                      {form.images[index] ? (
-                        <button type="button" onClick={() => handleRemoveGalleryImage(index)} className="text-sm font-semibold text-[var(--color-accent)]">
-                          Remove
-                        </button>
-                      ) : null}
+                      <label className="mt-3 flex cursor-pointer items-center justify-center overflow-hidden rounded-[1.2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/80 p-2">
+                        <input type="file" accept="image/*" onChange={(event) => handleGalleryUpload(event.target.files, index)} className="hidden" />
+                        {form.images[index] ? (
+                          <img src={form.images[index]} alt={label} className="h-28 w-full rounded-[1rem] object-cover" />
+                        ) : (
+                          <span className="py-8 text-sm text-[var(--color-muted)]">Tap to upload {label.toLowerCase()}</span>
+                        )}
+                      </label>
                     </div>
-                    <label className="mt-3 flex cursor-pointer items-center justify-center overflow-hidden rounded-[1.2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/80 p-2">
-                      <input type="file" accept="image/*" onChange={(event) => handleGalleryUpload(event.target.files, index)} className="hidden" />
-                      {form.images[index] ? (
-                        <img src={form.images[index]} alt={label} className="h-28 w-full rounded-[1rem] object-cover" />
-                      ) : (
-                        <span className="py-8 text-sm text-[var(--color-muted)]">Tap to upload {label.toLowerCase()}</span>
-                      )}
+                  ))}
+                </div>
+                <div className="space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-text)]">Videos</p>
+                      <p className="mt-1 text-xs text-[var(--color-muted)]">Upload clips for product stories or trims.</p>
+                    </div>
+                    <label className="cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-2 text-xs font-semibold text-[var(--color-text)]">
+                      <input type="file" accept="video/*" multiple onChange={(event) => handleUpload(event.target.files, 'product-videos')} className="hidden" />
+                      Add video
                     </label>
                   </div>
-                ))}
-              </div>
-              <div className="space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--color-text)]">Videos</p>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">Upload clips for product stories or trims.</p>
-                  </div>
-                  <label className="cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-2 text-xs font-semibold text-[var(--color-text)]">
-                    <input type="file" accept="video/*" multiple onChange={(event) => handleUpload(event.target.files, 'product-videos')} className="hidden" />
-                    Add video
-                  </label>
+                  {form.videos.length ? (
+                    <div className="space-y-2">
+                      {form.videos.map((video) => (
+                        <div key={video} className="flex items-center justify-between rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-muted)]">
+                          <span className="truncate">{video}</span>
+                          <button type="button" onClick={() => handleRemoveMedia(video, 'video')} className="ml-3 font-semibold text-[var(--color-accent)]">Remove</button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="text-sm text-[var(--color-muted)]">No product videos yet.</p>}
                 </div>
-                {form.videos.length ? (
-                  <div className="space-y-2">
-                    {form.videos.map((video) => (
-                      <div key={video} className="flex items-center justify-between rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-muted)]">
-                        <span className="truncate">{video}</span>
-                        <button type="button" onClick={() => handleRemoveMedia(video, 'video')} className="ml-3 font-semibold text-[var(--color-accent)]">Remove</button>
-                      </div>
-                    ))}
-                  </div>
-                ) : <p className="text-sm text-[var(--color-muted)]">No product videos yet.</p>}
-              </div>
-              <div className="flex flex-wrap gap-3 text-sm">
-                <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.featured} onChange={() => setForm({ ...form, featured: !form.featured })} /> Featured</label>
-                <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.newArrival} onChange={() => setForm({ ...form, newArrival: !form.newArrival })} /> New arrival</label>
-                <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.hero} onChange={() => setForm({ ...form, hero: !form.hero })} /> Hero spotlight</label>
-              </div>
-              <Button type="submit" disabled={loading} className="w-full justify-center">{isEditing ? 'Update product' : 'Create product'}</Button>
-            </form>
-          </Card>
+                <div className="flex flex-wrap gap-3 text-sm">
+                  <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.featured} onChange={() => setForm({ ...form, featured: !form.featured })} /> Featured</label>
+                  <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.newArrival} onChange={() => setForm({ ...form, newArrival: !form.newArrival })} /> New arrival</label>
+                  <label className="flex items-center gap-2 text-[var(--color-muted)]"><input type="checkbox" checked={form.hero} onChange={() => setForm({ ...form, hero: !form.hero })} /> Hero spotlight</label>
+                </div>
+                <Button type="submit" disabled={loading} className="w-full justify-center">{isEditing ? 'Update product' : 'Create product'}</Button>
+              </form>
+            </Card>
+          </div>
 
           <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
@@ -613,7 +767,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <Card className="rounded-[2rem] p-5 sm:p-7">
+          <div id="orders-management">
+            <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Orders</p>
@@ -637,6 +792,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       </select>
                       <input value={orderEdits[order.id]?.trackingNumber ?? order.trackingNumber ?? ''} onChange={(event) => setOrderEdits((current) => ({ ...current, [order.id]: { ...current[order.id], trackingNumber: event.target.value } }))} className="mt-2 w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Tracking number" />
                       <div className="mt-2 flex flex-wrap gap-2">
+                        <button type="button" onClick={() => handleStatusChange(order.id, 'confirmed')} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Confirm Order</button>
+                        <button type="button" onClick={() => handleStatusChange(order.id, 'cancelled')} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Cancel Order</button>
                         <button type="button" onClick={() => handleSaveOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Save</button>
                         <button type="button" onClick={() => handleDeleteOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Delete</button>
                       </div>
@@ -668,9 +825,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
               ))}
             </div>
-          </Card>
+            </Card>
+          </div>
 
-          <Card className="rounded-[2rem] p-5 sm:p-7">
+          <div id="homepage-management">
+            <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Homepage</p>
@@ -685,10 +844,44 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <input value={homepageContent.navbarBrandSecondary ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, navbarBrandSecondary: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Navbar brand line 2" />
                 </div>
                 <input value={homepageContent.navbarSearchPlaceholder ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, navbarSearchPlaceholder: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Navbar search placeholder" />
-                <input value={homepageContent.heroTitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero title" />
-                <textarea value={homepageContent.heroSubtitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroSubtitle: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero subtitle" />
-                <input value={homepageContent.heroCta} onChange={(event) => setHomepageContent({ ...homepageContent, heroCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero CTA" />
-                <input value={homepageContent.heroSecondaryCta ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroSecondaryCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero secondary CTA" />
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-text)]">Homepage structure</p>
+                      <p className="mt-1 text-xs text-[var(--color-muted)]">Show or hide sections and change the live website order.</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    {homepageSections.map((section) => (
+                      <div key={section.key} className="flex flex-col gap-3 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--color-text)]">{section.label}</p>
+                          <p className="text-xs text-[var(--color-muted)]">Order {section.order}</p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" onClick={() => updateHomepageSection(section.key, { enabled: !section.enabled })} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${section.enabled ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}>
+                            {section.enabled ? 'Visible' : 'Hidden'}
+                          </button>
+                          <button type="button" onClick={() => reorderHomepageSection(section.key, -1)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Up</button>
+                          <button type="button" onClick={() => reorderHomepageSection(section.key, 1)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Down</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={homepageContent.heroEyebrow ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroEyebrow: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero small heading" />
+                  <input value={homepageContent.heroTitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero main heading" />
+                </div>
+                <textarea value={homepageContent.heroSubtitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroSubtitle: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero description" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={homepageContent.heroCta} onChange={(event) => setHomepageContent({ ...homepageContent, heroCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Primary button text" />
+                  <input value={homepageContent.heroPrimaryLink ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroPrimaryLink: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Primary button link" />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={homepageContent.heroSecondaryCta ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroSecondaryCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Secondary button text" />
+                  <input value={homepageContent.heroSecondaryLink ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroSecondaryLink: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Secondary button link" />
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input value={homepageContent.featuredCollectionEyebrow ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, featuredCollectionEyebrow: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Featured collection eyebrow" />
                   <input value={homepageContent.featuredCollectionTitle ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, featuredCollectionTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Featured collection title" />
@@ -801,11 +994,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 ))}
               </div>
             ) : null}
-          </Card>
+            </Card>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <Card className="rounded-[2rem] p-5 sm:p-7">
+          <div id="categories-management">
+            <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Categories</p>
@@ -830,9 +1025,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
               ))}
             </div>
-          </Card>
+            </Card>
+          </div>
 
-          <Card className="rounded-[2rem] p-5 sm:p-7">
+          <div id="customers-management">
+            <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Customers</p>
@@ -853,7 +1050,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               ))}
               {!customers.length ? <p className="text-sm text-[var(--color-muted)]">Customer list will appear after checkout orders are placed.</p> : null}
             </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </Container>
     </section>
