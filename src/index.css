@@ -18,7 +18,7 @@
   --color-text: #111111;
   --color-muted: #5f5d57;
   --color-border: #e8e0cf;
-  --color-accent: #c9a227;
+  --color-accent: #2d5a4f;
   color: var(--color-text);
   background-color: var(--color-bg);
 }
@@ -29,7 +29,7 @@
   --color-text: #f8f5ed;
   --color-muted: #b8b0a2;
   --color-border: #242424;
-  --color-accent: #e2b84c;
+  --color-accent: #3d8b7d;
 }
 
 html {
@@ -127,7 +127,7 @@ button {
 button[class*="accent"],
 button[style*="accent"] {
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.05em;
 }
