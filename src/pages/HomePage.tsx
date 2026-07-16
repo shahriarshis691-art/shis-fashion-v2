@@ -5,6 +5,7 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type HomepageContent } from '../firebase/adminService'
 import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
@@ -287,6 +288,11 @@ export default function HomePage() {
         </section>
       ),
     } : null,
+    {
+      key: 'shopByCategory',
+      order: (heroConfig?.order ?? 0) + 0.5,
+      node: <ShopByCategorySection />,
+    },
     featuredCollectionConfig?.enabled !== false ? {
       key: 'featuredCollection',
       order: featuredCollectionConfig?.order ?? 1,

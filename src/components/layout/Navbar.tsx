@@ -21,7 +21,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
+      className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] antialiased transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
     >
       {children}
     </button>
@@ -32,15 +32,35 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { theme, toggleTheme } = useTheme()
   const { itemCount } = useCart()
   const navigate = useNavigate()
   const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
+  const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `relative py-1 text-sm font-medium tracking-[0.3px] antialiased transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 ${
+      isActive
+        ? 'font-semibold text-[#000000] after:absolute after:-bottom-3 after:left-0 after:h-[2px] after:w-full after:bg-[#000000] after:content-[\'\']'
+        : 'text-[#000000] hover:text-[#000000] after:absolute after:-bottom-3 after:left-1/2 after:h-[1px] after:w-0 after:-translate-x-1/2 after:bg-[#000000] after:content-[\'\'] after:transition-all after:duration-200 after:ease-out hover:after:left-0 hover:after:w-full hover:after:translate-x-0'
+    }`
+  const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `relative block rounded-md px-4 py-3.5 text-lg font-medium tracking-[0.3px] antialiased transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 ${
+      isActive
+        ? 'font-semibold text-[#000000] after:absolute after:bottom-1.5 after:left-4 after:right-4 after:h-[2px] after:bg-[#000000] after:content-[\'\']'
+        : 'text-[#000000] hover:bg-black hover:text-white'
+    }`
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
     return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 4)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   // Focus the first link when mobile menu opens and handle Escape key
@@ -66,10 +86,9 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex items-center justify-between h-20 md:h-24 rounded-lg border border-[var(--color-border)]/40 px-3 bg-[var(--color-surface)]/70 backdrop-blur-sm shadow-sm">
-            <Link to="/" className="flex items-center justify-center group flex-shrink-0">
+      <header className={`sticky top-0 z-50 w-full border-b border-black bg-[#FFFFFF] transition-[box-shadow] duration-200 ${isScrolled ? 'shadow-[0_6px_20px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
+        <div className="grid h-20 w-full grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:px-6 md:h-[5.5rem] lg:h-24 lg:px-10">
+            <Link to="/" className="group flex flex-shrink-0 items-center justify-center">
               <img 
                 src="/shis-logo.svg" 
                 alt="SHIS Fashion - Premium Essentials" 
@@ -78,39 +97,41 @@ export default function Navbar() {
               />
             </Link>
 
-            <nav className="hidden items-center gap-8 md:flex">
+            <nav className="hidden items-center justify-self-center md:flex md:gap-6 lg:gap-9" aria-label="Primary navigation">
               {links.map((link) => (
                 <NavLink
                   key={link.label}
                   to={link.href}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors duration-200 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:text-[var(--color-accent)]'}`
-                  }
+                  className={desktopLinkClass}
                 >
                   {link.label}
                 </NavLink>
               ))}
             </nav>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-self-end gap-1.5">
               <IconButton label="Search" onClick={() => setIsSearchOpen((value) => !value)}>
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <circle cx="11" cy="11" r="5.5" />
                   <path d="M15.5 15.5 20 20" />
                 </svg>
               </IconButton>
-              <Link to="/cart" className="relative flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8" aria-label="Cart">
+              <Link
+                to="/cart"
+                className="relative flex h-9 w-9 items-center justify-center rounded-md text-[#000000] antialiased transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
+                aria-label="Cart"
+              >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                   <circle cx="10" cy="18" r="1.2" />
                   <circle cx="17" cy="18" r="1.2" />
                 </svg>
-                {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[8px] font-bold text-white">{itemCount}</span> : null}
+                {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#000000] px-0.5 text-[8px] font-bold text-white">{itemCount}</span> : null}
               </Link>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="hidden sm:flex h-8 items-center justify-center rounded-lg px-2 text-xs font-semibold text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8"
+                className="hidden h-9 items-center justify-center rounded-md border border-[#000000] px-2 text-xs font-semibold tracking-[0.3px] text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 sm:flex"
                 aria-label="Toggle theme"
               >
                 {theme === 'luxury' ? '🌙' : '☀️'}
@@ -118,7 +139,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((value) => !value)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text)] transition hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/8 md:hidden"
+                className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 md:hidden"
                 aria-label="Toggle navigation"
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-navigation"
@@ -126,13 +147,12 @@ export default function Navbar() {
                 <span aria-hidden className="text-lg">{isMobileMenuOpen ? '×' : '☰'}</span>
               </button>
             </div>
-          </div>
         </div>
 
         <AnimatePresence>
           {isSearchOpen ? (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mx-auto px-4 sm:px-6 lg:px-8 py-3 border-b border-[var(--color-border)]/30">
-              <div className="max-w-7xl mx-auto flex gap-2">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-b border-black bg-[#FFFFFF] px-4 py-3 sm:px-6 lg:px-10">
+              <div className="flex gap-2">
                 <input
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
@@ -149,7 +169,7 @@ export default function Navbar() {
                     }
                   }}
                   placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                  className="flex-1 rounded-lg border border-[var(--color-border)]/30 bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-text)] outline-none transition hover:border-[var(--color-border)]/50 focus:border-[var(--color-accent)]/50 focus:bg-[var(--color-accent)]/5"
+                  className="flex-1 rounded-md border border-[#000000] bg-[#FFFFFF] px-4 py-2 text-sm tracking-[0.3px] text-[#000000] outline-none transition-colors duration-200 hover:border-[#000000] focus:border-[#000000] focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-1"
                 />
                 <button
                   type="button"
@@ -162,7 +182,7 @@ export default function Navbar() {
                     setIsSearchOpen(false)
                     setSearchTerm('')
                   }}
-                  className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-accent)]/90"
+                  className="rounded-md border border-[#000000] bg-[#000000] px-4 py-2 text-sm font-semibold tracking-[0.3px] text-white transition-colors duration-200 hover:bg-white hover:text-[#000000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                 >
                   Search
                 </button>
@@ -181,7 +201,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setIsMobileMenuOpen(false)}
               className="fixed inset-0 z-40 bg-black/50 md:hidden"
               aria-hidden="true"
@@ -192,19 +212,19 @@ export default function Navbar() {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-0 z-50 h-screen w-[85vw] max-w-sm bg-[#F8F6F2] md:hidden overflow-y-auto"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed right-0 top-0 z-50 h-screen w-[85vw] max-w-sm overflow-y-auto bg-[#FFFFFF] md:hidden"
               role="dialog"
               aria-modal="true"
               id="mobile-navigation"
             >
               {/* Close button */}
-              <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-6 bg-[#F8F6F2] border-b border-[#E8E3DA]">
-                <h2 className="text-lg font-semibold text-[#111111]">Menu</h2>
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black bg-[#FFFFFF] px-6 py-6">
+                <h2 className="text-lg font-semibold text-[#000000]">Menu</h2>
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#111111] transition hover:bg-[#C8A96A]/10"
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                   aria-label="Close menu"
                 >
                   <span className="text-2xl">×</span>
@@ -212,25 +232,19 @@ export default function Navbar() {
               </div>
 
               {/* Navigation links */}
-              <nav className="px-6 py-8 space-y-1">
+              <nav className="space-y-1.5 px-6 py-8" aria-label="Mobile navigation">
                 {links.map((link, index) => (
                   <motion.div
                     key={link.label}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    transition={{ delay: index * 0.04, duration: 0.2 }}
                   >
                     <NavLink
                       to={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
                       ref={index === 0 ? firstMobileLinkRef : undefined}
-                      className={({ isActive }) =>
-                        `block px-4 py-4 text-lg font-medium transition rounded-lg ${
-                          isActive
-                            ? 'bg-[#C8A96A]/15 text-[#C8A96A]'
-                            : 'text-[#111111] hover:bg-[#F0EEE9]'
-                        }`
-                      }
+                      className={mobileLinkClass}
                     >
                       {link.label}
                     </NavLink>
@@ -242,25 +256,25 @@ export default function Navbar() {
               <div className="flex-1" />
 
               {/* Footer section with theme toggle and social links */}
-              <div className="px-6 py-8 border-t border-[#E8E3DA] space-y-6 bg-[#F8F6F2]">
+              <div className="space-y-6 border-t border-black bg-[#FFFFFF] px-6 py-8">
                 {/* Theme toggle */}
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-[#111111] bg-[#111111] text-white font-semibold text-base transition hover:bg-[#111111]/90"
+                  className="w-full rounded-md border border-[#000000] bg-[#000000] px-4 py-3 text-base font-semibold text-white transition-colors duration-200 hover:bg-white hover:text-[#000000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                 >
                   {theme === 'luxury' ? '🌙 Midnight Mode' : '☀️ Luxury Mode'}
                 </button>
 
                 {/* Social links */}
                 <div>
-                  <p className="text-xs font-semibold text-[#666666] uppercase tracking-wider mb-4">Follow Us</p>
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#000000]">Follow Us</p>
                   <div className="flex gap-4">
                     <a
                       href="https://instagram.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center h-12 w-12 rounded-lg border-2 border-[#111111] text-[#111111] transition hover:bg-[#111111] hover:text-white"
+                      className="flex h-12 w-12 items-center justify-center rounded-md border border-[#000000] text-[#000000] transition-colors duration-200 hover:bg-[#000000] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                       aria-label="Instagram"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -271,7 +285,7 @@ export default function Navbar() {
                       href="https://pinterest.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center h-12 w-12 rounded-lg border-2 border-[#111111] text-[#111111] transition hover:bg-[#111111] hover:text-white"
+                      className="flex h-12 w-12 items-center justify-center rounded-md border border-[#000000] text-[#000000] transition-colors duration-200 hover:bg-[#000000] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                       aria-label="Pinterest"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -282,7 +296,7 @@ export default function Navbar() {
                       href="https://tiktok.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center h-12 w-12 rounded-lg border-2 border-[#111111] text-[#111111] transition hover:bg-[#111111] hover:text-white"
+                      className="flex h-12 w-12 items-center justify-center rounded-md border border-[#000000] text-[#000000] transition-colors duration-200 hover:bg-[#000000] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
                       aria-label="TikTok"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
