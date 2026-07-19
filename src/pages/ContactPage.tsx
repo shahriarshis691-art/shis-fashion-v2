@@ -8,6 +8,7 @@ export default function ContactPage() {
   return (
     <section className="px-4 py-20 sm:px-6 lg:px-8">
       <Container>
+        <h1 className="sr-only">Contact SHIS Fashion</h1>
         <SectionTitle eyebrow="Let’s talk" title="Book a private styling consultation" description="Whether you're planning a wardrobe refresh or a special event, our team is ready to assist." />
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mt-10">
           <Card className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">

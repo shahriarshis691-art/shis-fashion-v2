@@ -38,6 +38,15 @@ export default function Navbar() {
   const { itemCount } = useCart()
   const navigate = useNavigate()
   const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
+  const closeMobileMenu = () => setIsMobileMenuOpen(false)
+  const toggleMobileMenu = () => {
+    setIsSearchOpen(false)
+    setIsMobileMenuOpen((value) => !value)
+  }
+  const toggleSearch = () => {
+    setIsMobileMenuOpen(false)
+    setIsSearchOpen((value) => !value)
+  }
   const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
     `relative py-1 text-sm font-medium tracking-[0.3px] antialiased transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 ${
       isActive
@@ -67,11 +76,6 @@ export default function Navbar() {
   useEffect(() => {
     if (isMobileMenuOpen) {
       firstMobileLinkRef.current?.focus()
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden'
-    } else {
-      // Restore body scroll
-      document.body.style.overflow = ''
     }
 
     const onKey = (e: KeyboardEvent) => {
@@ -80,7 +84,6 @@ export default function Navbar() {
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
     }
   }, [isMobileMenuOpen])
 
@@ -110,7 +113,7 @@ export default function Navbar() {
             </nav>
 
             <div className="flex items-center justify-self-end gap-1.5">
-              <IconButton label="Search" onClick={() => setIsSearchOpen((value) => !value)}>
+              <IconButton label="Search" onClick={toggleSearch}>
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <circle cx="11" cy="11" r="5.5" />
                   <path d="M15.5 15.5 20 20" />
@@ -138,7 +141,7 @@ export default function Navbar() {
               </button>
               <button
                 type="button"
-                onClick={() => setIsMobileMenuOpen((value) => !value)}
+                onClick={toggleMobileMenu}
                 className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 md:hidden"
                 aria-label="Toggle navigation"
                 aria-expanded={isMobileMenuOpen}
@@ -190,49 +193,20 @@ export default function Navbar() {
             </motion.div>
           ) : null}
         </AnimatePresence>
-      </header>
 
-      {/* Mobile Drawer - Outside header to avoid positioning constraints */}
-      <AnimatePresence>
-        {isMobileMenuOpen ? (
-          <>
-            {/* Dark overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen ? (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
-              aria-hidden="true"
-            />
-            
-            {/* Full-height side drawer */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed right-0 top-0 z-50 h-screen w-[85vw] max-w-sm overflow-y-auto bg-[#FFFFFF] md:hidden"
+              id="mobile-navigation"
               role="dialog"
               aria-modal="true"
-              id="mobile-navigation"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="overflow-hidden border-t border-black bg-[#FFFFFF] md:hidden"
             >
-              {/* Close button */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-black bg-[#FFFFFF] px-6 py-6">
-                <h2 className="text-lg font-semibold text-[#000000]">Menu</h2>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
-                  aria-label="Close menu"
-                >
-                  <span className="text-2xl">×</span>
-                </button>
-              </div>
-
-              {/* Navigation links */}
-              <nav className="space-y-1.5 px-6 py-8" aria-label="Mobile navigation">
+              <nav className="space-y-1.5 px-4 py-5 sm:px-6" aria-label="Mobile navigation">
                 {links.map((link, index) => (
                   <motion.div
                     key={link.label}
@@ -242,7 +216,7 @@ export default function Navbar() {
                   >
                     <NavLink
                       to={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                       ref={index === 0 ? firstMobileLinkRef : undefined}
                       className={mobileLinkClass}
                     >
@@ -252,12 +226,7 @@ export default function Navbar() {
                 ))}
               </nav>
 
-              {/* Spacer */}
-              <div className="flex-1" />
-
-              {/* Footer section with theme toggle and social links */}
-              <div className="space-y-6 border-t border-black bg-[#FFFFFF] px-6 py-8">
-                {/* Theme toggle */}
+              <div className="space-y-6 border-t border-black bg-[#FFFFFF] px-4 py-6 sm:px-6">
                 <button
                   type="button"
                   onClick={toggleTheme}
@@ -266,7 +235,6 @@ export default function Navbar() {
                   {theme === 'luxury' ? '🌙 Midnight Mode' : '☀️ Luxury Mode'}
                 </button>
 
-                {/* Social links */}
                 <div>
                   <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#000000]">Follow Us</p>
                   <div className="flex gap-4">
@@ -307,9 +275,9 @@ export default function Navbar() {
                 </div>
               </div>
             </motion.div>
-          </>
-        ) : null}
-      </AnimatePresence>
+          ) : null}
+        </AnimatePresence>
+      </header>
     </>
   )
 }

@@ -6,6 +6,7 @@ import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 
@@ -20,6 +21,7 @@ function slugify(value: string) {
 
 function toProduct(product: AdminProduct) {
   const discountMatch = product.description.match(/(\d{1,2}%\s*off|save\s*\d{1,2}%)/i)
+  const imageEntries = getManagedImageEntries(product, 1)
 
   return {
     id: product.id,
@@ -27,9 +29,11 @@ function toProduct(product: AdminProduct) {
     name: product.name,
     price: product.price,
     category: product.category,
-    image: product.images[0] ?? '',
+    image: imageEntries[0]?.url ?? '',
     description: product.description,
-    galleryImages: product.images,
+    galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
+    galleryImageTitles: imageEntries.map((entry) => entry.title),
+    galleryImageDescriptions: imageEntries.map((entry) => entry.description),
     sizes: product.sizes,
     stock: product.stock,
     discount: discountMatch?.[0],
@@ -132,6 +136,9 @@ export default function ProductDetailPage() {
   ].filter(Boolean)
   const normalizedGalleryImages = galleryImages.map((image) => normalizeCatalogImageUrl(image, 1200, 1400))
   const resolvedActiveImage = activeImage && normalizedGalleryImages.includes(activeImage) ? activeImage : normalizedGalleryImages[0] ?? normalizeCatalogImageUrl(product.image, 1200, 1400)
+  const activeImageIndex = normalizedGalleryImages.findIndex((image) => image === resolvedActiveImage)
+  const activeImageTitle = product.galleryImageTitles?.[activeImageIndex] || product.name
+  const activeImageDescription = product.galleryImageDescriptions?.[activeImageIndex] || product.description
   const size = selectedSize && product.sizes.includes(selectedSize) ? selectedSize : (product.sizes[0] ?? 'M')
   const stockStatus = product.stock <= 0 ? 'Out of stock' : product.stock <= 5 ? 'Low stock' : 'In stock'
   const highlights = buildHighlights(product.description, product.stock, product.sizes)
@@ -169,7 +176,7 @@ export default function ProductDetailPage() {
               <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-[var(--color-bg)]">
                 <img
                   src={resolvedActiveImage}
-                  alt={product.name}
+                  alt={activeImageTitle}
                   loading="eager"
                   decoding="async"
                   onError={handleImageError}
@@ -187,10 +194,14 @@ export default function ProductDetailPage() {
               {normalizedGalleryImages.map((image, index) => (
                 <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(image)} className={`overflow-hidden rounded-[1.2rem] border ${resolvedActiveImage === image ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}>
                   <div className="aspect-[4/5] bg-[var(--color-bg)]">
-                    <img src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`} />
+                    <img src={image} alt={product.galleryImageTitles?.[index] || `${product.name} view ${index + 1}`} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`} />
                   </div>
                 </button>
               ))}
+            </div>
+            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+              <p className="text-sm font-semibold text-[var(--color-text)]">{activeImageTitle}</p>
+              <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{activeImageDescription}</p>
             </div>
           </div>
           <div className="flex flex-col justify-center">

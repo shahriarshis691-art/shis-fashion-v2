@@ -4,16 +4,18 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 import { consumeAdminAccessDeniedFlag, onAdminAuthChanged } from './firebase/adminService'
-import HomePage from './pages/HomePage'
-import ShopPage from './pages/ShopPage'
-import ProductDetailPage from './pages/ProductDetailPage'
 
+const HomePage = lazy(() => import('./pages/HomePage'))
+const ShopPage = lazy(() => import('./pages/ShopPage'))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const TermsPage = lazy(() => import('./pages/TermsPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -54,11 +56,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: withSuspense(<HomePage />),
       },
       {
         path: 'shop',
-        element: <ShopPage />,
+        element: withSuspense(<ShopPage />),
       },
       {
         path: 'shop/new-arrivals',
@@ -66,15 +68,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'shop/:slug',
-        element: <ShopPage />,
+        element: withSuspense(<ShopPage />),
       },
       {
         path: 'shop/:category/:productSlug',
-        element: <ProductDetailPage />,
+        element: withSuspense(<ProductDetailPage />),
       },
       {
         path: 'product/:productSlug',
-        element: <ProductDetailPage />,
+        element: withSuspense(<ProductDetailPage />),
       },
       {
         path: 'cart',
@@ -97,6 +99,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<ContactPage />),
       },
       {
+        path: 'privacy',
+        element: withSuspense(<PrivacyPage />),
+      },
+      {
+        path: 'terms',
+        element: withSuspense(<TermsPage />),
+      },
+      {
         path: 'admin',
         element: withSuspense(<AdminRouteGuard><AdminPage initialView="dashboard" /></AdminRouteGuard>),
       },
@@ -110,6 +120,10 @@ export const router = createBrowserRouter([
           {
             path: 'login',
             element: withSuspense(<AdminPage initialView="login" />),
+          },
+          {
+            path: 'dashboard',
+            element: withSuspense(<AdminRouteGuard><AdminPage initialView="dashboard" /></AdminRouteGuard>),
           },
         ],
       },

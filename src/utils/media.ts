@@ -1,6 +1,18 @@
 const DEMO_IMAGE_HOSTS = ['images.unsplash.com', 'plus.unsplash.com']
 const CLOUDINARY_HOST = 'res.cloudinary.com'
 
+export interface ManagedImageSource {
+  images?: string[]
+  imageTitles?: string[]
+  imageDescriptions?: string[]
+}
+
+export interface ManagedImageEntry {
+  url: string
+  title: string
+  description: string
+}
+
 export function isDemoImageUrl(url?: string) {
   if (!url) {
     return false
@@ -63,4 +75,25 @@ export function normalizeCloudinaryImageUrl(url: string, width: number, height: 
 export function normalizeCatalogImageUrl(url: string, width: number, height: number) {
   const cloudinaryUrl = normalizeCloudinaryImageUrl(url, width, height)
   return normalizeDemoImageUrl(cloudinaryUrl, width, height)
+}
+
+export function getManagedImageEntries(source: ManagedImageSource, minLength = 0): ManagedImageEntry[] {
+  const images = Array.isArray(source.images) ? source.images.filter((entry): entry is string => typeof entry === 'string') : []
+  const total = Math.max(images.length, minLength)
+
+  return Array.from({ length: total }, (_, index) => ({
+    url: images[index] ?? '',
+    title: typeof source.imageTitles?.[index] === 'string' ? source.imageTitles[index] ?? '' : '',
+    description: typeof source.imageDescriptions?.[index] === 'string' ? source.imageDescriptions[index] ?? '' : '',
+  }))
+}
+
+export function compactManagedImages(source: ManagedImageSource) {
+  const entries = getManagedImageEntries(source).filter((entry) => entry.url)
+
+  return {
+    images: entries.map((entry) => entry.url),
+    imageTitles: entries.map((entry) => entry.title.trim()),
+    imageDescriptions: entries.map((entry) => entry.description.trim()),
+  }
 }

@@ -13,6 +13,7 @@ export default function AboutPage() {
   return (
     <section className="px-4 py-20 sm:px-6 lg:px-8">
       <Container>
+        <h1 className="sr-only">About SHIS Fashion</h1>
         <SectionTitle eyebrow="Our philosophy" title="Luxury, redefined for everyday life" description="We create pieces that feel as elevated as they look, balancing luxury details with effortless wearability." />
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mt-10">
           <Card className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">

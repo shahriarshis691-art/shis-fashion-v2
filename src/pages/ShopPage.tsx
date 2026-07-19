@@ -5,6 +5,7 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { shopCategories, type ShopCategory, type ShopProduct } from '../data/shopData'
 import { subscribeToCategories, subscribeToProducts, type AdminCategory, type AdminProduct } from '../firebase/adminService'
+import { getManagedImageEntries } from '../utils/media'
 
 function slugify(value: string) {
   return value
@@ -16,15 +17,18 @@ function slugify(value: string) {
 }
 
 function mapProduct(product: AdminProduct): ShopProduct {
+  const imageEntries = getManagedImageEntries(product, 1)
+
   return {
     id: product.id,
     slug: slugify(product.name),
     name: product.name,
     price: product.price,
     category: product.category,
-    image: product.images[0] ?? '',
+    image: imageEntries[0]?.url ?? '',
     description: product.description,
-    galleryImages: product.images,
+    galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
+    stock: product.stock,
     discount: product.stock <= 5 ? 'Low stock' : undefined,
   }
 }
@@ -36,6 +40,35 @@ function mapCategory(category: AdminCategory): ShopCategory {
     description: 'Premium edits curated for your wardrobe.',
     image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=80',
   }
+}
+
+const categoryAliasMap: Record<string, string[]> = {
+  mens: ['mens', 'mens-shirt', 'men', 'menswear'],
+  womens: ['womens', 'womens-dresses', 'women', 'womenswear'],
+  couples: ['couples', 'couple', 'couple-set'],
+  kids: ['kids', 'kid', 'children'],
+  western: ['western', 'western-outfits'],
+  denim: ['denim'],
+}
+
+function categoryMatches(productCategory: string, activeSlug?: string) {
+  if (!activeSlug) {
+    return true
+  }
+
+  const normalizedSlug = activeSlug.trim().toLowerCase()
+  const normalizedCategory = productCategory.trim().toLowerCase()
+
+  if (normalizedCategory === normalizedSlug) {
+    return true
+  }
+
+  const aliases = categoryAliasMap[normalizedSlug]
+  if (!aliases?.length) {
+    return false
+  }
+
+  return aliases.some((alias) => normalizedCategory.includes(alias))
 }
 
 export default function ShopPage() {
@@ -84,11 +117,30 @@ export default function ShopPage() {
   }
 
   const activeCategories = categories.length ? categories : shopCategories
-  const category = slug && slug !== 'shop' ? activeCategories.find((item) => item.slug === slug) : undefined
+  const category = slug && slug !== 'shop'
+    ? activeCategories.find((item) => item.slug === slug)
+      ?? shopCategories.find((item) => item.slug === slug)
+      ?? (categoryAliasMap[slug]
+        ? {
+          slug,
+          title: slug.charAt(0).toUpperCase() + slug.slice(1),
+          description: 'Premium edits curated for your wardrobe.',
+          image: '',
+        }
+        : undefined)
+    : undefined
   const isNewArrivalsRoute = location.pathname === '/shop/new-arrivals'
+  const isBestSellersRoute = location.pathname === '/shop/best-sellers'
+  const bestSellerProducts = useMemo(() => [...products].sort((left, right) => (right.stock ?? 0) - (left.stock ?? 0)).slice(0, 8), [products])
 
   const visibleProducts = useMemo(() => {
-    const baseProducts = isNewArrivalsRoute ? products.slice(0, 8) : slug && slug !== 'shop' ? products.filter((product) => product.category === slug) : products
+    const baseProducts = isNewArrivalsRoute
+      ? products.slice(0, 8)
+      : isBestSellersRoute
+        ? bestSellerProducts
+        : slug && slug !== 'shop'
+          ? products.filter((product) => categoryMatches(product.category, slug))
+          : products
     const query = searchQuery.trim().toLowerCase()
 
     const filtered = query
@@ -96,7 +148,19 @@ export default function ShopPage() {
       : baseProducts
 
     return filtered
-  }, [isNewArrivalsRoute, products, searchQuery, slug])
+  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, products, searchQuery, slug])
+
+  const headingTitle = isNewArrivalsRoute
+    ? 'New Arrivals'
+    : isBestSellersRoute
+      ? 'Best Sellers'
+      : category?.title ?? 'Curated essentials'
+
+  const headingDescription = isNewArrivalsRoute
+    ? 'Fresh pieces newly added to the SHIS collection.'
+    : isBestSellersRoute
+      ? 'Most in-demand essentials selected from the live catalog.'
+      : category?.description ?? 'Discover premium essentials crafted for modern dressing and timeless comfort.'
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -112,10 +176,10 @@ export default function ShopPage() {
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">SHIS SHOP</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--color-text)] sm:text-4xl">
-                {category?.title ?? 'Curated essentials'}
+                {headingTitle}
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
-                {category?.description ?? 'Discover premium essentials crafted for modern dressing and timeless comfort.'}
+                {headingDescription}
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
@@ -146,6 +210,13 @@ export default function ShopPage() {
               className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isNewArrivalsRoute ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
             >
               New Arrivals
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/shop/best-sellers')}
+              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isBestSellersRoute ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+            >
+              Best Sellers
             </button>
             {activeCategories.map((item) => (
               <button

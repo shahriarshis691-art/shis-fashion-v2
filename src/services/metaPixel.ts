@@ -46,6 +46,7 @@ interface PurchaseData {
 class MetaPixelService {
   private pixelId: string | null = null
   private isInitialized = false
+  private hasWarnedMissingId = false
 
   constructor() {
     this.pixelId = import.meta.env.VITE_META_PIXEL_ID || null
@@ -62,7 +63,10 @@ class MetaPixelService {
     }
 
     if (!this.pixelId) {
-      console.warn('[MetaPixel] Meta Pixel ID not found in environment variables. Set VITE_META_PIXEL_ID.')
+      if (import.meta.env.DEV && !this.hasWarnedMissingId) {
+        console.warn('[MetaPixel] Meta Pixel ID not found in environment variables. Set VITE_META_PIXEL_ID.')
+        this.hasWarnedMissingId = true
+      }
       return
     }
 
@@ -70,7 +74,9 @@ class MetaPixelService {
       // Add Facebook Pixel script
       this.loadPixelScript()
       this.isInitialized = true
-      console.log('[MetaPixel] Initialized successfully with ID:', this.pixelId)
+      if (import.meta.env.DEV) {
+        console.log('[MetaPixel] Initialized successfully with ID:', this.pixelId)
+      }
     } catch (error) {
       console.error('[MetaPixel] Initialization failed:', error)
     }
@@ -96,7 +102,6 @@ class MetaPixelService {
     // Set up pixel
     ;(window as FacebookPixelWindow).fbq = fbq
     ;(window as FacebookPixelWindow).fbq?.('init', this.pixelId ?? '')
-    ;(window as FacebookPixelWindow).fbq?.('track', 'PageView')
   }
 
   /**

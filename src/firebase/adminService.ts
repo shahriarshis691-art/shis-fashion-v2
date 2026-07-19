@@ -13,6 +13,8 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { uploadMultipleAssets } from '../services/cloudinary'
+import { homeCategoryItems } from '../data/homeCategories'
+import { compactManagedImages } from '../utils/media'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
 
@@ -35,6 +37,8 @@ export interface AdminProduct {
   description: string
   category: string
   images: string[]
+  imageTitles?: string[]
+  imageDescriptions?: string[]
   videos: string[]
   featured: boolean
   newArrival: boolean
@@ -65,6 +69,12 @@ export interface AdminCategory {
   createdAt?: string | { seconds: number }
 }
 
+export interface HomepageShopCategory {
+  title: string
+  href: string
+  image?: string
+}
+
 export interface HomepageContent {
   navbarBrandPrimary?: string
   navbarBrandSecondary?: string
@@ -77,9 +87,14 @@ export interface HomepageContent {
   heroSecondaryCta?: string
   heroSecondaryLink?: string
   heroImage?: string
+  heroImageTitle?: string
+  heroImageDescription?: string
   heroVideo?: string
   bannerImage?: string
+  bannerImageTitle?: string
+  bannerImageDescription?: string
   categories: Array<{ title: string; caption: string; image?: string }>
+  shopByCategories: HomepageShopCategory[]
   featuredCollectionEyebrow?: string
   featuredCollectionTitle?: string
   featuredCollectionSubtitle?: string
@@ -107,6 +122,10 @@ export function isFirebaseConfigured() {
   return Boolean(firebaseAuth && firebaseDb)
 }
 
+export function isOrderBackendReady() {
+  return Boolean(firebaseDb)
+}
+
 const PRODUCTS_KEY = 'shis-admin-products'
 const ORDERS_KEY = 'shis-admin-orders'
 const HOMEPAGE_KEY = 'shis-admin-homepage'
@@ -128,6 +147,14 @@ function parseConfiguredAdminEmails() {
 
 const configuredAdminEmails = parseConfiguredAdminEmails()
 
+function isProductionBuild() {
+  return import.meta.env.PROD
+}
+
+function requiresLiveBackend() {
+  return (import.meta.env.VITE_ALLOW_LOCAL_FALLBACK ?? (isProductionBuild() ? 'false' : 'true')) !== 'true'
+}
+
 /**
  * TEMPORARY LAUNCH MODE - Environment-based admin authentication
  * 
@@ -141,8 +168,8 @@ const configuredAdminEmails = parseConfiguredAdminEmails()
  * 3. Create the admin user account in Firebase
  */
 
-function isLaunchModeEnabled() {
-  return (import.meta.env.VITE_LAUNCH_MODE ?? 'false') === 'true'
+export function isLaunchModeEnabled() {
+  return (import.meta.env.VITE_LAUNCH_MODE ?? 'false') === 'true' && !isProductionBuild()
 }
 
 function getLaunchModeUser(): { uid: string; email: string } | null {
@@ -361,6 +388,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Detail look', 'Lifestyle look'],
+    imageDescriptions: ['Primary product image for the atelier oversized tee.', 'A closer texture and trim view.', 'An editorial angle for styling inspiration.'],
     videos: [],
     featured: true,
     newArrival: true,
@@ -381,6 +410,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1484516758160-69878111a911?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Studio look', 'Close detail'],
+    imageDescriptions: ['Primary product image for the signature unisex tee.', 'Full look styling shot.', 'Close-up view for finishing details.'],
     videos: [],
     featured: true,
     newArrival: false,
@@ -401,6 +432,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1475178626620-a4d074967452?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Side look', 'Denim detail'],
+    imageDescriptions: ['Primary product image for monarch denim.', 'A secondary side-angle shot.', 'A detail-first image for the wash and fit.'],
     videos: [],
     featured: true,
     newArrival: false,
@@ -421,6 +454,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Editorial look', 'Texture detail'],
+    imageDescriptions: ['Primary product image for the studio men shirt.', 'An editorial product view.', 'Closer product detail on fabric and buttons.'],
     videos: [],
     featured: false,
     newArrival: true,
@@ -441,6 +476,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Movement look', 'Styling detail'],
+    imageDescriptions: ['Primary product image for aurora dress.', 'A movement shot that highlights the silhouette.', 'A closer image showing the styling finish.'],
     videos: [],
     featured: true,
     newArrival: true,
@@ -461,6 +498,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1467632499275-7a693a761056?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Lifestyle look', 'Detail look'],
+    imageDescriptions: ['Primary product image for the desert western set.', 'A styled lifestyle product image.', 'A closer frame for shape and finishing.'],
     videos: [],
     featured: false,
     newArrival: false,
@@ -481,6 +520,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Paired look', 'Detail look'],
+    imageDescriptions: ['Primary product image for the duo couple set.', 'A coordinated full-look shot.', 'A closer image for styling details.'],
     videos: [],
     featured: false,
     newArrival: true,
@@ -501,6 +542,8 @@ const defaultProducts: AdminProduct[] = [
       'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&w=1400&q=80',
     ],
+    imageTitles: ['Front look', 'Play look', 'Detail look'],
+    imageDescriptions: ['Primary product image for mini essentials.', 'An active styling image.', 'A closer view for fabric and finish.'],
     videos: [],
     featured: false,
     newArrival: false,
@@ -544,13 +587,22 @@ const defaultHomepage: HomepageContent = {
   heroSecondaryCta: 'New arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
   heroImage: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1800&q=80',
+  heroImageTitle: 'Homepage hero image',
+  heroImageDescription: 'Main hero visual used in the first fold of the homepage.',
   heroVideo: '',
   bannerImage: 'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1800&q=80',
+  bannerImageTitle: 'Brand promise banner image',
+  bannerImageDescription: 'Editorial banner used beside the brand promise content.',
   categories: [
     { title: 'Tailored Layers', caption: 'Soft authority', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80' },
     { title: 'Everyday Luxe', caption: 'Refined comfort', image: 'https://images.unsplash.com/photo-1527719327859-c6ce80353573?auto=format&fit=crop&w=1200&q=80' },
     { title: 'Evening Edit', caption: 'Quiet glamour', image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80' },
   ],
+  shopByCategories: homeCategoryItems.map((item) => ({
+    title: item.name,
+    href: item.href,
+    image: item.image,
+  })),
   featuredCollectionEyebrow: 'Featured collection',
   featuredCollectionTitle: 'Premium categories for every moment',
   featuredCollectionSubtitle: 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.',
@@ -580,11 +632,33 @@ const defaultHomepage: HomepageContent = {
   ],
 }
 
+function normalizeProduct(product: AdminProduct): AdminProduct {
+  const normalizedImages = compactManagedImages(product)
+
+  return {
+    ...product,
+    images: normalizedImages.images,
+    imageTitles: normalizedImages.imageTitles,
+    imageDescriptions: normalizedImages.imageDescriptions,
+  }
+}
+
 function normalizeHomepageContent(content: Partial<HomepageContent> | undefined): HomepageContent {
   const mergedCategories = (content?.categories && content.categories.length ? content.categories : defaultHomepage.categories).map((category, index) => ({
     ...defaultHomepage.categories[index],
     ...category,
     image: category.image || defaultHomepage.categories[index]?.image,
+  }))
+
+  const mergedShopByCategories = (content?.shopByCategories && content.shopByCategories.length
+    ? content.shopByCategories
+    : defaultHomepage.shopByCategories
+  ).map((category, index) => ({
+    ...defaultHomepage.shopByCategories[index],
+    ...category,
+    title: category.title || defaultHomepage.shopByCategories[index]?.title || '',
+    href: category.href || defaultHomepage.shopByCategories[index]?.href || '/shop',
+    image: category.image || defaultHomepage.shopByCategories[index]?.image,
   }))
 
   return {
@@ -593,7 +667,12 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     heroEyebrow: content?.heroEyebrow ?? defaultHomepage.heroEyebrow,
     heroPrimaryLink: content?.heroPrimaryLink ?? defaultHomepage.heroPrimaryLink,
     heroSecondaryLink: content?.heroSecondaryLink ?? defaultHomepage.heroSecondaryLink,
+    heroImageTitle: content?.heroImageTitle ?? defaultHomepage.heroImageTitle,
+    heroImageDescription: content?.heroImageDescription ?? defaultHomepage.heroImageDescription,
+    bannerImageTitle: content?.bannerImageTitle ?? defaultHomepage.bannerImageTitle,
+    bannerImageDescription: content?.bannerImageDescription ?? defaultHomepage.bannerImageDescription,
     categories: mergedCategories,
+    shopByCategories: mergedShopByCategories,
     sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
       ...defaultHomepage.sections[index],
       ...section,
@@ -638,18 +717,32 @@ function ensureSeedData() {
   }
 
   const storedProducts = readStored<AdminProduct[]>(PRODUCTS_KEY, defaultProducts)
+  const normalizedStoredProducts = storedProducts.map(normalizeProduct)
   const isLegacySingleSeed =
-    storedProducts.length === 1 &&
-    storedProducts[0]?.id === 'seed-atelier-oversized-tee' &&
-    (storedProducts[0].images?.length ?? 0) <= 1
+    normalizedStoredProducts.length === 1 &&
+    normalizedStoredProducts[0]?.id === 'seed-atelier-oversized-tee' &&
+    (normalizedStoredProducts[0].images?.length ?? 0) <= 1
 
   if (isLegacySingleSeed) {
     writeStored(PRODUCTS_KEY, defaultProducts)
+  } else if (JSON.stringify(storedProducts) !== JSON.stringify(normalizedStoredProducts)) {
+    writeStored(PRODUCTS_KEY, normalizedStoredProducts)
   }
 
   const storedHomepage = readStored<HomepageContent>(HOMEPAGE_KEY, defaultHomepage)
   const needsCategoryImageBackfill = (storedHomepage.categories ?? []).some((category, index) => !category.image && defaultHomepage.categories[index]?.image)
-  if (needsCategoryImageBackfill) {
+  const needsShopByBackfill =
+    !storedHomepage.shopByCategories?.length ||
+    storedHomepage.shopByCategories.some((category, index) => {
+      const fallback = defaultHomepage.shopByCategories[index]
+      if (!fallback) {
+        return false
+      }
+
+      return !category.title || !category.href || !category.image
+    })
+
+  if (needsCategoryImageBackfill || needsShopByBackfill) {
     writeStored(HOMEPAGE_KEY, normalizeHomepageContent(storedHomepage))
   }
 }
@@ -773,31 +866,38 @@ export async function signOutAdmin() {
 
 export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
   ensureSeedData()
-  callback(readStored(PRODUCTS_KEY, defaultProducts))
+  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct))
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(PRODUCTS_KEY, defaultProducts, callback)
+    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct)))
   }
 
   const productsRef = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'))
   return onSnapshot(
     productsRef,
     (snapshot) => {
-      const products = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
+      const products = snapshot.docs.map((doc) => normalizeProduct({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
       callback(products)
     },
     (error) => {
       if (shouldFallbackToLocal(error)) {
-        callback(readStored(PRODUCTS_KEY, defaultProducts))
+        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct))
       }
     },
   )
 }
 
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
-  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts)
-  const nextProduct = {
+  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const normalizedProduct = normalizeProduct({ ...product, id: 'draft-product' } as AdminProduct)
+  const productPayload = {
     ...product,
+    images: normalizedProduct.images,
+    imageTitles: normalizedProduct.imageTitles,
+    imageDescriptions: normalizedProduct.imageDescriptions,
+  }
+  const nextProduct = {
+    ...normalizedProduct,
     id: `local-${Date.now()}`,
     createdAt: new Date().toISOString(),
   } as AdminProduct
@@ -809,12 +909,12 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
 
   try {
     const payload = {
-      ...product,
+      ...productPayload,
       createdAt: serverTimestamp(),
     }
 
     const ref = await addDoc(collection(firebaseDb, 'products'), payload)
-    return { id: ref.id, ...product }
+    return { ...productPayload, id: ref.id }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
@@ -825,9 +925,13 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
 }
 
 export async function updateProduct(id: string, product: Partial<AdminProduct>) {
-  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts)
-  const updatedProducts = currentProducts.map((item) => (item.id === id ? { ...item, ...product } : item))
+  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const updatedProducts = currentProducts.map((item) => (item.id === id ? normalizeProduct({ ...item, ...product }) : item))
   writeStored(PRODUCTS_KEY, updatedProducts)
+
+  const normalizedUpdate = currentProducts.find((item) => item.id === id)
+    ? normalizeProduct({ ...currentProducts.find((item) => item.id === id)!, ...product })
+    : undefined
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     return updatedProducts.find((item) => item.id === id)
@@ -835,8 +939,17 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
 
   try {
     const ref = doc(firebaseDb, 'products', id)
-    await updateDoc(ref, product)
-    return { id, ...product }
+    if (normalizedUpdate) {
+      await updateDoc(ref, {
+        ...product,
+        images: normalizedUpdate.images,
+        imageTitles: normalizedUpdate.imageTitles,
+        imageDescriptions: normalizedUpdate.imageDescriptions,
+      })
+    } else {
+      await updateDoc(ref, product)
+    }
+    return normalizedUpdate ?? { id, ...product }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
@@ -937,6 +1050,10 @@ export async function deleteOrder(id: string) {
 }
 
 export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
+  if (requiresLiveBackend() && !firebaseDb) {
+    throw new Error('Live order backend is not configured. Add Firebase production credentials before accepting orders.')
+  }
+
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
   const optimisticOrder = {
     ...order,
@@ -946,6 +1063,11 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
   writeStored(ORDERS_KEY, [optimisticOrder, ...currentOrders])
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    if (requiresLiveBackend()) {
+      writeStored(ORDERS_KEY, currentOrders)
+      throw new Error('Live order backend is unavailable. Order was not submitted.')
+    }
+
     return optimisticOrder
   }
 
@@ -962,7 +1084,15 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
     return syncedOrder
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
+      writeStored(ORDERS_KEY, currentOrders)
       throw error
+    }
+
+    if (requiresLiveBackend()) {
+      writeStored(ORDERS_KEY, currentOrders)
+      throw new Error('Live order backend is unavailable. Order was not submitted.', {
+        cause: error,
+      })
     }
 
     return optimisticOrder

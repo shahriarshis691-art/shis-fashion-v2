@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { useCart } from '../context/CartContext'
-import { createOrder } from '../firebase/adminService'
+import { createOrder, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, type BangladeshDivision } from '../utils/bangladeshAddress'
 
@@ -30,10 +30,12 @@ export default function CheckoutPage() {
     deliveryNote: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const submissionLockRef = useRef(false)
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
   const grandTotal = subtotal + deliveryCharge
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
+  const backendReady = isOrderBackendReady()
 
   if (!items.length) {
     return (
@@ -61,6 +63,7 @@ export default function CheckoutPage() {
 
     submissionLockRef.current = true
     setIsSubmitting(true)
+    setSubmitError('')
     let shouldReleaseLock = true
 
     try {
@@ -85,6 +88,9 @@ export default function CheckoutPage() {
       clearCart()
       shouldReleaseLock = false
       navigate('/order-success')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Order submission failed. Please try again.'
+      setSubmitError(message)
     } finally {
       setIsSubmitting(false)
       if (shouldReleaseLock) {
@@ -107,6 +113,8 @@ export default function CheckoutPage() {
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">No account needed</span>
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">2 minute checkout</span>
             </div>
+
+            {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
 
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -167,6 +175,7 @@ export default function CheckoutPage() {
               </div>
 
               <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
+              {submitError ? <p className="text-center text-sm text-red-700">{submitError}</p> : null}
               <p className="text-center text-xs leading-6 text-[var(--color-muted)]">By placing this order, you confirm you want Cash on Delivery. We will contact you on the phone number provided.</p>
             </form>
           </div>

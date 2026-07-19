@@ -116,13 +116,6 @@ span {
   transition: filter 0.3s ease;
 }
 
-/* Premium Button Styling */
-button {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
 /* Matte black button styling */
 button[class*="accent"],
 button[style*="accent"] {
@@ -162,12 +155,6 @@ article:hover img {
   filter: brightness(1.02);
 }
 
-/* Header Enhancements */
-header {
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
 /* Premium Typography */
 h1, h2, h3, h4, h5, h6 {
   transition: color 0.3s ease;
@@ -194,16 +181,6 @@ main {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Link Hover Effects */
-a {
-  transition: color 0.3s ease, text-decoration-color 0.3s ease;
-  position: relative;
-}
-
-a:hover {
-  color: var(--color-accent);
 }
 
 /* Form Elements Premium */

@@ -6,8 +6,9 @@ import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
+import { homeCategoryItems } from '../data/homeCategories'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type HomepageContent } from '../firebase/adminService'
-import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
@@ -20,11 +21,20 @@ const defaultHomepage: HomepageContent = {
   heroPrimaryLink: '/shop',
   heroSecondaryCta: 'New Arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
+  heroImageTitle: 'Homepage hero image',
+  heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
+  bannerImageTitle: 'Featured banner image',
+  bannerImageDescription: 'Editorial banner image used in the brand promise section.',
   categories: [
     { title: 'Tailored Layers', caption: 'Soft authority' },
     { title: 'Everyday Luxe', caption: 'Refined comfort' },
     { title: 'Evening Edit', caption: 'Quiet glamour' },
   ],
+  shopByCategories: homeCategoryItems.map((item) => ({
+    title: item.name,
+    href: item.href,
+    image: item.image,
+  })),
   featuredCollectionEyebrow: 'Featured collection',
   featuredCollectionTitle: 'Premium categories for every moment',
   featuredCollectionSubtitle: 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.',
@@ -120,7 +130,7 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
     <div className="mt-7 sm:hidden">
       <div className="grid grid-cols-3 gap-2.5">
         {displayedProducts.map((item, index) => {
-          const productImage = normalizeCatalogImageUrl(item.images[0], 520, 650)
+          const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 520, 650)
           const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
 
           return (
@@ -164,7 +174,7 @@ function ProductRail({ products }: { products: AdminProduct[] }) {
   return (
     <div className="mt-8 grid gap-6 grid-cols-2 md:grid-cols-2 xl:grid-cols-4">
       {products.map((item, index) => {
-        const productImage = normalizeCatalogImageUrl(item.images[0], 900, 1125)
+        const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
         const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
 
         return (
@@ -235,6 +245,18 @@ export default function HomePage() {
   const newArrivalsConfig = sectionMap.get('newArrivals')
   const bestSellersConfig = sectionMap.get('bestSellers')
   const brandPromiseConfig = sectionMap.get('brandPromise')
+  const shopByCategoryCards = useMemo(() => {
+    const rawItems = homepageContent.shopByCategories?.length
+      ? homepageContent.shopByCategories
+      : defaultHomepage.shopByCategories
+
+    return rawItems.map((item, index) => ({
+      key: `shop-by-${index}`,
+      name: item.title || homeCategoryItems[index]?.name || `Category ${index + 1}`,
+      href: item.href || homeCategoryItems[index]?.href || '/shop',
+      image: item.image || homeCategoryItems[index]?.image || '',
+    }))
+  }, [homepageContent.shopByCategories])
 
   const sectionNodes = [
     heroConfig?.enabled !== false ? {
@@ -256,7 +278,7 @@ export default function HomePage() {
           ) : heroImage ? (
             <img
               src={heroImage}
-              alt="Hero media"
+              alt={homepageContent.heroImageTitle || 'Hero media'}
               loading="eager"
               fetchPriority="high"
               decoding="async"
@@ -279,9 +301,21 @@ export default function HomePage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-white/90 sm:text-xs">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
               <h1 className="mt-2 text-[2rem] font-semibold leading-[0.98] tracking-[-0.01em] text-white sm:mt-4 sm:text-5xl lg:text-6xl">{homepageContent.heroTitle}</h1>
               <p className="mt-3 max-w-md text-sm leading-7 text-white/86 sm:mt-5 sm:text-base">{homepageContent.heroSubtitle}</p>
+              {homepageContent.heroImageDescription ? <p className="mt-3 max-w-md text-xs leading-6 text-white/70 sm:text-sm">{homepageContent.heroImageDescription}</p> : null}
               <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
-                <Button to={homepageContent.heroPrimaryLink ?? '/shop'} className="min-w-[11rem]">{homepageContent.heroCta}</Button>
-                <Button to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'} variant="secondary" className="min-w-[10rem] border-white/35 bg-white/12 text-white hover:border-white hover:bg-white/20 hover:text-white">{homepageContent.heroSecondaryCta}</Button>
+                <Button
+                  to={homepageContent.heroPrimaryLink ?? '/shop'}
+                  className="min-w-[11rem] border-[#ead8b7] bg-[linear-gradient(135deg,#fdf8ee_0%,#f3e7cf_52%,#e9d4ae_100%)] px-7 text-[0.82rem] font-semibold tracking-[0.08em] text-[#2f2516] shadow-[0_14px_32px_rgba(16,12,6,0.25)] hover:border-[#f4e5ca] hover:bg-[linear-gradient(135deg,#fffdf8_0%,#f7edd8_52%,#ecdab9_100%)] hover:text-[#21180d]"
+                >
+                  {homepageContent.heroCta}
+                </Button>
+                <Button
+                  to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
+                  variant="secondary"
+                  className="min-w-[10rem] border-[#f0e4cd]/90 bg-[#f8f1e2]/20 px-6 text-[0.8rem] font-semibold tracking-[0.08em] text-[#fff7e8] backdrop-blur-[2px] hover:border-[#fff2d7] hover:bg-[#fff5e4]/28 hover:text-[#fffaf0]"
+                >
+                  {homepageContent.heroSecondaryCta}
+                </Button>
               </div>
             </motion.div>
           </Container>
@@ -291,7 +325,7 @@ export default function HomePage() {
     {
       key: 'shopByCategory',
       order: (heroConfig?.order ?? 0) + 0.5,
-      node: <ShopByCategorySection />,
+      node: <ShopByCategorySection items={shopByCategoryCards} />,
     },
     featuredCollectionConfig?.enabled !== false ? {
       key: 'featuredCollection',
@@ -363,9 +397,10 @@ export default function HomePage() {
                 <p className="mt-4 text-sm leading-7 text-[var(--color-muted)] sm:text-base sm:leading-8">{homepageContent.brandPromiseDescription ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}</p>
               </div>
               <div className="order-1 rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(201,162,39,0.16),rgba(255,255,255,0.6))] p-5 sm:p-6 lg:order-2">
-                {bannerImage ? <img src={bannerImage} alt="Featured banner" loading="lazy" decoding="async" onError={handleImageError} className={`mb-4 h-44 w-full rounded-[1.25rem] object-cover object-[center_22%] sm:h-48 ${isDemoImageUrl(bannerImage) ? 'shis-media-tone' : ''}`} /> : null}
+                {bannerImage ? <img src={bannerImage} alt={homepageContent.bannerImageTitle || 'Featured banner'} loading="lazy" decoding="async" onError={handleImageError} className={`mb-4 h-44 w-full rounded-[1.25rem] object-cover object-[center_22%] sm:h-48 ${isDemoImageUrl(bannerImage) ? 'shis-media-tone' : ''}`} /> : null}
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandSignatureLabel ?? 'Signature'}</p>
                 <p className="mt-3 text-base leading-7 text-[var(--color-text)] sm:text-lg sm:leading-8">{homepageContent.brandSignatureText ?? 'Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight.'}</p>
+                {homepageContent.bannerImageDescription ? <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{homepageContent.bannerImageDescription}</p> : null}
               </div>
             </div>
           </Container>

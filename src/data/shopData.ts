@@ -15,6 +15,7 @@ export interface ShopProduct {
   image: string
   description: string
   galleryImages?: string[]
+  stock?: number
 }
 
 export const shopCategories: ShopCategory[] = [

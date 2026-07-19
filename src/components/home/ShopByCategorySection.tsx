@@ -4,6 +4,13 @@ import { homeCategoryItems } from '../../data/homeCategories'
 import { normalizeCatalogImageUrl } from '../../utils/media'
 import Container from '../ui/Container'
 
+interface ShopByCategoryCardItem {
+  key: string
+  name: string
+  href: string
+  image: string
+}
+
 function CategoryCard({
   name,
   href,
@@ -51,7 +58,9 @@ function CategoryCard({
   )
 }
 
-export default function ShopByCategorySection() {
+export default function ShopByCategorySection({ items }: { items?: ShopByCategoryCardItem[] }) {
+  const categoryItems = items?.length ? items : homeCategoryItems
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 28 }}
@@ -71,14 +80,14 @@ export default function ShopByCategorySection() {
           </p>
         </div>
 
-        <div className="mt-9 hidden gap-6 md:grid md:grid-cols-3 lg:grid-cols-5">
-          {homeCategoryItems.map((item, index) => (
+        <div className="mt-9 hidden gap-6 md:grid md:grid-cols-3 lg:grid-cols-6">
+          {categoryItems.map((item, index) => (
             <CategoryCard key={item.key} name={item.name} href={item.href} image={item.image} index={index} />
           ))}
         </div>
 
         <div className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {homeCategoryItems.map((item, index) => (
+          {categoryItems.map((item, index) => (
             <div key={item.key} className="min-w-[74%] max-w-[18rem] flex-none">
               <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
             </div>

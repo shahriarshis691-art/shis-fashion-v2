@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import { compactManagedImages, getManagedImageEntries } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import {
   consumeAdminAccessDeniedFlag,
@@ -14,6 +15,7 @@ import {
   deleteAsset,
   deleteProduct,
   isFirebaseConfigured,
+  isLaunchModeEnabled,
   signInAdmin,
   signOutAdmin,
   subscribeToHomepageContent,
@@ -43,6 +45,8 @@ const emptyProductForm = {
   description: '',
   category: 'oversized-tee',
   images: ['', '', ''] as string[],
+  imageTitles: ['', '', ''] as string[],
+  imageDescriptions: ['', '', ''] as string[],
   videos: [] as string[],
   featured: false,
   newArrival: false,
@@ -58,6 +62,8 @@ interface AdminPageProps {
 export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const navigate = useNavigate()
   const firebaseReady = isFirebaseConfigured()
+  const launchModeEnabled = isLaunchModeEnabled()
+  const canSignIn = firebaseReady || launchModeEnabled
   const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
@@ -278,8 +284,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       if (uploadedImages[0]) {
         setForm((current) => {
           const nextImages = [...current.images]
+          const nextImageTitles = [...current.imageTitles]
           nextImages[slotIndex] = uploadedImages[0]
-          return { ...current, images: nextImages }
+          if (!nextImageTitles[slotIndex]?.trim()) {
+            const baseName = current.name.trim() || 'Product'
+            nextImageTitles[slotIndex] = `${baseName} ${labelForImage(slotIndex)}`
+          }
+          return { ...current, images: nextImages, imageTitles: nextImageTitles }
         })
         setMessage(`${galleryLabels[slotIndex]} uploaded.`)
       }
@@ -296,15 +307,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const handleRemoveGalleryImage = (slotIndex: number) => {
     setForm((current) => {
       const nextImages = [...current.images]
+      const nextImageTitles = [...current.imageTitles]
+      const nextImageDescriptions = [...current.imageDescriptions]
       nextImages[slotIndex] = ''
-      return { ...current, images: nextImages }
+      nextImageTitles[slotIndex] = ''
+      nextImageDescriptions[slotIndex] = ''
+      return { ...current, images: nextImages, imageTitles: nextImageTitles, imageDescriptions: nextImageDescriptions }
     })
     setMessage(`${galleryLabels[slotIndex]} removed.`)
   }
 
   const handleUpload = async (
     files: FileList | null,
-    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | null = null,
+    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | null = null,
     categoryIndex?: number,
   ) => {
     if (!files?.length) {
@@ -326,7 +341,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setUploadProgress(0)
 
       const uploadedImages = imageFiles.length
-        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' ? 'homepage' : 'products', {
+        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' ? 'homepage' : 'products', {
           retries: 2,
           onProgress: (progress) => setUploadProgress(progress),
         })
@@ -354,6 +369,25 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           nextCategories[safeIndex] = { ...nextCategories[safeIndex], image: uploadedImages[0] ?? nextCategories[safeIndex].image }
           return { ...current, categories: nextCategories }
         })
+      } else if (target === 'shop-category-image') {
+        setHomepageContent((current) => {
+          if (!current) {
+            return current
+          }
+
+          const nextShopByCategories = [...(current.shopByCategories ?? [])]
+          if (!nextShopByCategories.length) {
+            return current
+          }
+
+          const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextShopByCategories.length - 1) : 0
+          nextShopByCategories[safeIndex] = {
+            ...nextShopByCategories[safeIndex],
+            image: uploadedImages[0] ?? nextShopByCategories[safeIndex].image,
+          }
+
+          return { ...current, shopByCategories: nextShopByCategories }
+        })
       } else {
         setForm((current) => ({ ...current, images: [...current.images, ...uploadedImages], videos: [...current.videos, ...uploadedVideos] }))
       }
@@ -369,7 +403,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | null = null) => {
+  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | null = null) => {
     event.preventDefault()
     setDragActive(false)
     await handleUpload(event.dataTransfer.files, target)
@@ -393,11 +427,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     event.preventDefault()
     setLoading(true)
     try {
-      const normalizedImages = form.images.filter(Boolean).slice(0, 3)
+      const normalizedMedia = compactManagedImages({
+        images: form.images.slice(0, 3),
+        imageTitles: form.imageTitles.slice(0, 3),
+        imageDescriptions: form.imageDescriptions.slice(0, 3),
+      })
       if (isEditing) {
         await updateProduct(isEditing, {
           ...form,
-          images: normalizedImages,
+          ...normalizedMedia,
           sizes: form.sizes,
           colors: form.colors,
         })
@@ -405,7 +443,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       } else {
         await createProduct({
           ...form,
-          images: normalizedImages,
+          ...normalizedMedia,
           sizes: form.sizes,
           colors: form.colors,
         })
@@ -418,6 +456,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleEditProduct = (product: AdminProduct) => {
+    const imageEntries = getManagedImageEntries(product, 3)
     setForm({
       name: product.name,
       price: product.price,
@@ -426,7 +465,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       colors: product.colors,
       description: product.description,
       category: product.category,
-      images: Array.from({ length: 3 }, (_, index) => product.images?.[index] ?? ''),
+      images: imageEntries.map((entry) => entry.url),
+      imageTitles: imageEntries.map((entry) => entry.title),
+      imageDescriptions: imageEntries.map((entry) => entry.description),
       videos: product.videos,
       featured: product.featured,
       newArrival: product.newArrival,
@@ -582,6 +623,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setMessage('Category removed.')
   }
 
+  const labelForImage = (slotIndex: number) => {
+    if (slotIndex === 0) {
+      return 'front image'
+    }
+    if (slotIndex === 1) {
+      return 'detail image'
+    }
+    return 'extra image'
+  }
+
   if (authMode === 'login' && !user) {
     return (
       <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -591,9 +642,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             <form className="space-y-4" onSubmit={handleLogin}>
               <input required value={loginForm.email} onChange={(event) => setLoginForm({ ...loginForm, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Email" />
               <input required type="password" value={loginForm.password} onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Password" />
-              <Button type="submit" disabled={loading || !firebaseReady} className="w-full justify-center">{loading ? 'Signing in…' : 'Enter dashboard'}</Button>
+              <Button type="submit" disabled={loading || !canSignIn} className="w-full justify-center">{loading ? 'Signing in…' : 'Enter dashboard'}</Button>
             </form>
-            <p className="mt-4 text-sm text-[var(--color-muted)]">{firebaseReady ? 'Firebase is active.' : 'Admin login requires Firebase authentication configuration.'}</p>
+            <p className="mt-4 text-sm text-[var(--color-muted)]">
+              {firebaseReady
+                ? 'Firebase is active.'
+                : launchModeEnabled
+                  ? 'Launch mode is active. Admin access is limited to configured admin emails.'
+                  : 'Admin login requires Firebase authentication configuration or Launch Mode.'}
+            </p>
             {message ? <p className="mt-3 text-sm text-[var(--color-accent)]">{message}</p> : null}
           </Card>
         </Container>
@@ -650,7 +707,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers') },
-              { label: 'Live Mode', value: firebaseReady ? 'Firebase' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
+              { label: 'Live Mode', value: firebaseReady ? 'Firebase' : launchModeEnabled ? 'Launch Mode' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
             ].map((card) => (
               <button key={card.label} type="button" onClick={card.target} className="text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
                 <Card className="h-full rounded-[1.6rem] p-4">
@@ -705,6 +762,18 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                           <span className="py-8 text-sm text-[var(--color-muted)]">Tap to upload {label.toLowerCase()}</span>
                         )}
                       </label>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <input value={form.imageTitles[index] ?? ''} onChange={(event) => setForm((current) => {
+                          const nextImageTitles = [...current.imageTitles]
+                          nextImageTitles[index] = event.target.value
+                          return { ...current, imageTitles: nextImageTitles }
+                        })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Image title" />
+                        <textarea value={form.imageDescriptions[index] ?? ''} onChange={(event) => setForm((current) => {
+                          const nextImageDescriptions = [...current.imageDescriptions]
+                          nextImageDescriptions[index] = event.target.value
+                          return { ...current, imageDescriptions: nextImageDescriptions }
+                        })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none sm:col-span-2" placeholder="Image description" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -877,6 +946,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 <textarea value={homepageContent.heroSubtitle} onChange={(event) => setHomepageContent({ ...homepageContent, heroSubtitle: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero description" />
                 <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={homepageContent.heroImageTitle ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroImageTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Hero image title" />
+                  <textarea value={homepageContent.heroImageDescription ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroImageDescription: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none sm:col-span-2" placeholder="Hero image description" />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
                   <input value={homepageContent.heroCta} onChange={(event) => setHomepageContent({ ...homepageContent, heroCta: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Primary button text" />
                   <input value={homepageContent.heroPrimaryLink ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, heroPrimaryLink: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Primary button link" />
                 </div>
@@ -958,6 +1031,30 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
                   </div>
                 ) : null}
+                <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'banner-image')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+                  <label className="cursor-pointer">
+                    <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'banner-image')} className="hidden" />
+                    Drop banner image or tap to replace.
+                  </label>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={homepageContent.bannerImageTitle ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, bannerImageTitle: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Banner image title" />
+                  <textarea value={homepageContent.bannerImageDescription ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, bannerImageDescription: event.target.value })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none sm:col-span-2" placeholder="Banner image description" />
+                </div>
+                {homepageContent.bannerImage ? (
+                  <div className="relative">
+                    <img src={homepageContent.bannerImage} alt="Banner preview" className="h-40 w-full rounded-[1.25rem] object-cover" />
+                    <button type="button" onClick={async () => {
+                      try {
+                        await deleteAsset(homepageContent.bannerImage!)
+                        setHomepageContent((current) => current ? { ...current, bannerImage: '' } : current)
+                        setMessage('Banner image removed.')
+                      } catch {
+                        setMessage('Unable to remove banner image.')
+                      }
+                    }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
+                  </div>
+                ) : null}
                 {homepageContent.categories.map((category, index) => (
                   <div key={`${category.title}-${index}`} className="grid gap-3 sm:grid-cols-2">
                     <input value={category.title} onChange={(event) => {
@@ -994,6 +1091,77 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                   </div>
                 ))}
+
+                <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
+                  <p className="text-xs text-[var(--color-muted)]">After uploading category images, click save to publish these changes.</p>
+                  <Button onClick={handleHomepageSave} variant="secondary" className="mt-3 sm:mt-0">Save content</Button>
+                </div>
+
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">Shop by category cards</p>
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">Edit homepage category cards (title, link, image) for mens, womens, couples, kids, western, and denim.</p>
+                  <div className="mt-4 space-y-4">
+                    {(homepageContent.shopByCategories ?? []).map((item, index) => (
+                      <div key={`${item.title}-${index}`} className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <input
+                            value={item.title}
+                            onChange={(event) => {
+                              const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
+                              nextShopByCategories[index] = { ...nextShopByCategories[index], title: event.target.value }
+                              setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
+                            }}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Card title"
+                          />
+                          <input
+                            value={item.href}
+                            onChange={(event) => {
+                              const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
+                              nextShopByCategories[index] = { ...nextShopByCategories[index], href: event.target.value }
+                              setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
+                            }}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Card link (example: /shop/denim)"
+                          />
+                        </div>
+                        <div className="mt-3">
+                          <label className="cursor-pointer text-sm text-[var(--color-muted)]">
+                            <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'shop-category-image', index)} className="hidden" />
+                            Set shop category image
+                          </label>
+                          {item.image ? (
+                            <div className="relative">
+                              <img src={item.image} alt={`${item.title || 'Shop category'} card preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover" />
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await deleteAsset(item.image!)
+                                    const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
+                                    nextShopByCategories[index] = { ...nextShopByCategories[index], image: '' }
+                                    setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
+                                    setMessage('Shop category image removed.')
+                                  } catch {
+                                    setMessage('Unable to remove shop category image.')
+                                  }
+                                }}
+                                className="absolute right-3 top-1 rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent)]"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
+                  <p className="text-xs text-[var(--color-muted)]">Save shop-by-category title, link, and image changes from here.</p>
+                  <Button onClick={handleHomepageSave} variant="secondary" className="mt-3 sm:mt-0">Save content</Button>
+                </div>
               </div>
             ) : null}
             </Card>
