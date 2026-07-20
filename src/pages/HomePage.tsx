@@ -10,6 +10,13 @@ import { homeCategoryItems } from '../data/homeCategories'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type HomepageContent } from '../firebase/adminService'
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
+const serviceHighlights = [
+  { label: 'Free shipping', value: 'On orders over select thresholds' },
+  { label: 'Premium quality', value: 'Designed for repeat wear' },
+  { label: 'Easy returns', value: '7 day support window' },
+  { label: 'Customer support', value: 'Fast response on WhatsApp' },
+]
+
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
   navbarBrandSecondary: 'Fashion',
@@ -101,6 +108,36 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
+function SectionHeader({
+  eyebrow,
+  title,
+  description,
+  to,
+  linkLabel,
+}: {
+  eyebrow: string
+  title: string
+  description?: string
+  to?: string
+  linkLabel?: string
+}) {
+  return (
+    <div className="flex items-end justify-between gap-4">
+      <div className="max-w-2xl">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">{eyebrow}</p>
+        <h2 className="mt-3 text-[2rem] font-bold leading-[0.96] text-[var(--color-text)] sm:text-[2.45rem]">{title}</h2>
+        {description ? <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)] sm:text-[0.98rem]">{description}</p> : null}
+      </div>
+      {to && linkLabel ? (
+        <Link to={to} className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)] md:inline-flex">
+          <span>{linkLabel}</span>
+          <span aria-hidden className="text-base leading-none">→</span>
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
 function MobileProductGrid({ products }: { products: AdminProduct[] }) {
   const [visibleCount, setVisibleCount] = useState(() => Math.min(9, products.length))
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -178,24 +215,30 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
 
 function ProductRail({ products }: { products: AdminProduct[] }) {
   return (
-    <div className="mt-7 grid gap-4 grid-cols-2 md:gap-5 xl:grid-cols-4">
+    <div className="-mx-4 mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
       {products.map((item, index) => {
         const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
         const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
 
         return (
-          <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }}>
-            <Link to={productHref(item)} className="block overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90">
-              <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-44 w-full object-cover sm:h-56 lg:h-64 ${toneClass}`} />
-              <div className="p-4">
-                <h3 className="text-base font-semibold text-[var(--color-text)]">{item.name}</h3>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-[var(--color-accent)]">{item.price}</p>
-                  <span className="rounded-full border border-[var(--color-border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+          <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="min-w-[15.5rem] snap-start md:min-w-0">
+            <Link to={productHref(item)} className="group block overflow-hidden rounded-[1.6rem] bg-transparent">
+              <div className="relative overflow-hidden rounded-[1.4rem] bg-[var(--color-surface)] shadow-[0_16px_34px_rgba(17,17,17,0.08)]">
+                <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-56 w-full object-cover sm:h-64 ${toneClass}`} />
+                <div className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/88 text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.12)] backdrop-blur-sm">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 21s-6.7-4.35-9.1-8.06C1.26 10.48 2.3 6.9 5.64 5.58c2.17-.86 4.08-.14 5.36 1.42 1.28-1.56 3.19-2.28 5.36-1.42 3.34 1.32 4.38 4.9 2.74 7.36C18.7 16.65 12 21 12 21Z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="px-1 pb-1 pt-3">
+                <h3 className="line-clamp-1 text-[1.02rem] font-semibold text-[var(--color-text)]">{item.name}</h3>
+                <div className="mt-1.5 flex items-center justify-between gap-3">
+                  <p className="text-lg font-bold leading-none text-[var(--color-text)]">{item.price}</p>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
                     {item.stock > 0 ? 'In stock' : 'Sold out'}
                   </span>
                 </div>
-                <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]/80">View product</p>
               </div>
             </Link>
           </motion.div>
@@ -275,67 +318,83 @@ export default function HomePage() {
       key: 'hero',
       order: heroConfig?.order ?? 0,
       node: (
-        <section className="relative -mt-24 h-[82svh] min-h-[500px] max-h-[780px] overflow-hidden">
-          {heroVideo ? (
-            <video
-              src={heroVideo}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster={heroImage || undefined}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : heroImage ? (
-            <img
-              src={heroImage}
-              alt={homepageContent.heroImageTitle || 'Hero media'}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onError={handleImageError}
-              className={`absolute inset-0 h-full w-full object-cover object-[center_22%] ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.2))]" />
-          )}
+        <section className="px-4 pb-8 pt-4 sm:px-6 lg:px-8 lg:pb-12 lg:pt-6">
+          <Container>
+            <div className="overflow-hidden rounded-[2rem] bg-[#090909] shadow-[0_30px_60px_rgba(0,0,0,0.16)]">
+              <div className="relative min-h-[27rem] sm:min-h-[34rem] lg:min-h-[38rem]">
+                {heroVideo ? (
+                  <video
+                    src={heroVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster={heroImage || undefined}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : heroImage ? (
+                  <img
+                    src={heroImage}
+                    alt={homepageContent.heroImageTitle || 'Hero media'}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    onError={handleImageError}
+                    className={`absolute inset-0 h-full w-full object-cover object-[68%_24%] ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
+                )}
 
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,9,0.08)_0%,rgba(9,9,9,0.36)_52%,rgba(9,9,9,0.72)_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,9,9,0.96)_0%,rgba(9,9,9,0.82)_34%,rgba(9,9,9,0.38)_66%,rgba(9,9,9,0.06)_100%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_26%,rgba(255,255,255,0.08),transparent_32%)]" />
 
-          <Container className="relative z-10 flex h-full items-end px-4 pb-6 pt-16 sm:px-6 sm:pb-10 lg:px-8 lg:pb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
-              className="max-w-[20rem] sm:max-w-2xl"
-            >
-              <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-white/90 sm:text-xs">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
-              <h1 className="mt-2 text-[2rem] font-semibold leading-[0.98] tracking-[-0.01em] text-white sm:mt-4 sm:text-5xl lg:text-6xl">{homepageContent.heroTitle}</h1>
-              <p className="mt-3 max-w-md text-sm leading-7 text-white/86 sm:mt-5 sm:text-base">{homepageContent.heroSubtitle}</p>
-              {homepageContent.heroImageDescription ? <p className="mt-3 max-w-md text-xs leading-6 text-white/70 sm:text-sm">{homepageContent.heroImageDescription}</p> : null}
-              <div className="mt-5 flex flex-wrap gap-3 sm:mt-7 sm:gap-4">
-                <Button
-                  to={homepageContent.heroPrimaryLink ?? '/shop'}
-                  className="min-w-[12rem] border-[#ead8b7] bg-[linear-gradient(135deg,#fdf8ee_0%,#f3e7cf_52%,#e9d4ae_100%)] px-8 text-[0.82rem] font-semibold tracking-[0.1em] text-[#2f2516] shadow-[0_14px_32px_rgba(16,12,6,0.25)] hover:border-[#f4e5ca] hover:bg-[linear-gradient(135deg,#fffdf8_0%,#f7edd8_52%,#ecdab9_100%)] hover:text-[#21180d]"
-                >
-                  {homepageContent.heroCta}
-                </Button>
-                <Button
-                  to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
-                  variant="secondary"
-                  className="min-w-[10rem] border-[#f0e4cd]/90 bg-[#f8f1e2]/20 px-6 text-[0.8rem] font-semibold tracking-[0.08em] text-[#fff7e8] backdrop-blur-[2px] hover:border-[#fff2d7] hover:bg-[#fff5e4]/28 hover:text-[#fffaf0]"
-                >
-                  {homepageContent.heroSecondaryCta}
-                </Button>
+                <Container className="relative z-10 flex min-h-[27rem] items-center px-6 py-8 sm:min-h-[34rem] sm:px-10 lg:min-h-[38rem] lg:px-12">
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, ease: 'easeOut' }}
+                    className="max-w-[16rem] sm:max-w-[23rem] lg:max-w-[27rem]"
+                  >
+                    <p className="text-[0.82rem] font-semibold uppercase tracking-[0.34em] text-white/76">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
+                    <h1 className="mt-4 text-[3.35rem] font-bold leading-[0.88] text-white sm:text-[4.7rem] lg:text-[5.7rem]">{homepageContent.heroTitle}</h1>
+                    <p className="mt-5 max-w-sm text-base leading-7 text-white/82 sm:text-lg">{homepageContent.heroSubtitle}</p>
+                    <div className="mt-7 flex flex-wrap gap-3">
+                      <Button
+                        to={homepageContent.heroPrimaryLink ?? '/shop'}
+                        className="min-w-[11.5rem] rounded-[1rem] border-white bg-white px-7 py-3 text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-[#111111] shadow-[0_16px_32px_rgba(255,255,255,0.12)] hover:border-[#f3ede4] hover:bg-[#f3ede4]"
+                      >
+                        {homepageContent.heroCta}
+                      </Button>
+                      <Button
+                        to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
+                        variant="secondary"
+                        className="min-w-[10rem] rounded-[1rem] border-white/22 bg-white/8 px-6 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm hover:border-white/40 hover:bg-white/12 hover:text-white"
+                      >
+                        {homepageContent.heroSecondaryCta}
+                      </Button>
+                    </div>
+                    {homepageContent.heroImageDescription ? <p className="mt-5 max-w-xs text-xs leading-6 text-white/58">{homepageContent.heroImageDescription}</p> : null}
+                  </motion.div>
+                </Container>
+
+                <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/12 bg-black/18 px-4 py-2 backdrop-blur-sm">
+                  <span className="h-1.5 w-7 rounded-full bg-white/90" />
+                  <span className="h-1.5 w-7 rounded-full bg-white/35" />
+                  <span className="h-1.5 w-7 rounded-full bg-white/35" />
+                </div>
               </div>
+            </div>
 
-              <div className="mt-4 grid max-w-xl grid-cols-1 gap-2 rounded-[1rem] border border-white/20 bg-black/25 p-3 backdrop-blur-[2px] sm:mt-6 sm:grid-cols-3 sm:gap-3 sm:p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Cash on Delivery</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Fast Dhaka Delivery</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Easy Exchange Support</p>
-              </div>
-            </motion.div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3 border-b border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.16))] px-2 py-6 sm:grid-cols-4 sm:px-6 lg:px-10">
+              {serviceHighlights.map((item) => (
+                <div key={item.label} className="flex min-h-24 flex-col items-center justify-center border-r border-[var(--color-border)] px-3 text-center last:border-r-0 [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r sm:[&:last-child]:border-r-0">
+                  <p className="text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]">{item.label}</p>
+                  <p className="mt-1 max-w-[11rem] text-[0.72rem] leading-5 text-[var(--color-muted)]">{item.value}</p>
+                </div>
+              ))}
+            </div>
           </Container>
         </section>
       ),
@@ -384,8 +443,20 @@ export default function HomePage() {
       node: (
         <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
-            <SectionTitle eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'} title={homepageContent.newArrivalsTitle} description={homepageContent.newArrivalsSubtitle} />
+            <SectionHeader
+              eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
+              title={homepageContent.newArrivalsTitle}
+              description={homepageContent.newArrivalsSubtitle}
+              to="/shop/new-arrivals"
+              linkLabel="View all"
+            />
             <ProductRail products={newArrivals} />
+            <div className="mt-6 flex md:hidden">
+              <Link to="/shop/new-arrivals" className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)]">
+                <span>View all</span>
+                <span aria-hidden className="text-base leading-none">→</span>
+              </Link>
+            </div>
           </Container>
         </section>
       ),

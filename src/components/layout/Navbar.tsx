@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
@@ -36,6 +36,7 @@ export default function Navbar() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { theme, toggleTheme } = useTheme()
   const { itemCount } = useCart()
+  const location = useLocation()
   const navigate = useNavigate()
   const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
@@ -64,6 +65,11 @@ export default function Navbar() {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+    setIsSearchOpen(false)
+  }, [location.pathname])
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 4)

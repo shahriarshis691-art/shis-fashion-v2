@@ -237,29 +237,29 @@ export default function ProductDetailPage() {
                   <button type="button" onClick={() => setQuantity((value) => value + 1)} className="h-10 w-10 rounded-full border border-[var(--color-border)] text-lg text-[var(--color-text)]">+</button>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={() => { 
-                addToCart(product, { size, color: 'Default', quantity })
-                metaPixel.addToCart({
-                  content_name: product.name,
-                  content_ids: [String(product.id)],
-                  content_type: 'product',
-                  value: parseBDT(product.price) * quantity,
-                  currency: 'BDT',
-                })
-                navigate('/cart') 
-              }} className="justify-center">Add to cart</Button>
-              <Button onClick={() => { 
-                addToCart(product, { size, color: 'Default', quantity })
-                metaPixel.initiateCheckout({
-                  value: parseBDT(product.price) * quantity,
-                  currency: 'BDT',
-                  content_type: 'product',
-                })
-                navigate('/checkout') 
-              }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button onClick={() => {
+                  addToCart(product, { size, color: 'Default', quantity })
+                  metaPixel.addToCart({
+                    content_name: product.name,
+                    content_ids: [String(product.id)],
+                    content_type: 'product',
+                    value: parseBDT(product.price) * quantity,
+                    currency: 'BDT',
+                  })
+                  navigate('/cart')
+                }} className="justify-center">Add to cart</Button>
+                <Button onClick={() => {
+                  addToCart(product, { size, color: 'Default', quantity })
+                  metaPixel.initiateCheckout({
+                    value: parseBDT(product.price) * quantity,
+                    currency: 'BDT',
+                    content_type: 'product',
+                  })
+                  navigate('/checkout')
+                }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
+              </div>
             </div>
           </div>
         </div>
