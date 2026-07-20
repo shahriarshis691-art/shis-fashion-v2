@@ -74,6 +74,15 @@ export interface AdminCategory {
   archivedAt?: string | { seconds: number }
 }
 
+const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
+  new: ['confirmed', 'cancelled'],
+  confirmed: ['processing', 'cancelled'],
+  processing: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+}
+
 export interface HomepageShopCategory {
   title: string
   href: string
@@ -994,6 +1003,29 @@ export function subscribeToProducts(callback: (products: AdminProduct[]) => void
   )
 }
 
+export function subscribeToArchivedProducts(callback: (products: AdminProduct[]) => void) {
+  ensureSeedData()
+  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => product.archived))
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => product.archived)))
+  }
+
+  const productsRef = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'))
+  return onSnapshot(
+    productsRef,
+    (snapshot) => {
+      const products = snapshot.docs.map((entry) => normalizeProduct({ id: entry.id, ...(entry.data() as Omit<AdminProduct, 'id'>) }))
+      callback(products.filter((product) => product.archived))
+    },
+    (error) => {
+      if (shouldFallbackToLocal(error)) {
+        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => product.archived))
+      }
+    },
+  )
+}
+
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const normalizedProduct = normalizeProduct({ ...product, id: 'draft-product' } as AdminProduct)
@@ -1091,6 +1123,29 @@ export async function deleteProduct(id: string) {
   }
 }
 
+export async function restoreProduct(id: string) {
+  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const updatedProducts = currentProducts.map((item) => (item.id === id
+    ? { ...item, archived: false, archivedAt: undefined }
+    : item))
+  writeStored(PRODUCTS_KEY, updatedProducts)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'products', id), {
+      archived: false,
+      archivedAt: null,
+    })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+  }
+}
+
 export function subscribeToOrders(callback: (orders: AdminOrder[]) => void) {
   ensureSeedData()
   callback(readStored(ORDERS_KEY, defaultOrders).filter((order) => !order.archived))
@@ -1114,7 +1169,41 @@ export function subscribeToOrders(callback: (orders: AdminOrder[]) => void) {
   )
 }
 
+export function subscribeToArchivedOrders(callback: (orders: AdminOrder[]) => void) {
+  ensureSeedData()
+  callback(readStored(ORDERS_KEY, defaultOrders).filter((order) => order.archived))
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(ORDERS_KEY, defaultOrders, (orders) => callback(orders.filter((order) => order.archived)))
+  }
+
+  const ordersRef = query(collection(firebaseDb, 'orders'), orderBy('createdAt', 'desc'))
+  return onSnapshot(
+    ordersRef,
+    (snapshot) => {
+      const orders = snapshot.docs.map((entry) => ({ id: entry.id, ...(entry.data() as Omit<AdminOrder, 'id'>) }))
+      callback(orders.filter((order) => order.archived))
+    },
+    (error) => {
+      if (shouldFallbackToLocal(error)) {
+        callback(readStored(ORDERS_KEY, defaultOrders).filter((order) => order.archived))
+      }
+    },
+  )
+}
+
 export async function updateOrderStatus(id: string, status: AdminOrder['status'], trackingNumber?: string) {
+  const currentOrder = readStored(ORDERS_KEY, defaultOrders).find((order) => order.id === id)
+
+  if (currentOrder && currentOrder.status !== status) {
+    const allowedNextStatuses = ORDER_STATUS_TRANSITIONS[currentOrder.status] ?? []
+    if (!allowedNextStatuses.includes(status)) {
+      const error = new Error(`Invalid order transition: ${currentOrder.status} -> ${status}`)
+      ;(error as Error & { code?: string }).code = 'order/invalid-status-transition'
+      throw error
+    }
+  }
+
   return updateOrderDetails(id, { status, trackingNumber: trackingNumber ?? '' })
 }
 
@@ -1165,6 +1254,29 @@ export async function deleteOrder(id: string) {
     }
 
     return
+  }
+}
+
+export async function restoreOrder(id: string) {
+  const currentOrders = readStored(ORDERS_KEY, defaultOrders)
+  const updatedOrders = currentOrders.map((order) => (order.id === id
+    ? { ...order, archived: false, archivedAt: undefined }
+    : order))
+  writeStored(ORDERS_KEY, updatedOrders)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'orders', id), {
+      archived: false,
+      archivedAt: null,
+    })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
   }
 }
 
@@ -1267,6 +1379,29 @@ export function subscribeToCategories(callback: (categories: AdminCategory[]) =>
   )
 }
 
+export function subscribeToArchivedCategories(callback: (categories: AdminCategory[]) => void) {
+  ensureSeedData()
+  callback(readStored(CATEGORIES_KEY, defaultCategories).filter((category) => category.archived))
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(CATEGORIES_KEY, defaultCategories, (categories) => callback(categories.filter((category) => category.archived)))
+  }
+
+  const categoriesRef = query(collection(firebaseDb, 'categories'), orderBy('createdAt', 'asc'))
+  return onSnapshot(
+    categoriesRef,
+    (snapshot) => {
+      const categories = snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<AdminCategory, 'id'>) }))
+      callback(categories.filter((category) => category.archived))
+    },
+    (error) => {
+      if (shouldFallbackToLocal(error)) {
+        callback(readStored(CATEGORIES_KEY, defaultCategories).filter((category) => category.archived))
+      }
+    },
+  )
+}
+
 export async function createCategory(name: string) {
   const normalizedName = name.trim()
   const slug = slugify(normalizedName)
@@ -1356,6 +1491,29 @@ export async function deleteCategory(id: string) {
     }
 
     return
+  }
+}
+
+export async function restoreCategory(id: string) {
+  const current = readStored(CATEGORIES_KEY, defaultCategories)
+  const updated = current.map((item) => (item.id === id
+    ? { ...item, archived: false, archivedAt: undefined }
+    : item))
+  writeStored(CATEGORIES_KEY, updated)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'categories', id), {
+      archived: false,
+      archivedAt: null,
+    })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
   }
 }
 

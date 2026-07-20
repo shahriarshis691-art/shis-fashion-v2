@@ -16,8 +16,14 @@ import {
   deleteProduct,
   isFirebaseConfigured,
   isLaunchModeEnabled,
+  restoreCategory,
+  restoreOrder,
+  restoreProduct,
   signInAdmin,
   signOutAdmin,
+  subscribeToArchivedCategories,
+  subscribeToArchivedOrders,
+  subscribeToArchivedProducts,
   subscribeToHomepageContent,
   subscribeToCategories,
   subscribeToOrders,
@@ -71,6 +77,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [categories, setCategories] = useState<AdminCategory[]>([])
+  const [archivedProducts, setArchivedProducts] = useState<AdminProduct[]>([])
+  const [archivedOrders, setArchivedOrders] = useState<AdminOrder[]>([])
+  const [archivedCategories, setArchivedCategories] = useState<AdminCategory[]>([])
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const [form, setForm] = useState(emptyProductForm)
   const [isEditing, setIsEditing] = useState<string | null>(null)
@@ -121,12 +130,18 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => setHomepageContent(nextContent))
     const unsubscribeCategories = subscribeToCategories((nextCategories) => setCategories(nextCategories))
+    const unsubscribeArchivedProducts = subscribeToArchivedProducts((nextProducts) => setArchivedProducts(nextProducts))
+    const unsubscribeArchivedOrders = subscribeToArchivedOrders((nextOrders) => setArchivedOrders(nextOrders))
+    const unsubscribeArchivedCategories = subscribeToArchivedCategories((nextCategories) => setArchivedCategories(nextCategories))
 
     return () => {
       unsubscribeProducts()
       unsubscribeOrders()
       unsubscribeHomepage()
       unsubscribeCategories()
+      unsubscribeArchivedProducts()
+      unsubscribeArchivedOrders()
+      unsubscribeArchivedCategories()
     }
   }, [authMode, user])
 
@@ -578,8 +593,20 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleStatusChange = async (orderId: string, status: AdminOrder['status']) => {
-    await updateOrderStatus(orderId, status)
-    setMessage('Order status updated.')
+    try {
+      await updateOrderStatus(orderId, status)
+      setMessage('Order status updated.')
+    } catch (error) {
+      const code = typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code ?? '')
+        : ''
+
+      if (code === 'order/invalid-status-transition') {
+        setMessage('Invalid status flow. Use forward lifecycle actions only.')
+      } else {
+        setMessage('Unable to update order status right now.')
+      }
+    }
   }
 
   const handleSaveOrder = async (orderId: string) => {
@@ -710,6 +737,21 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setCategoryName('')
     }
     setMessage('Category archived.')
+  }
+
+  const handleRestoreProduct = async (productId: string) => {
+    await restoreProduct(productId)
+    setMessage('Product restored from archive.')
+  }
+
+  const handleRestoreOrder = async (orderId: string) => {
+    await restoreOrder(orderId)
+    setMessage('Order restored from archive.')
+  }
+
+  const handleRestoreCategory = async (categoryId: string) => {
+    await restoreCategory(categoryId)
+    setMessage('Category restored from archive.')
   }
 
   const labelForImage = (slotIndex: number) => {
@@ -1351,7 +1393,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Categories</p>
-                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Add, edit, and delete categories</h2>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Add, edit, and archive categories</h2>
               </div>
             </div>
             <div className="mt-5 space-y-3">
@@ -1371,6 +1413,50 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   </div>
                 </div>
               ))}
+
+              <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Archive center</p>
+                <div className="mt-3 grid gap-4 lg:grid-cols-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">Products</p>
+                    <div className="mt-2 space-y-2">
+                      {archivedProducts.slice(0, 5).map((product) => (
+                        <div key={product.id} className="flex items-center justify-between rounded-full border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-muted)]">
+                          <span className="truncate pr-2">{product.name}</span>
+                          <button type="button" onClick={() => handleRestoreProduct(product.id)} className="font-semibold text-[var(--color-accent)]">Restore</button>
+                        </div>
+                      ))}
+                      {!archivedProducts.length ? <p className="text-xs text-[var(--color-muted)]">No archived products.</p> : null}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">Orders</p>
+                    <div className="mt-2 space-y-2">
+                      {archivedOrders.slice(0, 5).map((order) => (
+                        <div key={order.id} className="flex items-center justify-between rounded-full border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-muted)]">
+                          <span className="truncate pr-2">{order.customerName} • {order.status}</span>
+                          <button type="button" onClick={() => handleRestoreOrder(order.id)} className="font-semibold text-[var(--color-accent)]">Restore</button>
+                        </div>
+                      ))}
+                      {!archivedOrders.length ? <p className="text-xs text-[var(--color-muted)]">No archived orders.</p> : null}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">Categories</p>
+                    <div className="mt-2 space-y-2">
+                      {archivedCategories.slice(0, 5).map((category) => (
+                        <div key={category.id} className="flex items-center justify-between rounded-full border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-muted)]">
+                          <span className="truncate pr-2">{category.name}</span>
+                          <button type="button" onClick={() => handleRestoreCategory(category.id)} className="font-semibold text-[var(--color-accent)]">Restore</button>
+                        </div>
+                      ))}
+                      {!archivedCategories.length ? <p className="text-xs text-[var(--color-muted)]">No archived categories.</p> : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             </Card>
           </div>
