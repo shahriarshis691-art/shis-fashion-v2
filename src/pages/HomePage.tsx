@@ -358,7 +358,7 @@ export default function HomePage() {
       order: heroConfig?.order ?? 0,
       node: (
         <section className="px-0 pb-8 pt-0 lg:pb-12">
-          <div className="overflow-hidden bg-[#111111] shadow-[0_24px_54px_rgba(0,0,0,0.14)]">
+          <div className="overflow-hidden bg-[#111111]">
             <div className="relative min-h-[23rem] sm:min-h-[31rem] lg:min-h-[36rem]">
               {heroVideo ? (
                 <video
