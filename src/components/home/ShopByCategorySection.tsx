@@ -34,7 +34,7 @@ function CategoryCard({
     >
       <Link
         to={href}
-        className="group relative block aspect-[0.96] overflow-hidden rounded-[1.15rem] bg-[#0a0a0a] shadow-[0_14px_30px_rgba(0,0,0,0.32)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
+        className="group relative block aspect-[4/5] overflow-hidden rounded-[1.15rem] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
         aria-label={`${name} collection`}
       >
         <img
@@ -47,7 +47,7 @@ function CategoryCard({
 
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_12%,rgba(0,0,0,0.1)_52%,rgba(0,0,0,0.52)_100%)]" />
 
-        <div className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-12 text-white">
+        <div className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-10 text-white">
           <h3 className="font-sans text-[0.9rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
         </div>
       </Link>
@@ -92,7 +92,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
 
         <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryItems.map((item, index) => (
-            <div key={item.key} className="min-w-[49%] max-w-[10.8rem] flex-none">
+            <div key={item.key} className="min-w-[46%] max-w-[10.2rem] flex-none">
               <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
             </div>
           ))}

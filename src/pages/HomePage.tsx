@@ -146,6 +146,29 @@ function productHref(product: AdminProduct) {
   return `/shop/${product.category}/${slugify(product.name)}`
 }
 
+function getImagePositionClass(category: string) {
+  switch (category) {
+    case 'oversized-tee':
+      return 'object-[center_10%]'
+    case 'unisex-tee':
+      return 'object-[center_12%]'
+    case 'mens-shirt':
+      return 'object-[center_14%]'
+    case 'womens-dresses':
+      return 'object-[center_16%]'
+    case 'western-outfits':
+      return 'object-[center_15%]'
+    case 'denim':
+      return 'object-[center_18%]'
+    case 'couples':
+      return 'object-[center_12%]'
+    case 'kids':
+      return 'object-[center_20%]'
+    default:
+      return 'object-[center_14%]'
+  }
+}
+
 function getWhatsAppHref(phone?: string) {
   const digits = (phone ?? '').replace(/\D/g, '')
   if (!digits) {
@@ -224,6 +247,7 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
           const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 520, 650)
           const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
           const stockLabel = item.stock <= 0 ? 'Sold out' : item.stock <= 5 ? 'Low stock' : null
+          const imagePositionClass = getImagePositionClass(item.category)
 
           return (
             <motion.article
@@ -245,7 +269,7 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
                     loading="lazy"
                     decoding="async"
                     onError={handleImageError}
-                    className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
+                    className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.03] ${toneClass}`}
                   />
                 </div>
                 <div className="px-2.25 pb-2 pt-2">
@@ -276,12 +300,13 @@ function ProductRail({ products }: { products: AdminProduct[] }) {
         const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
         const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
         const stockLabel = item.stock <= 0 ? 'Sold out' : item.stock <= 5 ? 'Low stock' : null
+        const imagePositionClass = getImagePositionClass(item.category)
 
         return (
           <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="min-w-[14.8rem] snap-start md:min-w-0">
             <Link to={productHref(item)} className="group block overflow-hidden rounded-[1.6rem] bg-transparent">
-              <div className="overflow-hidden rounded-[1.35rem] bg-[var(--color-surface)] shadow-[0_14px_30px_rgba(17,17,17,0.08)]">
-                <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-52 w-full object-cover sm:h-60 ${toneClass}`} />
+              <div className="aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-[var(--color-surface)] shadow-[0_12px_24px_rgba(17,17,17,0.08)]">
+                <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${imagePositionClass} ${toneClass}`} />
               </div>
               <div className="px-1 pb-1 pt-2.5">
                 <h3 className="line-clamp-1 font-sans text-[1rem] font-semibold text-[var(--color-text)]">{item.name}</h3>
