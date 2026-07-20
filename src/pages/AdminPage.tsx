@@ -237,19 +237,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const errorCode = typeof error === 'object' && error !== null && 'code' in error
         ? String((error as { code?: unknown }).code ?? '')
         : ''
-      const errorMessage = error instanceof Error ? error.message : String(error ?? '')
-      const debugError = `Error code: ${errorCode || 'unknown'} | Message: ${errorMessage || 'No error message'}`
-
       if (errorCode === 'auth/forbidden-admin') {
-        window.alert(debugError)
-        setMessage(debugError)
+        setMessage('Access denied. This account is not authorized for admin dashboard access.')
         navigate('/', { replace: true })
       } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
-        setMessage(debugError)
+        setMessage('Invalid email or password. Please try again.')
       } else if (errorCode === 'auth/firebase-not-configured') {
-        setMessage(debugError)
+        setMessage('Admin authentication is not configured in this environment.')
       } else {
-        setMessage(debugError)
+        setMessage('Sign in failed. Please try again in a moment.')
+      }
+
+      if (import.meta.env.DEV) {
+        console.error('Admin login failed', error)
       }
     } finally {
       setLoading(false)
@@ -551,11 +551,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleDeleteProduct = async (productId: string) => {
+    const shouldDelete = window.confirm('Archive this product? It will be hidden from storefront and dashboard lists.')
+    if (!shouldDelete) {
+      return
+    }
+
     await deleteProduct(productId)
     if (isEditing === productId) {
       resetForm()
     }
-    setMessage('Product removed.')
+    setMessage('Product archived.')
   }
 
   const handleHomepageSave = async () => {
@@ -589,8 +594,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleDeleteOrder = async (orderId: string) => {
+    const shouldDelete = window.confirm('Archive this order? It will be removed from active management lists.')
+    if (!shouldDelete) {
+      return
+    }
+
     await deleteOrder(orderId)
-    setMessage('Order deleted.')
+    setMessage('Order archived.')
   }
 
   const handleSaveCustomer = async (identity: string, orderIds: string[], fallback: { name: string; phone: string; email: string }) => {
@@ -689,12 +699,17 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleDeleteCategory = async (categoryId: string) => {
+    const shouldDelete = window.confirm('Archive this category? Existing products remain unchanged.')
+    if (!shouldDelete) {
+      return
+    }
+
     await deleteCategory(categoryId)
     if (editingCategoryId === categoryId) {
       setEditingCategoryId(null)
       setCategoryName('')
     }
-    setMessage('Category removed.')
+    setMessage('Category archived.')
   }
 
   const labelForImage = (slotIndex: number) => {

@@ -9,28 +9,76 @@ interface CloudinaryResponse {
   error?: { message?: string }
 }
 
+interface SignedUploadResponse {
+  timestamp: number
+  signature: string
+  apiKey: string
+  folder?: string
+}
+
+interface DeleteAssetResponse {
+  ok: boolean
+}
+
+function isSignedUploadEnabled() {
+  return (import.meta.env.VITE_CLOUDINARY_SIGNED_UPLOAD ?? 'false') === 'true'
+}
+
 function getCloudinaryConfig() {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 
-  if (!cloudName || !uploadPreset) {
+  if (!cloudName) {
+    throw new Error('Cloudinary is not configured. Set VITE_CLOUDINARY_CLOUD_NAME.')
+  }
+
+  if (isSignedUploadEnabled()) {
+    return { cloudName, uploadPreset: '' }
+  }
+
+  if (!uploadPreset) {
     throw new Error('Cloudinary is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.')
   }
 
   return { cloudName, uploadPreset }
 }
 
-function uploadWithProgress(file: File, options: CloudinaryUploadOptions = {}) {
+async function getSignedUploadPayload(folder?: string) {
+  const query = folder ? `?folder=${encodeURIComponent(folder)}` : ''
+  const response = await fetch(`/api/cloudinary-signature${query}`)
+
+  if (!response.ok) {
+    throw new Error('Unable to create signed upload session.')
+  }
+
+  return response.json() as Promise<SignedUploadResponse>
+}
+
+async function uploadWithProgress(file: File, options: CloudinaryUploadOptions = {}) {
   const { cloudName, uploadPreset } = getCloudinaryConfig()
   const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`
+  const signedUpload = isSignedUploadEnabled() ? await getSignedUploadPayload(options.folder) : null
 
   return new Promise<string>((resolve, reject) => {
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('upload_preset', uploadPreset)
 
-    if (options.folder) {
-      formData.append('folder', options.folder)
+    if (signedUpload) {
+      formData.append('api_key', signedUpload.apiKey)
+      formData.append('timestamp', String(signedUpload.timestamp))
+      formData.append('signature', signedUpload.signature)
+
+      if (signedUpload.folder) {
+        formData.append('folder', signedUpload.folder)
+      } else if (options.folder) {
+        formData.append('folder', options.folder)
+      }
+    } else {
+      formData.append('upload_preset', uploadPreset)
+
+      if (options.folder) {
+        formData.append('folder', options.folder)
+      }
     }
 
     const xhr = new XMLHttpRequest()
@@ -151,4 +199,33 @@ export async function uploadMultipleAssets(files: File[], options: CloudinaryUpl
 
   options.onProgress?.(100)
   return urls
+}
+
+export async function deleteCloudinaryAssetByUrl(url: string) {
+  let parsed: URL
+
+  try {
+    parsed = new URL(url)
+  } catch {
+    return false
+  }
+
+  if (!parsed.hostname.includes('res.cloudinary.com')) {
+    return false
+  }
+
+  const response = await fetch('/api/cloudinary-destroy', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url }),
+  })
+
+  if (!response.ok) {
+    return false
+  }
+
+  const payload = await response.json() as DeleteAssetResponse
+  return payload.ok
 }

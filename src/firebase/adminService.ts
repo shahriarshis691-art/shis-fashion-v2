@@ -2,7 +2,6 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged, type User } fr
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -12,7 +11,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { uploadMultipleAssets } from '../services/cloudinary'
+import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
 import { compactManagedImages } from '../utils/media'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
@@ -44,6 +43,8 @@ export interface AdminProduct {
   newArrival: boolean
   hero: boolean
   createdAt?: string | { seconds: number }
+  archived?: boolean
+  archivedAt?: string | { seconds: number }
 }
 
 export interface AdminOrder {
@@ -60,6 +61,8 @@ export interface AdminOrder {
   status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   trackingNumber?: string
   createdAt?: string | { seconds: number }
+  archived?: boolean
+  archivedAt?: string | { seconds: number }
 }
 
 export interface AdminCategory {
@@ -67,6 +70,8 @@ export interface AdminCategory {
   name: string
   slug: string
   createdAt?: string | { seconds: number }
+  archived?: boolean
+  archivedAt?: string | { seconds: number }
 }
 
 export interface HomepageShopCategory {
@@ -239,7 +244,7 @@ function isLocalFirstDataMode() {
     return false
   }
 
-  return window.localStorage.getItem(DATA_MODE_KEY) === 'local-first'
+  return !isProductionBuild() && window.localStorage.getItem(DATA_MODE_KEY) === 'local-first'
 }
 
 function markAccessDenied() {
@@ -372,9 +377,12 @@ function shouldFallbackToLocal(error: unknown) {
     ? String((error as { code?: unknown }).code ?? '').toLowerCase()
     : ''
 
+  // Never downgrade auth/permission errors to local writes in production.
+  if (code.includes('permission-denied') || message.includes('permission-denied') || message.includes('missing or insufficient permissions')) {
+    return false
+  }
+
   return [
-    'permission-denied',
-    'missing or insufficient permissions',
     'unavailable',
     'network-request-failed',
     'deadline-exceeded',
@@ -965,10 +973,10 @@ export async function signOutAdmin() {
 
 export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
   ensureSeedData()
-  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct))
+  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived))
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct)))
+    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => !product.archived)))
   }
 
   const productsRef = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'))
@@ -976,11 +984,11 @@ export function subscribeToProducts(callback: (products: AdminProduct[]) => void
     productsRef,
     (snapshot) => {
       const products = snapshot.docs.map((doc) => normalizeProduct({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
-      callback(products)
+      callback(products.filter((product) => !product.archived))
     },
     (error) => {
       if (shouldFallbackToLocal(error)) {
-        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct))
+        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived))
       }
     },
   )
@@ -1059,15 +1067,21 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
 }
 
 export async function deleteProduct(id: string) {
-  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts)
-  writeStored(PRODUCTS_KEY, currentProducts.filter((item) => item.id !== id))
+  const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const updatedProducts = currentProducts.map((item) => (item.id === id
+    ? { ...item, archived: true, archivedAt: new Date().toISOString() }
+    : item))
+  writeStored(PRODUCTS_KEY, updatedProducts)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     return
   }
 
   try {
-    await deleteDoc(doc(firebaseDb, 'products', id))
+    await updateDoc(doc(firebaseDb, 'products', id), {
+      archived: true,
+      archivedAt: serverTimestamp(),
+    })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
@@ -1079,10 +1093,10 @@ export async function deleteProduct(id: string) {
 
 export function subscribeToOrders(callback: (orders: AdminOrder[]) => void) {
   ensureSeedData()
-  callback(readStored(ORDERS_KEY, defaultOrders))
+  callback(readStored(ORDERS_KEY, defaultOrders).filter((order) => !order.archived))
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(ORDERS_KEY, defaultOrders, callback)
+    return subscribeToStored(ORDERS_KEY, defaultOrders, (orders) => callback(orders.filter((order) => !order.archived)))
   }
 
   const ordersRef = query(collection(firebaseDb, 'orders'), orderBy('createdAt', 'desc'))
@@ -1090,11 +1104,11 @@ export function subscribeToOrders(callback: (orders: AdminOrder[]) => void) {
     ordersRef,
     (snapshot) => {
       const orders = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<AdminOrder, 'id'>) }))
-      callback(orders)
+      callback(orders.filter((order) => !order.archived))
     },
     (error) => {
       if (shouldFallbackToLocal(error)) {
-        callback(readStored(ORDERS_KEY, defaultOrders))
+        callback(readStored(ORDERS_KEY, defaultOrders).filter((order) => !order.archived))
       }
     },
   )
@@ -1131,14 +1145,20 @@ export async function updateOrderDetails(
 
 export async function deleteOrder(id: string) {
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
-  writeStored(ORDERS_KEY, currentOrders.filter((order) => order.id !== id))
+  const updatedOrders = currentOrders.map((order) => (order.id === id
+    ? { ...order, archived: true, archivedAt: new Date().toISOString() }
+    : order))
+  writeStored(ORDERS_KEY, updatedOrders)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     return
   }
 
   try {
-    await deleteDoc(doc(firebaseDb, 'orders', id))
+    await updateDoc(doc(firebaseDb, 'orders', id), {
+      archived: true,
+      archivedAt: serverTimestamp(),
+    })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
@@ -1226,10 +1246,10 @@ export function subscribeToHomepageContent(callback: (content: HomepageContent) 
 
 export function subscribeToCategories(callback: (categories: AdminCategory[]) => void) {
   ensureSeedData()
-  callback(readStored(CATEGORIES_KEY, defaultCategories))
+  callback(readStored(CATEGORIES_KEY, defaultCategories).filter((category) => !category.archived))
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(CATEGORIES_KEY, defaultCategories, callback)
+    return subscribeToStored(CATEGORIES_KEY, defaultCategories, (categories) => callback(categories.filter((category) => !category.archived)))
   }
 
   const categoriesRef = query(collection(firebaseDb, 'categories'), orderBy('createdAt', 'asc'))
@@ -1237,11 +1257,11 @@ export function subscribeToCategories(callback: (categories: AdminCategory[]) =>
     categoriesRef,
     (snapshot) => {
       const categories = snapshot.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<AdminCategory, 'id'>) }))
-      callback(categories)
+      callback(categories.filter((category) => !category.archived))
     },
     (error) => {
       if (shouldFallbackToLocal(error)) {
-        callback(readStored(CATEGORIES_KEY, defaultCategories))
+        callback(readStored(CATEGORIES_KEY, defaultCategories).filter((category) => !category.archived))
       }
     },
   )
@@ -1316,14 +1336,20 @@ export async function updateCategory(id: string, name: string) {
 
 export async function deleteCategory(id: string) {
   const current = readStored(CATEGORIES_KEY, defaultCategories)
-  writeStored(CATEGORIES_KEY, current.filter((item) => item.id !== id))
+  const updated = current.map((item) => (item.id === id
+    ? { ...item, archived: true, archivedAt: new Date().toISOString() }
+    : item))
+  writeStored(CATEGORIES_KEY, updated)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     return
   }
 
   try {
-    await deleteDoc(doc(firebaseDb, 'categories', id))
+    await updateDoc(doc(firebaseDb, 'categories', id), {
+      archived: true,
+      archivedAt: serverTimestamp(),
+    })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
@@ -1376,18 +1402,5 @@ export async function deleteAsset(url: string) {
     return
   }
 
-  const parsed = (() => {
-    try {
-      return new URL(url)
-    } catch {
-      return null
-    }
-  })()
-
-  if (!parsed || !parsed.hostname.includes('res.cloudinary.com')) {
-    return
-  }
-
-  // Unsigned browser uploads cannot securely delete Cloudinary assets.
-  // We remove URLs from Firestore/local state immediately and treat remote delete as a no-op.
+  await deleteCloudinaryAssetByUrl(url)
 }

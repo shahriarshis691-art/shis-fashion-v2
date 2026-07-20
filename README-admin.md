@@ -9,6 +9,11 @@ Quick steps to enable full admin features (uploads, Firebase Auth/Firestore):
 - `VITE_CLOUDINARY_CLOUD_NAME`
 - `VITE_CLOUDINARY_UPLOAD_PRESET` (unsigned upload preset)
 
+Production hardening (recommended):
+- Set `VITE_CLOUDINARY_SIGNED_UPLOAD=true`.
+- Add server-side env vars: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+- Use deployed API routes `/api/cloudinary-signature` and `/api/cloudinary-destroy` for signed upload/delete.
+
 3. Install dependencies and run dev server:
 
 ```bash
