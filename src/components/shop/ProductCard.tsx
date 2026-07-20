@@ -66,10 +66,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       viewport={{ once: true, amount: 0.2 }}
       whileHover={{ y: -6, scale: 1.01 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 shadow-[0_18px_55px_rgba(0,0,0,0.06)]"
+      className="overflow-hidden rounded-[0.95rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[1.15rem]"
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="block">
-        <div className="relative aspect-[4/4.7] overflow-hidden bg-[var(--color-bg)]">
+        <div className="relative aspect-[4/4.55] overflow-hidden bg-[var(--color-bg)]">
           {isSoldOut ? (
             <span className="absolute left-3 top-3 z-10 rounded-full bg-[#111111]/88 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
               Sold out
@@ -86,9 +86,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
         </div>
-        <div className="p-3 sm:p-3.5">
+        <div className="px-2.5 pb-2.5 pt-2 sm:p-3.5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">SHIS Selection</p>
-          <h3 className="mt-1 line-clamp-2 min-h-[2.45rem] text-[0.94rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
+          <h3 className="mt-0.5 line-clamp-2 min-h-[2.35rem] text-[0.93rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <p className="text-base font-semibold text-[var(--color-accent)] sm:text-sm">{product.price}</p>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>

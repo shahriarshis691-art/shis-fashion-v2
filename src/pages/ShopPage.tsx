@@ -169,7 +169,7 @@ export default function ShopPage() {
       : category?.description ?? 'Discover premium essentials crafted for modern dressing and timeless comfort.'
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-2.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         {!ready ? (
           <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 px-6 py-10 text-center text-sm text-[var(--color-muted)]">
@@ -250,10 +250,12 @@ export default function ShopPage() {
           </div>
 
           {visibleProducts.length ? (
-            <div className="grid grid-cols-2 gap-2.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:gap-4 xl:grid-cols-4">
-              {visibleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+            <div className="-mx-4 px-2 sm:mx-0 sm:px-0">
+              <div className="grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:gap-4 xl:grid-cols-4">
+                {visibleProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/70 px-6 py-12 text-center shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
