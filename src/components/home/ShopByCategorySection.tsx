@@ -68,7 +68,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
       aria-labelledby="shop-by-category-title"
     >
       <Container>
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">Explore</p>
             <h2 id="shop-by-category-title" className="mt-2.5 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">

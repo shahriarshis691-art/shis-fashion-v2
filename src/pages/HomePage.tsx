@@ -2,7 +2,6 @@ import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from '
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
@@ -468,7 +467,7 @@ export default function HomePage() {
       key: 'featuredCollection',
       order: featuredCollectionConfig?.order ?? 1,
       node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
+        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
           <Container>
             <SectionTitle
               eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collection'}
@@ -486,12 +485,26 @@ export default function HomePage() {
                 return (
                   <motion.div key={category.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="hidden sm:block">
                     <Link to={categoryHref} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]">
-                      <Card className="h-full rounded-[1.5rem] transition hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(17,17,17,0.1)]">
-                        {categoryImage ? <img src={categoryImage} alt={category.title} loading="lazy" decoding="async" onError={handleImageError} className={`h-28 w-full rounded-[1.25rem] object-cover ${toneClass}`} /> : <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />}
-                        <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.title}</h3>
-                        <p className="mt-2 text-sm text-[var(--color-muted)]">{category.caption}</p>
-                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">View collection</p>
-                      </Card>
+                      <div className="group relative aspect-[4/5] overflow-hidden rounded-[1.2rem] border border-[var(--color-border)] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(0,0,0,0.34)]">
+                        {categoryImage ? (
+                          <img
+                            src={categoryImage}
+                            alt={category.title}
+                            loading="lazy"
+                            decoding="async"
+                            onError={handleImageError}
+                            className={`h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03] ${toneClass}`}
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.24))]" />
+                        )}
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04)_10%,rgba(0,0,0,0.16)_56%,rgba(0,0,0,0.58)_100%)]" />
+                        <div className="absolute inset-x-0 bottom-0 px-3.5 pb-3.5 pt-12 text-white">
+                          <h3 className="text-[0.95rem] font-semibold uppercase tracking-[0.08em]">{category.title}</h3>
+                          <p className="mt-1 line-clamp-1 text-[0.78rem] text-white/84">{category.caption}</p>
+                          <p className="mt-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-accent)]">View collection</p>
+                        </div>
+                      </div>
                     </Link>
                   </motion.div>
                 )
@@ -505,7 +518,7 @@ export default function HomePage() {
       key: 'newArrivals',
       order: newArrivalsConfig?.order ?? 2,
       node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
+        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
           <Container>
             <SectionHeader
               eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
@@ -529,7 +542,7 @@ export default function HomePage() {
       key: 'bestSellers',
       order: bestSellersConfig?.order ?? 3,
       node: (
-        <section className="hidden px-4 py-12 sm:block sm:px-6 lg:px-8 lg:py-16">
+        <section className="hidden px-4 py-8 sm:block sm:px-6 sm:py-10 lg:px-8 lg:py-14">
           <Container>
             <SectionTitle eyebrow={homepageContent.bestSellerEyebrow ?? 'Best seller'} title={homepageContent.featuredTitle} description={homepageContent.featuredSubtitle} />
             <ProductRail products={featuredProducts.length ? featuredProducts : bestSellers} />
@@ -541,7 +554,7 @@ export default function HomePage() {
       key: 'brandPromise',
       order: brandPromiseConfig?.order ?? 4,
       node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-16">
+        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
           <Container>
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandPromiseEyebrow ?? 'Brand promise'}</p>
@@ -556,7 +569,7 @@ export default function HomePage() {
       key: 'allProducts',
       order: 5,
       node: (
-        <section className="hidden px-4 py-12 sm:block sm:px-6 lg:px-8 lg:py-16">
+        <section className="hidden px-4 py-8 sm:block sm:px-6 sm:py-10 lg:px-8 lg:py-14">
           <Container>
             <SectionHeader
               eyebrow="All products"
