@@ -421,9 +421,9 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-3 w-full max-w-7xl px-3 sm:mt-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
+            <div className="-mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:rounded-[1.05rem] sm:px-3 sm:py-3">
+                <div key={item.label} className="min-w-[16.25rem] snap-start rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.05rem] sm:px-3 sm:py-3">
                   <p className="text-[0.69rem] font-semibold uppercase tracking-[0.11em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
                   <p className="mt-1 line-clamp-2 text-[0.68rem] leading-4 text-[var(--color-muted)] sm:text-[0.7rem] sm:leading-5">{item.value}</p>
                 </div>
