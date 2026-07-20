@@ -414,9 +414,6 @@ export default function HomePage() {
                     >
                       {homepageContent.heroCta}
                     </Button>
-                    <Link to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'} className="inline-flex items-center justify-center text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/84 sm:hidden">
-                      {homepageContent.heroSecondaryCta}
-                    </Link>
                     <Button
                       to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
                       variant="secondary"
