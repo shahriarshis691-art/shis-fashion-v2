@@ -395,41 +395,23 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
               )}
 
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.94)_0%,rgba(10,10,10,0.78)_42%,rgba(10,10,10,0.26)_74%,rgba(10,10,10,0.06)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.76)_0%,rgba(10,10,10,0.56)_42%,rgba(10,10,10,0.2)_74%,rgba(10,10,10,0.03)_100%)]" />
 
-              <div className="relative z-10 flex min-h-[23rem] items-start px-5 py-8 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
+              <div className="relative z-10 flex min-h-[23rem] items-center px-5 py-8 sm:min-h-[31rem] sm:px-10 lg:min-h-[36rem] lg:px-12">
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, ease: 'easeOut' }}
-                  className="max-w-[14.6rem] pt-4 sm:max-w-[21rem] sm:pt-0 lg:max-w-[24rem]"
+                  className="max-w-[14.8rem] sm:max-w-[21rem] lg:max-w-[24rem]"
                 >
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-white/70">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
-                  <h1 className="home-hero-title mt-3 font-sans text-[2.45rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:mt-4 sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
-                  <p className="mt-3 max-w-[15rem] text-[0.88rem] leading-6 text-white/78 sm:mt-4 sm:max-w-sm sm:text-base sm:leading-7">{homepageContent.heroSubtitle}</p>
-                  <div className="mt-5 flex max-w-[12.75rem] flex-col gap-2.5 sm:mt-6 sm:max-w-none sm:flex-row sm:flex-wrap">
+                  <h1 className="home-hero-title font-sans text-[2.45rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                  <div className="mt-6 flex max-w-[12.75rem] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:flex-wrap">
                     <Button
                       to={homepageContent.heroPrimaryLink ?? '/shop'}
                       className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white"
                     >
                       {homepageContent.heroCta}
                     </Button>
-                    <Button
-                      to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
-                      variant="secondary"
-                      className="hidden min-w-[11.25rem] rounded-full border-white/14 bg-black/16 px-6 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm hover:border-white/28 hover:bg-black/24 hover:text-white sm:inline-flex"
-                    >
-                      {homepageContent.heroSecondaryCta}
-                    </Button>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/84 backdrop-blur-sm">Premium essentials</span>
-                    <span className="hidden rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/84 backdrop-blur-sm sm:inline-flex">Cash on delivery</span>
-                  </div>
-                  <div className="mt-3 grid max-w-[15rem] grid-cols-1 gap-1.5 sm:max-w-none sm:grid-cols-3 sm:gap-2">
-                    <span className="rounded-full border border-white/12 bg-black/24 px-3 py-1.5 text-center text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white/80">72h dispatch</span>
-                    <span className="rounded-full border border-white/12 bg-black/24 px-3 py-1.5 text-center text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white/80">Easy exchange</span>
-                    <span className="rounded-full border border-white/12 bg-black/24 px-3 py-1.5 text-center text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white/80">Verified checkout</span>
                   </div>
                 </motion.div>
               </div>
