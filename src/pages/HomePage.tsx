@@ -577,10 +577,10 @@ export default function HomePage() {
       <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
         <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-white/10 bg-[#0b0b0b]/95 p-2 shadow-[0_14px_34px_rgba(0,0,0,0.4)] backdrop-blur-xl">
           <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-white/14 bg-white/6 px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white">
-            Shop now
+            Shop collection
           </Link>
           <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[rgba(210,180,122,0.32)] bg-[rgba(210,180,122,0.12)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">
-            WhatsApp
+            Size help
           </a>
         </div>
       </div>

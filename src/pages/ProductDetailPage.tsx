@@ -60,6 +60,12 @@ function buildHighlights(description: string, stock: number, sizes: string[]) {
   return [...sentenceHighlights, sizeLine, stockLine].slice(0, 4)
 }
 
+function getWhatsAppHref(phone?: string) {
+  const digits = (phone ?? '').replace(/\D/g, '')
+  const normalized = digits ? (digits.startsWith('88') ? digits : `88${digits}`) : '8801887848304'
+  return `https://wa.me/${normalized}`
+}
+
 export default function ProductDetailPage() {
   const { productSlug } = useParams()
   const decodedSlug = decodeURIComponent(productSlug ?? '')
@@ -141,6 +147,7 @@ export default function ProductDetailPage() {
   const size = selectedSize && product.sizes.includes(selectedSize) ? selectedSize : (product.sizes[0] ?? 'M')
   const stockStatus = product.stock <= 0 ? 'Out of stock' : product.stock <= 5 ? 'Low stock' : 'In stock'
   const highlights = buildHighlights(product.description, product.stock, product.sizes)
+  const supportWhatsAppHref = getWhatsAppHref()
 
   const handleSwipeEnd = (event: React.TouchEvent<HTMLDivElement>) => {
     if (touchStartX === null) {
@@ -244,7 +251,7 @@ export default function ProductDetailPage() {
                     currency: 'BDT',
                   })
                   navigate('/cart')
-                }} className="justify-center">Add to cart</Button>
+                }} className="justify-center" disabled={product.stock <= 0}>Add to bag</Button>
                 <Button onClick={() => {
                   addToCart(product, { size, color: 'Default', quantity })
                   metaPixel.initiateCheckout({
@@ -254,6 +261,13 @@ export default function ProductDetailPage() {
                   })
                   navigate('/checkout')
                 }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--color-border)] pt-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Dispatch in 24-72h</p>
+                <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-accent)]">
+                  Size help on WhatsApp
+                </a>
               </div>
             </div>
           </div>

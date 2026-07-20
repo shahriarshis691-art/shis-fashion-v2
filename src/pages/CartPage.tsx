@@ -5,10 +5,15 @@ import Button from '../components/ui/Button'
 import { useCart } from '../context/CartContext'
 import { formatBDT, parseBDT } from '../utils/currency'
 
+function getWhatsAppHref() {
+  return 'https://wa.me/8801887848304'
+}
+
 export default function CartPage() {
   const navigate = useNavigate()
   const { items, updateQuantity, removeFromCart, subtotal, itemCount } = useCart()
   const totalLabel = formatBDT(subtotal)
+  const supportWhatsAppHref = getWhatsAppHref()
 
   if (items.length === 0) {
     return (
@@ -94,6 +99,10 @@ export default function CartPage() {
               <Button onClick={() => navigate('/checkout')} className="w-full justify-center">Checkout</Button>
               <Button to="/shop" variant="secondary" className="w-full justify-center">Keep browsing</Button>
             </div>
+            <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-xs uppercase tracking-[0.14em] text-[var(--color-muted)]">
+              <span>Phone confirmation</span>
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">WhatsApp support</a>
+            </div>
           </div>
         </div>
 
@@ -106,6 +115,10 @@ export default function CartPage() {
             <Button onClick={() => navigate('/checkout')} className="min-w-[8.75rem] justify-center px-4.5">
               Checkout
             </Button>
+          </div>
+          <div className="mt-2 flex items-center justify-between px-1 text-[10px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+            <span>Delivery call before dispatch</span>
+            <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
           </div>
         </div>
       </Container>

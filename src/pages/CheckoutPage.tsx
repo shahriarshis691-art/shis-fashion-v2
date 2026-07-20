@@ -17,6 +17,10 @@ interface CheckoutFormState {
   deliveryNote: string
 }
 
+function getWhatsAppHref() {
+  return 'https://wa.me/8801887848304'
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
@@ -37,6 +41,7 @@ export default function CheckoutPage() {
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(grandTotal)
+  const supportWhatsAppHref = getWhatsAppHref()
 
   if (!items.length) {
     return (
@@ -115,6 +120,12 @@ export default function CheckoutPage() {
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">2 minute checkout</span>
             </div>
 
+            <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:grid-cols-3">
+              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Phone confirm before dispatch</span>
+              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Delivery charge shown upfront</span>
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-3 py-2 text-center text-[var(--color-accent)]">WhatsApp support</a>
+            </div>
+
             {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
 
             <form id="checkout-form" className="mt-5 space-y-3" onSubmit={handleSubmit}>
@@ -178,6 +189,7 @@ export default function CheckoutPage() {
               <Button type="submit" className="hidden w-full justify-center sm:inline-flex" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
               {submitError ? <p className="text-center text-sm text-red-700">{submitError}</p> : null}
               <p className="text-center text-xs leading-6 text-[var(--color-muted)]">By placing this order, you confirm you want Cash on Delivery. We will contact you on the phone number provided.</p>
+              <p className="text-center text-xs leading-6 text-[var(--color-muted)]">Need help with address or delivery? <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Chat on WhatsApp</a></p>
             </form>
           </div>
 
@@ -226,7 +238,7 @@ export default function CheckoutPage() {
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-[var(--color-muted)]">
               <span>{items.length} item{items.length > 1 ? 's' : ''}</span>
-              <span>Delivery included</span>
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
             </div>
           </div>
         </div>
