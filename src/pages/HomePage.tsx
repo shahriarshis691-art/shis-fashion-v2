@@ -179,8 +179,8 @@ function SectionHeader({
     <div className="flex items-end justify-between gap-4">
       <div className="max-w-2xl">
         <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">{eyebrow}</p>
-        <h2 className="mt-3 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
-        {description ? <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)] sm:text-[0.98rem]">{description}</p> : null}
+        <h2 className="mt-2.5 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
+        {description ? <p className="mt-2.5 max-w-xl text-sm leading-6 text-[var(--color-muted)] sm:text-[0.98rem] sm:leading-7">{description}</p> : null}
       </div>
       {to && linkLabel ? (
         <Link to={to} className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)] md:inline-flex">
@@ -218,7 +218,7 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
   }, [canLoadMore, products.length])
 
   return (
-    <div className="mt-6 sm:hidden">
+    <div className="mt-4 sm:hidden">
       <div className="grid grid-cols-2 gap-3">
         {displayedProducts.map((item, index) => {
           const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 520, 650)
@@ -262,14 +262,14 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
           )
         })}
       </div>
-      {canLoadMore ? <div ref={sentinelRef} className="h-8" aria-hidden /> : null}
+      {canLoadMore ? <div ref={sentinelRef} className="h-6" aria-hidden /> : null}
     </div>
   )
 }
 
 function ProductRail({ products }: { products: AdminProduct[] }) {
   return (
-    <div className="-mx-4 mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
+    <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
       {products.map((item, index) => {
         const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
         const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
@@ -418,18 +418,18 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-3 w-full max-w-7xl px-3 sm:mt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mt-2 w-full max-w-7xl px-3 sm:mt-3 sm:px-6 lg:px-8">
               <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#090909] after:to-transparent after:content-[''] sm:after:hidden">
-              <div className="-mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0">
+              <div className="-mx-3 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="min-w-[14.6rem] snap-start rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.05rem] sm:px-3 sm:py-3">
+                <div key={item.label} className="min-w-[13.6rem] snap-start rounded-[0.9rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.25 py-2 text-center shadow-[0_8px_18px_rgba(0,0,0,0.15)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.02rem] sm:px-2.75 sm:py-2.5">
                   <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
-                  <p className="mt-1 line-clamp-1 text-[0.67rem] leading-4 text-[var(--color-muted)] sm:text-[0.7rem]">{item.value}</p>
+                  <p className="mt-0.5 line-clamp-1 text-[0.64rem] leading-4 text-[var(--color-muted)] sm:text-[0.68rem]">{item.value}</p>
                 </div>
               ))}
               </div>
             </div>
-            <p className="mt-1.5 px-1 text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)] sm:hidden">Swipe for more</p>
+            <p className="mt-1 px-1 text-[0.56rem] font-semibold uppercase tracking-[0.17em] text-[var(--color-muted)] sm:hidden">Swipe for more</p>
           </div>
         </section>
       ),
@@ -442,7 +442,7 @@ export default function HomePage() {
       key: 'featuredCollection',
       order: featuredCollectionConfig?.order ?? 1,
       node: (
-        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <section className="px-4 py-9 sm:px-6 sm:py-11 lg:px-8 lg:py-16">
           <Container>
             <SectionTitle
               eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collection'}
@@ -479,7 +479,7 @@ export default function HomePage() {
       key: 'newArrivals',
       order: newArrivalsConfig?.order ?? 2,
       node: (
-        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <section className="px-4 py-9 sm:px-6 sm:py-11 lg:px-8 lg:py-16">
           <Container>
             <SectionHeader
               eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
@@ -515,7 +515,7 @@ export default function HomePage() {
       key: 'brandPromise',
       order: brandPromiseConfig?.order ?? 4,
       node: (
-        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <section className="px-4 py-9 sm:px-6 sm:py-11 lg:px-8 lg:py-16">
           <Container>
             <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandPromiseEyebrow ?? 'Brand promise'}</p>
