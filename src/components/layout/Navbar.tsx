@@ -16,19 +16,13 @@ const links = [
   { label: 'Contact', href: '/contact' },
 ]
 
-const mobileQuickLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Shop', href: '/shop' },
-  { label: 'Our Brands', href: '/brands' },
-]
-
 function IconButton({ label, children, onClick }: { label: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-8 sm:w-8"
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-9 sm:w-9"
     >
       {children}
     </button>
@@ -100,18 +94,18 @@ export default function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full items-center gap-2 px-3 py-2 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
-          <Link to="/" onClick={closeOverlays} className="group flex w-[3.65rem] flex-shrink-0 items-center justify-start overflow-hidden sm:w-auto">
+        <div className="flex h-[4.5rem] w-full items-center gap-2 px-3 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
+          <Link to="/" onClick={closeOverlays} className="group flex w-[2.65rem] flex-shrink-0 items-center justify-start overflow-hidden sm:w-auto">
             <img
               src="/shis-logo.svg"
               alt="SHIS Fashion - Premium Essentials"
-              className="h-7 w-auto object-contain brightness-[1.15] contrast-125 sm:h-9 md:h-10 lg:h-12"
+              className="h-6 w-auto object-contain brightness-[1.15] contrast-125 sm:h-9 md:h-10 lg:h-12"
               loading="eager"
             />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex lg:justify-center" aria-label="Primary navigation">
-            <div className="flex min-w-max items-center gap-5 px-1 sm:gap-6 lg:gap-9">
+          <nav className="min-w-0 flex-1 touch-pan-x overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex lg:justify-center" aria-label="Primary navigation">
+            <div className="flex min-w-max items-center gap-3 px-1 sm:gap-6 lg:gap-9">
             {links.map((link) => (
               <NavLink
                 key={link.label}
@@ -119,10 +113,10 @@ export default function Navbar() {
                 onClick={closeOverlays}
                 className={({ isActive }) => {
                   if (link.href === '/brands') {
-                    return `whitespace-nowrap rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:text-[11px] ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.5)] hover:bg-[rgba(210,180,122,0.14)]'}`
+                    return `whitespace-nowrap rounded-full border px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:px-3 sm:py-1.5 sm:text-[10px] sm:tracking-[0.18em] md:text-[11px] ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.5)] hover:bg-[rgba(210,180,122,0.14)]'}`
                   }
 
-                  const baseClass = `whitespace-nowrap px-0 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:text-[12px] md:font-medium md:tracking-[0.22em] ${
+                  const baseClass = `whitespace-nowrap px-0 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:text-[11px] sm:tracking-[0.22em] md:text-[12px] md:font-medium md:tracking-[0.22em] ${
                     isActive
                       ? 'text-[var(--color-accent)] md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
                       : 'text-[var(--color-text)]/86 hover:text-[var(--color-text)] md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
@@ -148,7 +142,7 @@ export default function Navbar() {
               to="/cart"
               onClick={closeOverlays}
               title="Cart"
-              className="relative flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-8 sm:w-8"
+              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-9 sm:w-9"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
@@ -174,31 +168,6 @@ export default function Navbar() {
             </IconButton>
           </div>
         </div>
-
-        <nav className="border-t border-[rgba(255,255,255,0.05)] px-3 py-1.5 lg:hidden" aria-label="Mobile quick navigation">
-          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {mobileQuickLinks.map((link) => (
-              <NavLink
-                key={`mobile-quick-${link.label}`}
-                to={link.href}
-                onClick={closeOverlays}
-                className={({ isActive }) => {
-                  if (link.href === '/shop') {
-                    return `rounded-full border px-2.75 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.52)] bg-[rgba(210,180,122,0.2)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.34)] bg-[rgba(210,180,122,0.12)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.52)]'}`
-                  }
-
-                  if (link.href === '/brands') {
-                    return `rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.44)] bg-[rgba(210,180,122,0.14)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.06)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.4)]'}`
-                  }
-
-                  return `text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]/82 hover:text-[var(--color-text)]'}`
-                }}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
 
         <AnimatePresence>
           {isSearchOpen ? (
