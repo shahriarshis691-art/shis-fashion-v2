@@ -250,7 +250,7 @@ export default function ShopPage() {
           </div>
 
           {visibleProducts.length ? (
-            <div className="grid grid-cols-2 gap-3.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 lg:gap-5 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:gap-4 xl:grid-cols-4">
               {visibleProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
