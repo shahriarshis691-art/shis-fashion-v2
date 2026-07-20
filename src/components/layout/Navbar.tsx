@@ -21,7 +21,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
+      className="flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-8 sm:w-8"
     >
       {children}
     </button>
@@ -93,12 +93,12 @@ export default function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full items-center gap-2.5 px-4 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
-          <Link to="/" onClick={closeOverlays} className="group flex min-w-0 flex-shrink-0 items-center justify-center">
+        <div className="flex h-auto w-full items-center justify-between gap-2 px-3 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
+          <Link to="/" onClick={closeOverlays} className="group flex min-w-0 max-w-[6.2rem] flex-shrink items-center justify-center sm:max-w-none sm:flex-shrink-0">
             <img
               src="/shis-logo.svg"
               alt="SHIS Fashion - Premium Essentials"
-              className="h-9 w-auto object-contain brightness-[1.15] contrast-125 md:h-10 lg:h-12"
+              className="h-7 w-auto object-contain brightness-[1.15] contrast-125 sm:h-9 md:h-10 lg:h-12"
               loading="eager"
             />
           </Link>
@@ -126,9 +126,9 @@ export default function Navbar() {
 
           <div className="hidden flex-1 md:flex lg:hidden" />
 
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             <IconButton label="Search" onClick={toggleSearch}>
-              <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                 <circle cx="11" cy="11" r="5.5" />
                 <path d="M15.5 15.5 20 20" />
               </svg>
@@ -136,24 +136,24 @@ export default function Navbar() {
             <Link
               to="/cart"
               onClick={closeOverlays}
-              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
+              className="relative flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-8 sm:w-8"
               aria-label="Cart"
             >
-              <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                 <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-              {itemCount > 0 ? <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[8px] font-bold text-[#050505]">{itemCount}</span> : null}
+              {itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[7px] font-bold text-[#050505] sm:-right-1.5 sm:-top-1.5 sm:h-4 sm:min-w-4 sm:text-[8px]">{itemCount}</span> : null}
             </Link>
             <IconButton label={isMenuOpen ? 'Close menu' : 'Open menu'} onClick={toggleMenu}>
               {isMenuOpen ? (
-                <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+                <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                   <path d="M6 6 18 18" />
                   <path d="M18 6 6 18" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+                <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                   <path d="M4 7h16" />
                   <path d="M4 12h16" />
                   <path d="M4 17h16" />
