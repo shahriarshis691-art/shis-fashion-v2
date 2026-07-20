@@ -108,7 +108,7 @@ export default function MainLayout() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <ScrollToTop />
       <Navbar />
-      <main className="page-shell min-h-screen pt-24">
+      <main className="page-shell min-h-screen">
         <PageTransition>
           <Outlet />
         </PageTransition>
