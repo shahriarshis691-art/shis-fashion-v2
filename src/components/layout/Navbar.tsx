@@ -93,8 +93,8 @@ export default function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full items-center justify-between gap-2 px-3 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
-          <Link to="/" onClick={closeOverlays} className="group flex min-w-0 max-w-[6.2rem] flex-shrink items-center justify-center sm:max-w-none sm:flex-shrink-0">
+        <div className="flex h-auto w-full items-center gap-2 px-3 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
+          <Link to="/" onClick={closeOverlays} className="group flex w-[3.65rem] flex-shrink-0 items-center justify-start overflow-hidden sm:w-auto">
             <img
               src="/shis-logo.svg"
               alt="SHIS Fashion - Premium Essentials"
@@ -103,17 +103,18 @@ export default function Navbar() {
             />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-6 lg:flex lg:gap-9" aria-label="Primary navigation">
+          <nav className="flex min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:justify-center" aria-label="Primary navigation">
+            <div className="flex min-w-max items-center gap-5 px-1 sm:gap-6 lg:gap-9">
             {links.map((link) => (
               <NavLink
                 key={link.label}
                 to={link.href}
                 onClick={closeOverlays}
                 className={({ isActive }) => {
-                  const baseClass = `whitespace-nowrap rounded-md px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:px-0 md:py-1 md:text-[12px] md:font-medium md:tracking-[0.22em] ${
+                  const baseClass = `whitespace-nowrap px-0 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:text-[12px] md:font-medium md:tracking-[0.22em] ${
                     isActive
-                      ? 'bg-[rgba(210,180,122,0.1)] text-[var(--color-accent)] md:bg-transparent md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
-                      : 'text-[var(--color-text)]/86 hover:bg-[rgba(255,255,255,0.05)] hover:text-[var(--color-text)] md:hover:bg-transparent md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
+                      ? 'text-[var(--color-accent)] md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
+                      : 'text-[var(--color-text)]/86 hover:text-[var(--color-text)] md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
                   }`
 
                   return baseClass
@@ -122,9 +123,8 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ))}
+            </div>
           </nav>
-
-          <div className="hidden flex-1 md:flex lg:hidden" />
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             <IconButton label="Search" onClick={toggleSearch}>
