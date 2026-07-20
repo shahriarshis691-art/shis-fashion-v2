@@ -34,7 +34,7 @@ function CategoryCard({
     >
       <Link
         to={href}
-        className="group relative block aspect-[0.82] overflow-hidden rounded-[1.6rem] bg-[#f1ede6] shadow-[0_14px_34px_rgba(17,17,17,0.08)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_24px_50px_rgba(17,17,17,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
+        className="group relative block aspect-[0.96] overflow-hidden rounded-[1.35rem] bg-[#f1ede6] shadow-[0_12px_28px_rgba(17,17,17,0.08)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(17,17,17,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
         aria-label={`${name} collection`}
       >
         <img
@@ -45,15 +45,13 @@ function CategoryCard({
           className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02)_8%,rgba(0,0,0,0.18)_40%,rgba(0,0,0,0.68)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_12%,rgba(0,0,0,0.12)_52%,rgba(0,0,0,0.56)_100%)]" />
 
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-4 pt-14 text-white">
-          <div className="rounded-[1.1rem] border border-white/12 bg-black/22 px-4 py-4 backdrop-blur-sm">
-            <h3 className="text-[1.18rem] font-semibold uppercase leading-[1.02] tracking-[0.06em] antialiased transition-colors duration-300 group-hover:text-white/95">{name}</h3>
-            <div className="mt-3 flex items-center justify-between gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/84">
-              <span>Shop now</span>
-              <span aria-hidden="true" className="text-base leading-none">→</span>
-            </div>
+        <div className="absolute inset-x-0 bottom-0 px-3.5 pb-3.5 pt-14 text-white">
+          <h3 className="font-sans text-[0.96rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
+          <div className="mt-2 flex items-center gap-2 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+            <span>Shop now</span>
+            <span aria-hidden="true" className="text-sm leading-none">→</span>
           </div>
         </div>
       </Link>
@@ -77,7 +75,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">Explore</p>
-            <h2 id="shop-by-category-title" className="mt-3 text-[2rem] font-bold leading-[0.96] text-[var(--color-text)] sm:text-[2.45rem]">
+            <h2 id="shop-by-category-title" className="mt-3 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">
               Shop by category
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)] sm:text-[0.98rem]">
@@ -98,7 +96,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
 
         <div className="-mx-4 mt-7 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryItems.map((item, index) => (
-            <div key={item.key} className="min-w-[43%] max-w-[10.2rem] flex-none">
+            <div key={item.key} className="min-w-[47%] max-w-[10.8rem] flex-none">
               <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
             </div>
           ))}
