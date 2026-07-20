@@ -168,6 +168,27 @@ export default function Navbar() {
           </div>
         </div>
 
+        <nav className="border-t border-[rgba(255,255,255,0.05)] px-3 py-2 lg:hidden" aria-label="Mobile quick navigation">
+          <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {links.map((link) => (
+              <NavLink
+                key={`mobile-quick-${link.label}`}
+                to={link.href}
+                onClick={closeOverlays}
+                className={({ isActive }) => {
+                  if (link.href === '/brands') {
+                    return `rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)]'}`
+                  }
+
+                  return `text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]/82 hover:text-[var(--color-text)]'}`
+                }}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+
         <AnimatePresence>
           {isSearchOpen ? (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-t border-[rgba(255,255,255,0.06)] bg-[rgba(8,8,8,0.98)] px-4 py-3 sm:px-6 lg:px-10">
