@@ -420,12 +420,12 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mx-auto mt-3 w-full max-w-7xl px-3 sm:mt-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="rounded-[1.1rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-3 py-4 text-center shadow-[0_18px_36px_rgba(0,0,0,0.22)] backdrop-blur-sm">
-                  <p className="text-[0.74rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]">{item.label}</p>
-                  <p className="mt-1 text-[0.7rem] leading-5 text-[var(--color-muted)]">{item.value}</p>
+                <div key={item.label} className="rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:rounded-[1.05rem] sm:px-3 sm:py-3">
+                  <p className="text-[0.69rem] font-semibold uppercase tracking-[0.11em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
+                  <p className="mt-1 line-clamp-2 text-[0.68rem] leading-4 text-[var(--color-muted)] sm:text-[0.7rem] sm:leading-5">{item.value}</p>
                 </div>
               ))}
             </div>
