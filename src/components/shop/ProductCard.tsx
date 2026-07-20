@@ -14,19 +14,15 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
 }
 
 function getStockLabel(stock?: number) {
-  if (typeof stock !== 'number') {
-    return 'Available'
-  }
-
-  if (stock <= 0) {
+  if (typeof stock === 'number' && stock <= 0) {
     return 'Sold out'
   }
 
-  if (stock <= 5) {
+  if (typeof stock === 'number' && stock <= 5) {
     return 'Low stock'
   }
 
-  return 'In stock'
+  return null
 }
 
 function getImagePositionClass(category: string) {
@@ -56,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
   const stockLabel = getStockLabel(product.stock)
-  const isSoldOut = stockLabel === 'Sold out'
+  const isSoldOut = typeof product.stock === 'number' && product.stock <= 0
   const imagePositionClass = getImagePositionClass(product.category)
 
   return (
@@ -90,9 +86,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="line-clamp-2 min-h-[2.35rem] text-[0.95rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <p className="text-base font-semibold text-[var(--color-accent)] sm:text-sm">{product.price}</p>
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
-              {stockLabel}
-            </span>
+            {stockLabel ? (
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+                {stockLabel}
+              </span>
+            ) : null}
           </div>
         </div>
       </Link>

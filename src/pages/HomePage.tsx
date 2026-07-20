@@ -524,16 +524,10 @@ export default function HomePage() {
               eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
               title={homepageContent.newArrivalsTitle}
               description={homepageContent.newArrivalsSubtitle}
-              to="/shop/new-arrivals"
+              to="/shop"
               linkLabel="View all"
             />
             <ProductRail products={newArrivals} />
-            <div className="mt-4 flex md:hidden">
-              <Link to="/shop/new-arrivals" className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)]">
-                <span>View all</span>
-                <span aria-hidden className="text-base leading-none">→</span>
-              </Link>
-            </div>
           </Container>
         </section>
       ),
