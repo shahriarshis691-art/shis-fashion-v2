@@ -167,12 +167,12 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-14 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
-        <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-3">
+        <div className="grid gap-5 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="space-y-2">
             <div className="relative" onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)} onTouchEnd={handleSwipeEnd}>
-              <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-[var(--color-bg)]">
+              <div className="aspect-[4/5] overflow-hidden rounded-[1.1rem] bg-[var(--color-bg)] sm:rounded-[1.5rem]">
                 <img
                   src={resolvedActiveImage}
                   alt={activeImageTitle}
@@ -185,13 +185,13 @@ export default function ProductDetailPage() {
                   className={`h-full w-full cursor-zoom-in object-cover transition-opacity duration-300 ${isDemoImageUrl(resolvedActiveImage) ? 'shis-media-tone' : ''}`}
                 />
               </div>
-              <button type="button" onClick={() => setIsZoomOpen(true)} className="absolute right-3 top-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">
+              <button type="button" onClick={() => setIsZoomOpen(true)} className="absolute right-2.5 top-2.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-text)] sm:right-3 sm:top-3 sm:px-3 sm:py-2 sm:text-xs sm:tracking-[0.25em]">
                 Zoom
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {normalizedGalleryImages.map((image, index) => (
-                <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(image)} className={`overflow-hidden rounded-[1.2rem] border ${resolvedActiveImage === image ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}>
+                <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(image)} className={`overflow-hidden rounded-[0.9rem] border sm:rounded-[1.2rem] ${resolvedActiveImage === image ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}>
                   <div className="aspect-[4/5] bg-[var(--color-bg)]">
                     <img src={image} alt={product.galleryImageTitles?.[index] || `${product.name} view ${index + 1}`} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`} />
                   </div>
@@ -200,8 +200,8 @@ export default function ProductDetailPage() {
             </div>
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">{product.name}</h1>
-            <div className="mt-5 space-y-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+            <h1 className="mt-1 text-[1.75rem] font-semibold leading-tight text-[var(--color-text)] sm:mt-3 sm:text-3xl">{product.name}</h1>
+            <div className="mt-3 space-y-2.5 rounded-[1.05rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3.5 sm:mt-5 sm:rounded-[1.25rem] sm:p-4">
               <div>
                 <p className="text-sm text-[var(--color-muted)]">Price</p>
                 <div className="mt-1 flex items-center gap-2">
@@ -212,10 +212,10 @@ export default function ProductDetailPage() {
               <p className={`text-sm font-semibold ${product.stock <= 0 ? 'text-red-600' : product.stock <= 5 ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]'}`}>{stockStatus}</p>
             </div>
 
-            <div className="mt-6 space-y-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)]/92 p-4 sticky bottom-3 z-20 md:static md:bg-transparent md:border-0 md:p-0">
+            <div className="mt-4 space-y-3 rounded-[1.05rem] border border-[var(--color-border)] bg-[var(--color-surface)]/92 p-3.5 sticky bottom-3 z-20 sm:rounded-[1.25rem] sm:p-4 md:static md:bg-transparent md:border-0 md:p-0">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">Size</p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   {product.sizes.map((option) => (
                     <button key={option} type="button" onClick={() => setSelectedSize(option)} className={`rounded-full border px-3 py-2 text-sm ${size === option ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}>
                       {option}
@@ -226,14 +226,14 @@ export default function ProductDetailPage() {
 
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[var(--color-text)]">Quantity</p>
-                <div className="mt-3 flex items-center gap-3">
+                <div className="mt-2 flex items-center gap-3">
                   <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="h-10 w-10 rounded-full border border-[var(--color-border)] text-lg text-[var(--color-text)]">−</button>
                   <span className="min-w-8 text-center text-base font-semibold text-[var(--color-text)]">{quantity}</span>
                   <button type="button" onClick={() => setQuantity((value) => value + 1)} className="h-10 w-10 rounded-full border border-[var(--color-border)] text-lg text-[var(--color-text)]">+</button>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Button onClick={() => {
                   addToCart(product, { size, color: 'Default', quantity })
                   metaPixel.addToCart({
@@ -270,7 +270,7 @@ export default function ProductDetailPage() {
           </div>
         ) : null}
 
-        <div className="mt-10 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 sm:p-6">
+        <div className="mt-8 rounded-[1.35rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 sm:mt-10 sm:rounded-[1.75rem] sm:p-6">
           <h2 className="text-xl font-semibold text-[var(--color-text)]">Description</h2>
           <ul className="mt-4 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
             {highlights.map((item) => (
@@ -283,9 +283,9 @@ export default function ProductDetailPage() {
           <p className="mt-4 text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">Cash on Delivery available</p>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-8 sm:mt-10">
           <h2 className="text-xl font-semibold text-[var(--color-text)]">You may also like</h2>
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-5 lg:grid-cols-3">
             {related.map((item) => (
               <ProductCard
                 key={item.id}

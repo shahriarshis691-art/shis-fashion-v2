@@ -101,10 +101,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="px-4 pb-40 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-34 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
+        <div className="grid gap-4 lg:grid-cols-[1fr_0.85fr]">
+          <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Checkout</p>
             <h1 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">Cash on delivery, made simple</h1>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">Built for Bangladesh shoppers who want a fast mobile checkout with only the details needed to deliver the order.</p>
@@ -117,13 +117,13 @@ export default function CheckoutPage() {
 
             {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
 
-            <form id="checkout-form" className="mt-6 space-y-4" onSubmit={handleSubmit}>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <form id="checkout-form" className="mt-5 space-y-3" onSubmit={handleSubmit}>
+              <div className="grid gap-3 sm:grid-cols-2">
                 <input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Full name" />
                 <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">Division</span>
                   <select
@@ -161,16 +161,16 @@ export default function CheckoutPage() {
                 autoComplete="street-address"
                 value={form.streetAddress}
                 onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
-                className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 placeholder="House/Road/Village/Area, Union, Thana, Landmark"
               />
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <input type="email" inputMode="email" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Email Address (optional)" />
                 <textarea
                   value={form.deliveryNote}
                   onChange={(event) => setForm({ ...form, deliveryNote: event.target.value })}
-                  className="min-h-28 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
                   placeholder="Apartment, Floor, Landmark or Special Delivery Instructions"
                 />
               </div>
@@ -213,14 +213,14 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="fixed inset-x-4 bottom-4 z-40 rounded-[1.6rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
-          <div className="rounded-[1.2rem] bg-[rgba(255,255,255,0.03)] px-4 py-3">
+        <div className="fixed inset-x-2.5 bottom-3.5 z-40 rounded-[1.2rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
+          <div className="rounded-[0.95rem] bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Grand total</p>
                 <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{summaryLabel}</p>
               </div>
-              <Button type="submit" form="checkout-form" className="min-w-[10.25rem] justify-center px-5" disabled={isSubmitting}>
+              <Button type="submit" form="checkout-form" className="min-w-[9.5rem] justify-center px-4" disabled={isSubmitting}>
                 {isSubmitting ? 'Placing...' : 'Place order'}
               </Button>
             </div>

@@ -28,11 +28,11 @@ export default function CartPage() {
   }
 
   return (
-    <section className="px-4 pb-36 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-32 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-4">
-            <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-3">
+            <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Cart</p>
@@ -48,10 +48,10 @@ export default function CartPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-[1.8rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:p-5"
+                className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:rounded-[1.8rem] sm:p-5"
               >
                 <div className="flex gap-4">
-                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-24 w-24 rounded-[1.2rem] object-cover sm:h-28 sm:w-28" />
+                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-20 w-20 rounded-[0.9rem] object-cover sm:h-28 sm:w-28 sm:rounded-[1.2rem]" />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -60,7 +60,7 @@ export default function CartPage() {
                       </div>
                       <button type="button" onClick={() => removeFromCart(item.id)} className="text-sm font-semibold text-[var(--color-accent)]">Remove</button>
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] p-1">
                         <button type="button" onClick={() => updateQuantity(item.id, -1)} className="h-8 w-8 text-lg text-[var(--color-text)]">−</button>
                         <span className="min-w-8 text-center text-sm font-semibold text-[var(--color-text)]">{item.quantity}</span>
@@ -97,13 +97,13 @@ export default function CartPage() {
           </div>
         </div>
 
-        <div className="fixed inset-x-4 bottom-4 z-40 rounded-[1.6rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
-          <div className="flex items-center justify-between gap-3 rounded-[1.2rem] bg-[rgba(255,255,255,0.03)] px-4 py-3">
+        <div className="fixed inset-x-2.5 bottom-3.5 z-40 rounded-[1.2rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
+          <div className="flex items-center justify-between gap-3 rounded-[0.95rem] bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
               <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
-            <Button onClick={() => navigate('/checkout')} className="min-w-[9.5rem] justify-center px-5">
+            <Button onClick={() => navigate('/checkout')} className="min-w-[8.75rem] justify-center px-4.5">
               Checkout
             </Button>
           </div>
