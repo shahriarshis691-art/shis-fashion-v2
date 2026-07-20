@@ -8,6 +8,7 @@ import { consumeAdminAccessDeniedFlag, onAdminAuthChanged } from './firebase/adm
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
+const CollectionListingPage = lazy(() => import('./pages/CollectionListingPage'))
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
@@ -81,6 +82,10 @@ export const router = createBrowserRouter([
       {
         path: 'shop/:category/:productSlug',
         element: withSuspense(<ProductDetailPage />),
+      },
+      {
+        path: 'collections/:slug',
+        element: withSuspense(<CollectionListingPage />),
       },
       {
         path: 'product/:productSlug',

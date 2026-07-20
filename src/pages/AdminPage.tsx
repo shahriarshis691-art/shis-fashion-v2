@@ -319,8 +319,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleUpload = async (
     files: FileList | null,
-    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | null = null,
+    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'featured-page-image' | null = null,
     categoryIndex?: number,
+    slotIndex?: number,
   ) => {
     if (!files?.length) {
       return
@@ -341,7 +342,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setUploadProgress(0)
 
       const uploadedImages = imageFiles.length
-        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' ? 'homepage' : 'products', {
+        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' || target === 'featured-page-image' ? 'homepage' : 'products', {
           retries: 2,
           onProgress: (progress) => setUploadProgress(progress),
         })
@@ -388,6 +389,24 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
           return { ...current, shopByCategories: nextShopByCategories }
         })
+      } else if (target === 'featured-page-image') {
+        setHomepageContent((current) => {
+          if (!current || !current.featuredCollectionPages.length) {
+            return current
+          }
+
+          const nextPages = [...current.featuredCollectionPages]
+          const safePageIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextPages.length - 1) : 0
+          const currentImages = [...(nextPages[safePageIndex].images ?? [])]
+          const safeSlotIndex = typeof slotIndex === 'number' ? Math.max(0, Math.min(slotIndex, 3)) : currentImages.findIndex((image) => !image)
+          const targetSlot = safeSlotIndex === -1 ? 0 : safeSlotIndex
+          currentImages[targetSlot] = uploadedImages[0] ?? currentImages[targetSlot] ?? ''
+          nextPages[safePageIndex] = {
+            ...nextPages[safePageIndex],
+            images: currentImages,
+          }
+          return { ...current, featuredCollectionPages: nextPages }
+        })
       } else {
         setForm((current) => ({ ...current, images: [...current.images, ...uploadedImages], videos: [...current.videos, ...uploadedVideos] }))
       }
@@ -403,10 +422,65 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | null = null) => {
+  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'featured-page-image' | null = null) => {
     event.preventDefault()
     setDragActive(false)
     await handleUpload(event.dataTransfer.files, target)
+  }
+
+  const updateFeaturedCollectionPageField = (
+    pageIndex: number,
+    field: 'title' | 'subtitle' | 'description' | 'href' | 'slug' | 'relatedCategorySlugs',
+    value: string,
+  ) => {
+    if (!homepageContent) {
+      return
+    }
+
+    const nextPages = [...homepageContent.featuredCollectionPages]
+    if (!nextPages[pageIndex]) {
+      return
+    }
+
+    if (field === 'relatedCategorySlugs') {
+      nextPages[pageIndex] = {
+        ...nextPages[pageIndex],
+        relatedCategorySlugs: value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
+      }
+    } else {
+      nextPages[pageIndex] = {
+        ...nextPages[pageIndex],
+        [field]: value,
+      }
+    }
+
+    setHomepageContent({ ...homepageContent, featuredCollectionPages: nextPages })
+  }
+
+  const handleRemoveFeaturedCollectionImage = async (pageIndex: number, imageIndex: number) => {
+    if (!homepageContent?.featuredCollectionPages[pageIndex]) {
+      return
+    }
+
+    const imageToRemove = homepageContent.featuredCollectionPages[pageIndex].images?.[imageIndex]
+    if (!imageToRemove) {
+      return
+    }
+
+    try {
+      await deleteAsset(imageToRemove)
+      const nextPages = [...homepageContent.featuredCollectionPages]
+      const nextImages = [...(nextPages[pageIndex].images ?? [])]
+      nextImages[imageIndex] = ''
+      nextPages[pageIndex] = { ...nextPages[pageIndex], images: nextImages }
+      setHomepageContent({ ...homepageContent, featuredCollectionPages: nextPages })
+      setMessage('Collection image removed.')
+    } catch {
+      setMessage('Unable to remove collection image.')
+    }
   }
 
   const handleRemoveMedia = async (value: string, kind: 'image' | 'video') => {
@@ -1067,6 +1141,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       nextCategories[index] = { ...nextCategories[index], caption: event.target.value }
                       setHomepageContent({ ...homepageContent, categories: nextCategories })
                     }} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category caption" />
+                    <input value={category.href ?? ''} onChange={(event) => {
+                      const nextCategories = [...homepageContent.categories]
+                      nextCategories[index] = { ...nextCategories[index], href: event.target.value }
+                      setHomepageContent({ ...homepageContent, categories: nextCategories })
+                    }} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none sm:col-span-2" placeholder="Category link (example: /collections/winter)" />
                     <div className="sm:col-span-2">
                       <label className="cursor-pointer text-sm text-[var(--color-muted)]">
                         <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'category-image', index)} className="hidden" />
@@ -1091,6 +1170,89 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                   </div>
                 ))}
+
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">Featured listing pages</p>
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">Manage Winter, Summer, and Everyday wear listing pages with dedicated images and route slugs.</p>
+
+                  <div className="mt-4 space-y-4">
+                    {homepageContent.featuredCollectionPages.map((page, pageIndex) => (
+                      <div key={page.slug} className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <input
+                            value={page.title}
+                            onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'title', event.target.value)}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Listing page title"
+                          />
+                          <input
+                            value={page.subtitle}
+                            onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'subtitle', event.target.value)}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Listing page subtitle"
+                          />
+                          <input
+                            value={page.slug}
+                            onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'slug', event.target.value)}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Route slug (example: winter)"
+                          />
+                          <input
+                            value={page.href}
+                            onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'href', event.target.value)}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Route path (example: /collections/winter)"
+                          />
+                        </div>
+                        <textarea
+                          value={page.description}
+                          onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'description', event.target.value)}
+                          className="mt-3 min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Listing page description"
+                        />
+                        <input
+                          value={page.relatedCategorySlugs.join(', ')}
+                          onChange={(event) => updateFeaturedCollectionPageField(pageIndex, 'relatedCategorySlugs', event.target.value)}
+                          className="mt-3 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Related product categories (comma separated slugs)"
+                        />
+
+                        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                          {Array.from({ length: 4 }).map((_, imageIndex) => {
+                            const image = page.images?.[imageIndex] ?? ''
+                            return (
+                              <div key={`${page.slug}-image-${imageIndex}`} className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+                                {image ? (
+                                  <img src={image} alt={`${page.title} ${imageIndex + 1}`} className="h-20 w-full rounded-[0.75rem] object-cover" />
+                                ) : (
+                                  <div className="flex h-20 items-center justify-center rounded-[0.75rem] border border-dashed border-[var(--color-border)] text-[11px] text-[var(--color-muted)]">Image {imageIndex + 1}</div>
+                                )}
+                                <label className="mt-2 block cursor-pointer text-[11px] font-semibold text-[var(--color-text)]">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => handleUpload(event.target.files, 'featured-page-image', pageIndex, imageIndex)}
+                                    className="hidden"
+                                  />
+                                  {image ? 'Replace' : 'Upload'}
+                                </label>
+                                {image ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveFeaturedCollectionImage(pageIndex, imageIndex)}
+                                    className="mt-1 text-[11px] font-semibold text-[var(--color-accent)]"
+                                  >
+                                    Remove
+                                  </button>
+                                ) : null}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
                   <p className="text-xs text-[var(--color-muted)]">After uploading category images, click save to publish these changes.</p>

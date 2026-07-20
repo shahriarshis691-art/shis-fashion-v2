@@ -33,9 +33,53 @@ const defaultHomepage: HomepageContent = {
   bannerImageTitle: 'Featured banner image',
   bannerImageDescription: 'Editorial banner image used in the brand promise section.',
   categories: [
-    { title: 'Tailored Layers', caption: 'Soft authority' },
-    { title: 'Everyday Luxe', caption: 'Refined comfort' },
-    { title: 'Evening Edit', caption: 'Quiet glamour' },
+    { title: 'Winter', caption: 'Winter.', href: '/collections/winter' },
+    { title: 'Summer', caption: 'Summer.', href: '/collections/summer' },
+    { title: 'Everyday Wear', caption: 'Everyday wear.', href: '/collections/everyday-wear' },
+  ],
+  featuredCollectionPages: [
+    {
+      slug: 'winter',
+      title: 'Winter Collection',
+      subtitle: 'Layer-ready staples',
+      description: 'Cold-season essentials with premium texture and clean tailoring.',
+      href: '/collections/winter',
+      images: [
+        'https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
+    },
+    {
+      slug: 'summer',
+      title: 'Summer Collection',
+      subtitle: 'Breathable premium edits',
+      description: 'Lightweight silhouettes designed for warm days and evening plans.',
+      href: '/collections/summer',
+      images: [
+        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
+    },
+    {
+      slug: 'everyday-wear',
+      title: 'Everyday Wear',
+      subtitle: 'Daily go-to luxury',
+      description: 'Reliable daily pieces balancing comfort, polish, and movement.',
+      href: '/collections/everyday-wear',
+      images: [
+        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
+    },
   ],
   shopByCategories: homeCategoryItems.map((item) => ({
     title: item.name,
@@ -125,7 +169,7 @@ function SectionHeader({
     <div className="flex items-end justify-between gap-4">
       <div className="max-w-2xl">
         <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">{eyebrow}</p>
-        <h2 className="mt-3 text-[2rem] font-bold leading-[0.96] text-[var(--color-text)] sm:text-[2.45rem]">{title}</h2>
+        <h2 className="mt-3 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
         {description ? <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)] sm:text-[0.98rem]">{description}</p> : null}
       </div>
       {to && linkLabel ? (
@@ -223,19 +267,14 @@ function ProductRail({ products }: { products: AdminProduct[] }) {
         return (
           <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="min-w-[15.5rem] snap-start md:min-w-0">
             <Link to={productHref(item)} className="group block overflow-hidden rounded-[1.6rem] bg-transparent">
-              <div className="relative overflow-hidden rounded-[1.4rem] bg-[var(--color-surface)] shadow-[0_16px_34px_rgba(17,17,17,0.08)]">
+              <div className="overflow-hidden rounded-[1.35rem] bg-[var(--color-surface)] shadow-[0_14px_30px_rgba(17,17,17,0.08)]">
                 <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-56 w-full object-cover sm:h-64 ${toneClass}`} />
-                <div className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/88 text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.12)] backdrop-blur-sm">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 21s-6.7-4.35-9.1-8.06C1.26 10.48 2.3 6.9 5.64 5.58c2.17-.86 4.08-.14 5.36 1.42 1.28-1.56 3.19-2.28 5.36-1.42 3.34 1.32 4.38 4.9 2.74 7.36C18.7 16.65 12 21 12 21Z" />
-                  </svg>
-                </div>
               </div>
-              <div className="px-1 pb-1 pt-3">
-                <h3 className="line-clamp-1 text-[1.02rem] font-semibold text-[var(--color-text)]">{item.name}</h3>
+              <div className="px-1 pb-1 pt-3.5">
+                <h3 className="line-clamp-1 font-sans text-[1rem] font-semibold text-[var(--color-text)]">{item.name}</h3>
                 <div className="mt-1.5 flex items-center justify-between gap-3">
-                  <p className="text-lg font-bold leading-none text-[var(--color-text)]">{item.price}</p>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+                  <p className="text-base font-bold leading-none text-[var(--color-text)]">{item.price}</p>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
                     {item.stock > 0 ? 'In stock' : 'Sold out'}
                   </span>
                 </div>
@@ -318,10 +357,10 @@ export default function HomePage() {
       key: 'hero',
       order: heroConfig?.order ?? 0,
       node: (
-        <section className="px-4 pb-8 pt-4 sm:px-6 lg:px-8 lg:pb-12 lg:pt-6">
+        <section className="px-4 pb-8 pt-3 sm:px-6 lg:px-8 lg:pb-12 lg:pt-6">
           <Container>
-            <div className="overflow-hidden rounded-[2rem] bg-[#090909] shadow-[0_30px_60px_rgba(0,0,0,0.16)]">
-              <div className="relative min-h-[27rem] sm:min-h-[34rem] lg:min-h-[38rem]">
+            <div className="overflow-hidden rounded-[1.6rem] bg-[#111111] shadow-[0_24px_54px_rgba(0,0,0,0.14)] sm:rounded-[2rem]">
+              <div className="relative min-h-[23rem] sm:min-h-[31rem] lg:min-h-[36rem]">
                 {heroVideo ? (
                   <video
                     src={heroVideo}
@@ -341,57 +380,56 @@ export default function HomePage() {
                     fetchPriority="high"
                     decoding="async"
                     onError={handleImageError}
-                    className={`absolute inset-0 h-full w-full object-cover object-[68%_24%] ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
+                    className={`absolute inset-0 h-full w-full object-cover object-[62%_20%] sm:object-[70%_24%] ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
                   />
                 ) : (
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
                 )}
 
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,9,9,0.96)_0%,rgba(9,9,9,0.82)_34%,rgba(9,9,9,0.38)_66%,rgba(9,9,9,0.06)_100%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_26%,rgba(255,255,255,0.08),transparent_32%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.94)_0%,rgba(10,10,10,0.78)_42%,rgba(10,10,10,0.26)_74%,rgba(10,10,10,0.06)_100%)]" />
 
-                <Container className="relative z-10 flex min-h-[27rem] items-center px-6 py-8 sm:min-h-[34rem] sm:px-10 lg:min-h-[38rem] lg:px-12">
+                <Container className="relative z-10 flex min-h-[23rem] items-start px-5 py-8 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
                   <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, ease: 'easeOut' }}
-                    className="max-w-[16rem] sm:max-w-[23rem] lg:max-w-[27rem]"
+                    className="max-w-[13rem] pt-4 sm:max-w-[21rem] sm:pt-0 lg:max-w-[24rem]"
                   >
-                    <p className="text-[0.82rem] font-semibold uppercase tracking-[0.34em] text-white/76">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
-                    <h1 className="mt-4 text-[3.35rem] font-bold leading-[0.88] text-white sm:text-[4.7rem] lg:text-[5.7rem]">{homepageContent.heroTitle}</h1>
-                    <p className="mt-5 max-w-sm text-base leading-7 text-white/82 sm:text-lg">{homepageContent.heroSubtitle}</p>
-                    <div className="mt-7 flex flex-wrap gap-3">
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-white/70">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
+                    <h1 className="mt-3 font-sans text-[2.55rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:mt-4 sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                    <p className="mt-4 max-w-[14rem] text-[0.98rem] leading-7 text-white/80 sm:max-w-sm sm:text-base">{homepageContent.heroSubtitle}</p>
+                    <div className="mt-6 flex max-w-[12.5rem] flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
                       <Button
                         to={homepageContent.heroPrimaryLink ?? '/shop'}
-                        className="min-w-[11.5rem] rounded-[1rem] border-white bg-white px-7 py-3 text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-[#111111] shadow-[0_16px_32px_rgba(255,255,255,0.12)] hover:border-[#f3ede4] hover:bg-[#f3ede4]"
+                        className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white"
                       >
                         {homepageContent.heroCta}
                       </Button>
                       <Button
                         to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
                         variant="secondary"
-                        className="min-w-[10rem] rounded-[1rem] border-white/22 bg-white/8 px-6 py-3 text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm hover:border-white/40 hover:bg-white/12 hover:text-white"
+                        className="min-w-[11.25rem] rounded-full border-white/14 bg-black/16 px-6 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm hover:border-white/28 hover:bg-black/24 hover:text-white"
                       >
                         {homepageContent.heroSecondaryCta}
                       </Button>
                     </div>
-                    {homepageContent.heroImageDescription ? <p className="mt-5 max-w-xs text-xs leading-6 text-white/58">{homepageContent.heroImageDescription}</p> : null}
+                    {homepageContent.heroImageDescription ? <p className="mt-5 max-w-[13rem] text-[0.78rem] leading-6 text-white/54 sm:max-w-xs">{homepageContent.heroImageDescription}</p> : null}
                   </motion.div>
                 </Container>
 
-                <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/12 bg-black/18 px-4 py-2 backdrop-blur-sm">
-                  <span className="h-1.5 w-7 rounded-full bg-white/90" />
-                  <span className="h-1.5 w-7 rounded-full bg-white/35" />
-                  <span className="h-1.5 w-7 rounded-full bg-white/35" />
+                <div className="absolute bottom-4 left-5 z-10 flex items-center gap-2 sm:left-1/2 sm:-translate-x-1/2">
+                  <span className="h-1.5 w-6 rounded-full bg-white/92" />
+                  <span className="h-1.5 w-6 rounded-full bg-white/32" />
+                  <span className="h-1.5 w-6 rounded-full bg-white/32" />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 border-b border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.16))] px-2 py-6 sm:grid-cols-4 sm:px-6 lg:px-10">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="flex min-h-24 flex-col items-center justify-center border-r border-[var(--color-border)] px-3 text-center last:border-r-0 [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r sm:[&:last-child]:border-r-0">
-                  <p className="text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]">{item.label}</p>
-                  <p className="mt-1 max-w-[11rem] text-[0.72rem] leading-5 text-[var(--color-muted)]">{item.value}</p>
+                <div key={item.label} className="rounded-[1.1rem] border border-[var(--color-border)] bg-white/78 px-3 py-4 text-center shadow-[0_10px_22px_rgba(17,17,17,0.04)]">
+                  <p className="text-[0.74rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]">{item.label}</p>
+                  <p className="mt-1 text-[0.7rem] leading-5 text-[var(--color-muted)]">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -421,14 +459,18 @@ export default function HomePage() {
               {homepageContent.categories.map((category, index) => {
                 const categoryImage = normalizeCatalogImageUrl(category.image ?? '', 900, 600)
                 const toneClass = isDemoImageUrl(categoryImage) ? 'shis-media-tone' : ''
+                const categoryHref = category.href || `/collections/${category.title.toLowerCase().replace(/\s+/g, '-')}`
 
                 return (
                   <motion.div key={category.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="hidden sm:block">
-                    <Card className="h-full rounded-[1.5rem]">
-                      {categoryImage ? <img src={categoryImage} alt={category.title} loading="lazy" decoding="async" onError={handleImageError} className={`h-28 w-full rounded-[1.25rem] object-cover ${toneClass}`} /> : <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />}
-                      <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.title}</h3>
-                      <p className="mt-2 text-sm text-[var(--color-muted)]">{category.caption}</p>
-                    </Card>
+                    <Link to={categoryHref} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]">
+                      <Card className="h-full rounded-[1.5rem] transition hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(17,17,17,0.1)]">
+                        {categoryImage ? <img src={categoryImage} alt={category.title} loading="lazy" decoding="async" onError={handleImageError} className={`h-28 w-full rounded-[1.25rem] object-cover ${toneClass}`} /> : <div className="h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.08))]" />}
+                        <h3 className="mt-4 text-lg font-semibold text-[var(--color-text)]">{category.title}</h3>
+                        <p className="mt-2 text-sm text-[var(--color-muted)]">{category.caption}</p>
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">View collection</p>
+                      </Card>
+                    </Link>
                   </motion.div>
                 )
               })}

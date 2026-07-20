@@ -29,8 +29,8 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
 }
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [mobileMenuPath, setMobileMenuPath] = useState<string | null>(null)
+  const [searchPath, setSearchPath] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
@@ -38,15 +38,17 @@ export default function Navbar() {
   const { itemCount } = useCart()
   const location = useLocation()
   const navigate = useNavigate()
+  const isMobileMenuOpen = mobileMenuPath === location.pathname
+  const isSearchOpen = searchPath === location.pathname
   const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
-  const closeMobileMenu = () => setIsMobileMenuOpen(false)
+  const closeMobileMenu = () => setMobileMenuPath(null)
   const toggleMobileMenu = () => {
-    setIsSearchOpen(false)
-    setIsMobileMenuOpen((value) => !value)
+    setSearchPath(null)
+    setMobileMenuPath((value) => (value === location.pathname ? null : location.pathname))
   }
   const toggleSearch = () => {
-    setIsMobileMenuOpen(false)
-    setIsSearchOpen((value) => !value)
+    setMobileMenuPath(null)
+    setSearchPath((value) => (value === location.pathname ? null : location.pathname))
   }
   const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
     `relative py-1 text-sm font-medium tracking-[0.3px] antialiased transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 ${
@@ -67,11 +69,6 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    setIsMobileMenuOpen(false)
-    setIsSearchOpen(false)
-  }, [location.pathname])
-
-  useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 4)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -85,7 +82,7 @@ export default function Navbar() {
     }
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMobileMenuOpen(false)
+      if (e.key === 'Escape') setMobileMenuPath(null)
     }
     window.addEventListener('keydown', onKey)
     return () => {
@@ -173,7 +170,7 @@ export default function Navbar() {
                         metaPixel.search({ search_string: query })
                       }
                       navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
-                      setIsSearchOpen(false)
+                      setSearchPath(null)
                       setSearchTerm('')
                     }
                   }}
@@ -188,7 +185,7 @@ export default function Navbar() {
                       metaPixel.search({ search_string: query })
                     }
                     navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
-                    setIsSearchOpen(false)
+                    setSearchPath(null)
                     setSearchTerm('')
                   }}
                   className="rounded-md border border-[#000000] bg-[#000000] px-4 py-2 text-sm font-semibold tracking-[0.3px] text-white transition-colors duration-200 hover:bg-white hover:text-[#000000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"

@@ -75,6 +75,16 @@ export interface HomepageShopCategory {
   image?: string
 }
 
+export interface FeaturedCollectionPage {
+  slug: string
+  title: string
+  subtitle: string
+  description: string
+  href: string
+  images: string[]
+  relatedCategorySlugs: string[]
+}
+
 export interface HomepageContent {
   navbarBrandPrimary?: string
   navbarBrandSecondary?: string
@@ -93,7 +103,8 @@ export interface HomepageContent {
   bannerImage?: string
   bannerImageTitle?: string
   bannerImageDescription?: string
-  categories: Array<{ title: string; caption: string; image?: string }>
+  categories: Array<{ title: string; caption: string; href?: string; image?: string }>
+  featuredCollectionPages: FeaturedCollectionPage[]
   shopByCategories: HomepageShopCategory[]
   featuredCollectionEyebrow?: string
   featuredCollectionTitle?: string
@@ -594,9 +605,53 @@ const defaultHomepage: HomepageContent = {
   bannerImageTitle: 'Brand promise banner image',
   bannerImageDescription: 'Editorial banner used beside the brand promise content.',
   categories: [
-    { title: 'Tailored Layers', caption: 'Soft authority', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80' },
-    { title: 'Everyday Luxe', caption: 'Refined comfort', image: 'https://images.unsplash.com/photo-1527719327859-c6ce80353573?auto=format&fit=crop&w=1200&q=80' },
-    { title: 'Evening Edit', caption: 'Quiet glamour', image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80' },
+    { title: 'Winter', caption: 'Winter.', href: '/collections/winter', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80' },
+    { title: 'Summer', caption: 'Summer.', href: '/collections/summer', image: 'https://images.unsplash.com/photo-1527719327859-c6ce80353573?auto=format&fit=crop&w=1200&q=80' },
+    { title: 'Everyday Wear', caption: 'Everyday wear.', href: '/collections/everyday-wear', image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80' },
+  ],
+  featuredCollectionPages: [
+    {
+      slug: 'winter',
+      title: 'Winter Collection',
+      subtitle: 'Layer-ready staples',
+      description: 'Cold-season essentials with premium texture and clean tailoring.',
+      href: '/collections/winter',
+      images: [
+        'https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
+    },
+    {
+      slug: 'summer',
+      title: 'Summer Collection',
+      subtitle: 'Breathable premium edits',
+      description: 'Lightweight silhouettes designed for warm days and evening plans.',
+      href: '/collections/summer',
+      images: [
+        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
+    },
+    {
+      slug: 'everyday-wear',
+      title: 'Everyday Wear',
+      subtitle: 'Daily go-to luxury',
+      description: 'Reliable daily pieces balancing comfort, polish, and movement.',
+      href: '/collections/everyday-wear',
+      images: [
+        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1200&q=80',
+      ],
+      relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
+    },
   ],
   shopByCategories: homeCategoryItems.map((item) => ({
     title: item.name,
@@ -644,11 +699,54 @@ function normalizeProduct(product: AdminProduct): AdminProduct {
 }
 
 function normalizeHomepageContent(content: Partial<HomepageContent> | undefined): HomepageContent {
-  const mergedCategories = (content?.categories && content.categories.length ? content.categories : defaultHomepage.categories).map((category, index) => ({
-    ...defaultHomepage.categories[index],
-    ...category,
-    image: category.image || defaultHomepage.categories[index]?.image,
-  }))
+  const mergedCategories = (content?.categories && content.categories.length ? content.categories : defaultHomepage.categories).map((category, index) => {
+    const fallback = defaultHomepage.categories[index] ?? defaultHomepage.categories[0]
+    const legacyTitle = (category.title ?? '').trim().toLowerCase()
+    const legacyCaption = (category.caption ?? '').trim().toLowerCase()
+    const shouldMigrateLegacyLabel =
+      legacyTitle === 'tailored layers' ||
+      legacyTitle === 'everyday luxe' ||
+      legacyTitle === 'evening edit' ||
+      legacyCaption === 'soft authority' ||
+      legacyCaption === 'refined comfort' ||
+      legacyCaption === 'quiet glamour'
+
+    return {
+      ...fallback,
+      ...category,
+      title: shouldMigrateLegacyLabel ? fallback.title : (category.title || fallback.title),
+      caption: shouldMigrateLegacyLabel ? fallback.caption : (category.caption || fallback.caption),
+      href: category.href || fallback.href,
+      image: category.image || fallback.image,
+    }
+  })
+
+  const mergedFeaturedCollectionPages = (
+    content?.featuredCollectionPages && content.featuredCollectionPages.length
+      ? content.featuredCollectionPages
+      : defaultHomepage.featuredCollectionPages
+  ).map((page, index) => {
+    const fallback = defaultHomepage.featuredCollectionPages[index] ?? defaultHomepage.featuredCollectionPages[0]
+    const normalizedImages = Array.isArray(page.images)
+      ? page.images.filter((image): image is string => typeof image === 'string' && image.trim().length > 0)
+      : []
+
+    const paddedImages = Array.from({ length: 4 }, (_, imageIndex) => normalizedImages[imageIndex] || fallback.images[imageIndex] || '')
+
+    return {
+      ...fallback,
+      ...page,
+      slug: page.slug || fallback.slug,
+      title: page.title || fallback.title,
+      subtitle: page.subtitle || fallback.subtitle,
+      description: page.description || fallback.description,
+      href: page.href || fallback.href,
+      images: paddedImages,
+      relatedCategorySlugs: Array.isArray(page.relatedCategorySlugs) && page.relatedCategorySlugs.length
+        ? page.relatedCategorySlugs.filter((slug): slug is string => typeof slug === 'string' && slug.trim().length > 0)
+        : fallback.relatedCategorySlugs,
+    }
+  })
 
   const mergedShopByCategories = (content?.shopByCategories && content.shopByCategories.length
     ? content.shopByCategories
@@ -672,6 +770,7 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     bannerImageTitle: content?.bannerImageTitle ?? defaultHomepage.bannerImageTitle,
     bannerImageDescription: content?.bannerImageDescription ?? defaultHomepage.bannerImageDescription,
     categories: mergedCategories,
+    featuredCollectionPages: mergedFeaturedCollectionPages,
     shopByCategories: mergedShopByCategories,
     sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
       ...defaultHomepage.sections[index],
