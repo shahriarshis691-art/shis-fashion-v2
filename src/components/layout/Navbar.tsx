@@ -21,7 +21,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-md text-[#000000] antialiased transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
     >
       {children}
     </button>
@@ -30,14 +30,26 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
-  const { theme, toggleTheme } = useTheme()
+  const { theme } = useTheme()
   const { itemCount } = useCart()
   const navigate = useNavigate()
+  const closeOverlays = () => {
+    setIsSearchOpen(false)
+    setIsMenuOpen(false)
+  }
+
   const toggleSearch = () => {
+    setIsMenuOpen(false)
     setIsSearchOpen((value) => !value)
+  }
+
+  const toggleMenu = () => {
+    setIsSearchOpen(false)
+    setIsMenuOpen((value) => !value)
   }
 
   useEffect(() => {
@@ -55,7 +67,10 @@ export default function Navbar() {
   // Close search using Escape key.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsSearchOpen(false)
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false)
+        setIsMenuOpen(false)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => {
@@ -63,29 +78,42 @@ export default function Navbar() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      document.body.style.overflow = ''
+      return
+    }
+
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMenuOpen])
+
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full bg-[#FFFFFF] transition-[box-shadow] duration-200 ${isScrolled ? 'shadow-[0_6px_20px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full items-center gap-3 px-4 py-3 sm:px-6 md:h-[5.5rem] lg:h-24 lg:px-10">
-          <Link to="/" className="group flex flex-shrink-0 items-center justify-center">
+      <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
+        <div className="flex h-auto w-full items-center gap-2.5 px-4 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
+          <Link to="/" onClick={closeOverlays} className="group flex min-w-0 flex-shrink-0 items-center justify-center">
             <img
               src="/shis-logo.svg"
               alt="SHIS Fashion - Premium Essentials"
-              className="h-12 w-auto object-contain md:h-14 lg:h-20"
+              className="h-9 w-auto object-contain brightness-[1.15] contrast-125 md:h-10 lg:h-12"
               loading="eager"
             />
           </Link>
 
-          <nav className="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6 lg:gap-9" aria-label="Primary navigation">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-6 lg:flex lg:gap-9" aria-label="Primary navigation">
             {links.map((link) => (
               <NavLink
                 key={link.label}
                 to={link.href}
+                onClick={closeOverlays}
                 className={({ isActive }) => {
-                  const baseClass = `whitespace-nowrap rounded-md px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 md:px-0 md:py-1 md:text-sm md:font-medium md:tracking-[0.3px] ${
+                  const baseClass = `whitespace-nowrap rounded-md px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:px-0 md:py-1 md:text-[12px] md:font-medium md:tracking-[0.22em] ${
                     isActive
-                      ? 'bg-black text-white md:bg-transparent md:text-[#000000] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[#000000] md:after:content-[\'\']'
-                      : 'text-[#000000] hover:bg-black hover:text-white md:hover:bg-transparent md:hover:text-[#000000] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[#000000] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
+                      ? 'bg-[rgba(210,180,122,0.1)] text-[var(--color-accent)] md:bg-transparent md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
+                      : 'text-[var(--color-text)]/86 hover:bg-[rgba(255,255,255,0.05)] hover:text-[var(--color-text)] md:hover:bg-transparent md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
                   }`
 
                   return baseClass
@@ -96,39 +124,48 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="hidden flex-1 md:flex lg:hidden" />
+
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
             <IconButton label="Search" onClick={toggleSearch}>
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                 <circle cx="11" cy="11" r="5.5" />
                 <path d="M15.5 15.5 20 20" />
               </svg>
             </IconButton>
             <Link
               to="/cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-md text-[#000000] antialiased transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
+              onClick={closeOverlays}
+              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
               aria-label="Cart"
             >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                 <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-              {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#000000] px-0.5 text-[8px] font-bold text-white">{itemCount}</span> : null}
+              {itemCount > 0 ? <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[8px] font-bold text-[#050505]">{itemCount}</span> : null}
             </Link>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="hidden h-9 items-center justify-center rounded-md border border-[#000000] px-2 text-xs font-semibold tracking-[0.3px] text-[#000000] transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 sm:flex"
-              aria-label="Toggle theme"
-            >
-              {theme === 'luxury' ? '🌙' : '☀️'}
-            </button>
+            <IconButton label={isMenuOpen ? 'Close menu' : 'Open menu'} onClick={toggleMenu}>
+              {isMenuOpen ? (
+                <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+                  <path d="M6 6 18 18" />
+                  <path d="M18 6 6 18" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h16" />
+                </svg>
+              )}
+            </IconButton>
           </div>
         </div>
 
         <AnimatePresence>
           {isSearchOpen ? (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-b border-black bg-[#FFFFFF] px-4 py-3 sm:px-6 lg:px-10">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-t border-[rgba(255,255,255,0.06)] bg-[rgba(8,8,8,0.98)] px-4 py-3 sm:px-6 lg:px-10">
               <div className="flex gap-2">
                 <input
                   value={searchTerm}
@@ -146,7 +183,7 @@ export default function Navbar() {
                     }
                   }}
                   placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                  className="flex-1 rounded-md border border-[#000000] bg-[#FFFFFF] px-4 py-2 text-sm tracking-[0.3px] text-[#000000] outline-none transition-colors duration-200 hover:border-[#000000] focus:border-[#000000] focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-1"
+                  className="flex-1 rounded-full border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm tracking-[0.18em] text-[var(--color-text)] outline-none transition-colors duration-200 hover:border-[rgba(210,180,122,0.3)] focus:border-[rgba(210,180,122,0.45)] focus-visible:ring-2 focus-visible:ring-[rgba(210,180,122,0.24)] focus-visible:ring-offset-1 focus-visible:ring-offset-[#050505]"
                 />
                 <button
                   type="button"
@@ -159,7 +196,7 @@ export default function Navbar() {
                     setIsSearchOpen(false)
                     setSearchTerm('')
                   }}
-                  className="rounded-md border border-[#000000] bg-[#000000] px-4 py-2 text-sm font-semibold tracking-[0.3px] text-white transition-colors duration-200 hover:bg-white hover:text-[#000000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
+                  className="rounded-full border border-[rgba(210,180,122,0.2)] bg-[linear-gradient(180deg,#171717,#090909)] px-4 py-2 text-sm font-semibold tracking-[0.18em] text-[var(--color-text)] transition-colors duration-200 hover:border-[rgba(210,180,122,0.42)] hover:text-[var(--color-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
                 >
                   Search
                 </button>
@@ -168,6 +205,56 @@ export default function Navbar() {
           ) : null}
         </AnimatePresence>
       </header>
+
+      <AnimatePresence>
+        {isMenuOpen ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close menu overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-40 bg-[rgba(10,10,10,0.34)] lg:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <motion.aside
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="fixed inset-x-3 top-[4.45rem] z-50 rounded-[1.5rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.96)] p-3 shadow-[0_26px_80px_rgba(0,0,0,0.52)] backdrop-blur-xl sm:inset-x-6 md:top-[5.25rem] lg:hidden"
+            >
+              <div className="rounded-[1.2rem] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-3">
+                <div className="flex items-center justify-between gap-3 px-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">Browse</p>
+                  <span className="rounded-full border border-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">{theme}</span>
+                </div>
+                <nav className="mt-3 grid gap-1" aria-label="Mobile navigation">
+                  {links.map((link) => (
+                    <NavLink
+                      key={link.label}
+                      to={link.href}
+                      onClick={closeOverlays}
+                      className={({ isActive }) => `flex items-center justify-between rounded-[0.95rem] px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'bg-[rgba(210,180,122,0.1)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(255,255,255,0.04)]'}`}
+                    >
+                      <span>{link.label}</span>
+                      <span aria-hidden className="text-base leading-none">→</span>
+                    </NavLink>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="mt-3 grid grid-cols-1 gap-3">
+                <Link to="/checkout" onClick={closeOverlays} className="rounded-[1rem] border border-[rgba(210,180,122,0.16)] bg-[linear-gradient(180deg,#181818,#090909)] px-4 py-3 text-center text-sm font-semibold tracking-[0.16em] text-[var(--color-text)] shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  Checkout now
+                </Link>
+              </div>
+            </motion.aside>
+          </>
+        ) : null}
+      </AnimatePresence>
     </>
   )
 }

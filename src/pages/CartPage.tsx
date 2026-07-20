@@ -8,6 +8,7 @@ import { formatBDT, parseBDT } from '../utils/currency'
 export default function CartPage() {
   const navigate = useNavigate()
   const { items, updateQuantity, removeFromCart, subtotal, itemCount } = useCart()
+  const totalLabel = formatBDT(subtotal)
 
   if (items.length === 0) {
     return (
@@ -27,7 +28,7 @@ export default function CartPage() {
   }
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-4 pb-36 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
@@ -73,12 +74,12 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
+          <div className="hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:block sm:p-7">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Summary</p>
             <div className="mt-5 space-y-3 text-sm text-[var(--color-muted)]">
               <div className="flex items-center justify-between">
                 <span>Subtotal</span>
-                <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
+                <span className="text-[var(--color-text)]">{totalLabel}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Shipping</span>
@@ -86,13 +87,25 @@ export default function CartPage() {
               </div>
               <div className="flex items-center justify-between pt-3 text-base font-semibold text-[var(--color-text)]">
                 <span>Total</span>
-                <span className="text-[var(--color-accent)]">{formatBDT(subtotal)}</span>
+                <span className="text-[var(--color-accent)]">{totalLabel}</span>
               </div>
             </div>
             <div className="mt-6 space-y-3">
               <Button onClick={() => navigate('/checkout')} className="w-full justify-center">Checkout</Button>
               <Button to="/shop" variant="secondary" className="w-full justify-center">Keep browsing</Button>
             </div>
+          </div>
+        </div>
+
+        <div className="fixed inset-x-4 bottom-4 z-40 rounded-[1.6rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
+          <div className="flex items-center justify-between gap-3 rounded-[1.2rem] bg-[rgba(255,255,255,0.03)] px-4 py-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
+              <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{totalLabel}</p>
+            </div>
+            <Button onClick={() => navigate('/checkout')} className="min-w-[9.5rem] justify-center px-5">
+              Checkout
+            </Button>
           </div>
         </div>
       </Container>

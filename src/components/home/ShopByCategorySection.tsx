@@ -34,7 +34,7 @@ function CategoryCard({
     >
       <Link
         to={href}
-        className="group relative block aspect-[0.96] overflow-hidden rounded-[1.35rem] bg-[#f1ede6] shadow-[0_12px_28px_rgba(17,17,17,0.08)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(17,17,17,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
+        className="group relative block aspect-[0.96] overflow-hidden rounded-[1.35rem] bg-[#0a0a0a] shadow-[0_18px_42px_rgba(0,0,0,0.34)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_24px_46px_rgba(0,0,0,0.42)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
         aria-label={`${name} collection`}
       >
         <img

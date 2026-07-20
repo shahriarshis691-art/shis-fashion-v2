@@ -12,14 +12,11 @@ const quickLinks = [
   { label: 'Terms & Conditions', href: '/terms' },
 ]
 
-const socialLinks = [
-  { label: 'Instagram', href: 'https://instagram.com' },
-  { label: 'Pinterest', href: 'https://pinterest.com' },
-  { label: 'TikTok', href: 'https://tiktok.com' },
-]
-
 export default function Footer() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
+  const contactEmail = homepageContent?.footerContactEmail ?? 'hello@shisfashion.com'
+  const contactPhone = homepageContent?.footerContactPhone ?? '+234 800 000 0000'
+  const contactAddress = homepageContent?.footerContactAddress ?? 'Abuja, Nigeria'
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -54,16 +51,17 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-text)]">Contact</h4>
             <ul className="mt-4 space-y-3 text-sm text-[var(--color-muted)]">
-              <li>{homepageContent?.footerContactEmail ?? 'hello@shisfashion.com'}</li>
-              <li>{homepageContent?.footerContactPhone ?? '+234 800 000 0000'}</li>
-              <li>{homepageContent?.footerContactAddress ?? 'Abuja, Nigeria'}</li>
+              <li>{contactEmail}</li>
+              <li>{contactPhone}</li>
+              <li>{contactAddress}</li>
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
-              {socialLinks.map((link) => (
-                <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--color-muted)] transition hover:text-[var(--color-accent)]">
-                  {link.label}
-                </a>
-              ))}
+              <a href={`mailto:${contactEmail}`} className="inline-flex items-center rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
+                Email us
+              </a>
+              <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="inline-flex items-center rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
+                Call now
+              </a>
             </div>
           </div>
         </div>

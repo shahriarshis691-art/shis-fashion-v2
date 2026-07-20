@@ -29,6 +29,8 @@ function mapProduct(product: AdminProduct): ShopProduct {
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
     stock: product.stock,
+    featured: product.featured,
+    newArrival: product.newArrival,
     discount: product.stock <= 5 ? 'Low stock' : undefined,
   }
 }
@@ -131,11 +133,15 @@ export default function ShopPage() {
     : undefined
   const isNewArrivalsRoute = location.pathname === '/shop/new-arrivals'
   const isBestSellersRoute = location.pathname === '/shop/best-sellers'
+  const newArrivalProducts = useMemo(() => {
+    const flagged = products.filter((product) => product.newArrival)
+    return flagged.length ? flagged : products.slice(0, 8)
+  }, [products])
   const bestSellerProducts = useMemo(() => [...products].sort((left, right) => (right.stock ?? 0) - (left.stock ?? 0)).slice(0, 8), [products])
 
   const visibleProducts = useMemo(() => {
     const baseProducts = isNewArrivalsRoute
-      ? products.slice(0, 8)
+      ? newArrivalProducts
       : isBestSellersRoute
         ? bestSellerProducts
         : slug && slug !== 'shop'
@@ -148,7 +154,7 @@ export default function ShopPage() {
       : baseProducts
 
     return filtered
-  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, products, searchQuery, slug])
+  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, newArrivalProducts, products, searchQuery, slug])
 
   const headingTitle = isNewArrivalsRoute
     ? 'New Arrivals'
@@ -187,7 +193,7 @@ export default function ShopPage() {
                 type="search"
                 value={searchQuery}
                 onChange={(event) => handleSearchChange(event.target.value)}
-                placeholder="Search collection"
+                placeholder="Search the collection"
                 className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none ring-0 sm:w-56"
               />
               <Button to="/shop" onClick={() => handleSearchChange('')} variant="secondary" className="px-4 py-2.5">
@@ -196,7 +202,12 @@ export default function ShopPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Browse edits</p>
+              <p className="text-xs text-[var(--color-muted)]">{visibleProducts.length} pieces</p>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => navigate('/shop')}
@@ -228,6 +239,7 @@ export default function ShopPage() {
                 {item.title}
               </button>
             ))}
+            </div>
           </div>
         </div>
 
@@ -238,7 +250,7 @@ export default function ShopPage() {
           </div>
 
           {visibleProducts.length ? (
-            <div className="grid grid-cols-2 gap-3.5 min-[420px]:grid-cols-3 sm:gap-4 lg:gap-5">
+            <div className="grid grid-cols-2 gap-3.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 lg:gap-5 xl:grid-cols-4">
               {visibleProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

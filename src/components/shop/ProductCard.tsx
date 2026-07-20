@@ -13,9 +13,27 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
+function getStockLabel(stock?: number) {
+  if (typeof stock !== 'number') {
+    return 'Available'
+  }
+
+  if (stock <= 0) {
+    return 'Sold out'
+  }
+
+  if (stock <= 5) {
+    return 'Low stock'
+  }
+
+  return 'In stock'
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
+  const stockLabel = getStockLabel(product.stock)
+  const isSoldOut = stockLabel === 'Sold out'
 
   return (
     <motion.article
@@ -28,23 +46,29 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-bg)]">
+          {isSoldOut ? (
+            <span className="absolute left-3 top-3 z-10 rounded-full bg-[#111111]/88 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+              Sold out
+            </span>
+          ) : null}
           <img
             src={imageSrc}
             alt={product.name}
             loading="lazy"
             decoding="async"
             onError={handleImageError}
-            className={`h-full w-full object-cover ${imageToneClass}`}
+            className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${imageToneClass}`}
             fetchPriority="low"
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
         </div>
         <div className="p-3.5 sm:p-4">
-          <h3 className="line-clamp-1 text-sm font-semibold text-[var(--color-text)] sm:text-base">{product.name}</h3>
-          <div className="mt-1.5 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[var(--color-accent)]">{product.price}</p>
-            <span className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
-              {product.stock && product.stock > 0 ? 'In stock' : 'Limited'}
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">SHIS Selection</p>
+          <h3 className="mt-1 line-clamp-2 min-h-[2.6rem] text-[0.95rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-base font-semibold text-[var(--color-accent)] sm:text-sm">{product.price}</p>
+            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+              {stockLabel}
             </span>
           </div>
           <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]/78">View details</p>

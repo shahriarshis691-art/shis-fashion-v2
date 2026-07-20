@@ -11,10 +11,10 @@ import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, typ
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
 const serviceHighlights = [
-  { label: 'Free shipping', value: 'On orders over select thresholds' },
-  { label: 'Premium quality', value: 'Designed for repeat wear' },
-  { label: 'Easy returns', value: '7 day support window' },
-  { label: 'Customer support', value: 'Fast response on WhatsApp' },
+  { label: 'Nationwide delivery', value: 'Fast dispatch across Bangladesh' },
+  { label: 'Premium finishing', value: 'Built for repeat wear and clean structure' },
+  { label: 'COD checkout', value: 'Simple ordering with delivery confirmation' },
+  { label: 'Direct support', value: 'Quick help through phone and WhatsApp' },
 ]
 
 const defaultHomepage: HomepageContent = {
@@ -411,14 +411,11 @@ export default function HomePage() {
                       {homepageContent.heroSecondaryCta}
                     </Button>
                   </div>
-                  {homepageContent.heroImageDescription ? <p className="mt-5 max-w-[13rem] text-[0.78rem] leading-6 text-white/54 sm:max-w-xs">{homepageContent.heroImageDescription}</p> : null}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/84 backdrop-blur-sm">Premium essentials</span>
+                    <span className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/84 backdrop-blur-sm">Cash on delivery</span>
+                  </div>
                 </motion.div>
-              </div>
-
-              <div className="absolute bottom-4 left-5 z-10 flex items-center gap-2 sm:left-1/2 sm:-translate-x-1/2">
-                <span className="h-1.5 w-6 rounded-full bg-white/92" />
-                <span className="h-1.5 w-6 rounded-full bg-white/32" />
-                <span className="h-1.5 w-6 rounded-full bg-white/32" />
               </div>
             </div>
           </div>
@@ -426,7 +423,7 @@ export default function HomePage() {
           <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="rounded-[1.1rem] border border-[var(--color-border)] bg-white/78 px-3 py-4 text-center shadow-[0_10px_22px_rgba(17,17,17,0.04)]">
+                <div key={item.label} className="rounded-[1.1rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-3 py-4 text-center shadow-[0_18px_36px_rgba(0,0,0,0.22)] backdrop-blur-sm">
                   <p className="text-[0.74rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]">{item.label}</p>
                   <p className="mt-1 text-[0.7rem] leading-5 text-[var(--color-muted)]">{item.value}</p>
                 </div>

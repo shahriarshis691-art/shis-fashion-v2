@@ -14,16 +14,16 @@ const STORAGE_KEY = 'shis-fashion-theme'
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
     if (typeof window === 'undefined') {
-      return 'luxury'
+      return 'midnight'
     }
 
     const storedTheme = window.localStorage.getItem(STORAGE_KEY)
-    return storedTheme === 'midnight' ? 'midnight' : 'luxury'
+    return storedTheme === 'luxury' ? 'luxury' : 'midnight'
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    document.documentElement.style.colorScheme = theme === 'midnight' ? 'dark' : 'light'
+    document.documentElement.style.colorScheme = 'dark'
     window.localStorage.setItem(STORAGE_KEY, theme)
   }, [theme])
 

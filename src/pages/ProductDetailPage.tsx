@@ -303,6 +303,7 @@ export default function ProductDetailPage() {
                   image: item.image,
                   description: item.description,
                   galleryImages: item.galleryImages,
+                  stock: item.stock,
                   discount: item.discount,
                 }}
               />

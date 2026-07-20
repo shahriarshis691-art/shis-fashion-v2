@@ -12,11 +12,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border border-[#111111] bg-[#111111] text-white shadow-[0_4px_12px_rgba(17,17,17,0.16)] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(17,17,17,0.20)]',
+    'border border-[#1f1f1f] bg-[linear-gradient(180deg,#171717,#090909)] text-[#f7f3e9] shadow-[0_14px_34px_rgba(0,0,0,0.38)] hover:-translate-y-0.5 hover:border-[rgba(210,180,122,0.38)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.46)]',
   secondary:
-    'border border-[var(--color-border)] bg-[var(--color-surface)]/90 text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[#111111] hover:text-[#111111]',
+    'border border-[var(--color-border)] bg-[rgba(255,255,255,0.02)] text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[rgba(210,180,122,0.36)] hover:bg-[rgba(210,180,122,0.08)] hover:text-[var(--color-text)]',
   ghost:
-    'border border-transparent bg-transparent text-[var(--color-text)] hover:bg-[rgba(17,17,17,0.08)] hover:text-[#111111]',
+    'border border-transparent bg-transparent text-[var(--color-text)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[var(--color-text)]',
 }
 
 export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {

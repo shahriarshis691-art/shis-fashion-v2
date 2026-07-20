@@ -16,6 +16,8 @@ export interface ShopProduct {
   description: string
   galleryImages?: string[]
   stock?: number
+  featured?: boolean
+  newArrival?: boolean
 }
 
 export const shopCategories: ShopCategory[] = [

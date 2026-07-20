@@ -36,6 +36,7 @@ export default function CheckoutPage() {
   const grandTotal = subtotal + deliveryCharge
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const backendReady = isOrderBackendReady()
+  const summaryLabel = formatBDT(grandTotal)
 
   if (!items.length) {
     return (
@@ -100,7 +101,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-4 pb-40 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
           <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
@@ -116,7 +117,7 @@ export default function CheckoutPage() {
 
             {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
 
-            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <form id="checkout-form" className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Full name" />
                 <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
@@ -174,13 +175,13 @@ export default function CheckoutPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
+              <Button type="submit" className="hidden w-full justify-center sm:inline-flex" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
               {submitError ? <p className="text-center text-sm text-red-700">{submitError}</p> : null}
               <p className="text-center text-xs leading-6 text-[var(--color-muted)]">By placing this order, you confirm you want Cash on Delivery. We will contact you on the phone number provided.</p>
             </form>
           </div>
 
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7 lg:sticky lg:top-6 lg:self-start">
+          <div className="hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:block sm:p-7 lg:sticky lg:top-6 lg:self-start">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Order summary</p>
             <div className="mt-5 space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
               {items.map((item) => (
@@ -206,8 +207,26 @@ export default function CheckoutPage() {
               </div>
               <div className="mt-3 flex items-center justify-between text-base font-semibold text-[var(--color-text)]">
                 <span>Grand total</span>
-                <span className="text-[var(--color-accent)]">{formatBDT(grandTotal)}</span>
+                <span className="text-[var(--color-accent)]">{summaryLabel}</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="fixed inset-x-4 bottom-4 z-40 rounded-[1.6rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
+          <div className="rounded-[1.2rem] bg-[rgba(255,255,255,0.03)] px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Grand total</p>
+                <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{summaryLabel}</p>
+              </div>
+              <Button type="submit" form="checkout-form" className="min-w-[10.25rem] justify-center px-5" disabled={isSubmitting}>
+                {isSubmitting ? 'Placing...' : 'Place order'}
+              </Button>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-[var(--color-muted)]">
+              <span>{items.length} item{items.length > 1 ? 's' : ''}</span>
+              <span>Delivery included</span>
             </div>
           </div>
         </div>
