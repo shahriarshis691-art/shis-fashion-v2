@@ -45,13 +45,14 @@ function CategoryCard({
           className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.05)_0%,rgba(0,0,0,0.35)_52%,rgba(0,0,0,0.78)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02)_0%,rgba(0,0,0,0.42)_58%,rgba(0,0,0,0.84)_100%)]" />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-5 pb-7 pt-12 text-center text-white">
           <h3 className="text-[1.05rem] font-medium tracking-[0.3px] antialiased transition-colors duration-300 group-hover:text-white/95">{name}</h3>
-          <p className="mt-2 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-white/85 transition-colors duration-300 group-hover:text-white">
-            {'Explore Collection ->'}
-          </p>
+          <div className="mt-3 flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-3.5 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white/95 backdrop-blur-[1px] transition-all duration-300 group-hover:border-white/60 group-hover:bg-black/35">
+            <span>Shop this edit</span>
+            <span aria-hidden="true" className="text-xs leading-none">→</span>
+          </div>
         </div>
       </Link>
     </motion.div>
@@ -67,7 +68,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="bg-[#FFFFFF] px-4 py-14 sm:px-6 lg:px-8 lg:py-18"
+      className="bg-[#FFFFFF] px-4 py-12 sm:px-6 lg:px-8 lg:py-16"
       aria-labelledby="shop-by-category-title"
     >
       <Container>
@@ -80,15 +81,15 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
           </p>
         </div>
 
-        <div className="mt-9 hidden gap-6 md:grid md:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-7 hidden gap-4 md:grid md:grid-cols-3 lg:grid-cols-6">
           {categoryItems.map((item, index) => (
             <CategoryCard key={item.key} name={item.name} href={item.href} image={item.image} index={index} />
           ))}
         </div>
 
-        <div className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 mt-7 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryItems.map((item, index) => (
-            <div key={item.key} className="min-w-[74%] max-w-[18rem] flex-none">
+            <div key={item.key} className="min-w-[78%] max-w-[18rem] flex-none">
               <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
             </div>
           ))}

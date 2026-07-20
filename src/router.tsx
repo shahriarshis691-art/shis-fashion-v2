@@ -67,6 +67,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<NewArrivalsPage />),
       },
       {
+        path: 'new-arrivals',
+        element: withSuspense(<NewArrivalsPage />),
+      },
+      {
+        path: 'best-sellers',
+        element: <Navigate to="/shop/best-sellers" replace />,
+      },
+      {
         path: 'shop/:slug',
         element: withSuspense(<ShopPage />),
       },

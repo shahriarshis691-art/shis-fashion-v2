@@ -41,7 +41,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="p-3.5 sm:p-4">
           <h3 className="line-clamp-1 text-sm font-semibold text-[var(--color-text)] sm:text-base">{product.name}</h3>
-          <p className="mt-1 text-sm font-semibold text-[var(--color-accent)]">{product.price}</p>
+          <div className="mt-1.5 flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-[var(--color-accent)]">{product.price}</p>
+            <span className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+              {product.stock && product.stock > 0 ? 'In stock' : 'Limited'}
+            </span>
+          </div>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]/78">View details</p>
         </div>
       </Link>
     </motion.article>

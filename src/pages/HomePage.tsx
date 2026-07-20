@@ -127,8 +127,8 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
   }, [canLoadMore, products.length])
 
   return (
-    <div className="mt-7 sm:hidden">
-      <div className="grid grid-cols-3 gap-2.5">
+    <div className="mt-6 sm:hidden">
+      <div className="grid grid-cols-2 gap-3">
         {displayedProducts.map((item, index) => {
           const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 520, 650)
           const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
@@ -156,9 +156,15 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
                     className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
                   />
                 </div>
-                <div className="px-2 pb-2 pt-2.5">
-                  <h3 className="line-clamp-1 text-[11px] font-medium tracking-[0.01em] text-[var(--color-text)]">{item.name}</h3>
-                  <p className="mt-1 text-[11px] font-semibold tracking-[0.02em] text-[var(--color-accent)]">{item.price}</p>
+                <div className="px-2.5 pb-2.5 pt-2.5">
+                  <h3 className="line-clamp-1 text-[11px] font-semibold tracking-[0.01em] text-[var(--color-text)]">{item.name}</h3>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-semibold tracking-[0.02em] text-[var(--color-accent)]">{item.price}</p>
+                    <span className="rounded-full border border-[var(--color-border)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--color-muted)]">
+                      {item.stock > 0 ? 'In stock' : 'Sold out'}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]/80">View details</p>
                 </div>
               </Link>
             </motion.article>
@@ -172,7 +178,7 @@ function MobileProductGrid({ products }: { products: AdminProduct[] }) {
 
 function ProductRail({ products }: { products: AdminProduct[] }) {
   return (
-    <div className="mt-8 grid gap-6 grid-cols-2 md:grid-cols-2 xl:grid-cols-4">
+    <div className="mt-7 grid gap-4 grid-cols-2 md:gap-5 xl:grid-cols-4">
       {products.map((item, index) => {
         const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
         const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
@@ -183,7 +189,13 @@ function ProductRail({ products }: { products: AdminProduct[] }) {
               <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-44 w-full object-cover sm:h-56 lg:h-64 ${toneClass}`} />
               <div className="p-4">
                 <h3 className="text-base font-semibold text-[var(--color-text)]">{item.name}</h3>
-                <p className="mt-2 text-sm font-semibold text-[var(--color-accent)]">{item.price}</p>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-[var(--color-accent)]">{item.price}</p>
+                  <span className="rounded-full border border-[var(--color-border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+                    {item.stock > 0 ? 'In stock' : 'Sold out'}
+                  </span>
+                </div>
+                <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]/80">View product</p>
               </div>
             </Link>
           </motion.div>
@@ -263,7 +275,7 @@ export default function HomePage() {
       key: 'hero',
       order: heroConfig?.order ?? 0,
       node: (
-        <section className="relative -mt-24 h-[100svh] min-h-[560px] overflow-hidden">
+        <section className="relative -mt-24 h-[82svh] min-h-[500px] max-h-[780px] overflow-hidden">
           {heroVideo ? (
             <video
               src={heroVideo}
@@ -291,21 +303,21 @@ export default function HomePage() {
 
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,9,9,0.08)_0%,rgba(9,9,9,0.36)_52%,rgba(9,9,9,0.72)_100%)]" />
 
-          <Container className="relative z-10 flex h-full items-end px-4 pb-8 pt-16 sm:px-6 sm:pb-12 lg:px-8 lg:pb-14">
+          <Container className="relative z-10 flex h-full items-end px-4 pb-6 pt-16 sm:px-6 sm:pb-10 lg:px-8 lg:pb-12">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
-              className="max-w-[20rem] sm:max-w-xl"
+              className="max-w-[20rem] sm:max-w-2xl"
             >
               <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-white/90 sm:text-xs">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
               <h1 className="mt-2 text-[2rem] font-semibold leading-[0.98] tracking-[-0.01em] text-white sm:mt-4 sm:text-5xl lg:text-6xl">{homepageContent.heroTitle}</h1>
               <p className="mt-3 max-w-md text-sm leading-7 text-white/86 sm:mt-5 sm:text-base">{homepageContent.heroSubtitle}</p>
               {homepageContent.heroImageDescription ? <p className="mt-3 max-w-md text-xs leading-6 text-white/70 sm:text-sm">{homepageContent.heroImageDescription}</p> : null}
-              <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
+              <div className="mt-5 flex flex-wrap gap-3 sm:mt-7 sm:gap-4">
                 <Button
                   to={homepageContent.heroPrimaryLink ?? '/shop'}
-                  className="min-w-[11rem] border-[#ead8b7] bg-[linear-gradient(135deg,#fdf8ee_0%,#f3e7cf_52%,#e9d4ae_100%)] px-7 text-[0.82rem] font-semibold tracking-[0.08em] text-[#2f2516] shadow-[0_14px_32px_rgba(16,12,6,0.25)] hover:border-[#f4e5ca] hover:bg-[linear-gradient(135deg,#fffdf8_0%,#f7edd8_52%,#ecdab9_100%)] hover:text-[#21180d]"
+                  className="min-w-[12rem] border-[#ead8b7] bg-[linear-gradient(135deg,#fdf8ee_0%,#f3e7cf_52%,#e9d4ae_100%)] px-8 text-[0.82rem] font-semibold tracking-[0.1em] text-[#2f2516] shadow-[0_14px_32px_rgba(16,12,6,0.25)] hover:border-[#f4e5ca] hover:bg-[linear-gradient(135deg,#fffdf8_0%,#f7edd8_52%,#ecdab9_100%)] hover:text-[#21180d]"
                 >
                   {homepageContent.heroCta}
                 </Button>
@@ -316,6 +328,12 @@ export default function HomePage() {
                 >
                   {homepageContent.heroSecondaryCta}
                 </Button>
+              </div>
+
+              <div className="mt-4 grid max-w-xl grid-cols-1 gap-2 rounded-[1rem] border border-white/20 bg-black/25 p-3 backdrop-blur-[2px] sm:mt-6 sm:grid-cols-3 sm:gap-3 sm:p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Cash on Delivery</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Fast Dhaka Delivery</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">Easy Exchange Support</p>
               </div>
             </motion.div>
           </Container>
@@ -331,7 +349,7 @@ export default function HomePage() {
       key: 'featuredCollection',
       order: featuredCollectionConfig?.order ?? 1,
       node: (
-        <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <SectionTitle
               eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collection'}
@@ -340,7 +358,7 @@ export default function HomePage() {
               align="center"
             />
             <MobileProductGrid products={mobileFeaturedProducts} />
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-7 grid gap-3 sm:grid-cols-3 sm:gap-4">
               {homepageContent.categories.map((category, index) => {
                 const categoryImage = normalizeCatalogImageUrl(category.image ?? '', 900, 600)
                 const toneClass = isDemoImageUrl(categoryImage) ? 'shis-media-tone' : ''
@@ -364,7 +382,7 @@ export default function HomePage() {
       key: 'newArrivals',
       order: newArrivalsConfig?.order ?? 2,
       node: (
-        <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <SectionTitle eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'} title={homepageContent.newArrivalsTitle} description={homepageContent.newArrivalsSubtitle} />
             <ProductRail products={newArrivals} />
@@ -376,7 +394,7 @@ export default function HomePage() {
       key: 'bestSellers',
       order: bestSellersConfig?.order ?? 3,
       node: (
-        <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <SectionTitle eyebrow={homepageContent.bestSellerEyebrow ?? 'Best seller'} title={homepageContent.featuredTitle} description={homepageContent.featuredSubtitle} />
             <ProductRail products={featuredProducts.length ? featuredProducts : bestSellers} />
@@ -388,7 +406,7 @@ export default function HomePage() {
       key: 'brandPromise',
       order: brandPromiseConfig?.order ?? 4,
       node: (
-        <section className="px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
               <div className="order-2 lg:order-1">
