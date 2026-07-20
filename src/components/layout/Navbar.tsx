@@ -16,6 +16,12 @@ const links = [
   { label: 'Contact', href: '/contact' },
 ]
 
+const mobileQuickLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Our Brands', href: '/brands' },
+]
+
 function IconButton({ label, children, onClick }: { label: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
@@ -94,7 +100,7 @@ export default function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full items-center gap-2 px-3 py-2.5 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
+        <div className="flex h-auto w-full items-center gap-2 px-3 py-2 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
           <Link to="/" onClick={closeOverlays} className="group flex w-[3.65rem] flex-shrink-0 items-center justify-start overflow-hidden sm:w-auto">
             <img
               src="/shis-logo.svg"
@@ -141,6 +147,7 @@ export default function Navbar() {
             <Link
               to="/cart"
               onClick={closeOverlays}
+              title="Cart"
               className="relative flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(210,180,122,0.28)] hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:h-8 sm:w-8"
               aria-label="Cart"
             >
@@ -168,19 +175,23 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="border-t border-[rgba(255,255,255,0.05)] px-3 py-2 lg:hidden" aria-label="Mobile quick navigation">
-          <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {links.map((link) => (
+        <nav className="border-t border-[rgba(255,255,255,0.05)] px-3 py-1.5 lg:hidden" aria-label="Mobile quick navigation">
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {mobileQuickLinks.map((link) => (
               <NavLink
                 key={`mobile-quick-${link.label}`}
                 to={link.href}
                 onClick={closeOverlays}
                 className={({ isActive }) => {
-                  if (link.href === '/brands') {
-                    return `rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)]'}`
+                  if (link.href === '/shop') {
+                    return `rounded-full border px-2.75 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.52)] bg-[rgba(210,180,122,0.2)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.34)] bg-[rgba(210,180,122,0.12)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.52)]'}`
                   }
 
-                  return `text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]/82 hover:text-[var(--color-text)]'}`
+                  if (link.href === '/brands') {
+                    return `rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.44)] bg-[rgba(210,180,122,0.14)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.06)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.4)]'}`
+                  }
+
+                  return `text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]/82 hover:text-[var(--color-text)]'}`
                 }}
               >
                 {link.label}
