@@ -48,11 +48,8 @@ function CategoryCard({
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_12%,rgba(0,0,0,0.12)_52%,rgba(0,0,0,0.56)_100%)]" />
 
         <div className="absolute inset-x-0 bottom-0 px-3.5 pb-3.5 pt-14 text-white">
-          <h3 className="font-sans text-[0.96rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
-          <div className="mt-2 flex items-center gap-2 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white/85 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
-            <span>Shop now</span>
-            <span aria-hidden="true" className="text-sm leading-none">→</span>
-          </div>
+          <h3 className="font-sans text-[0.9rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
+          <div className="mt-1.5 text-[0.78rem] text-white/84">Explore</div>
         </div>
       </Link>
     </motion.div>
@@ -79,7 +76,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
               Shop by category
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)] sm:text-[0.98rem]">
-              Discover premium edits built for everyday wear, statement pieces, and easy gifting.
+              Curated categories with a quieter, editorial shopping flow.
             </p>
           </div>
           <Link to="/shop" className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)] md:inline-flex">
@@ -96,7 +93,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
 
         <div className="-mx-4 mt-7 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryItems.map((item, index) => (
-            <div key={item.key} className="min-w-[47%] max-w-[10.8rem] flex-none">
+            <div key={item.key} className="min-w-[52%] max-w-[11.4rem] flex-none">
               <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
             </div>
           ))}

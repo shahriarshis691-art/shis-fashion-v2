@@ -66,6 +66,12 @@ function getWhatsAppHref(phone?: string) {
   return `https://wa.me/${normalized}`
 }
 
+function getWhatsAppOrderHref(productName: string, size: string, quantity: number) {
+  const baseHref = getWhatsAppHref()
+  const message = encodeURIComponent(`Hi SHIS, I want to order ${productName}. Size: ${size}. Quantity: ${quantity}.`)
+  return `${baseHref}?text=${message}`
+}
+
 export default function ProductDetailPage() {
   const { productSlug } = useParams()
   const decodedSlug = decodeURIComponent(productSlug ?? '')
@@ -148,6 +154,7 @@ export default function ProductDetailPage() {
   const stockStatus = product.stock <= 0 ? 'Out of stock' : product.stock <= 5 ? 'Low stock' : 'In stock'
   const highlights = buildHighlights(product.description, product.stock, product.sizes)
   const supportWhatsAppHref = getWhatsAppHref()
+  const quickOrderWhatsAppHref = getWhatsAppOrderHref(product.name, size, quantity)
 
   const handleSwipeEnd = (event: React.TouchEvent<HTMLDivElement>) => {
     if (touchStartX === null) {
@@ -262,6 +269,15 @@ export default function ProductDetailPage() {
                   navigate('/checkout')
                 }} variant="secondary" className="justify-center" disabled={product.stock <= 0}>Buy now</Button>
               </div>
+
+              <a
+                href={quickOrderWhatsAppHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]"
+              >
+                Quick order on WhatsApp
+              </a>
 
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--color-border)] pt-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Dispatch in 24-72h</p>

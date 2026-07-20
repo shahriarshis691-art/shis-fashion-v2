@@ -87,15 +87,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
         </div>
         <div className="px-2.5 pb-2.5 pt-2 sm:p-3.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">SHIS Selection</p>
-          <h3 className="mt-0.5 line-clamp-2 min-h-[2.35rem] text-[0.93rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
+          <h3 className="line-clamp-2 min-h-[2.35rem] text-[0.95rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <p className="text-base font-semibold text-[var(--color-accent)] sm:text-sm">{product.price}</p>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
               {stockLabel}
             </span>
           </div>
-          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]/78">View details</p>
         </div>
       </Link>
     </motion.article>

@@ -6,6 +6,7 @@ import ProductCard from '../components/shop/ProductCard'
 import { shopCategories, type ShopCategory, type ShopProduct } from '../data/shopData'
 import { subscribeToCategories, subscribeToProducts, type AdminCategory, type AdminProduct } from '../firebase/adminService'
 import { getManagedImageEntries } from '../utils/media'
+import { parseBDT } from '../utils/currency'
 
 function slugify(value: string) {
   return value
@@ -73,6 +74,10 @@ function categoryMatches(productCategory: string, activeSlug?: string) {
   return aliases.some((alias) => normalizedCategory.includes(alias))
 }
 
+function getWhatsAppHref() {
+  return 'https://wa.me/8801887848304'
+}
+
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -80,7 +85,9 @@ export default function ShopPage() {
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [ready, setReady] = useState(false)
   const [categories, setCategories] = useState<ShopCategory[]>(shopCategories)
+  const [sortBy, setSortBy] = useState<'curated' | 'price-low' | 'price-high' | 'new-arrivals'>('curated')
   const searchQuery = new URLSearchParams(location.search).get('q') ?? ''
+  const supportWhatsAppHref = getWhatsAppHref()
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -153,8 +160,20 @@ export default function ShopPage() {
       ? baseProducts.filter((product) => [product.name, product.description, product.category].some((value) => value.toLowerCase().includes(query)))
       : baseProducts
 
+    if (sortBy === 'price-low') {
+      return [...filtered].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
+    }
+
+    if (sortBy === 'price-high') {
+      return [...filtered].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
+    }
+
+    if (sortBy === 'new-arrivals') {
+      return [...filtered].sort((left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)))
+    }
+
     return filtered
-  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, newArrivalProducts, products, searchQuery, slug])
+  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, newArrivalProducts, products, searchQuery, slug, sortBy])
 
   const headingTitle = isNewArrivalsRoute
     ? 'New Arrivals'
@@ -202,10 +221,29 @@ export default function ShopPage() {
             </div>
           </div>
 
-          <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+          <div className="flex items-center justify-between rounded-[0.95rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:hidden">
+            <span>Swipe filters below</span>
+            <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-[var(--color-accent)]">WhatsApp help</a>
+          </div>
+
+          <div className="sticky top-[4.35rem] z-20 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/92 p-3 backdrop-blur-xl sm:static sm:bg-[var(--color-bg)]/70 sm:backdrop-blur-none">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Browse edits</p>
-              <p className="text-xs text-[var(--color-muted)]">{visibleProducts.length} pieces</p>
+              <div className="flex items-center gap-2">
+                <label htmlFor="shop-sort" className="sr-only">Sort products</label>
+                <select
+                  id="shop-sort"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value as 'curated' | 'price-low' | 'price-high' | 'new-arrivals')}
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text)] outline-none"
+                >
+                  <option value="curated">Curated</option>
+                  <option value="new-arrivals">New first</option>
+                  <option value="price-low">Price low-high</option>
+                  <option value="price-high">Price high-low</option>
+                </select>
+                <p className="text-xs text-[var(--color-muted)]">{visibleProducts.length} pieces</p>
+              </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button

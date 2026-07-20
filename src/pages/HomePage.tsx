@@ -11,10 +11,10 @@ import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, typ
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
 const serviceHighlights = [
-  { label: 'Nationwide delivery', value: 'Fast dispatch across Bangladesh' },
-  { label: 'Premium finishing', value: 'Built for repeat wear and clean structure' },
-  { label: 'COD checkout', value: 'Simple ordering with delivery confirmation' },
-  { label: 'Direct support', value: 'Quick help through phone and WhatsApp' },
+  { label: 'Nationwide delivery', value: 'Fast dispatch' },
+  { label: 'Premium finishing', value: 'Refined daily wear' },
+  { label: 'COD checkout', value: 'Simple delivery confirmation' },
+  { label: 'Direct support', value: 'Phone and WhatsApp help' },
 ]
 
 const defaultHomepage: HomepageContent = {
@@ -419,12 +419,12 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-3 w-full max-w-7xl px-3 sm:mt-4 sm:px-6 lg:px-8">
-            <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#090909] after:to-transparent after:content-[''] sm:after:hidden">
+              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#090909] after:to-transparent after:content-[''] sm:after:hidden">
               <div className="-mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="min-w-[15.2rem] snap-start rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.05rem] sm:px-3 sm:py-3">
-                  <p className="text-[0.69rem] font-semibold uppercase tracking-[0.11em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
-                  <p className="mt-1 line-clamp-2 text-[0.68rem] leading-4 text-[var(--color-muted)] sm:text-[0.7rem] sm:leading-5">{item.value}</p>
+                <div key={item.label} className="min-w-[14.6rem] snap-start rounded-[0.95rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.5 py-2.5 text-center shadow-[0_10px_22px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.05rem] sm:px-3 sm:py-3">
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
+                  <p className="mt-1 line-clamp-1 text-[0.67rem] leading-4 text-[var(--color-muted)] sm:text-[0.7rem]">{item.value}</p>
                 </div>
               ))}
               </div>
@@ -503,7 +503,7 @@ export default function HomePage() {
       key: 'bestSellers',
       order: bestSellersConfig?.order ?? 3,
       node: (
-        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <section className="hidden px-4 py-12 sm:block sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <SectionTitle eyebrow={homepageContent.bestSellerEyebrow ?? 'Best seller'} title={homepageContent.featuredTitle} description={homepageContent.featuredSubtitle} />
             <ProductRail products={featuredProducts.length ? featuredProducts : bestSellers} />
@@ -530,7 +530,7 @@ export default function HomePage() {
       key: 'allProducts',
       order: 5,
       node: (
-        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <section className="hidden px-4 py-12 sm:block sm:px-6 lg:px-8 lg:py-16">
           <Container>
             <SectionHeader
               eyebrow="All products"
