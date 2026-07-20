@@ -45,6 +45,11 @@ export default function CartPage() {
                 </div>
                 <Link to="/shop" className="text-sm font-semibold text-[var(--color-accent)]">Continue shopping</Link>
               </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">COD checkout</span>
+                <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">Phone confirm before dispatch</span>
+                <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-3 py-1.5 text-[var(--color-accent)]">WhatsApp support</a>
+              </div>
             </div>
 
             {items.map((item) => (
@@ -113,11 +118,11 @@ export default function CartPage() {
               <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
             <Button onClick={() => navigate('/checkout')} className="min-w-[8.75rem] justify-center px-4.5">
-              Checkout
+              Secure checkout
             </Button>
           </div>
           <div className="mt-2 flex items-center justify-between px-1 text-[10px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
-            <span>Delivery call before dispatch</span>
+            <span>No prepayment required</span>
             <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
           </div>
         </div>

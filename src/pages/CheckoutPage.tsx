@@ -114,6 +114,12 @@ export default function CheckoutPage() {
             <h1 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">Cash on delivery, made simple</h1>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">Built for Bangladesh shoppers who want a fast mobile checkout with only the details needed to deliver the order.</p>
 
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:text-[11px]">
+              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">1. Address</span>
+              <span className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-2 py-1.5 text-[var(--color-accent)]">2. Confirm</span>
+              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">3. Delivery call</span>
+            </div>
+
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text)]">
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">COD only</span>
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">No account needed</span>
@@ -133,6 +139,7 @@ export default function CheckoutPage() {
                 <input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Full name" />
                 <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
               </div>
+              <p className="-mt-1 text-xs text-[var(--color-muted)]">Use active number like 01XXXXXXXXX for confirmation call.</p>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-2">
@@ -165,6 +172,10 @@ export default function CheckoutPage() {
                     {districtOptions.map((district) => <option key={district} value={district}>{district}</option>)}
                   </select>
                 </label>
+              </div>
+
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)]/70 px-4 py-3 text-xs text-[var(--color-muted)]">
+                Delivery charge for {form.division}: <span className="font-semibold text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
               </div>
 
               <textarea
@@ -237,7 +248,7 @@ export default function CheckoutPage() {
               </Button>
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-[var(--color-muted)]">
-              <span>{items.length} item{items.length > 1 ? 's' : ''}</span>
+              <span>{items.length} item{items.length > 1 ? 's' : ''} • COD</span>
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
             </div>
           </div>
