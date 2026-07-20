@@ -138,7 +138,6 @@ export default function ProductDetailPage() {
   const resolvedActiveImage = activeImage && normalizedGalleryImages.includes(activeImage) ? activeImage : normalizedGalleryImages[0] ?? normalizeCatalogImageUrl(product.image, 1200, 1400)
   const activeImageIndex = normalizedGalleryImages.findIndex((image) => image === resolvedActiveImage)
   const activeImageTitle = product.galleryImageTitles?.[activeImageIndex] || product.name
-  const activeImageDescription = product.galleryImageDescriptions?.[activeImageIndex] || product.description
   const size = selectedSize && product.sizes.includes(selectedSize) ? selectedSize : (product.sizes[0] ?? 'M')
   const stockStatus = product.stock <= 0 ? 'Out of stock' : product.stock <= 5 ? 'Low stock' : 'In stock'
   const highlights = buildHighlights(product.description, product.stock, product.sizes)
@@ -198,10 +197,6 @@ export default function ProductDetailPage() {
                   </div>
                 </button>
               ))}
-            </div>
-            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
-              <p className="text-sm font-semibold text-[var(--color-text)]">{activeImageTitle}</p>
-              <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{activeImageDescription}</p>
             </div>
           </div>
           <div className="flex flex-col justify-center">
