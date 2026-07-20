@@ -528,6 +528,24 @@ export default function HomePage() {
         </section>
       ),
     } : null,
+    {
+      key: 'allProducts',
+      order: 5,
+      node: (
+        <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <Container>
+            <SectionHeader
+              eyebrow="All products"
+              title="Browse the full collection"
+              description="Scroll through every live product available on SHIS Fashion."
+              to="/shop"
+              linkLabel="Open shop"
+            />
+            <ProductRail products={products} />
+          </Container>
+        </section>
+      ),
+    },
   ].filter(Boolean) as Array<{ key: string; order: number; node: ReactNode }>
 
   sectionNodes.sort((left, right) => left.order - right.order)
