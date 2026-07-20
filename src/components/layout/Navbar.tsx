@@ -65,7 +65,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full border-b border-black bg-[#FFFFFF] transition-[box-shadow] duration-200 ${isScrolled ? 'shadow-[0_6px_20px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
+      <header className={`sticky top-0 z-50 w-full bg-[#FFFFFF] transition-[box-shadow] duration-200 ${isScrolled ? 'shadow-[0_6px_20px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
         <div className="flex h-auto w-full items-center gap-3 px-4 py-3 sm:px-6 md:h-[5.5rem] lg:h-24 lg:px-10">
           <Link to="/" className="group flex flex-shrink-0 items-center justify-center">
             <img

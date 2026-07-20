@@ -357,75 +357,75 @@ export default function HomePage() {
       key: 'hero',
       order: heroConfig?.order ?? 0,
       node: (
-        <section className="px-4 pb-8 pt-3 sm:px-6 lg:px-8 lg:pb-12 lg:pt-6">
-          <Container>
-            <div className="overflow-hidden rounded-[1.6rem] bg-[#111111] shadow-[0_24px_54px_rgba(0,0,0,0.14)] sm:rounded-[2rem]">
-              <div className="relative min-h-[23rem] sm:min-h-[31rem] lg:min-h-[36rem]">
-                {heroVideo ? (
-                  <video
-                    src={heroVideo}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    poster={heroImage || undefined}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                ) : heroImage ? (
-                  <img
-                    src={heroImage}
-                    alt={homepageContent.heroImageTitle || 'Hero media'}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    onError={handleImageError}
-                    className={`absolute inset-0 h-full w-full object-cover object-center ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
-                )}
+        <section className="px-0 pb-8 pt-0 lg:pb-12">
+          <div className="overflow-hidden bg-[#111111] shadow-[0_24px_54px_rgba(0,0,0,0.14)]">
+            <div className="relative min-h-[23rem] sm:min-h-[31rem] lg:min-h-[36rem]">
+              {heroVideo ? (
+                <video
+                  src={heroVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster={heroImage || undefined}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : heroImage ? (
+                <img
+                  src={heroImage}
+                  alt={homepageContent.heroImageTitle || 'Hero media'}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  onError={handleImageError}
+                  className={`absolute inset-0 h-full w-full object-cover object-center ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
+              )}
 
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.94)_0%,rgba(10,10,10,0.78)_42%,rgba(10,10,10,0.26)_74%,rgba(10,10,10,0.06)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.94)_0%,rgba(10,10,10,0.78)_42%,rgba(10,10,10,0.26)_74%,rgba(10,10,10,0.06)_100%)]" />
 
-                <Container className="relative z-10 flex min-h-[23rem] items-start px-5 py-8 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
-                  <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.45, ease: 'easeOut' }}
-                    className="max-w-[13rem] pt-4 sm:max-w-[21rem] sm:pt-0 lg:max-w-[24rem]"
-                  >
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-white/70">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
-                    <h1 className="mt-3 font-sans text-[2.55rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:mt-4 sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
-                    <p className="mt-4 max-w-[14rem] text-[0.98rem] leading-7 text-white/80 sm:max-w-sm sm:text-base">{homepageContent.heroSubtitle}</p>
-                    <div className="mt-6 flex max-w-[12.5rem] flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
-                      <Button
-                        to={homepageContent.heroPrimaryLink ?? '/shop'}
-                        className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white"
-                      >
-                        {homepageContent.heroCta}
-                      </Button>
-                      <Button
-                        to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
-                        variant="secondary"
-                        className="min-w-[11.25rem] rounded-full border-white/14 bg-black/16 px-6 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm hover:border-white/28 hover:bg-black/24 hover:text-white"
-                      >
-                        {homepageContent.heroSecondaryCta}
-                      </Button>
-                    </div>
-                    {homepageContent.heroImageDescription ? <p className="mt-5 max-w-[13rem] text-[0.78rem] leading-6 text-white/54 sm:max-w-xs">{homepageContent.heroImageDescription}</p> : null}
-                  </motion.div>
-                </Container>
+              <div className="relative z-10 flex min-h-[23rem] items-start px-5 py-8 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, ease: 'easeOut' }}
+                  className="max-w-[13rem] pt-4 sm:max-w-[21rem] sm:pt-0 lg:max-w-[24rem]"
+                >
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-white/70">{homepageContent.heroEyebrow ?? 'SHIS FASHION'}</p>
+                  <h1 className="mt-3 font-sans text-[2.55rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:mt-4 sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                  <p className="mt-4 max-w-[14rem] text-[0.98rem] leading-7 text-white/80 sm:max-w-sm sm:text-base">{homepageContent.heroSubtitle}</p>
+                  <div className="mt-6 flex max-w-[12.5rem] flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap">
+                    <Button
+                      to={homepageContent.heroPrimaryLink ?? '/shop'}
+                      className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white"
+                    >
+                      {homepageContent.heroCta}
+                    </Button>
+                    <Button
+                      to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
+                      variant="secondary"
+                      className="min-w-[11.25rem] rounded-full border-white/14 bg-black/16 px-6 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm hover:border-white/28 hover:bg-black/24 hover:text-white"
+                    >
+                      {homepageContent.heroSecondaryCta}
+                    </Button>
+                  </div>
+                  {homepageContent.heroImageDescription ? <p className="mt-5 max-w-[13rem] text-[0.78rem] leading-6 text-white/54 sm:max-w-xs">{homepageContent.heroImageDescription}</p> : null}
+                </motion.div>
+              </div>
 
-                <div className="absolute bottom-4 left-5 z-10 flex items-center gap-2 sm:left-1/2 sm:-translate-x-1/2">
-                  <span className="h-1.5 w-6 rounded-full bg-white/92" />
-                  <span className="h-1.5 w-6 rounded-full bg-white/32" />
-                  <span className="h-1.5 w-6 rounded-full bg-white/32" />
-                </div>
+              <div className="absolute bottom-4 left-5 z-10 flex items-center gap-2 sm:left-1/2 sm:-translate-x-1/2">
+                <span className="h-1.5 w-6 rounded-full bg-white/92" />
+                <span className="h-1.5 w-6 rounded-full bg-white/32" />
+                <span className="h-1.5 w-6 rounded-full bg-white/32" />
               </div>
             </div>
+          </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {serviceHighlights.map((item) => (
                 <div key={item.label} className="rounded-[1.1rem] border border-[var(--color-border)] bg-white/78 px-3 py-4 text-center shadow-[0_10px_22px_rgba(17,17,17,0.04)]">
                   <p className="text-[0.74rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-text)]">{item.label}</p>
@@ -433,13 +433,12 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-          </Container>
+          </div>
         </section>
       ),
     } : null,
     {
       key: 'shopByCategory',
-      order: (heroConfig?.order ?? 0) + 0.5,
       node: <ShopByCategorySection items={shopByCategoryCards} />,
     },
     featuredCollectionConfig?.enabled !== false ? {
@@ -538,7 +537,9 @@ export default function HomePage() {
         </section>
       ),
     } : null,
-  ].filter(Boolean).sort((left, right) => left!.order - right!.order) as Array<{ key: string; order: number; node: ReactNode }>
+  ].filter(Boolean) as Array<{ key: string; order: number; node: ReactNode }>
+
+  sectionNodes.sort((left, right) => left.order - right.order)
 
   return (
     <>
