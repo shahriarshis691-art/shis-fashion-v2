@@ -329,7 +329,6 @@ export default function HomePage() {
   }, [featuredProducts, newArrivals, products])
 
   const heroImage = normalizeCatalogImageUrl(homepageContent.heroImage ?? '', 1400, 900)
-  const bannerImage = normalizeCatalogImageUrl(homepageContent.bannerImage ?? '', 1400, 900)
   const heroVideo = homepageContent.heroVideo
   const orderedSections = useMemo(() => [...(homepageContent.sections?.length ? homepageContent.sections : defaultHomepage.sections)].sort((left, right) => left.order - right.order), [homepageContent.sections])
   const sectionMap = useMemo(() => new Map(orderedSections.map((section) => [section.key, section] as const)), [orderedSections])
@@ -520,18 +519,10 @@ export default function HomePage() {
       node: (
         <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <Container>
-            <div className="grid gap-8 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
-              <div className="order-2 lg:order-1">
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandPromiseEyebrow ?? 'Brand promise'}</p>
-                <h2 className="mt-4 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl lg:text-4xl">{homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}</h2>
-                <p className="mt-4 text-sm leading-7 text-[var(--color-muted)] sm:text-base sm:leading-8">{homepageContent.brandPromiseDescription ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}</p>
-              </div>
-              <div className="order-1 rounded-[1.5rem] border border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(201,162,39,0.16),rgba(255,255,255,0.6))] p-5 sm:p-6 lg:order-2">
-                {bannerImage ? <img src={bannerImage} alt={homepageContent.bannerImageTitle || 'Featured banner'} loading="lazy" decoding="async" onError={handleImageError} className={`mb-4 h-44 w-full rounded-[1.25rem] object-cover object-[center_22%] sm:h-48 ${isDemoImageUrl(bannerImage) ? 'shis-media-tone' : ''}`} /> : null}
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandSignatureLabel ?? 'Signature'}</p>
-                <p className="mt-3 text-base leading-7 text-[var(--color-text)] sm:text-lg sm:leading-8">{homepageContent.brandSignatureText ?? 'Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight.'}</p>
-                {homepageContent.bannerImageDescription ? <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{homepageContent.bannerImageDescription}</p> : null}
-              </div>
+            <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandPromiseEyebrow ?? 'Brand promise'}</p>
+              <h2 className="mt-4 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl lg:text-4xl">{homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}</h2>
+              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)] sm:text-base sm:leading-8">{homepageContent.brandPromiseDescription ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}</p>
             </div>
           </Container>
         </section>
