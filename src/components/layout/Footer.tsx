@@ -6,6 +6,7 @@ import { subscribeToHomepageContent, type HomepageContent } from '../../firebase
 const quickLinks = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
+  { label: 'Brands', href: '/brands' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
   { label: 'Privacy Policy', href: '/privacy' },

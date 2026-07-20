@@ -437,6 +437,13 @@ export default function HomePage() {
                     >
                       {homepageContent.heroCta}
                     </Button>
+                    <Button
+                      to="/brands"
+                      variant="secondary"
+                      className="min-w-[11.25rem] rounded-full border-white/18 bg-white/8 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                    >
+                      Meet founder
+                    </Button>
                   </div>
                 </motion.div>
               </div>

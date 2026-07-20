@@ -11,6 +11,7 @@ const links = [
   { label: 'Shop', href: '/shop' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'Best Sellers', href: '/shop/best-sellers' },
+  { label: 'Brands', href: '/brands' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ]

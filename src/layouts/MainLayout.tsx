@@ -76,6 +76,13 @@ function getRouteMetadata(pathname: string) {
     }
   }
 
+  if (pathname === '/brands') {
+    return {
+      title: 'Brands and Founder | SHIS Group',
+      description: 'Explore XEROXII, CERAVO, and RANGKUTIR with brand details, founder profile, and direct contact options.',
+    }
+  }
+
   return {
     title: 'SHIS Fashion',
     description: 'Premium fashion essentials with refined comfort and timeless styling.',
