@@ -66,46 +66,23 @@ export default function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-black bg-[#FFFFFF] transition-[box-shadow] duration-200 ${isScrolled ? 'shadow-[0_6px_20px_rgba(0,0,0,0.08)]' : 'shadow-none'}`}>
-        <div className="flex h-auto w-full flex-col gap-3 px-4 py-3 sm:px-6 md:h-[5.5rem] md:flex-row md:items-center md:gap-4 lg:h-24 lg:px-10">
-          <div className="flex items-center justify-between gap-3 md:shrink-0">
-            <Link to="/" className="group flex flex-shrink-0 items-center justify-center">
-              <img
-                src="/shis-logo.svg"
-                alt="SHIS Fashion - Premium Essentials"
-                className="h-12 w-auto object-contain md:h-14 lg:h-20"
-                loading="eager"
-              />
-            </Link>
+        <div className="flex h-auto w-full items-center gap-3 px-4 py-3 sm:px-6 md:h-[5.5rem] lg:h-24 lg:px-10">
+          <Link to="/" className="group flex flex-shrink-0 items-center justify-center">
+            <img
+              src="/shis-logo.svg"
+              alt="SHIS Fashion - Premium Essentials"
+              className="h-12 w-auto object-contain md:h-14 lg:h-20"
+              loading="eager"
+            />
+          </Link>
 
-            <div className="flex items-center gap-1.5 md:hidden">
-              <IconButton label="Search" onClick={toggleSearch}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <circle cx="11" cy="11" r="5.5" />
-                  <path d="M15.5 15.5 20 20" />
-                </svg>
-              </IconButton>
-              <Link
-                to="/cart"
-                className="relative flex h-9 w-9 items-center justify-center rounded-md text-[#000000] antialiased transition-colors duration-200 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2"
-                aria-label="Cart"
-              >
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
-                  <circle cx="10" cy="18" r="1.2" />
-                  <circle cx="17" cy="18" r="1.2" />
-                </svg>
-                {itemCount > 0 ? <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#000000] px-0.5 text-[8px] font-bold text-white">{itemCount}</span> : null}
-              </Link>
-            </div>
-          </div>
-
-          <nav className="flex w-full items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-1 md:justify-center md:gap-6 lg:gap-9" aria-label="Primary navigation">
+          <nav className="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6 lg:gap-9" aria-label="Primary navigation">
             {links.map((link) => (
               <NavLink
                 key={link.label}
                 to={link.href}
                 className={({ isActive }) => {
-                  const baseClass = `whitespace-nowrap rounded-md px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 md:px-0 md:py-1 md:text-sm md:font-medium md:tracking-[0.3px] ${
+                  const baseClass = `whitespace-nowrap rounded-md px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#000000] focus-visible:ring-offset-2 md:px-0 md:py-1 md:text-sm md:font-medium md:tracking-[0.3px] ${
                     isActive
                       ? 'bg-black text-white md:bg-transparent md:text-[#000000] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[#000000] md:after:content-[\'\']'
                       : 'text-[#000000] hover:bg-black hover:text-white md:hover:bg-transparent md:hover:text-[#000000] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[#000000] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
@@ -119,7 +96,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-1.5 md:flex md:shrink-0">
+          <div className="flex shrink-0 items-center gap-1.5">
             <IconButton label="Search" onClick={toggleSearch}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <circle cx="11" cy="11" r="5.5" />
