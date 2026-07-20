@@ -11,7 +11,7 @@ const links = [
   { label: 'Shop', href: '/shop' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'Best Sellers', href: '/shop/best-sellers' },
-  { label: 'Brands', href: '/brands' },
+  { label: 'Our Brands', href: '/brands' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ]
@@ -112,6 +112,10 @@ export default function Navbar() {
                 to={link.href}
                 onClick={closeOverlays}
                 className={({ isActive }) => {
+                  if (link.href === '/brands') {
+                    return `whitespace-nowrap rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:text-[11px] ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.5)] hover:bg-[rgba(210,180,122,0.14)]'}`
+                  }
+
                   const baseClass = `whitespace-nowrap px-0 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] md:text-[12px] md:font-medium md:tracking-[0.22em] ${
                     isActive
                       ? 'text-[var(--color-accent)] md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
@@ -238,7 +242,13 @@ export default function Navbar() {
                       key={link.label}
                       to={link.href}
                       onClick={closeOverlays}
-                      className={({ isActive }) => `flex items-center justify-between rounded-[0.95rem] px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'bg-[rgba(210,180,122,0.1)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(255,255,255,0.04)]'}`}
+                      className={({ isActive }) => {
+                        if (link.href === '/brands') {
+                          return `flex items-center justify-between rounded-[0.95rem] border px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'border-[rgba(210,180,122,0.45)] bg-[rgba(210,180,122,0.14)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.24)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.45)]'}`
+                        }
+
+                        return `flex items-center justify-between rounded-[0.95rem] px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'bg-[rgba(210,180,122,0.1)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(255,255,255,0.04)]'}`
+                      }}
                     >
                       <span>{link.label}</span>
                       <span aria-hidden className="text-base leading-none">→</span>
