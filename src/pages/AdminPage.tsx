@@ -148,7 +148,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
     for (const order of orders) {
-      const identity = (order.customerPhone || order.customerEmail || order.customerName).toLowerCase()
+      const identity = (order.customerPhone || order.customerEmail || order.customerName || order.id).toLowerCase()
       const current = byIdentity.get(identity)
       if (!current) {
         byIdentity.set(identity, {
@@ -243,8 +243,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     event.preventDefault()
     setLoading(true)
     setMessage('')
+    const email = loginForm.email.trim()
+    const password = loginForm.password.trim()
     try {
-      await signInAdmin(loginForm.email, loginForm.password)
+      await signInAdmin(email, password)
       setAuthMode('dashboard')
       setMessage('Welcome back. Your dashboard is ready.')
       navigate('/admin', { replace: true })
@@ -512,21 +514,32 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
+  const normalizeProductForm = (productForm: typeof form) => ({
+    ...productForm,
+    name: productForm.name.trim(),
+    price: productForm.price.trim(),
+    description: productForm.description.trim(),
+    category: productForm.category.trim(),
+    sizes: productForm.sizes.map((size) => size.trim()).filter(Boolean),
+    colors: productForm.colors.map((color) => color.trim()).filter(Boolean),
+  })
+
   const handleSaveProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
     try {
+      const normalizedForm = normalizeProductForm(form)
       const normalizedMedia = compactManagedImages({
-        images: form.images.slice(0, 3),
-        imageTitles: form.imageTitles.slice(0, 3),
-        imageDescriptions: form.imageDescriptions.slice(0, 3),
+        images: normalizedForm.images.slice(0, 3),
+        imageTitles: normalizedForm.imageTitles.slice(0, 3),
+        imageDescriptions: normalizedForm.imageDescriptions.slice(0, 3),
       })
       if (isEditing) {
         await updateProduct(isEditing, {
-          ...form,
+          ...normalizedForm,
           ...normalizedMedia,
-          sizes: form.sizes,
-          colors: form.colors,
+          sizes: normalizedForm.sizes,
+          colors: normalizedForm.colors,
         })
         setMessage('Product updated.')
       } else {
@@ -888,7 +901,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <label className="mt-3 flex cursor-pointer items-center justify-center overflow-hidden rounded-[1.2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/80 p-2">
                         <input type="file" accept="image/*" onChange={(event) => handleGalleryUpload(event.target.files, index)} className="hidden" />
                         {form.images[index] ? (
-                          <img src={form.images[index]} alt={label} className="h-28 w-full rounded-[1rem] object-cover" />
+                          <img src={form.images[index]} alt={label} className="h-28 w-full rounded-[1rem] object-cover object-center" />
                         ) : (
                           <span className="py-8 text-sm text-[var(--color-muted)]">Tap to upload {label.toLowerCase()}</span>
                         )}
@@ -1130,7 +1143,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 {homepageContent.heroImage ? (
                   <div className="relative">
-                    <img src={homepageContent.heroImage} alt="Hero preview" className="h-40 w-full rounded-[1.25rem] object-cover" />
+                    <img src={homepageContent.heroImage} alt="Hero preview" className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
                     <button type="button" onClick={async () => {
                       try {
                         await deleteAsset(homepageContent.heroImage!)
@@ -1150,7 +1163,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 {homepageContent.heroVideo ? (
                   <div className="relative">
-                    <video src={homepageContent.heroVideo} controls className="h-40 w-full rounded-[1.25rem] object-cover" />
+                    <video src={homepageContent.heroVideo} controls className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
                     <button type="button" onClick={async () => {
                       try {
                         await deleteAsset(homepageContent.heroVideo!)
@@ -1174,7 +1187,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 {homepageContent.bannerImage ? (
                   <div className="relative">
-                    <img src={homepageContent.bannerImage} alt="Banner preview" className="h-40 w-full rounded-[1.25rem] object-cover" />
+                    <img src={homepageContent.bannerImage} alt="Banner preview" className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
                     <button type="button" onClick={async () => {
                       try {
                         await deleteAsset(homepageContent.bannerImage!)
@@ -1210,7 +1223,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       </label>
                       {category.image ? (
                         <div className="relative">
-                          <img src={category.image} alt={`${category.title} preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover" />
+                          <img src={category.image} alt={`${category.title} preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover object-center" />
                           <button type="button" onClick={async () => {
                             try {
                               await deleteAsset(category.image!)
@@ -1280,7 +1293,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                             return (
                               <div key={`${page.slug}-image-${imageIndex}`} className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
                                 {image ? (
-                                  <img src={image} alt={`${page.title} ${imageIndex + 1}`} className="h-20 w-full rounded-[0.75rem] object-cover" />
+                                  <img src={image} alt={`${page.title} ${imageIndex + 1}`} className="h-20 w-full rounded-[0.75rem] object-cover object-center" />
                                 ) : (
                                   <div className="flex h-20 items-center justify-center rounded-[0.75rem] border border-dashed border-[var(--color-border)] text-[11px] text-[var(--color-muted)]">Image {imageIndex + 1}</div>
                                 )}
@@ -1351,7 +1364,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                           </label>
                           {item.image ? (
                             <div className="relative">
-                              <img src={item.image} alt={`${item.title || 'Shop category'} card preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover" />
+                              <img src={item.image} alt={`${item.title || 'Shop category'} card preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover object-center" />
                               <button
                                 type="button"
                                 onClick={async () => {
