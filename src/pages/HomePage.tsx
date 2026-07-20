@@ -380,7 +380,7 @@ export default function HomePage() {
                     fetchPriority="high"
                     decoding="async"
                     onError={handleImageError}
-                    className={`absolute inset-0 h-full w-full object-cover object-[62%_20%] sm:object-[70%_24%] ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
+                    className={`absolute inset-0 h-full w-full object-cover object-center ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
                   />
                 ) : (
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
