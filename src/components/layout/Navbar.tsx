@@ -103,7 +103,7 @@ export default function Navbar() {
             />
           </Link>
 
-          <nav className="flex min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:justify-center" aria-label="Primary navigation">
+          <nav className="hidden min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex lg:justify-center" aria-label="Primary navigation">
             <div className="flex min-w-max items-center gap-5 px-1 sm:gap-6 lg:gap-9">
             {links.map((link) => (
               <NavLink

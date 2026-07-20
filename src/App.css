@@ -217,14 +217,8 @@
     display: none;
   }
 
-  /* Slightly increase hero section padding on mobile for breathing room */
-  section.relative.overflow-hidden.px-4.pb-16.pt-6 {
-    padding-top: 28px;
-    padding-bottom: 44px;
-  }
-
-  /* Ensure hero text remains legible on small screens */
-  h1 {
+  /* Ensure homepage hero title remains legible on small screens */
+  .home-hero-title {
     font-size: 1.75rem; /* ~28px */
     line-height: 1.05;
   }
