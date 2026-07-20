@@ -29,16 +29,35 @@ function getStockLabel(stock?: number) {
   return 'In stock'
 }
 
+function getImagePositionClass(category: string) {
+  switch (category) {
+    case 'oversized-tee':
+      return 'object-[center_10%]'
+    case 'unisex-tee':
+      return 'object-[center_12%]'
+    case 'mens-shirt':
+      return 'object-[center_14%]'
+    case 'womens-dresses':
+      return 'object-[center_16%]'
+    case 'western-outfits':
+      return 'object-[center_15%]'
+    case 'denim':
+      return 'object-[center_18%]'
+    case 'couples':
+      return 'object-[center_12%]'
+    case 'kids':
+      return 'object-[center_20%]'
+    default:
+      return 'object-[center_14%]'
+  }
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
   const stockLabel = getStockLabel(product.stock)
   const isSoldOut = stockLabel === 'Sold out'
-  const imagePositionClass = product.category.includes('tee') || product.category.includes('shirt')
-    ? 'object-[center_14%]'
-    : product.category.includes('dress') || product.category.includes('western')
-      ? 'object-[center_18%]'
-      : 'object-[center_12%]'
+  const imagePositionClass = getImagePositionClass(product.category)
 
   return (
     <motion.article
