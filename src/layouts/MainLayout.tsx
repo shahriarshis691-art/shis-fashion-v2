@@ -5,8 +5,9 @@ import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import { metaPixel } from '../services/metaPixel'
+import { googleAnalytics } from '../services/googleAnalytics'
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL ?? 'https://shisfashion.com').replace(/\/$/, '')
+const SITE_URL = (import.meta.env.VITE_SITE_URL ?? 'https://www.shisfashion.com').replace(/\/$/, '')
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
@@ -84,6 +85,13 @@ function getRouteMetadata(pathname: string) {
     }
   }
 
+  if (pathname === '/sale') {
+    return {
+      title: 'Huge Sale | SHIS Fashion',
+      description: 'Shop SHIS Fashion Sale: premium essentials with limited-time markdowns, free delivery, and handpicked seasonal style.',
+    }
+  }
+
   return {
     title: 'SHIS Fashion',
     description: 'Premium fashion essentials with refined comfort and timeless styling.',
@@ -96,6 +104,7 @@ export default function MainLayout() {
   useEffect(() => {
     // Track PageView on every page change
     metaPixel.pageView()
+    googleAnalytics.pageView()
   }, [location.pathname])
 
   useEffect(() => {

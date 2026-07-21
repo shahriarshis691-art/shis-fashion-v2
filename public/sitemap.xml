@@ -1,42 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://shisfashion.com/</loc>
+    <loc>https://www.shisfashion.com/</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop</loc>
+    <loc>https://www.shisfashion.com/shop</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/new-arrivals</loc>
+    <loc>https://www.shisfashion.com/shop/new-arrivals</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/best-sellers</loc>
+    <loc>https://www.shisfashion.com/shop/best-sellers</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/mens-shirt</loc>
+    <loc>https://www.shisfashion.com/shop/mens-shirt</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/womens-dresses</loc>
+    <loc>https://www.shisfashion.com/shop/womens-dresses</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/kids</loc>
+    <loc>https://www.shisfashion.com/shop/kids</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/western-outfits</loc>
+    <loc>https://www.shisfashion.com/shop/western-outfits</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/shop/denim</loc>
+    <loc>https://www.shisfashion.com/shop/denim</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/about</loc>
+    <loc>https://www.shisfashion.com/about</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/contact</loc>
+    <loc>https://www.shisfashion.com/contact</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/privacy</loc>
+    <loc>https://www.shisfashion.com/sale</loc>
   </url>
   <url>
-    <loc>https://shisfashion.com/terms</loc>
+    <loc>https://www.shisfashion.com/privacy</loc>
+  </url>
+  <url>
+    <loc>https://www.shisfashion.com/terms</loc>
   </url>
 </urlset>
