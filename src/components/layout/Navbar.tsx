@@ -101,7 +101,7 @@ export default function Navbar() {
             <img
               src={shisLogoWhite}
               alt="SHIS Fashion"
-              className="h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02] sm:h-9 md:h-10 lg:h-11"
+              className="h-8 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02] sm:h-9 md:h-10 lg:h-11"
               loading="eager"
             />
           </Link>
@@ -115,10 +115,10 @@ export default function Navbar() {
                 onClick={closeOverlays}
                 className={({ isActive }) => {
                   if (link.href === '/brands') {
-                    return `whitespace-nowrap rounded-full border px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:px-3 sm:py-1.5 sm:text-[10px] sm:tracking-[0.18em] md:text-[11px] ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.5)] hover:bg-[rgba(210,180,122,0.14)]'}`
+                    return `whitespace-nowrap rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.18em] md:text-[12px] ${isActive ? 'border-[rgba(210,180,122,0.5)] bg-[rgba(210,180,122,0.18)] text-[var(--color-accent)]' : 'border-[rgba(210,180,122,0.3)] bg-[rgba(210,180,122,0.08)] text-[var(--color-accent)] hover:border-[rgba(210,180,122,0.5)] hover:bg-[rgba(210,180,122,0.14)]'}`
                   }
 
-                  const baseClass = `whitespace-nowrap px-0 py-1 text-[8px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:text-[11px] sm:tracking-[0.22em] md:text-[12px] md:font-medium md:tracking-[0.22em] ${
+                  const baseClass = `whitespace-nowrap px-0 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] sm:text-[12px] sm:tracking-[0.22em] md:text-[13px] md:font-medium md:tracking-[0.22em] ${
                     isActive
                       ? 'text-[var(--color-accent)] md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
                       : 'text-[var(--color-text)]/86 hover:text-[var(--color-text)] md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'

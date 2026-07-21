@@ -429,14 +429,14 @@ export default function HomePage() {
                   transition={{ duration: 0.45, ease: 'easeOut' }}
                   className="max-w-[14.8rem] sm:max-w-[21rem] lg:max-w-[24rem]"
                 >
-                  <h1 className="home-hero-title font-sans text-[2.45rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
-                  <h2 className="mt-4 max-w-[16rem] text-[0.95rem] leading-7 text-white/80 sm:text-[1.05rem] sm:leading-8">
+                  <h1 className="home-hero-title font-sans text-[2.8rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                  <h2 className="mt-4 max-w-[16rem] text-[1.05rem] leading-7 text-white/80 sm:text-[1.1rem] sm:leading-8">
                     Premium oversized T-shirts, Polo Shirts, Denim and fashion essentials for modern living in Bangladesh.
                   </h2>
                   <div className="mt-6 flex max-w-[12.75rem] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:flex-wrap">
                     <Button
                       to={homepageContent.heroPrimaryLink ?? '/shop'}
-                      className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white"
+                      className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white sm:text-[0.75rem]"
                     >
                       {homepageContent.heroCta}
                     </Button>

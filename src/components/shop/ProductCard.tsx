@@ -67,7 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link to={`/shop/${product.category}/${product.slug}`} className="block">
         <div className="relative aspect-[4/4.55] overflow-hidden bg-[var(--color-bg)]">
           {isSoldOut ? (
-            <span className="absolute left-3 top-3 z-10 rounded-full bg-[#111111]/88 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+            <span className="absolute left-3 top-3 z-10 rounded-full bg-[#111111]/88 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm sm:text-[9px]">
               Sold out
             </span>
           ) : null}
@@ -82,12 +82,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
         </div>
-        <div className="px-2.5 pb-2.5 pt-2 sm:p-3.5">
-          <h3 className="line-clamp-2 min-h-[2.35rem] text-[0.95rem] font-semibold leading-5 text-[var(--color-text)] sm:min-h-0 sm:text-base">{product.name}</h3>
-          <div className="mt-1.5 flex items-center justify-between gap-2">
-            <p className="text-base font-semibold text-[var(--color-accent)] sm:text-sm">{product.price}</p>
+        <div className="px-3 pb-3 pt-3 sm:p-3.5">
+          <h3 className="line-clamp-2 min-h-[2.7rem] text-[1.05rem] font-semibold leading-6 text-[var(--color-text)] sm:min-h-0 sm:text-lg">{product.name}</h3>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-lg font-semibold text-[var(--color-accent)] sm:text-base">{product.price}</p>
             {stockLabel ? (
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
+              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] sm:text-[10px] ${isSoldOut ? 'border-[#111111]/15 bg-[#111111]/[0.04] text-[#111111]/60' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
                 {stockLabel}
               </span>
             ) : null}

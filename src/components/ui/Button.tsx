@@ -20,7 +20,7 @@ const variants: Record<ButtonVariant, string> = {
 }
 
 export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {
-  const sharedClasses = `inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`
+  const sharedClasses = `inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm ${variants[variant]} ${className}`
   const ariaLabel = props['aria-label'] ?? (typeof children === 'string' ? children : undefined)
 
   if (to) {
