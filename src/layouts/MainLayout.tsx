@@ -7,6 +7,7 @@ import PageTransition from '../components/common/PageTransition'
 import { metaPixel } from '../services/metaPixel'
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL ?? 'https://shisfashion.com').replace(/\/$/, '')
+const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
   let element = document.head.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null
@@ -109,6 +110,13 @@ export default function MainLayout() {
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: metadata.title })
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: metadata.description })
     upsertMeta('link[rel="canonical"]', { rel: 'canonical', href: canonicalUrl })
+
+    if (GOOGLE_SITE_VERIFICATION) {
+      upsertMeta('meta[name="google-site-verification"]', {
+        name: 'google-site-verification',
+        content: GOOGLE_SITE_VERIFICATION,
+      })
+    }
   }, [location.pathname])
 
   return (
