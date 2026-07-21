@@ -45,6 +45,7 @@ Use this before running paid traffic.
 - Keep `VITE_ALLOW_LOCAL_FALLBACK=false` in production.
 - Keep `VITE_LAUNCH_MODE=false` in production.
 - Set `VITE_ADMIN_EMAILS` to the final admin email list only.
+- Set `VITE_GA_MEASUREMENT_ID` to the live Google Analytics 4 Measurement ID.
 - Set `VITE_META_PIXEL_ID` to the live Meta Pixel ID.
 
 2. Firebase project checks

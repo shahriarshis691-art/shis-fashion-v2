@@ -409,7 +409,7 @@ export default function HomePage() {
               ) : heroImage ? (
                 <img
                   src={heroImage}
-                  alt={homepageContent.heroImageTitle || 'Hero media'}
+                  alt={homepageContent.heroImageTitle || 'SHIS Fashion hero image'}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
@@ -430,6 +430,9 @@ export default function HomePage() {
                   className="max-w-[14.8rem] sm:max-w-[21rem] lg:max-w-[24rem]"
                 >
                   <h1 className="home-hero-title font-sans text-[2.45rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                  <h2 className="mt-4 max-w-[16rem] text-[0.95rem] leading-7 text-white/80 sm:text-[1.05rem] sm:leading-8">
+                    Premium oversized T-shirts, Polo Shirts, Denim and fashion essentials for modern living in Bangladesh.
+                  </h2>
                   <div className="mt-6 flex max-w-[12.75rem] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:flex-wrap">
                     <Button
                       to={homepageContent.heroPrimaryLink ?? '/shop'}

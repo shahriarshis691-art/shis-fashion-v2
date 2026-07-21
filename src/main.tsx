@@ -6,8 +6,10 @@ import { ThemeProvider } from './context/ThemeContext'
 import { CartProvider } from './context/CartContext'
 import { router } from './router'
 import { metaPixel } from './services/metaPixel'
+import { googleAnalytics } from './services/googleAnalytics'
 
-// Initialize Meta Pixel
+// Initialize analytics
+googleAnalytics.initialize()
 metaPixel.initialize()
 
 createRoot(document.getElementById('root')!).render(

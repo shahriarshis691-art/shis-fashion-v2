@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">SHIS Fashion Bangladesh</title>
+  <desc id="desc">Premium oversized T-shirts, Polo Shirts and Denim by SHIS Fashion Bangladesh.</desc>
+  <rect width="1200" height="630" fill="#0B0B0B"/>
+  <rect x="56" y="56" width="1088" height="518" rx="32" fill="#111111" stroke="#C8A96A" stroke-width="2"/>
+  <circle cx="312" cy="318" r="182" fill="#C8A96A" opacity="0.16"/>
+  <text x="112" y="256" fill="#F6EEE0" font-family="Arial, Helvetica, sans-serif" font-size="36" letter-spacing="6">SHIS FASHION</text>
+  <text x="112" y="332" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">Bangladesh</text>
+  <text x="112" y="392" fill="#C8A96A" font-family="Arial, Helvetica, sans-serif" font-size="34">Premium Oversized T-Shirts, Polo Shirts &amp; Denim</text>
+  <text x="112" y="454" fill="#D7D0C5" font-family="Arial, Helvetica, sans-serif" font-size="24">Premium quality • Fast delivery • Cash on delivery</text>
+</svg>

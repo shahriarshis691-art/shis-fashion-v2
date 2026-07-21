@@ -21,17 +21,18 @@ const variants: Record<ButtonVariant, string> = {
 
 export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {
   const sharedClasses = `inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8A96A] disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`
+  const ariaLabel = props['aria-label'] ?? (typeof children === 'string' ? children : undefined)
 
   if (to) {
     return (
-      <Link to={to} className={sharedClasses}>
+      <Link to={to} className={sharedClasses} aria-label={ariaLabel}>
         {children}
       </Link>
     )
   }
 
   return (
-    <button type="button" className={sharedClasses} {...props}>
+    <button type="button" className={sharedClasses} aria-label={ariaLabel} {...props}>
       {children}
     </button>
   )

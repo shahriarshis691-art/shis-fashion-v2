@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
@@ -8,6 +8,7 @@ import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { metaPixel } from '../services/metaPixel'
+import { applySeoMetadata } from '../utils/seo'
 
 function slugify(value: string) {
   return value
@@ -99,6 +100,7 @@ const fallbackHomepageContent: Pick<HomepageContent, 'featuredCollectionPages'> 
 export default function CollectionListingPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { addToCart } = useCart()
   const [homepageContent, setHomepageContent] = useState(fallbackHomepageContent)
   const [products, setProducts] = useState<ListingProduct[]>([])
@@ -156,7 +158,12 @@ export default function CollectionListingPage() {
         currency: 'BDT',
       })
     }
-  }, [activeCollection.title, selectedProduct])
+
+    applySeoMetadata(location.pathname, {
+      title: `${activeCollection.title} | SHIS Fashion Bangladesh`,
+      description: `${activeCollection.description} Discover premium fashion collections from SHIS Fashion Bangladesh.`,
+    })
+  }, [activeCollection.description, activeCollection.title, location.pathname, selectedProduct])
 
   const collectionImages = activeCollection.images.map((image) => normalizeCatalogImageUrl(image, 1000, 1200))
 

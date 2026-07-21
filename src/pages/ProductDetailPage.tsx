@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import ProductCard from '../components/shop/ProductCard'
@@ -9,6 +9,7 @@ import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { getManagedImageEntries } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
+import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 function slugify(value: string) {
   return value
@@ -76,6 +77,7 @@ export default function ProductDetailPage() {
   const { productSlug } = useParams()
   const decodedSlug = decodeURIComponent(productSlug ?? '')
   const navigate = useNavigate()
+  const location = useLocation()
   const { addToCart } = useCart()
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
   const [ready, setReady] = useState(false)
@@ -105,8 +107,22 @@ export default function ProductDetailPage() {
         value: parseBDT(product.price),
         currency: 'BDT',
       })
+
+      applySeoMetadata(location.pathname, {
+        title: `${product.name} | SHIS Fashion Bangladesh`,
+        description: `${product.description} Shop ${product.name} from SHIS Fashion Bangladesh with premium quality, fast dispatch and cash on delivery.`,
+        schema: [buildProductSchema({
+          name: product.name,
+          description: product.description,
+          slug: product.slug,
+          category: product.category,
+          image: product.image,
+          price: product.price,
+          stock: product.stock,
+        }, location.pathname)],
+      })
     }
-  }, [product, ready])
+  }, [location.pathname, product, ready])
 
   if (!ready) {
     return (

@@ -9,6 +9,7 @@ import { metaPixel } from '../../services/metaPixel'
 const links = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
+  { label: 'Sale', href: '/sale' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'Best Sellers', href: '/shop/best-sellers' },
   { label: 'Our Brands', href: '/brands' },
@@ -173,7 +174,9 @@ export default function Navbar() {
           {isSearchOpen ? (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-t border-[rgba(255,255,255,0.06)] bg-[rgba(8,8,8,0.98)] px-4 py-3 sm:px-6 lg:px-10">
               <div className="flex gap-2">
+                <label htmlFor="site-search" className="sr-only">Search SHIS Fashion products</label>
                 <input
+                  id="site-search"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   onKeyDown={(event) => {

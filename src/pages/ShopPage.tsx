@@ -208,7 +208,9 @@ export default function ShopPage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <label htmlFor="shop-search" className="sr-only">Search SHIS Fashion collection</label>
               <input
+                id="shop-search"
                 type="search"
                 value={searchQuery}
                 onChange={(event) => handleSearchChange(event.target.value)}
