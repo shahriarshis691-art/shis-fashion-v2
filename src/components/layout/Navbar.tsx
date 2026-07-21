@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import shisLogo from '../../assets/logo/shis-logo.svg'
 import { useTheme } from '../../hooks/useTheme'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
@@ -96,11 +97,11 @@ export default function Navbar() {
     <>
       <header className={`sticky top-0 z-50 w-full border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,5,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.45)] border-[rgba(210,180,122,0.12)]' : 'shadow-none'}`}>
         <div className="flex h-[4.5rem] w-full items-center gap-2 px-3 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
-          <Link to="/" onClick={closeOverlays} className="group flex flex-shrink-0 items-center justify-start overflow-hidden text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-accent)] sm:text-base">
+          <Link to="/" onClick={closeOverlays} className="group flex flex-shrink-0 items-center justify-start overflow-hidden text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-accent)] sm:text-base" aria-label="SHIS Fashion home">
             <img
-              src="/shis-logo.svg"
+              src={shisLogo}
               alt="SHIS Fashion"
-              className="h-7 w-auto object-contain brightness-[1.15] contrast-125 sm:h-9 md:h-10 lg:h-11"
+              className="h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02] sm:h-9 md:h-10 lg:h-11"
               loading="eager"
             />
           </Link>
