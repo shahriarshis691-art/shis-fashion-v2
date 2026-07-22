@@ -1,12 +1,43 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import Button from '../components/ui/Button'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
-import { shopCategories, type ShopCategory, type ShopProduct } from '../data/shopData'
-import { subscribeToCategories, subscribeToProducts, type AdminCategory, type AdminProduct } from '../firebase/adminService'
-import { getManagedImageEntries } from '../utils/media'
+import { type ShopProduct } from '../data/shopData'
+import {
+  subscribeToProducts,
+  type AdminProduct,
+} from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
+import { getManagedImageEntries } from '../utils/media'
+
+type ShopSegment = 'all' | 'women' | 'men' | 'kids'
+type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
+
+interface ProductFilters {
+  inStockOnly: boolean
+  newOnly: boolean
+}
+
+interface SegmentTab {
+  key: ShopSegment
+  label: string
+  path: string
+}
+
+const segmentTabs: SegmentTab[] = [
+  { key: 'women', label: 'Women', path: '/women' },
+  { key: 'men', label: 'Men', path: '/men' },
+  { key: 'kids', label: 'Kids', path: '/kids' },
+  { key: 'all', label: 'All', path: '/shop' },
+]
+
+const sortOptions: Array<{ value: SortOption; label: string }> = [
+  { value: 'popular', label: 'Popular' },
+  { value: 'new', label: 'New' },
+  { value: 'price-low', label: 'Price: low to high' },
+  { value: 'price-high', label: 'Price: high to low' },
+]
 
 function slugify(value: string) {
   return value
@@ -36,58 +67,122 @@ function mapProduct(product: AdminProduct): ShopProduct {
   }
 }
 
-function mapCategory(category: AdminCategory): ShopCategory {
+function normalizeSegmentFromPath(pathname: string): ShopSegment {
+  if (pathname === '/women') {
+    return 'women'
+  }
+
+  if (pathname === '/men') {
+    return 'men'
+  }
+
+  if (pathname === '/kids') {
+    return 'kids'
+  }
+
+  return 'all'
+}
+
+function normalizeSegmentFromQuery(rawSegment: string | null): ShopSegment {
+  if (!rawSegment) {
+    return 'all'
+  }
+
+  const value = rawSegment.trim().toLowerCase()
+  if (value === 'women') {
+    return 'women'
+  }
+
+  if (value === 'men') {
+    return 'men'
+  }
+
+  if (value === 'kids') {
+    return 'kids'
+  }
+
+  return 'all'
+}
+
+function segmentMatchesProduct(segment: ShopSegment, category: string) {
+  if (segment === 'all') {
+    return true
+  }
+
+  const normalizedCategory = category.trim().toLowerCase()
+
+  if (segment === 'women') {
+    return ['womens', 'women', 'dress', 'western', 'couples'].some((token) => normalizedCategory.includes(token))
+  }
+
+  if (segment === 'men') {
+    return ['mens', 'men', 'shirt', 'denim', 'oversized', 'unisex'].some((token) => normalizedCategory.includes(token))
+  }
+
+  return ['kids', 'kid', 'children'].some((token) => normalizedCategory.includes(token))
+}
+
+function segmentHeading(segment: ShopSegment) {
+  if (segment === 'women') {
+    return {
+      title: 'Women',
+      description: 'Editorial silhouettes and daily essentials tailored for modern women.',
+    }
+  }
+
+  if (segment === 'men') {
+    return {
+      title: 'Men',
+      description: 'Refined men\'s edits focused on comfort, fit, and repeat wear.',
+    }
+  }
+
+  if (segment === 'kids') {
+    return {
+      title: 'Kids',
+      description: 'Soft, practical, and polished pieces for active little wardrobes.',
+    }
+  }
+
   return {
-    slug: category.slug,
-    title: category.name,
-    description: 'Premium edits curated for your wardrobe.',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=900&q=80',
+    title: 'Shop All',
+    description: 'Explore all available products across women, men, and kids.',
   }
 }
 
-const categoryAliasMap: Record<string, string[]> = {
-  mens: ['mens', 'mens-shirt', 'men', 'menswear'],
-  womens: ['womens', 'womens-dresses', 'women', 'womenswear'],
-  couples: ['couples', 'couple', 'couple-set'],
-  kids: ['kids', 'kid', 'children'],
-  western: ['western', 'western-outfits'],
-  denim: ['denim'],
-}
-
-function categoryMatches(productCategory: string, activeSlug?: string) {
-  if (!activeSlug) {
-    return true
+function getLegacyCategorySlug(pathname: string) {
+  const parts = pathname.split('/').filter(Boolean)
+  if (parts[0] !== 'shop' || parts.length < 2) {
+    return null
   }
 
-  const normalizedSlug = activeSlug.trim().toLowerCase()
-  const normalizedCategory = productCategory.trim().toLowerCase()
-
-  if (normalizedCategory === normalizedSlug) {
-    return true
+  const slug = parts[1]?.trim().toLowerCase() ?? ''
+  if (!slug || slug === 'new-arrivals') {
+    return null
   }
 
-  const aliases = categoryAliasMap[normalizedSlug]
-  if (!aliases?.length) {
-    return false
-  }
-
-  return aliases.some((alias) => normalizedCategory.includes(alias))
-}
-
-function getWhatsAppHref() {
-  return 'https://wa.me/8801887848304'
+  return slug
 }
 
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const slug = location.pathname.split('/').filter(Boolean).at(-1)
+  const searchParams = new URLSearchParams(location.search)
+
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [ready, setReady] = useState(false)
-  const [categories, setCategories] = useState<ShopCategory[]>(shopCategories)
-  const [sortBy, setSortBy] = useState<'curated' | 'price-low' | 'price-high' | 'new-arrivals'>('curated')
-  const searchQuery = new URLSearchParams(location.search).get('q') ?? ''
-  const supportWhatsAppHref = getWhatsAppHref()
+  const [sortBy, setSortBy] = useState<SortOption>('popular')
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+  const [filters, setFilters] = useState<ProductFilters>({
+    inStockOnly: false,
+    newOnly: false,
+  })
+
+  const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
+  const activeSegment = normalizeSegmentFromPath(location.pathname) !== 'all'
+    ? normalizeSegmentFromPath(location.pathname)
+    : querySegment
+  const legacyCategorySlug = getLegacyCategorySlug(location.pathname)
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -95,220 +190,299 @@ export default function ShopPage() {
       setReady(true)
     })
 
-    const unsubscribeCategories = subscribeToCategories((nextCategories) => {
-      if (!nextCategories.length) {
-        return
-      }
-      setCategories(nextCategories.map(mapCategory))
-    })
-
     return () => {
       unsubscribeProducts()
-      unsubscribeCategories()
     }
   }, [])
 
-  const handleSearchChange = (value: string) => {
-    const params = new URLSearchParams(location.search)
-    if (value.trim()) {
-      params.set('q', value)
-    } else {
-      params.delete('q')
+  useEffect(() => {
+    if (!isFilterSheetOpen) {
+      document.body.style.overflow = ''
+      return
     }
 
-    navigate(
-      {
-        pathname: location.pathname,
-        search: params.toString() ? `?${params.toString()}` : '',
-      },
-      { replace: true },
-    )
-  }
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isFilterSheetOpen])
 
-  const activeCategories = categories.length ? categories : shopCategories
-  const category = slug && slug !== 'shop'
-    ? activeCategories.find((item) => item.slug === slug)
-      ?? shopCategories.find((item) => item.slug === slug)
-      ?? (categoryAliasMap[slug]
-        ? {
-          slug,
-          title: slug.charAt(0).toUpperCase() + slug.slice(1),
-          description: 'Premium edits curated for your wardrobe.',
-          image: '',
-        }
-        : undefined)
-    : undefined
-  const isNewArrivalsRoute = location.pathname === '/shop/new-arrivals'
-  const isBestSellersRoute = location.pathname === '/shop/best-sellers'
-  const newArrivalProducts = useMemo(() => {
-    const flagged = products.filter((product) => product.newArrival)
-    return flagged.length ? flagged : products.slice(0, 8)
-  }, [products])
-  const bestSellerProducts = useMemo(() => [...products].sort((left, right) => (right.stock ?? 0) - (left.stock ?? 0)).slice(0, 8), [products])
+  const heading = segmentHeading(activeSegment)
+  const legacyHeading = legacyCategorySlug
+    ? {
+      title: legacyCategorySlug.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
+      description: 'Category listing curated for quick mobile browsing.',
+    }
+    : null
 
   const visibleProducts = useMemo(() => {
-    const baseProducts = isNewArrivalsRoute
-      ? newArrivalProducts
-      : isBestSellersRoute
-        ? bestSellerProducts
-        : slug && slug !== 'shop'
-          ? products.filter((product) => categoryMatches(product.category, slug))
-          : products
-    const query = searchQuery.trim().toLowerCase()
+    const bySegment = products.filter((product) => segmentMatchesProduct(activeSegment, product.category))
 
-    const filtered = query
-      ? baseProducts.filter((product) => [product.name, product.description, product.category].some((value) => value.toLowerCase().includes(query)))
-      : baseProducts
+    const byLegacyCategory = legacyCategorySlug
+      ? bySegment.filter((product) => product.category.trim().toLowerCase().includes(legacyCategorySlug))
+      : bySegment
+
+    const byFilter = byLegacyCategory.filter((product) => {
+      if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
+        return false
+      }
+
+      if (filters.newOnly && !product.newArrival) {
+        return false
+      }
+
+      return true
+    })
+
+    if (sortBy === 'new') {
+      return [...byFilter].sort(
+        (left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)),
+      )
+    }
 
     if (sortBy === 'price-low') {
-      return [...filtered].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
+      return [...byFilter].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
     }
 
     if (sortBy === 'price-high') {
-      return [...filtered].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
+      return [...byFilter].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
     }
 
-    if (sortBy === 'new-arrivals') {
-      return [...filtered].sort((left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)))
-    }
-
-    return filtered
-  }, [bestSellerProducts, isBestSellersRoute, isNewArrivalsRoute, newArrivalProducts, products, searchQuery, slug, sortBy])
-
-  const headingTitle = isNewArrivalsRoute
-    ? 'New Arrivals'
-    : isBestSellersRoute
-      ? 'Best Sellers'
-      : category?.title ?? 'Curated essentials'
-
-  const headingDescription = isNewArrivalsRoute
-    ? 'Fresh pieces newly added to the SHIS collection.'
-    : isBestSellersRoute
-      ? 'Most in-demand essentials selected from the live catalog.'
-      : category?.description ?? 'Discover premium essentials crafted for modern dressing and timeless comfort.'
+    return [...byFilter].sort(
+      (left, right) =>
+        Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+        (right.stock ?? 0) - (left.stock ?? 0),
+    )
+  }, [activeSegment, filters.inStockOnly, filters.newOnly, legacyCategorySlug, products, sortBy])
 
   return (
-    <section className="px-2.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
       <Container>
-        {!ready ? (
-          <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 px-6 py-10 text-center text-sm text-[var(--color-muted)]">
-            Loading collection...
-          </div>
-        ) : null}
-
-        <div className="flex flex-col gap-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">SHIS SHOP</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--color-text)] sm:text-4xl">
-                {headingTitle}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
-                {headingDescription}
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-              <label htmlFor="shop-search" className="sr-only">Search SHIS Fashion collection</label>
-              <input
-                id="shop-search"
-                type="search"
-                value={searchQuery}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                placeholder="Search the collection"
-                className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none ring-0 sm:w-56"
-              />
-              <Button to="/shop" onClick={() => handleSearchChange('')} variant="secondary" className="px-4 py-2.5">
-                All
-              </Button>
-            </div>
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">SHIS Listing</p>
+            <h1 className="mt-1 text-h1 text-black">{legacyHeading?.title ?? heading.title}</h1>
+            <p className="mt-3 max-w-2xl text-body text-black/72">{legacyHeading?.description ?? heading.description}</p>
           </div>
 
-          <div className="flex items-center justify-between rounded-[0.95rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:hidden">
-            <span>Swipe filters below</span>
-            <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-[var(--color-accent)]">WhatsApp help</a>
-          </div>
-
-          <div className="sticky top-[4.35rem] z-20 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/92 p-3 backdrop-blur-xl sm:static sm:bg-[var(--color-bg)]/70 sm:backdrop-blur-none">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Browse edits</p>
-              <div className="flex items-center gap-2">
-                <label htmlFor="shop-sort" className="sr-only">Sort products</label>
-                <select
-                  id="shop-sort"
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as 'curated' | 'price-low' | 'price-high' | 'new-arrivals')}
-                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text)] outline-none"
-                >
-                  <option value="curated">Curated</option>
-                  <option value="new-arrivals">New first</option>
-                  <option value="price-low">Price low-high</option>
-                  <option value="price-high">Price high-low</option>
-                </select>
-                <p className="text-xs text-[var(--color-muted)]">{visibleProducts.length} pieces</p>
-              </div>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <button
-              type="button"
-              onClick={() => navigate('/shop')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === '/shop' ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
-            >
-              All categories
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/shop/new-arrivals')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isNewArrivalsRoute ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
-            >
-              New Arrivals
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/shop/best-sellers')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isBestSellersRoute ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
-            >
-              Best Sellers
-            </button>
-            {activeCategories.map((item) => (
+          <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {segmentTabs.map((tab) => (
               <button
-                key={item.slug}
+                key={tab.key}
                 type="button"
-                onClick={() => navigate(`/shop/${item.slug}`)}
-                className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === `/shop/${item.slug}` ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+                onClick={() => {
+                  setFilters({ inStockOnly: false, newOnly: false })
+                  navigate(tab.path)
+                }}
+                className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                  activeSegment === tab.key
+                    ? 'border-black text-black'
+                    : 'border-transparent text-black/65 hover:text-black'
+                }`}
               >
-                {item.title}
+                {tab.label}
               </button>
             ))}
-            </div>
+            <Link
+              to="/sale"
+              className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
+            >
+              Sale
+            </Link>
+            <Link
+              to="/shop/new-arrivals"
+              className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
+            >
+              New Arrivals
+            </Link>
           </div>
-        </div>
 
-        <div className="mt-8">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[var(--color-text)]">Live collection</h2>
-            <p className="text-sm text-[var(--color-muted)]">{visibleProducts.length} results</p>
-          </div>
+          <div className="flex items-center justify-between border-b border-black/10 pb-2.5">
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+              {visibleProducts.length} products
+            </p>
 
-          {visibleProducts.length ? (
-            <div className="-mx-4 px-2 sm:mx-0 sm:px-0">
-              <div className="grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:gap-4 xl:grid-cols-4">
-                {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+            <div className="hidden items-center gap-2 sm:flex">
+              <label htmlFor="desktop-sort" className="text-caption uppercase tracking-[0.12em] text-black/55">
+                Sort
+              </label>
+              <select
+                id="desktop-sort"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as SortOption)}
+                className="border border-black/20 px-2.5 py-1.5 text-xs text-black outline-none"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
-          ) : (
-            <div className="rounded-[1.75rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/70 px-6 py-12 text-center shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">No matches</p>
-              <h3 className="mt-3 text-xl font-semibold text-[var(--color-text)]">Nothing matched your search yet</h3>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--color-muted)]">Try a broader term or reset the filters to see more of the collection.</p>
-              <div className="mt-6 flex justify-center">
-                <Button onClick={() => handleSearchChange('')} variant="secondary">Reset search</Button>
-              </div>
-            </div>
-          )}
+
+            <button
+              type="button"
+              onClick={() => setIsFilterSheetOpen(true)}
+              className="ui-interactive border border-black/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black sm:hidden"
+            >
+              Filter & Sort
+            </button>
+          </div>
         </div>
+
+        {!ready ? (
+          <div className="py-12 text-center text-sm text-black/55">Loading collection...</div>
+        ) : null}
+
+        <div className="mt-5 grid grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-3 sm:gap-x-3 sm:gap-y-6 lg:grid-cols-4 lg:gap-x-4">
+          {visibleProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+
+        {ready && visibleProducts.length === 0 ? (
+          <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
+            <p className="mt-2 text-sm text-black/70">Try another filter combination.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({ inStockOnly: false, newOnly: false })
+                setSortBy('popular')
+              }}
+              className="ui-interactive mt-4 border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+            >
+              Reset filters
+            </button>
+          </div>
+        ) : null}
       </Container>
+
+      <AnimateMobileSheet
+        open={isFilterSheetOpen}
+        onClose={() => setIsFilterSheetOpen(false)}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
     </section>
+  )
+}
+
+function AnimateMobileSheet({
+  open,
+  onClose,
+  sortBy,
+  onSortChange,
+  filters,
+  onFiltersChange,
+}: {
+  open: boolean
+  onClose: () => void
+  sortBy: SortOption
+  onSortChange: (value: SortOption) => void
+  filters: ProductFilters
+  onFiltersChange: (value: ProductFilters) => void
+}) {
+  return (
+    <motion.div>
+      {open ? (
+        <>
+          <motion.button
+            type="button"
+            aria-label="Close filter panel"
+            className="fixed inset-0 z-40 bg-black/40 sm:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+            onClick={onClose}
+          />
+
+          <motion.aside
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.22 }}
+            className="fixed inset-x-0 bottom-0 z-50 rounded-t-xl border-t border-black/15 bg-white px-4 pb-6 pt-4 sm:hidden"
+          >
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Filter & Sort</h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="ui-interactive text-xs uppercase tracking-[0.12em] text-black/65 hover:text-black"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div>
+                <p className="text-caption uppercase tracking-[0.12em] text-black/55">Sort by</p>
+                <div className="mt-2 grid gap-2">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => onSortChange(option.value)}
+                      className={`ui-interactive flex items-center justify-between border px-3 py-2 text-sm ${
+                        sortBy === option.value
+                          ? 'border-black bg-black text-white'
+                          : 'border-black/15 text-black hover:bg-black/5'
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {sortBy === option.value ? <span aria-hidden>✓</span> : null}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <p className="text-caption uppercase tracking-[0.12em] text-black/55">Filters</p>
+                <div className="mt-2 grid gap-2">
+                  <label className="flex items-center justify-between border border-black/15 px-3 py-2 text-sm text-black">
+                    <span>In stock only</span>
+                    <input
+                      type="checkbox"
+                      checked={filters.inStockOnly}
+                      onChange={(event) =>
+                        onFiltersChange({
+                          ...filters,
+                          inStockOnly: event.target.checked,
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="flex items-center justify-between border border-black/15 px-3 py-2 text-sm text-black">
+                    <span>New arrivals only</span>
+                    <input
+                      type="checkbox"
+                      checked={filters.newOnly}
+                      onChange={(event) =>
+                        onFiltersChange({
+                          ...filters,
+                          newOnly: event.target.checked,
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="ui-interactive mt-5 w-full border border-black bg-black py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-white"
+              >
+                Apply
+              </button>
+            </div>
+          </motion.aside>
+        </>
+      ) : null}
+    </motion.div>
   )
 }

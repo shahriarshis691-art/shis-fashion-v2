@@ -7,9 +7,9 @@ import { subscribeToHomepageContent, type HomepageContent } from '../../firebase
 import { metaPixel } from '../../services/metaPixel'
 
 const primaryLinks = [
-  { label: 'Women', href: '/shop?segment=women' },
-  { label: 'Men', href: '/shop?segment=men' },
-  { label: 'Kids', href: '/shop?segment=kids' },
+  { label: 'Women', href: '/women' },
+  { label: 'Men', href: '/men' },
+  { label: 'Kids', href: '/kids' },
   { label: 'Sale', href: '/sale' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
 ]
