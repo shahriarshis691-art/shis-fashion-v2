@@ -8,6 +8,7 @@ import { subscribeToProducts, type AdminProduct } from '../firebase/adminService
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
+import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 function slugify(value: string) {
@@ -139,6 +140,14 @@ export default function ProductDetailPage() {
       currency: 'BDT',
     })
 
+    googleAnalytics.viewItem({
+      item_id: String(product.id),
+      item_name: product.name,
+      item_category: product.category,
+      price: parseBDT(product.price),
+      quantity: 1,
+    }, 'BDT')
+
     applySeoMetadata(location.pathname, {
       title: `${product.name} | SHIS Fashion Bangladesh`,
       description: `${product.description} Shop now with fast dispatch and cash on delivery in Bangladesh.`,
@@ -218,6 +227,14 @@ export default function ProductDetailPage() {
       currency: 'BDT',
     })
 
+    googleAnalytics.addToBag({
+      item_id: String(product.id),
+      item_name: product.name,
+      item_category: product.category,
+      price: parseBDT(product.price),
+      quantity: effectiveQuantity,
+    }, 'BDT')
+
     setDidAddToBag(true)
     setTimeout(() => setDidAddToBag(false), 1500)
   }
@@ -232,6 +249,20 @@ export default function ProductDetailPage() {
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
       content_type: 'product',
+    })
+
+    googleAnalytics.beginCheckout({
+      value: parseBDT(product.price) * effectiveQuantity,
+      currency: 'BDT',
+      items: [
+        {
+          item_id: String(product.id),
+          item_name: product.name,
+          item_category: product.category,
+          price: parseBDT(product.price),
+          quantity: effectiveQuantity,
+        },
+      ],
     })
     navigate('/checkout')
   }
@@ -282,6 +313,7 @@ export default function ProductDetailPage() {
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
+                  sizes="(max-width: 639px) 100vw, (max-width: 1279px) 58vw, 50vw"
                   onError={handleImageError}
                   onClick={() => setIsZoomOpen(true)}
                   className={`h-full w-full cursor-zoom-in object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
@@ -333,6 +365,7 @@ export default function ProductDetailPage() {
                       alt={`${product.name} view ${index + 1}`}
                       loading="lazy"
                       decoding="async"
+                      sizes="(max-width: 639px) 25vw, 10vw"
                       onError={handleImageError}
                       className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                     />
@@ -515,6 +548,8 @@ export default function ProductDetailPage() {
               <img
                 src={activeImage}
                 alt={`${product.name} zoom image`}
+                loading="eager"
+                decoding="async"
                 onError={handleImageError}
                 className={`h-full w-full object-contain ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
               />

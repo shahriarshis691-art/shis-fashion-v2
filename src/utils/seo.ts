@@ -130,6 +130,26 @@ function buildBreadcrumbItems(pathname: string) {
     return items
   }
 
+  if (segments[0] === 'women') {
+    items.push({ name: 'Women', item: `${SITE_URL}/women` })
+    return items
+  }
+
+  if (segments[0] === 'men') {
+    items.push({ name: 'Men', item: `${SITE_URL}/men` })
+    return items
+  }
+
+  if (segments[0] === 'kids') {
+    items.push({ name: 'Kids', item: `${SITE_URL}/kids` })
+    return items
+  }
+
+  if (segments[0] === 'new-arrivals') {
+    items.push({ name: 'New Arrivals', item: `${SITE_URL}/shop/new-arrivals` })
+    return items
+  }
+
   if (segments[0] === 'cart') {
     items.push({ name: 'Cart', item: `${SITE_URL}/cart` })
     return items
@@ -181,6 +201,18 @@ function buildBaseSchemas(pathname: string, canonicalUrl: string, metadata: SeoM
         '@type': 'SearchAction',
         target: `${SITE_URL}/shop?q={search_term_string}`,
         'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: metadata.title,
+      description: metadata.description,
+      url: canonicalUrl,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'SHIS Fashion',
+        url: SITE_URL,
       },
     },
   ]
@@ -291,6 +323,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
     }
   }
 
+  if (normalizedPath === '/new-arrivals') {
+    return {
+      title: 'New Arrivals | SHIS Fashion Bangladesh',
+      description: 'Explore the latest oversized essentials, polos, shirts, and denim arrivals from SHIS Fashion Bangladesh.',
+      keywords: DEFAULT_KEYWORDS,
+      canonicalPath: '/shop/new-arrivals',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: pageType,
+      robots: 'index,follow',
+    }
+  }
+
   if (normalizedPath === '/shop/best-sellers') {
     return {
       title: 'Best Sellers | SHIS Fashion Bangladesh',
@@ -375,6 +419,42 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
     }
   }
 
+  if (normalizedPath === '/women') {
+    return {
+      title: 'Women | SHIS Fashion Bangladesh',
+      description: 'Shop women\'s fashion essentials from SHIS Fashion Bangladesh designed for modern comfort and premium daily styling.',
+      keywords: 'Women fashion Bangladesh, SHIS women collection, premium women wear',
+      canonicalPath: '/women',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/men') {
+    return {
+      title: 'Men | SHIS Fashion Bangladesh',
+      description: 'Explore men\'s premium polos, oversized tees, shirts, and denim from SHIS Fashion Bangladesh.',
+      keywords: 'Men fashion Bangladesh, SHIS men collection, premium men wear',
+      canonicalPath: '/men',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/kids') {
+    return {
+      title: 'Kids | SHIS Fashion Bangladesh',
+      description: 'Discover SHIS kids essentials with comfortable fabrics and durable styling for everyday wear.',
+      keywords: 'Kids fashion Bangladesh, SHIS kids collection, children wear Bangladesh',
+      canonicalPath: '/kids',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
   if (normalizedPath === '/cart') {
     return {
       title: 'Cart | SHIS Fashion Bangladesh',
@@ -438,6 +518,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
     }
   }
 
+  if (normalizedPath.startsWith('/admin') || normalizedPath.startsWith('/shis-admin')) {
+    return {
+      title: 'Admin | SHIS Fashion',
+      description: 'SHIS Fashion administration area.',
+      keywords: 'SHIS admin',
+      canonicalPath: normalizedPath,
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'website',
+      robots: 'noindex,nofollow',
+    }
+  }
+
   return {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
@@ -467,10 +559,11 @@ function removeExistingJsonLd() {
 export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   const metadata = getRouteMetadata(pathname)
   const canonicalUrl = createCanonicalUrl(pathname)
+  const mergedSchemas = options?.schema ?? options?.schemas ?? []
   const mergedMetadata = {
     ...metadata,
     ...options,
-    title: options?.image ? metadata.title : metadata.title,
+    schema: mergedSchemas,
   }
 
   document.title = mergedMetadata.title

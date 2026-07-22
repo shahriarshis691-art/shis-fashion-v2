@@ -5,6 +5,7 @@ import shisLogo from '../../assets/logo/shis-logo.svg'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
+import { googleAnalytics } from '../../services/googleAnalytics'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -205,6 +206,7 @@ export default function Navbar() {
                       const query = searchTerm.trim()
                       if (query) {
                         metaPixel.search({ search_string: query })
+                        googleAnalytics.search(query)
                       }
                       navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
                       setIsSearchOpen(false)
@@ -220,6 +222,7 @@ export default function Navbar() {
                     const query = searchTerm.trim()
                     if (query) {
                       metaPixel.search({ search_string: query })
+                      googleAnalytics.search(query)
                     }
                     navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
                     setIsSearchOpen(false)

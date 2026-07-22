@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { parseBDT, formatBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
+import { googleAnalytics } from '../services/googleAnalytics'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -48,6 +49,7 @@ export default function OrderSuccessPage() {
   })
 
   const orderItems = order?.items ?? []
+  const hasTrackedPurchaseRef = useRef(false)
 
   const purchasePayload = useMemo(() => {
     if (!order) {
@@ -65,12 +67,25 @@ export default function OrderSuccessPage() {
   }, [order])
 
   useEffect(() => {
-    if (!purchasePayload) {
+    if (!purchasePayload || !order || hasTrackedPurchaseRef.current) {
       return
     }
 
     metaPixel.purchase(purchasePayload)
-  }, [purchasePayload])
+    googleAnalytics.purchase({
+      transaction_id: order.orderId,
+      value: order.grandTotal,
+      currency: 'BDT',
+      items: order.items.map((item) => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: parseBDT(item.price),
+        quantity: item.quantity,
+      })),
+    })
+
+    hasTrackedPurchaseRef.current = true
+  }, [order, purchasePayload])
 
   const supportWhatsAppHref = getWhatsAppHref()
 
@@ -117,7 +132,14 @@ export default function OrderSuccessPage() {
                 <div className="mt-5 space-y-3 border-t border-black/10 pt-4">
                   {orderItems.map((item) => (
                     <div key={item.id} className="flex items-center gap-3">
-                      <img src={item.image} alt={item.name} className="h-14 w-14 object-cover" loading="lazy" decoding="async" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-14 w-14 object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="56px"
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-black">{item.name}</p>
                         <p className="text-xs text-black/60">Qty: {item.quantity} • {item.size}</p>

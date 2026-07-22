@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext'
 import { createOrder, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, type BangladeshDivision } from '../utils/bangladeshAddress'
+import { googleAnalytics } from '../services/googleAnalytics'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -56,12 +57,33 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const submissionLockRef = useRef(false)
+  const hasTrackedCheckoutRef = useRef(false)
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
   const grandTotal = subtotal + deliveryCharge
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(grandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
+
+  useEffect(() => {
+    if (!items.length || hasTrackedCheckoutRef.current) {
+      return
+    }
+
+    googleAnalytics.beginCheckout({
+      value: grandTotal,
+      currency: 'BDT',
+      items: items.map((item) => ({
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.category,
+        price: parseBDT(item.price),
+        quantity: item.quantity,
+      })),
+    })
+
+    hasTrackedCheckoutRef.current = true
+  }, [grandTotal, items])
 
   if (!items.length) {
     return (

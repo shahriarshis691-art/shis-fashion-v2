@@ -10,6 +10,24 @@ declare global {
   }
 }
 
+interface AnalyticsItem {
+  item_id: string
+  item_name: string
+  item_category?: string
+  price?: number
+  quantity?: number
+}
+
+interface CheckoutPayload {
+  value: number
+  currency?: string
+  items: AnalyticsItem[]
+}
+
+interface PurchasePayload extends CheckoutPayload {
+  transaction_id: string
+}
+
 class GoogleAnalyticsService {
   private measurementId: string | null = null
   private initialized = false
@@ -44,11 +62,62 @@ class GoogleAnalyticsService {
 
   pageView(): void {
     if (!this.initialized || !this.measurementId || !window.gtag) return
-    window.gtag('event', 'page_view', {
+    this.track('page_view', {
       page_path: window.location.pathname,
       page_location: window.location.href,
       page_title: document.title,
     })
+  }
+
+  search(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      return
+    }
+
+    this.track('search', {
+      search_term: searchTerm.trim(),
+    })
+  }
+
+  viewItem(item: AnalyticsItem, currency = 'BDT'): void {
+    this.track('view_item', {
+      currency,
+      value: item.price ?? 0,
+      items: [item],
+    })
+  }
+
+  addToBag(item: AnalyticsItem, currency = 'BDT'): void {
+    this.track('add_to_cart', {
+      currency,
+      value: (item.price ?? 0) * (item.quantity ?? 1),
+      items: [item],
+    })
+  }
+
+  beginCheckout(payload: CheckoutPayload): void {
+    this.track('begin_checkout', {
+      currency: payload.currency ?? 'BDT',
+      value: payload.value,
+      items: payload.items,
+    })
+  }
+
+  purchase(payload: PurchasePayload): void {
+    this.track('purchase', {
+      transaction_id: payload.transaction_id,
+      currency: payload.currency ?? 'BDT',
+      value: payload.value,
+      items: payload.items,
+    })
+  }
+
+  private track(eventName: string, params: Record<string, unknown>): void {
+    if (!this.initialized || !this.measurementId || !window.gtag) {
+      return
+    }
+
+    window.gtag('event', eventName, params)
   }
 }
 

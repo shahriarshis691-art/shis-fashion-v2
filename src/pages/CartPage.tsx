@@ -4,6 +4,7 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { useCart } from '../context/CartContext'
 import { formatBDT, parseBDT } from '../utils/currency'
+import { googleAnalytics } from '../services/googleAnalytics'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
@@ -14,6 +15,22 @@ export default function CartPage() {
   const { items, updateQuantity, removeFromCart, subtotal, itemCount } = useCart()
   const totalLabel = formatBDT(subtotal)
   const supportWhatsAppHref = getWhatsAppHref()
+
+  const handleBeginCheckout = () => {
+    googleAnalytics.beginCheckout({
+      value: subtotal,
+      currency: 'BDT',
+      items: items.map((item) => ({
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.category,
+        price: parseBDT(item.price),
+        quantity: item.quantity,
+      })),
+    })
+
+    navigate('/checkout')
+  }
 
   if (items.length === 0) {
     return (
@@ -61,7 +78,14 @@ export default function CartPage() {
                 className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:rounded-[1.8rem] sm:p-5"
               >
                 <div className="flex gap-4">
-                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-20 w-20 rounded-[0.9rem] object-cover sm:h-28 sm:w-28 sm:rounded-[1.2rem]" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    decoding="async"
+                    sizes="(max-width: 639px) 80px, 112px"
+                    className="h-20 w-20 rounded-[0.9rem] object-cover sm:h-28 sm:w-28 sm:rounded-[1.2rem]"
+                  />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -101,7 +125,7 @@ export default function CartPage() {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button onClick={() => navigate('/checkout')} className="w-full justify-center">Checkout</Button>
+              <Button onClick={handleBeginCheckout} className="w-full justify-center">Checkout</Button>
               <Button to="/shop" variant="secondary" className="w-full justify-center">Keep browsing</Button>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-xs uppercase tracking-[0.14em] text-[var(--color-muted)]">
@@ -117,7 +141,7 @@ export default function CartPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
               <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
-            <Button onClick={() => navigate('/checkout')} className="min-w-[8.25rem] justify-center px-4 py-2.5 text-sm">
+            <Button onClick={handleBeginCheckout} className="min-w-[8.25rem] justify-center px-4 py-2.5 text-sm">
               Secure checkout
             </Button>
           </div>

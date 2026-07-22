@@ -8,6 +8,7 @@ import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { metaPixel } from '../services/metaPixel'
+import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata } from '../utils/seo'
 
 function slugify(value: string) {
@@ -157,6 +158,14 @@ export default function CollectionListingPage() {
         value: parseBDT(selectedProduct.price),
         currency: 'BDT',
       })
+
+      googleAnalytics.viewItem({
+        item_id: selectedProduct.id,
+        item_name: selectedProduct.name,
+        item_category: selectedProduct.category,
+        price: parseBDT(selectedProduct.price),
+        quantity: 1,
+      }, 'BDT')
     }
 
     applySeoMetadata(location.pathname, {
@@ -214,6 +223,7 @@ export default function CollectionListingPage() {
                   alt={`${activeCollection.title} look ${index + 1}`}
                   loading="lazy"
                   decoding="async"
+                  sizes="(max-width: 639px) 50vw, (max-width: 1023px) 25vw, 18vw"
                   className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                 />
               </div>
@@ -237,7 +247,14 @@ export default function CollectionListingPage() {
                     className={`overflow-hidden rounded-[1rem] border text-left transition ${selected ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}
                   >
                     <div className="aspect-[4/5] bg-[var(--color-bg)]">
-                      <img src={cardImage} alt={product.name} className={`h-full w-full object-cover ${isDemoImageUrl(cardImage) ? 'shis-media-tone' : ''}`} />
+                      <img
+                        src={cardImage}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 639px) 45vw, (max-width: 1023px) 30vw, 20vw"
+                        className={`h-full w-full object-cover ${isDemoImageUrl(cardImage) ? 'shis-media-tone' : ''}`}
+                      />
                     </div>
                     <div className="px-2.5 py-2.5">
                       <p className="line-clamp-1 text-xs font-semibold text-[var(--color-text)]">{product.name}</p>
@@ -269,6 +286,13 @@ export default function CollectionListingPage() {
                     value: parseBDT(selectedProduct.price),
                     currency: 'BDT',
                   })
+                  googleAnalytics.addToBag({
+                    item_id: selectedProduct.id,
+                    item_name: selectedProduct.name,
+                    item_category: selectedProduct.category,
+                    price: parseBDT(selectedProduct.price),
+                    quantity: 1,
+                  }, 'BDT')
                   navigate('/cart')
                 }}
                 className="justify-center"
@@ -294,6 +318,19 @@ export default function CollectionListingPage() {
                     value: parseBDT(selectedProduct.price),
                     currency: 'BDT',
                     content_type: 'product',
+                  })
+                  googleAnalytics.beginCheckout({
+                    value: parseBDT(selectedProduct.price),
+                    currency: 'BDT',
+                    items: [
+                      {
+                        item_id: selectedProduct.id,
+                        item_name: selectedProduct.name,
+                        item_category: selectedProduct.category,
+                        price: parseBDT(selectedProduct.price),
+                        quantity: 1,
+                      },
+                    ],
                   })
                   navigate('/checkout')
                 }}
