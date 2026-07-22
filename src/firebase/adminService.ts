@@ -284,6 +284,18 @@ function clearLegacyAdminBypassState() {
   window.localStorage.removeItem(LEGACY_AUTH_KEY)
 }
 
+async function getCurrentAdminIdToken() {
+  if (!firebaseAuth?.currentUser) {
+    return null
+  }
+
+  try {
+    return await firebaseAuth.currentUser.getIdToken()
+  } catch {
+    return null
+  }
+}
+
 function normalizeRoleValues(value: unknown) {
   if (!Array.isArray(value)) {
     return [] as string[]
@@ -896,7 +908,6 @@ export function onAdminAuthChanged(callback: (user: { uid: string; email: string
         }
 
         if (!user) {
-          callback(null)
           return
         }
 
@@ -1548,10 +1559,13 @@ export async function uploadAssets(files: File[], folder: string, options: Uploa
     return []
   }
 
+  const authToken = await getCurrentAdminIdToken()
+
   return uploadMultipleAssets(files, {
     folder,
     onProgress: options.onProgress,
     retries: options.retries,
+    authToken,
   })
 }
 
@@ -1560,5 +1574,6 @@ export async function deleteAsset(url: string) {
     return
   }
 
-  await deleteCloudinaryAssetByUrl(url)
+  const authToken = await getCurrentAdminIdToken()
+  await deleteCloudinaryAssetByUrl(url, authToken)
 }

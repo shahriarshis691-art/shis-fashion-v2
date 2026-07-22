@@ -1,8 +1,11 @@
 import { createHash } from 'node:crypto'
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
 
 interface LooseRequest {
   method?: string
   body?: unknown
+  headers?: Record<string, string | string[] | undefined>
 }
 
 interface LooseResponse {
@@ -13,6 +16,68 @@ interface LooseResponse {
 function readEnv(name: string) {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {}
   return env[name] ?? ''
+}
+
+function getHeaderValue(headers: LooseRequest['headers'], name: string) {
+  const header = headers?.[name] ?? headers?.[name.toLowerCase()]
+  return Array.isArray(header) ? header[0] : header ?? ''
+}
+
+function getFirebaseAdminAuth() {
+  const projectId = readEnv('FIREBASE_ADMIN_PROJECT_ID') || readEnv('VITE_FIREBASE_PROJECT_ID')
+  const clientEmail = readEnv('FIREBASE_ADMIN_CLIENT_EMAIL')
+  const privateKey = readEnv('FIREBASE_ADMIN_PRIVATE_KEY').replace(/\\n/g, '\n')
+
+  if (!projectId || !clientEmail || !privateKey) {
+    return null
+  }
+
+  if (!getApps().length) {
+    initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    })
+  }
+
+  return getAuth()
+}
+
+function isConfiguredAdminEmail(email: string) {
+  const rawValue = readEnv('VITE_ADMIN_EMAILS')
+  if (!rawValue) {
+    return false
+  }
+
+  return rawValue
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email.trim().toLowerCase())
+}
+
+async function requireAdminAccess(req: LooseRequest) {
+  if (process.env.NODE_ENV !== 'production') {
+    return true
+  }
+
+  const authorization = getHeaderValue(req.headers, 'authorization')
+  const token = authorization.startsWith('Bearer ') ? authorization.slice('Bearer '.length).trim() : ''
+
+  if (!token) {
+    return false
+  }
+
+  const auth = getFirebaseAdminAuth()
+  if (!auth) {
+    return false
+  }
+
+  const decoded = await auth.verifyIdToken(token)
+  const email = decoded.email?.trim().toLowerCase() ?? ''
+  return Boolean(decoded.admin === true || isConfiguredAdminEmail(email))
 }
 
 function makeSignature(params: Record<string, string>, apiSecret: string) {
@@ -50,9 +115,25 @@ function extractPublicId(url: string) {
   return withoutVersion.slice(0, dotIndex)
 }
 
+function getResourceType(url: string) {
+  try {
+    const parsed = new URL(url)
+    const match = parsed.pathname.match(/\/v\d+\/(image|video|raw)\/upload\//)
+    return match?.[1] ?? 'image'
+  } catch {
+    return 'image'
+  }
+}
+
 export default async function handler(req: LooseRequest, res: LooseResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  const hasAccess = await requireAdminAccess(req)
+  if (!hasAccess) {
+    res.status(401).json({ ok: false, error: 'Unauthorized' })
     return
   }
 
@@ -74,6 +155,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   }
 
   const timestamp = Math.floor(Date.now() / 1000)
+  const resourceType = getResourceType(body.url ?? '')
   const signature = makeSignature(
     {
       public_id: publicId,
@@ -82,7 +164,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     apiSecret,
   )
 
-  const destroyEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`
+  const destroyEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/destroy`
   const formData = new URLSearchParams()
   formData.set('public_id', publicId)
   formData.set('api_key', apiKey)

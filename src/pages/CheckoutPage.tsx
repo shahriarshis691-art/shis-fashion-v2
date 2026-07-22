@@ -106,7 +106,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="px-3 pb-34 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-4 lg:grid-cols-[1fr_0.85fr]">
           <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">

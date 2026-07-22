@@ -2,6 +2,7 @@ interface CloudinaryUploadOptions {
   folder?: string
   retries?: number
   onProgress?: (progress: number) => void
+  authToken?: string | null
 }
 
 interface CloudinaryResponse {
@@ -43,9 +44,11 @@ function getCloudinaryConfig() {
   return { cloudName, uploadPreset }
 }
 
-async function getSignedUploadPayload(folder?: string) {
+async function getSignedUploadPayload(folder?: string, authToken?: string | null) {
   const query = folder ? `?folder=${encodeURIComponent(folder)}` : ''
-  const response = await fetch(`/api/cloudinary-signature${query}`)
+  const response = await fetch(`/api/cloudinary-signature${query}`, {
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+  })
 
   if (!response.ok) {
     throw new Error('Unable to create signed upload session.')
@@ -57,7 +60,7 @@ async function getSignedUploadPayload(folder?: string) {
 async function uploadWithProgress(file: File, options: CloudinaryUploadOptions = {}) {
   const { cloudName, uploadPreset } = getCloudinaryConfig()
   const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`
-  const signedUpload = isSignedUploadEnabled() ? await getSignedUploadPayload(options.folder) : null
+  const signedUpload = isSignedUploadEnabled() ? await getSignedUploadPayload(options.folder, options.authToken) : null
 
   return new Promise<string>((resolve, reject) => {
     const formData = new FormData()
@@ -201,7 +204,7 @@ export async function uploadMultipleAssets(files: File[], options: CloudinaryUpl
   return urls
 }
 
-export async function deleteCloudinaryAssetByUrl(url: string) {
+export async function deleteCloudinaryAssetByUrl(url: string, authToken?: string | null) {
   let parsed: URL
 
   try {
@@ -218,6 +221,7 @@ export async function deleteCloudinaryAssetByUrl(url: string) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     body: JSON.stringify({ url }),
   })

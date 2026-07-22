@@ -12,6 +12,7 @@ Quick steps to enable full admin features (uploads, Firebase Auth/Firestore):
 Production hardening (recommended):
 - Set `VITE_CLOUDINARY_SIGNED_UPLOAD=true`.
 - Add server-side env vars: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+- Add Firebase Admin env vars for signed media routes: `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`.
 - Use deployed API routes `/api/cloudinary-signature` and `/api/cloudinary-destroy` for signed upload/delete.
 
 3. Install dependencies and run dev server:

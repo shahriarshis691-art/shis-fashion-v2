@@ -6,7 +6,7 @@
 declare global {
   interface Window {
     dataLayer?: unknown[]
-    gtag?: (...args: any[]) => void
+    gtag?: (...args: unknown[]) => void
   }
 }
 
@@ -25,12 +25,12 @@ class GoogleAnalyticsService {
     }
 
     window.dataLayer = window.dataLayer || []
-    window.gtag = function gtag(...args: any[]): void {
+    window.gtag = (...args: unknown[]): void => {
       window.dataLayer?.push(args)
     }
 
-    window.gtag && window.gtag('js', new Date())
-    window.gtag && window.gtag('config', this.measurementId, {
+    window.gtag('js', new Date())
+    window.gtag('config', this.measurementId, {
       send_page_view: false,
     })
 
