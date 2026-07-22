@@ -61,6 +61,26 @@ const emptyProductForm = {
 
 const galleryLabels = ['Main image', 'Detail image', 'Close-up image']
 
+const ORDER_LIFECYCLE: AdminOrder['status'][] = ['new', 'confirmed', 'processing', 'shipped', 'delivered']
+
+const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
+  new: ['confirmed', 'cancelled'],
+  confirmed: ['processing', 'cancelled'],
+  processing: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+}
+
+const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
+  new: 'New',
+  confirmed: 'Confirmed',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+}
+
 interface AdminPageProps {
   initialView?: 'login' | 'dashboard'
 }
@@ -238,6 +258,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const query = search.toLowerCase()
     return products.filter((product) => [product.name, product.category, product.description].some((value) => value.toLowerCase().includes(query)))
   }, [products, search])
+
+  const availableCategoryNames = useMemo(() => {
+    const names = categories.map((category) => category.name).filter(Boolean)
+    return Array.from(new Set(names)).sort((left, right) => left.localeCompare(right))
+  }, [categories])
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -838,6 +863,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </div>
           </div>
 
+          <div className="mt-5 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+            <p className="text-sm font-semibold text-[var(--color-text)]">Daily operator flow</p>
+            <div className="mt-2 grid gap-2 text-xs text-[var(--color-muted)] sm:grid-cols-2">
+              <p>1. Check <span className="font-semibold text-[var(--color-text)]">New Orders</span> and move to Confirmed.</p>
+              <p>2. Update stock when creating or editing products.</p>
+              <p>3. Keep category list clean before uploading new products.</p>
+              <p>4. Toggle homepage sections and click <span className="font-semibold text-[var(--color-text)]">Save content</span>.</p>
+            </div>
+          </div>
+
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {[
               { label: "Today's Orders", value: dashboardSummary.todayOrders, target: () => handleSummaryCardClick('orders') },
@@ -880,7 +915,21 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
                   <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
                 </div>
-                <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category" />
+                  <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category slug (example: women-kurti)" />
+                  {availableCategoryNames.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {availableCategoryNames.map((name) => (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => setForm((current) => ({ ...current, category: name }))}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${form.category === name ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
                 <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma separated)" />
                 <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
@@ -989,6 +1038,37 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Orders</p>
                 <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Manage the full order lifecycle</h2>
               </div>
+              <button
+                type="button"
+                onClick={() => setOrderStatusFilter('all')}
+                className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+              >
+                Show all
+              </button>
+            </div>
+            <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Status pipeline</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
+                {ORDER_LIFECYCLE.map((status, index) => (
+                  <div key={status} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setOrderStatusFilter(status)}
+                      className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === status ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                    >
+                      {ORDER_STATUS_LABELS[status]}
+                    </button>
+                    {index < ORDER_LIFECYCLE.length - 1 ? <span aria-hidden="true">→</span> : null}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter('cancelled')}
+                  className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === 'cancelled' ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                >
+                  Cancelled
+                </button>
+              </div>
             </div>
             <div className="mt-5 space-y-3">
               {filteredOrders.map((order) => (
@@ -1005,10 +1085,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <select value={order.status} onChange={(event) => handleStatusChange(order.id, event.target.value as AdminOrder['status'])} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none">
                         {['new', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => <option key={status} value={status}>{status}</option>)}
                       </select>
+                      <p className="mt-2 text-xs text-[var(--color-muted)]">Current: {ORDER_STATUS_LABELS[order.status]}</p>
                       <input value={orderEdits[order.id]?.trackingNumber ?? order.trackingNumber ?? ''} onChange={(event) => setOrderEdits((current) => ({ ...current, [order.id]: { ...current[order.id], trackingNumber: event.target.value } }))} className="mt-2 w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Tracking number" />
                       <div className="mt-2 flex flex-wrap gap-2">
-                        <button type="button" onClick={() => handleStatusChange(order.id, 'confirmed')} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Confirm Order</button>
-                        <button type="button" onClick={() => handleStatusChange(order.id, 'cancelled')} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Cancel Order</button>
+                        {(ORDER_STATUS_TRANSITIONS[order.status] ?? []).map((nextStatus) => (
+                          <button
+                            key={`${order.id}-${nextStatus}`}
+                            type="button"
+                            onClick={() => handleStatusChange(order.id, nextStatus)}
+                            className={`rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold ${nextStatus === 'cancelled' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]'}`}
+                          >
+                            Mark {ORDER_STATUS_LABELS[nextStatus]}
+                          </button>
+                        ))}
                         <button type="button" onClick={() => handleSaveOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Save</button>
                         <button type="button" onClick={() => handleDeleteOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Delete</button>
                       </div>
@@ -1065,6 +1154,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <p className="text-sm font-semibold text-[var(--color-text)]">Homepage structure</p>
                       <p className="mt-1 text-xs text-[var(--color-muted)]">Show or hide sections and change the live website order.</p>
                     </div>
+                    <p className="text-xs font-semibold text-[var(--color-accent)]">
+                      {(homepageSections.filter((section) => section.enabled).length)} live / {homepageSections.length} total
+                    </p>
                   </div>
                   <div className="mt-4 space-y-3">
                     {homepageSections.map((section) => (
@@ -1414,6 +1506,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <input value={categoryName} onChange={(event) => setCategoryName(event.target.value)} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category name" />
                 <Button onClick={handleSaveCategory} variant="secondary">{editingCategoryId ? 'Update' : 'Add'}</Button>
               </div>
+              <p className="text-xs text-[var(--color-muted)]">Tip: Add category first, then pick it in product form for faster catalog entry.</p>
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center justify-between rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 px-4 py-3">
                   <div>
