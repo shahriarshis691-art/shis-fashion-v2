@@ -1,19 +1,22 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
-import SectionTitle from '../components/ui/SectionTitle'
-import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
-import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type HomepageContent } from '../firebase/adminService'
+import {
+  subscribeToHomepageContent,
+  subscribeToProducts,
+  type AdminProduct,
+  type HomepageContent,
+} from '../firebase/adminService'
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
-const serviceHighlights = [
-  { label: 'All Bangladesh delivery', value: 'Reliable dispatch' },
-  { label: 'Everyday premium wear', value: 'Clean finishing' },
-  { label: 'Cash on delivery', value: 'Simple confirmation' },
-  { label: 'WhatsApp assistance', value: 'Direct support' },
+const lockedCategoryLinks = [
+  { label: 'Women', href: '/shop?segment=women' },
+  { label: 'Men', href: '/shop?segment=men' },
+  { label: 'Kids', href: '/shop?segment=kids' },
+  { label: 'Sale', href: '/sale' },
+  { label: 'New Arrivals', href: '/shop/new-arrivals' },
 ]
 
 const defaultHomepage: HomepageContent = {
@@ -22,7 +25,8 @@ const defaultHomepage: HomepageContent = {
   navbarSearchPlaceholder: 'Search products',
   heroEyebrow: 'SHIS FASHION',
   heroTitle: 'Crafted for Everyday Elegance.',
-  heroSubtitle: 'Contemporary Bangladeshi wardrobe essentials with refined fabrics, calm silhouettes, and comfort you can wear from morning to midnight.',
+  heroSubtitle:
+    'Contemporary Bangladeshi wardrobe essentials with refined fabrics, calm silhouettes, and comfort you can wear from morning to midnight.',
   heroCta: 'Shop now',
   heroPrimaryLink: '/shop',
   heroSecondaryCta: 'See new arrivals',
@@ -36,50 +40,7 @@ const defaultHomepage: HomepageContent = {
     { title: 'Summer', caption: 'Summer.', href: '/collections/summer' },
     { title: 'Everyday Wear', caption: 'Everyday wear.', href: '/collections/everyday-wear' },
   ],
-  featuredCollectionPages: [
-    {
-      slug: 'winter',
-      title: 'Winter Collection',
-      subtitle: 'Warm layers, clean structure',
-      description: 'Comfort-led pieces tailored for cooler days, with sharp lines and premium texture.',
-      href: '/collections/winter',
-      images: [
-        'https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=1200&q=80',
-      ],
-      relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
-    },
-    {
-      slug: 'summer',
-      title: 'Summer Collection',
-      subtitle: 'Lightweight and breathable',
-      description: 'Easy silhouettes for warm weather with polished finishing and movement-friendly fits.',
-      href: '/collections/summer',
-      images: [
-        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80',
-      ],
-      relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
-    },
-    {
-      slug: 'everyday-wear',
-      title: 'Everyday Wear',
-      subtitle: 'Built for daily comfort',
-      description: 'Dependable daily outfits that balance comfort, shape, and understated style.',
-      href: '/collections/everyday-wear',
-      images: [
-        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1200&q=80',
-      ],
-      relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
-    },
-  ],
+  featuredCollectionPages: [],
   shopByCategories: homeCategoryItems.map((item) => ({
     title: item.name,
     href: item.href,
@@ -87,7 +48,8 @@ const defaultHomepage: HomepageContent = {
   })),
   featuredCollectionEyebrow: 'Featured collections',
   featuredCollectionTitle: 'Designed for modern Bangladeshi wardrobes',
-  featuredCollectionSubtitle: 'Minimal, refined, and wearable edits that fit daily life and special moments alike.',
+  featuredCollectionSubtitle:
+    'Minimal, refined, and wearable edits that fit daily life and special moments alike.',
   newArrivalsEyebrow: 'Latest edit',
   newArrivalsTitle: 'New arrivals, curated weekly',
   newArrivalsSubtitle: 'Fresh additions selected for comfort, quality, and a polished finish.',
@@ -96,11 +58,13 @@ const defaultHomepage: HomepageContent = {
   featuredSubtitle: 'Timeless staples our customers reorder for fit, fabric, and comfort.',
   brandPromiseEyebrow: 'Our promise',
   brandPromiseTitle: 'Quality, comfort, and consistency.',
-  brandPromiseDescription: 'SHIS Fashion focuses on better materials, thoughtful fits, and clean detailing to make everyday style easier.',
+  brandPromiseDescription:
+    'SHIS Fashion focuses on better materials, thoughtful fits, and clean detailing to make everyday style easier.',
   brandSignatureLabel: 'SHIS Signature',
   brandSignatureText: 'Minimal design language, balanced proportions, and soft everyday luxury.',
   footerBrandTitle: 'Modern essentials for Bangladesh',
-  footerDescription: 'A calm shopping experience with clear styling, dependable quality, and mobile-first checkout convenience.',
+  footerDescription:
+    'A calm shopping experience with clear styling, dependable quality, and mobile-first checkout convenience.',
   footerContactEmail: 'shisfashion18@gmail.com',
   footerContactPhone: '+88 01887848304',
   footerContactAddress: 'Mirpur, Dhaka',
@@ -132,6 +96,9 @@ const defaultProducts: AdminProduct[] = [
   },
 ]
 
+const IMAGE_PLACEHOLDER =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
+
 function slugify(value: string) {
   return value
     .trim()
@@ -145,181 +112,8 @@ function productHref(product: AdminProduct) {
   return `/shop/${product.category}/${slugify(product.name)}`
 }
 
-function getImagePositionClass(category: string) {
-  switch (category) {
-    case 'oversized-tee':
-      return 'object-[center_10%]'
-    case 'unisex-tee':
-      return 'object-[center_12%]'
-    case 'mens-shirt':
-      return 'object-[center_14%]'
-    case 'womens-dresses':
-      return 'object-[center_16%]'
-    case 'western-outfits':
-      return 'object-[center_15%]'
-    case 'denim':
-      return 'object-[center_18%]'
-    case 'couples':
-      return 'object-[center_12%]'
-    case 'kids':
-      return 'object-[center_20%]'
-    default:
-      return 'object-[center_14%]'
-  }
-}
-
-function getWhatsAppHref(phone?: string) {
-  const digits = (phone ?? '').replace(/\D/g, '')
-  if (!digits) {
-    return 'https://wa.me/8801887848304'
-  }
-
-  const normalized = digits.startsWith('88') ? digits : `88${digits}`
-  return `https://wa.me/${normalized}`
-}
-
-const IMAGE_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f8f5ed"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23c9a227"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
-
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
-}
-
-function SectionHeader({
-  eyebrow,
-  title,
-  description,
-  to,
-  linkLabel,
-}: {
-  eyebrow: string
-  title: string
-  description?: string
-  to?: string
-  linkLabel?: string
-}) {
-  return (
-    <div className="flex items-end justify-between gap-3">
-      <div className="max-w-2xl">
-        <p className="text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">{eyebrow}</p>
-        <h2 className="mt-2 text-[1.7rem] font-semibold leading-[0.98] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
-        {description ? <p className="mt-2.5 max-w-xl text-[0.94rem] leading-6 text-[var(--color-muted)] sm:text-[0.98rem] sm:leading-7">{description}</p> : null}
-      </div>
-      {to && linkLabel ? (
-        <Link to={to} className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--color-accent)] md:inline-flex">
-          <span>{linkLabel}</span>
-          <span aria-hidden className="text-base leading-none">→</span>
-        </Link>
-      ) : null}
-    </div>
-  )
-}
-
-function MobileProductGrid({ products }: { products: AdminProduct[] }) {
-  const [visibleCount, setVisibleCount] = useState(() => Math.min(9, products.length))
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const displayedProducts = products.slice(0, visibleCount)
-  const canLoadMore = visibleCount < products.length
-
-  useEffect(() => {
-    if (!canLoadMore || !sentinelRef.current) {
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries
-        if (entry?.isIntersecting) {
-          setVisibleCount((current) => Math.min(current + 6, products.length))
-        }
-      },
-      { rootMargin: '160px 0px' }
-    )
-
-    observer.observe(sentinelRef.current)
-    return () => observer.disconnect()
-  }, [canLoadMore, products.length])
-
-  return (
-    <div className="mt-4 sm:hidden">
-      <div className="grid grid-cols-2 gap-2.5">
-        {displayedProducts.map((item, index) => {
-          const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 520, 650)
-          const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
-          const stockLabel = item.stock <= 0 ? 'Sold out' : item.stock <= 5 ? 'Low stock' : null
-          const imagePositionClass = getImagePositionClass(item.category)
-
-          return (
-            <motion.article
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.2, delay: index * 0.02 }}
-            >
-              <Link
-                to={productHref(item)}
-                className="group block overflow-hidden rounded-[1.1rem] border border-[var(--color-border)] bg-[var(--color-surface)]"
-                aria-label={item.name}
-              >
-                <div className="aspect-[4/5] overflow-hidden bg-[var(--color-bg)]">
-                  <img
-                    src={productImage || IMAGE_PLACEHOLDER}
-                    alt={item.name}
-                    loading="lazy"
-                    decoding="async"
-                    onError={handleImageError}
-                    className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.03] ${toneClass}`}
-                  />
-                </div>
-                <div className="px-2.25 pb-2 pt-2">
-                  <h3 className="line-clamp-1 text-[12px] font-semibold tracking-[0.01em] text-[var(--color-text)]">{item.name}</h3>
-                  <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="text-[12px] font-semibold tracking-[0.02em] text-[var(--color-accent)]">{item.price}</p>
-                    {stockLabel ? (
-                      <span className="rounded-full border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                        {stockLabel}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              </Link>
-            </motion.article>
-          )
-        })}
-      </div>
-      {canLoadMore ? <div ref={sentinelRef} className="h-6" aria-hidden /> : null}
-    </div>
-  )
-}
-
-function ProductRail({ products }: { products: AdminProduct[] }) {
-  return (
-    <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
-      {products.map((item, index) => {
-        const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
-        const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
-        const stockLabel = item.stock <= 0 ? 'Sold out' : item.stock <= 5 ? 'Low stock' : null
-        const imagePositionClass = getImagePositionClass(item.category)
-
-        return (
-          <motion.div key={item.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="min-w-[14.8rem] snap-start md:min-w-0">
-            <Link to={productHref(item)} className="group block overflow-hidden rounded-[1.6rem] bg-transparent">
-              <div className="aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-[var(--color-surface)] shadow-[0_12px_24px_rgba(17,17,17,0.08)]">
-                <img src={productImage || IMAGE_PLACEHOLDER} alt={item.name} loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-cover ${imagePositionClass} ${toneClass}`} />
-              </div>
-              <div className="px-1 pb-1 pt-2.5">
-                <h3 className="line-clamp-1 font-sans text-[1rem] font-semibold text-[var(--color-text)]">{item.name}</h3>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <p className="text-base font-bold leading-none text-[var(--color-text)]">{item.price}</p>
-                  {stockLabel ? <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">{stockLabel}</span> : null}
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        )
-      })}
-    </div>
-  )
 }
 
 export default function HomePage() {
@@ -336,269 +130,175 @@ export default function HomePage() {
     return unsubscribe
   }, [])
 
-  const featuredProducts = useMemo(() => {
-    const flagged = products.filter((product) => product.featured)
-    return (flagged.length ? flagged : products).slice(0, 4)
-  }, [products])
+  const heroImage = normalizeCatalogImageUrl(homepageContent.heroImage ?? '', 1400, 900)
+
+  const categoryStrips = useMemo(() => {
+    const contentImages = homepageContent.shopByCategories ?? []
+
+    return lockedCategoryLinks.map((item, index) => {
+      const fallback = homeCategoryItems[index]?.image ?? ''
+      const fromContent = contentImages[index]?.image ?? ''
+      const image = normalizeCatalogImageUrl(fromContent || fallback, 1200, 900)
+
+      return {
+        ...item,
+        image,
+      }
+    })
+  }, [homepageContent.shopByCategories])
 
   const newArrivals = useMemo(() => {
     const flagged = products.filter((product) => product.newArrival)
-    return (flagged.length ? flagged : products).slice(0, 4)
+    return (flagged.length ? flagged : products).slice(0, 8)
   }, [products])
-
-  const bestSellers = useMemo(() => {
-    const ranked = [...products].sort((left, right) => right.stock - left.stock)
-    return ranked.slice(0, 4)
-  }, [products])
-
-  const mobileFeaturedProducts = useMemo(() => {
-    const curated = [...newArrivals, ...featuredProducts, ...products]
-    const seen = new Set<string>()
-    return curated.filter((item) => {
-      if (seen.has(item.id)) {
-        return false
-      }
-      seen.add(item.id)
-      return true
-    })
-  }, [featuredProducts, newArrivals, products])
-
-  const heroImage = normalizeCatalogImageUrl(homepageContent.heroImage ?? '', 1400, 900)
-  const heroVideo = homepageContent.heroVideo
-  const supportWhatsappHref = useMemo(() => getWhatsAppHref(homepageContent.footerContactPhone), [homepageContent.footerContactPhone])
-  const orderedSections = useMemo(() => [...(homepageContent.sections?.length ? homepageContent.sections : defaultHomepage.sections)].sort((left, right) => left.order - right.order), [homepageContent.sections])
-  const sectionMap = useMemo(() => new Map(orderedSections.map((section) => [section.key, section] as const)), [orderedSections])
-
-  const heroConfig = sectionMap.get('hero')
-  const featuredCollectionConfig = sectionMap.get('featuredCollection')
-  const newArrivalsConfig = sectionMap.get('newArrivals')
-  const bestSellersConfig = sectionMap.get('bestSellers')
-  const brandPromiseConfig = sectionMap.get('brandPromise')
-  const shopByCategoryCards = useMemo(() => {
-    const rawItems = homepageContent.shopByCategories?.length
-      ? homepageContent.shopByCategories
-      : defaultHomepage.shopByCategories
-
-    return rawItems.map((item, index) => ({
-      key: `shop-by-${index}`,
-      name: item.title || homeCategoryItems[index]?.name || `Category ${index + 1}`,
-      href: item.href || homeCategoryItems[index]?.href || '/shop',
-      image: item.image || homeCategoryItems[index]?.image || '',
-    }))
-  }, [homepageContent.shopByCategories])
-
-  const sectionNodes = [
-    heroConfig?.enabled !== false ? {
-      key: 'hero',
-      order: heroConfig?.order ?? 0,
-      node: (
-        <section className="px-0 pb-6 pt-0 lg:pb-12">
-          <div className="overflow-hidden border-b border-[var(--color-border)]/70 bg-[#20160f]">
-            <div className="relative min-h-[24rem] sm:min-h-[31rem] lg:min-h-[36rem]">
-              {heroVideo ? (
-                <video
-                  src={heroVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  poster={heroImage || undefined}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : heroImage ? (
-                <img
-                  src={heroImage}
-                  alt={homepageContent.heroImageTitle || 'SHIS Fashion hero image'}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  onError={handleImageError}
-                  className={`absolute inset-0 h-full w-full object-cover object-center ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,#2d1d12,#54301d)]" />
-              )}
-
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-hero-overlay)_0%,rgba(43,30,21,0.52)_44%,rgba(43,30,21,0.2)_74%,rgba(43,30,21,0.03)_100%)]" />
-
-              <div className="relative z-10 flex min-h-[24rem] items-end px-4 pb-7 pt-11 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, ease: 'easeOut' }}
-                  className="max-w-[16rem] sm:max-w-[21rem] lg:max-w-[24rem]"
-                >
-                  <h1 className="home-hero-title text-[2.32rem] font-semibold leading-[0.9] tracking-[-0.02em] text-[#fff4e8] sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
-                  <h2 className="mt-3.5 max-w-[15.5rem] text-[0.95rem] leading-6 text-[#f7e6d7]/90 sm:text-[1.1rem] sm:leading-8">
-                    Premium oversized T-shirts, Polo Shirts, Denim and fashion essentials for modern living in Bangladesh.
-                  </h2>
-                  <div className="mt-5 flex max-w-[12.75rem] flex-col gap-2.5 sm:mt-6 sm:max-w-none sm:flex-row sm:flex-wrap">
-                    <Button
-                      to={homepageContent.heroPrimaryLink ?? '/shop'}
-                      className="min-w-[11.25rem] rounded-full border border-[#eec9a6]/45 bg-[linear-gradient(180deg,#9d4d2b,#7b3216)] px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#fff8f0] shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-[#f7d3b1]/60 hover:brightness-105 hover:text-[#fff8f0] sm:text-[0.75rem]"
-                    >
-                      {homepageContent.heroCta}
-                    </Button>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mx-auto mt-2.5 w-full max-w-7xl px-3 sm:mt-3 sm:px-6 lg:px-8">
-              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#f8f3eb] after:to-transparent after:content-[''] sm:after:hidden">
-              <div className="-mx-3 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0">
-              {serviceHighlights.map((item) => (
-                <div key={item.label} className="min-w-[13.6rem] snap-start rounded-[0.9rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,#fdf9f4,#f7efe5)] px-2.25 py-2 text-center shadow-[0_8px_18px_rgba(69,39,21,0.11)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.02rem] sm:px-2.75 sm:py-2.5">
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
-                  <p className="mt-0.5 line-clamp-1 text-[0.64rem] leading-4 text-[var(--color-muted)] sm:text-[0.68rem]">{item.value}</p>
-                </div>
-              ))}
-              </div>
-            </div>
-            <p className="mt-1 px-1 text-[0.56rem] font-semibold uppercase tracking-[0.17em] text-[var(--color-muted)] sm:hidden">Swipe for more</p>
-          </div>
-        </section>
-      ),
-    } : null,
-    {
-      key: 'shopByCategory',
-      node: <ShopByCategorySection items={shopByCategoryCards} />,
-    },
-    featuredCollectionConfig?.enabled !== false ? {
-      key: 'featuredCollection',
-      order: featuredCollectionConfig?.order ?? 1,
-      node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-          <Container>
-            <SectionTitle
-              eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collection'}
-              title={homepageContent.featuredCollectionTitle ?? 'Premium categories for every moment'}
-              description={homepageContent.featuredCollectionSubtitle ?? 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.'}
-              align="center"
-            />
-            <MobileProductGrid products={mobileFeaturedProducts} />
-            <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-4">
-              {homepageContent.categories.map((category, index) => {
-                const categoryImage = normalizeCatalogImageUrl(category.image ?? '', 900, 600)
-                const toneClass = isDemoImageUrl(categoryImage) ? 'shis-media-tone' : ''
-                const categoryHref = category.href || `/collections/${category.title.toLowerCase().replace(/\s+/g, '-')}`
-
-                return (
-                  <motion.div key={category.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.25, delay: index * 0.06 }} className="hidden sm:block">
-                    <Link to={categoryHref} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]">
-                      <div className="group relative aspect-[4/5] overflow-hidden rounded-[1.2rem] border border-[var(--color-border)] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(0,0,0,0.34)]">
-                        {categoryImage ? (
-                          <img
-                            src={categoryImage}
-                            alt={category.title}
-                            loading="lazy"
-                            decoding="async"
-                            onError={handleImageError}
-                            className={`h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03] ${toneClass}`}
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-[linear-gradient(135deg,rgba(0,0,0,0.1),rgba(0,0,0,0.16))]" />
-                        )}
-                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04)_10%,rgba(0,0,0,0.16)_56%,rgba(0,0,0,0.58)_100%)]" />
-                        <div className="absolute inset-x-0 bottom-0 px-3.5 pb-3.5 pt-12 text-white">
-                          <h3 className="text-[0.95rem] font-semibold uppercase tracking-[0.08em]">{category.title}</h3>
-                          <p className="mt-1 line-clamp-1 text-[0.78rem] text-white/84">{category.caption}</p>
-                          <p className="mt-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-accent)]">View collection</p>
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                )
-              })}
-            </div>
-          </Container>
-        </section>
-      ),
-    } : null,
-    newArrivalsConfig?.enabled !== false ? {
-      key: 'newArrivals',
-      order: newArrivalsConfig?.order ?? 2,
-      node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-          <Container>
-            <SectionHeader
-              eyebrow={homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
-              title={homepageContent.newArrivalsTitle}
-              description={homepageContent.newArrivalsSubtitle}
-              to="/shop"
-              linkLabel="View all"
-            />
-            <ProductRail products={newArrivals} />
-          </Container>
-        </section>
-      ),
-    } : null,
-    bestSellersConfig?.enabled !== false ? {
-      key: 'bestSellers',
-      order: bestSellersConfig?.order ?? 3,
-      node: (
-        <section className="hidden px-4 py-8 sm:block sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-          <Container>
-            <SectionTitle eyebrow={homepageContent.bestSellerEyebrow ?? 'Best seller'} title={homepageContent.featuredTitle} description={homepageContent.featuredSubtitle} />
-            <ProductRail products={featuredProducts.length ? featuredProducts : bestSellers} />
-          </Container>
-        </section>
-      ),
-    } : null,
-    brandPromiseConfig?.enabled !== false ? {
-      key: 'brandPromise',
-      order: brandPromiseConfig?.order ?? 4,
-      node: (
-        <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-          <Container>
-            <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{homepageContent.brandPromiseEyebrow ?? 'Brand promise'}</p>
-              <h2 className="mt-4 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl lg:text-4xl">{homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}</h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)] sm:text-base sm:leading-8">{homepageContent.brandPromiseDescription ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}</p>
-            </div>
-          </Container>
-        </section>
-      ),
-    } : null,
-    {
-      key: 'allProducts',
-      order: 5,
-      node: (
-        <section className="hidden px-4 py-8 sm:block sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-          <Container>
-            <SectionHeader
-              eyebrow="All products"
-              title="Browse the full collection"
-              description="Scroll through every live product available on SHIS Fashion."
-              to="/shop"
-              linkLabel="Open shop"
-            />
-            <ProductRail products={products} />
-          </Container>
-        </section>
-      ),
-    },
-  ].filter(Boolean) as Array<{ key: string; order: number; node: ReactNode }>
-
-  sectionNodes.sort((left, right) => left.order - right.order)
 
   return (
-    <>
-      {sectionNodes.map((section) => <Fragment key={section.key}>{section.node}</Fragment>)}
+    <div className="bg-white pb-12">
+      <section className="border-b border-black/10">
+        <div className="relative overflow-hidden bg-black">
+          <div className="relative aspect-[4/5] min-h-[23rem] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
+            {heroImage ? (
+              <img
+                src={heroImage}
+                alt={homepageContent.heroImageTitle || 'SHIS Fashion campaign image'}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onError={handleImageError}
+                className={`absolute inset-0 h-full w-full object-cover ${
+                  isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''
+                }`}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,#1b1b1b,#454545)]" />
+            )}
 
-      <div className="h-20 sm:hidden" aria-hidden />
-      <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
-        <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-[var(--color-border)] bg-[rgba(253,248,241,0.96)] p-2 shadow-[0_14px_34px_rgba(57,35,22,0.18)] backdrop-blur-xl">
-          <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-accent)]/35 bg-[rgba(180,106,70,0.12)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">
-            Shop collection
-          </Link>
-          <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-accent)]/55 bg-[linear-gradient(180deg,#9a4826,#7b3216)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-[#fff8f0]">
-            Size help
-          </a>
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.4)_52%,rgba(0,0,0,0.05)_100%)]" />
+
+            <Container className="relative z-10 flex h-full items-end pb-8 pt-14 sm:items-center sm:py-0">
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-[17rem] sm:max-w-[25rem]"
+              >
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80">
+                  {homepageContent.heroEyebrow || 'SHIS FASHION'}
+                </p>
+                <h1 className="mt-2 text-h1 text-white">{homepageContent.heroTitle}</h1>
+                <p className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7">
+                  {homepageContent.heroSubtitle}
+                </p>
+                <div className="mt-5">
+                  <Link
+                    to={homepageContent.heroPrimaryLink ?? '/shop'}
+                    className="ui-interactive inline-flex items-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
+                  >
+                    {homepageContent.heroCta || 'Shop now'}
+                  </Link>
+                </div>
+              </motion.div>
+            </Container>
+          </div>
         </div>
-      </div>
-    </>
+      </section>
+
+      <section className="py-7 sm:py-9">
+        <Container>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">Browse by category</p>
+              <h2 className="mt-1 text-h2 text-black">Category Strips</h2>
+            </div>
+            <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
+              View all
+            </Link>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {categoryStrips.map((item, index) => (
+              <motion.article
+                key={item.label}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.22, delay: index * 0.04 }}
+              >
+                <Link to={item.href} className="group block">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
+                    <img
+                      src={item.image || IMAGE_PLACEHOLDER}
+                      alt={item.label}
+                      loading="lazy"
+                      decoding="async"
+                      onError={handleImageError}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                    <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
+                      <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.label}</span>
+                      <span aria-hidden className="text-base leading-none">→</span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="pb-8 sm:pb-10">
+        <Container>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
+              </p>
+              <h2 className="mt-1 text-h2 text-black">{homepageContent.newArrivalsTitle ?? 'New Arrivals'}</h2>
+            </div>
+            <Link
+              to="/shop/new-arrivals"
+              className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black"
+            >
+              Shop now
+            </Link>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+            {newArrivals.map((item, index) => {
+              const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
+              const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
+
+              return (
+                <motion.article
+                  key={item.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.22, delay: index * 0.03 }}
+                >
+                  <Link to={productHref(item)} className="group block">
+                    <div className="aspect-[4/5] overflow-hidden bg-black/5">
+                      <img
+                        src={productImage || IMAGE_PLACEHOLDER}
+                        alt={item.name}
+                        loading="lazy"
+                        decoding="async"
+                        onError={handleImageError}
+                        className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
+                      />
+                    </div>
+                    <div className="pt-2.5">
+                      <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
+                      <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
+                    </div>
+                  </Link>
+                </motion.article>
+              )
+            })}
+          </div>
+        </Container>
+      </section>
+    </div>
   )
 }
