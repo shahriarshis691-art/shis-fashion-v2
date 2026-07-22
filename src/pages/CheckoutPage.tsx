@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -32,14 +32,40 @@ function normalizeBangladeshPhone(raw: string) {
   }
 
   if (digits.startsWith('8801') && digits.length === 13) {
-    return digits
+    return `0${digits.slice(3)}`
   }
 
   if (digits.startsWith('01') && digits.length === 11) {
-    return `88${digits}`
+    return digits
   }
 
   return null
+}
+
+function formatBangladeshPhoneInput(raw: string) {
+  const digits = raw.replace(/\D/g, '')
+
+  if (!digits) {
+    return ''
+  }
+
+  if (digits.startsWith('8801')) {
+    return `0${digits.slice(3).slice(0, 10)}`
+  }
+
+  if (digits.startsWith('88')) {
+    return `0${digits.slice(2).slice(0, 10)}`
+  }
+
+  if (digits.startsWith('01')) {
+    return digits.slice(0, 11)
+  }
+
+  if (digits.length === 10) {
+    return `0${digits}`
+  }
+
+  return digits.slice(0, 11)
 }
 
 export default function CheckoutPage() {
@@ -64,6 +90,18 @@ export default function CheckoutPage() {
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(grandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
+  const normalizedPhone = useMemo(() => normalizeBangladeshPhone(form.phone), [form.phone])
+  const isPhoneValid = normalizedPhone !== null
+  const phoneHasValue = form.phone.trim().length > 0
+  const discountAmount = 0
+  const canSubmit = Boolean(
+    form.name.trim() &&
+    isPhoneValid &&
+    form.division &&
+    form.district &&
+    form.streetAddress.trim() &&
+    !isSubmitting,
+  )
 
   useEffect(() => {
     if (!items.length || hasTrackedCheckoutRef.current) {
@@ -114,8 +152,8 @@ export default function CheckoutPage() {
     setSubmitError('')
     let shouldReleaseLock = true
 
-    const normalizedPhone = normalizeBangladeshPhone(form.phone)
-    if (!normalizedPhone) {
+    const phoneNumber = normalizeBangladeshPhone(form.phone)
+    if (!phoneNumber) {
       setSubmitError('Please enter a valid Bangladesh phone number (01XXXXXXXXX).')
       setIsSubmitting(false)
       submissionLockRef.current = false
@@ -125,7 +163,7 @@ export default function CheckoutPage() {
     try {
       const createdOrder = await createOrder({
         customerName: form.name.trim(),
-        customerPhone: normalizedPhone,
+        customerPhone: phoneNumber,
         customerEmail: form.email.trim(),
         address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
         deliveryAddress: {
@@ -145,7 +183,7 @@ export default function CheckoutPage() {
       const orderSnapshot = {
         orderId: createdOrder.id,
         customerName: form.name.trim(),
-        customerPhone: normalizedPhone,
+        customerPhone: phoneNumber,
         address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
         paymentMethod: 'Cash on Delivery',
         deliveryCharge,
@@ -182,44 +220,50 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="px-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-4 text-[var(--color-text)] sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
-        <div className="grid gap-4 lg:grid-cols-[1fr_0.85fr]">
-          <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Checkout</p>
-            <h1 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">Cash on delivery, made simple</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">Built for Bangladesh shoppers who want a fast mobile checkout with only the details needed to deliver the order.</p>
-
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:text-[11px]">
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">1. Address</span>
-              <span className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-2 py-1.5 text-[var(--color-accent)]">2. Confirm</span>
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">3. Delivery call</span>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text)]">
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">COD only</span>
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">No account needed</span>
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2">2 minute checkout</span>
-            </div>
-
-            <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:grid-cols-3">
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Phone confirm before dispatch</span>
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Delivery charge shown upfront</span>
-              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-3 py-2 text-center text-[var(--color-accent)]">WhatsApp support</a>
-            </div>
-
-            {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
-
-            <form id="checkout-form" className="mt-5 space-y-3" onSubmit={handleSubmit}>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Full name" />
-                <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
+        <div className="mx-auto max-w-[760px]">
+          <form id="checkout-form" className="space-y-8" onSubmit={handleSubmit}>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="checkout-name" className="text-sm font-medium text-[var(--color-text)]">Full Name *</label>
+                <input
+                  id="checkout-name"
+                  required
+                  autoComplete="name"
+                  value={form.name}
+                  onChange={(event) => setForm({ ...form, name: event.target.value })}
+                  className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
+                  placeholder="Full Name"
+                />
               </div>
-              <p className="-mt-1 text-xs text-[var(--color-muted)]">Phone-first checkout: use active number like 01XXXXXXXXX for dispatch confirmation.</p>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="checkout-phone" className="text-sm font-medium text-[var(--color-text)]">Phone Number *</label>
+                <input
+                  id="checkout-phone"
+                  required
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={form.phone}
+                  onChange={(event) => setForm({ ...form, phone: formatBangladeshPhoneInput(event.target.value) })}
+                  className={`w-full rounded-[1rem] border bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:bg-white focus:ring-2 ${isPhoneValid ? 'border-emerald-500 focus:border-emerald-600 focus:ring-emerald-100' : 'border-[var(--color-border)] focus:border-black focus:ring-black/5'}`}
+                  placeholder="01XXXXXXXXX"
+                  aria-describedby="phone-help"
+                  aria-invalid={phoneHasValue ? !isPhoneValid : undefined}
+                />
+                <div id="phone-help" className="flex items-start justify-between gap-3 text-sm">
+                  <p className={phoneHasValue && !isPhoneValid ? 'text-red-600' : 'text-[var(--color-muted)]'}>
+                    {phoneHasValue && !isPhoneValid ? 'Enter a valid Bangladeshi mobile number.' : 'Example: 01712345678'}
+                  </p>
+                  {isPhoneValid ? <p className="shrink-0 text-emerald-600">Valid</p> : null}
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">Division</span>
+                  <span className="text-sm font-medium text-[var(--color-text)]">Division *</span>
                   <select
                     required
                     value={form.division}
@@ -232,102 +276,145 @@ export default function CheckoutPage() {
                         district: nextDistricts[0],
                       })
                     }}
-                    className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                    className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
                   >
                     {bangladeshDivisions.map((division) => <option key={division} value={division}>{division}</option>)}
                   </select>
                 </label>
+
                 <label className="space-y-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">District / Zilla</span>
+                  <span className="text-sm font-medium text-[var(--color-text)]">District *</span>
                   <select
                     required
                     value={form.district}
                     onChange={(event) => setForm({ ...form, district: event.target.value })}
-                    className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                    className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
                   >
                     {districtOptions.map((district) => <option key={district} value={district}>{district}</option>)}
                   </select>
                 </label>
               </div>
 
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)]/70 px-4 py-3 text-xs text-[var(--color-muted)]">
-                Delivery charge for {form.division}: <span className="font-semibold text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
+              <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3 text-sm text-[var(--color-muted)]">
+                <span>{form.division}</span>
+                <span>{formatBDT(deliveryCharge)}</span>
               </div>
 
-              <textarea
-                required
-                autoComplete="street-address"
-                value={form.streetAddress}
-                onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
-                className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
-                placeholder="House/Road/Village/Area, Union, Thana, Landmark"
-              />
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input type="email" inputMode="email" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Email Address (optional)" />
+              <div className="space-y-2">
+                <label htmlFor="checkout-address" className="text-sm font-medium text-[var(--color-text)]">Full Address *</label>
                 <textarea
-                  value={form.deliveryNote}
-                  onChange={(event) => setForm({ ...form, deliveryNote: event.target.value })}
-                  className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]"
-                  placeholder="Apartment, Floor, Landmark or Special Delivery Instructions"
+                  id="checkout-address"
+                  required
+                  autoComplete="street-address"
+                  value={form.streetAddress}
+                  onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
+                  className="min-h-24 w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
+                  placeholder="House/Road/Village/Area"
                 />
               </div>
 
-              <Button type="submit" className="hidden w-full justify-center sm:inline-flex" disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Place COD order'}</Button>
-              {submitError ? <p className="text-center text-sm text-red-700">{submitError}</p> : null}
-              <p className="text-center text-xs leading-6 text-[var(--color-muted)]">By placing this order, you confirm you want Cash on Delivery. We will contact you on the phone number provided.</p>
-              <p className="text-center text-xs leading-6 text-[var(--color-muted)]">Need help with address or delivery? <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Chat on WhatsApp</a></p>
-            </form>
-          </div>
+              <div className="space-y-2">
+                <label htmlFor="checkout-apartment" className="text-sm font-medium text-[var(--color-text)]">Apartment / Floor / Landmark (Optional)</label>
+                <input
+                  id="checkout-apartment"
+                  value={form.deliveryNote}
+                  onChange={(event) => setForm({ ...form, deliveryNote: event.target.value })}
+                  className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
+                  placeholder="Apartment, Floor, Landmark"
+                />
+              </div>
 
-          <div className="hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:block sm:p-7 lg:sticky lg:top-6 lg:self-start">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Order summary</p>
-            <div className="mt-5 space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
-                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-14 w-14 rounded-xl object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[var(--color-text)]">{item.name}</p>
-                    <p className="text-xs text-[var(--color-muted)]">Qty: {item.quantity}</p>
-                    <p className="text-xs text-[var(--color-muted)]">Price: {item.price}</p>
-                  </div>
-                  <span className="shrink-0 font-semibold text-[var(--color-text)]">{formatBDT(item.quantity * parseBDT(item.price))}</span>
+              <div className="space-y-2">
+                <label htmlFor="checkout-email" className="text-sm font-medium text-[var(--color-text)]">Email Address (Optional)</label>
+                <input
+                  id="checkout-email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={(event) => setForm({ ...form, email: event.target.value })}
+                  className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
+                  placeholder="Email Address"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-text)]">Order Summary</p>
+                  <p className="text-sm text-[var(--color-muted)]">{items.length} product{items.length > 1 ? 's' : ''}</p>
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 border-t border-[var(--color-border)] pt-4 text-sm text-[var(--color-muted)]">
-              <div className="flex items-center justify-between">
-                <span>Subtotal</span>
-                <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
+                <p className="text-sm font-semibold text-[var(--color-text)]">{summaryLabel}</p>
               </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span>Delivery charge</span>
-                <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-base font-semibold text-[var(--color-text)]">
-                <span>Grand total</span>
-                <span className="text-[var(--color-accent)]">{summaryLabel}</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="fixed inset-x-2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-[1.1rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.14)] backdrop-blur-xl sm:hidden">
-          <div className="rounded-[0.9rem] bg-[rgba(0,0,0,0.03)] px-3 py-2">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Grand total</p>
-                <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{summaryLabel}</p>
+              <details className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 sm:hidden">
+                <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-[var(--color-text)] focus-visible:outline-none">
+                  <span>Products</span>
+                  <span className="text-[var(--color-muted)]">Tap to view</span>
+                </summary>
+                <div className="mt-4 space-y-3">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-3">
+                      <img src={item.image} alt={item.name} loading="lazy" decoding="async" sizes="64px" className="h-16 w-16 rounded-[0.75rem] object-cover" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-[var(--color-text)]">{item.name}</p>
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">Qty {item.quantity} • {item.size}</p>
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">{item.price}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+
+              <div className="mt-4 hidden space-y-3 sm:block">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" sizes="64px" className="h-16 w-16 rounded-[0.75rem] object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[var(--color-text)]">{item.name}</p>
+                      <p className="mt-1 text-xs text-[var(--color-muted)]">Qty {item.quantity} • {item.size} • {item.color}</p>
+                    </div>
+                    <p className="text-sm font-medium text-[var(--color-text)]">{formatBDT(item.quantity * parseBDT(item.price))}</p>
+                  </div>
+                ))}
               </div>
-              <Button type="submit" form="checkout-form" className="min-w-[8.75rem] justify-center px-4 py-2.5 text-sm" disabled={isSubmitting}>
-                {isSubmitting ? 'Placing...' : 'Place order'}
+
+              <div className="mt-5 space-y-3 border-t border-[var(--color-border)] pt-4 text-sm">
+                <div className="flex items-center justify-between text-[var(--color-muted)]">
+                  <span>Subtotal</span>
+                  <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-[var(--color-muted)]">
+                  <span>Delivery</span>
+                  <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
+                </div>
+                <div className="flex items-center justify-between text-[var(--color-muted)]">
+                  <span>Discount</span>
+                  <span className="text-[var(--color-text)]">{formatBDT(discountAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-base font-semibold text-[var(--color-text)]">
+                  <span>Grand Total</span>
+                  <span>{summaryLabel}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-3 z-20 bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+              <Button type="submit" className="w-full justify-center rounded-full bg-black px-5 py-4 text-[16px] font-semibold text-white shadow-none hover:bg-black/90 disabled:bg-black/25 disabled:text-white/70" disabled={!canSubmit}>
+                {isSubmitting ? 'Placing order...' : 'Place Order'}
               </Button>
             </div>
-            <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--color-muted)]">
-              <span>{items.length} item{items.length > 1 ? 's' : ''} • COD</span>
-              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
+
+            {submitError ? <p className="text-sm text-red-600" role="alert">{submitError}</p> : null}
+
+            <div className="space-y-1 text-sm text-[var(--color-muted)]">
+              <p>Need help?</p>
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="inline-flex font-medium text-[var(--color-text)] underline underline-offset-4">Chat on WhatsApp</a>
             </div>
-          </div>
+          </form>
+
+          {!backendReady ? <p className="mt-4 text-sm text-[var(--color-muted)]">Live order backend is not connected. Please verify Firebase production credentials before launch.</p> : null}
         </div>
       </Container>
     </section>
