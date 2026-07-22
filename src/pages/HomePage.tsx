@@ -164,6 +164,7 @@ export default function HomePage() {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
+                sizes="100vw"
                 onError={handleImageError}
                 className={`absolute inset-0 h-full w-full object-cover ${
                   isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''
@@ -231,6 +232,7 @@ export default function HomePage() {
                       alt={item.label}
                       loading="lazy"
                       decoding="async"
+                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
                       onError={handleImageError}
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                     />
@@ -284,6 +286,7 @@ export default function HomePage() {
                         alt={item.name}
                         loading="lazy"
                         decoding="async"
+                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
                         onError={handleImageError}
                         className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
                       />
