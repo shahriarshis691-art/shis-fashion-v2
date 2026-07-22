@@ -131,12 +131,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
 }
 
-/* Gold Accent Text */
-[class*="accent"], 
-[style*="accent"] {
-  color: var(--color-accent);
-}
-
 /* Smooth Page Transitions */
 main {
   animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
