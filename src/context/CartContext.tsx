@@ -43,14 +43,27 @@ function CartProvider({ children }: { children: ReactNode }) {
   }, [items])
 
   const addToCart = (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => {
-    const quantity = options.quantity ?? 1
+    const requestedQuantity = Math.max(1, options.quantity ?? 1)
+    const stockLimit = typeof product.stock === 'number' ? Math.max(0, product.stock) : undefined
+
+    if (typeof stockLimit === 'number' && stockLimit <= 0) {
+      return
+    }
+
     const itemId = `${product.slug}-${options.size}-${options.color}`
 
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === itemId)
+      const effectiveQuantity = typeof stockLimit === 'number'
+        ? Math.min(requestedQuantity, stockLimit)
+        : requestedQuantity
 
       if (existingItem) {
-        return currentItems.map((item) => (item.id === itemId ? { ...item, quantity: item.quantity + quantity } : item))
+        const nextQuantity = typeof stockLimit === 'number'
+          ? Math.min(existingItem.quantity + effectiveQuantity, stockLimit)
+          : existingItem.quantity + effectiveQuantity
+
+        return currentItems.map((item) => (item.id === itemId ? { ...item, quantity: nextQuantity } : item))
       }
 
       return [
@@ -60,7 +73,7 @@ function CartProvider({ children }: { children: ReactNode }) {
           id: itemId,
           size: options.size,
           color: options.color,
-          quantity,
+          quantity: effectiveQuantity,
         },
       ]
     })
@@ -69,7 +82,20 @@ function CartProvider({ children }: { children: ReactNode }) {
   const updateQuantity = (itemId: string, change: number) => {
     setItems((currentItems) =>
       currentItems
-        .map((item) => (item.id === itemId ? { ...item, quantity: item.quantity + change } : item))
+        .map((item) => {
+          if (item.id !== itemId) {
+            return item
+          }
+
+          const stockLimit = typeof item.stock === 'number' ? Math.max(0, item.stock) : undefined
+          const nextQuantity = item.quantity + change
+
+          if (typeof stockLimit === 'number') {
+            return { ...item, quantity: Math.min(nextQuantity, stockLimit) }
+          }
+
+          return { ...item, quantity: nextQuantity }
+        })
         .filter((item) => item.quantity > 0),
     )
   }

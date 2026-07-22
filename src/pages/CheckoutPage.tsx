@@ -7,6 +7,8 @@ import { createOrder, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, type BangladeshDivision } from '../utils/bangladeshAddress'
 
+const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
+
 interface CheckoutFormState {
   name: string
   phone: string
@@ -19,6 +21,24 @@ interface CheckoutFormState {
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
+}
+
+function normalizeBangladeshPhone(raw: string) {
+  const digits = raw.replace(/\D/g, '')
+
+  if (!digits) {
+    return null
+  }
+
+  if (digits.startsWith('8801') && digits.length === 13) {
+    return digits
+  }
+
+  if (digits.startsWith('01') && digits.length === 11) {
+    return `88${digits}`
+  }
+
+  return null
 }
 
 export default function CheckoutPage() {
@@ -72,10 +92,18 @@ export default function CheckoutPage() {
     setSubmitError('')
     let shouldReleaseLock = true
 
+    const normalizedPhone = normalizeBangladeshPhone(form.phone)
+    if (!normalizedPhone) {
+      setSubmitError('Please enter a valid Bangladesh phone number (01XXXXXXXXX).')
+      setIsSubmitting(false)
+      submissionLockRef.current = false
+      return
+    }
+
     try {
-      await createOrder({
+      const createdOrder = await createOrder({
         customerName: form.name.trim(),
-        customerPhone: form.phone.trim(),
+        customerPhone: normalizedPhone,
         customerEmail: form.email.trim(),
         address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
         deliveryAddress: {
@@ -91,9 +119,35 @@ export default function CheckoutPage() {
         status: 'new',
         trackingNumber: '',
       })
+
+      const orderSnapshot = {
+        orderId: createdOrder.id,
+        customerName: form.name.trim(),
+        customerPhone: normalizedPhone,
+        address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
+        paymentMethod: 'Cash on Delivery',
+        deliveryCharge,
+        subtotal,
+        grandTotal,
+        items: items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+        })),
+        createdAt: new Date().toISOString(),
+      }
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(ORDER_CONFIRMATION_KEY, JSON.stringify(orderSnapshot))
+      }
+
       clearCart()
       shouldReleaseLock = false
-      navigate('/order-success')
+      navigate('/order-success', { state: { orderId: createdOrder.id } })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Order submission failed. Please try again.'
       setSubmitError(message)
@@ -139,7 +193,7 @@ export default function CheckoutPage() {
                 <input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Full name" />
                 <input required type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-accent)]" placeholder="Phone number" />
               </div>
-              <p className="-mt-1 text-xs text-[var(--color-muted)]">Use active number like 01XXXXXXXXX for confirmation call.</p>
+              <p className="-mt-1 text-xs text-[var(--color-muted)]">Phone-first checkout: use active number like 01XXXXXXXXX for dispatch confirmation.</p>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-2">
