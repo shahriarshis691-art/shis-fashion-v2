@@ -24,7 +24,7 @@ function IconButton({ label, children, onClick }: { label: string; children: Rea
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.08)] bg-[rgba(0,0,0,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(0,0,0,0.24)] hover:bg-[rgba(0,0,0,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:h-9 sm:w-9"
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[var(--color-accent-soft)] hover:bg-[rgba(180,106,70,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:h-9 sm:w-9"
     >
       {children}
     </button>
@@ -95,19 +95,19 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full border-b border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.92)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_16px_40px_rgba(0,0,0,0.1)] border-[rgba(0,0,0,0.1)]' : 'shadow-none'}`}>
-        <div className="flex h-[4.5rem] w-full items-center gap-2 px-3 sm:px-6 md:h-[4.75rem] lg:h-[5.25rem] lg:px-10">
-          <Link to="/" onClick={closeOverlays} className="group flex flex-shrink-0 items-center justify-start overflow-hidden text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-accent)] sm:text-base" aria-label="SHIS Fashion home">
+      <header className={`sticky top-0 z-50 w-full border-b border-[var(--color-border)]/70 bg-[color:rgba(253,248,241,0.95)] backdrop-blur-xl transition-[box-shadow,border-color] duration-200 ${isScrolled ? 'shadow-[0_12px_34px_rgba(43,28,20,0.12)] border-[var(--color-border)]' : 'shadow-none'}`}>
+        <div className="flex h-[4.2rem] w-full items-center gap-2 px-3 sm:px-5 md:h-[4.6rem] lg:px-10">
+          <Link to="/" onClick={closeOverlays} className="group flex flex-shrink-0 items-center justify-start overflow-hidden text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-text)] transition-colors duration-200 hover:text-[var(--color-accent)] sm:text-base" aria-label="SHIS Fashion home">
             <img
               src={shisLogo}
               alt="SHIS Fashion"
-              className="h-8 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02] sm:h-9 md:h-10 lg:h-11"
+              className="h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02] sm:h-8 md:h-9 lg:h-10"
               loading="eager"
             />
           </Link>
 
-          <nav className="min-w-0 flex-1 touch-pan-x overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex lg:justify-center" aria-label="Primary navigation">
-            <div className="flex min-w-max items-center gap-3 px-1 sm:gap-6 lg:gap-9">
+          <nav className="hidden min-w-0 flex-1 md:flex md:justify-center" aria-label="Primary navigation">
+            <div className="flex min-w-max items-center gap-6 px-1 lg:gap-8">
             {links.map((link) => (
               <NavLink
                 key={link.label}
@@ -115,13 +115,13 @@ export default function Navbar() {
                 onClick={closeOverlays}
                 className={({ isActive }) => {
                   if (link.href === '/brands') {
-                    return `whitespace-nowrap rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.18em] md:text-[12px] ${isActive ? 'border-[rgba(0,0,0,0.5)] bg-[rgba(0,0,0,0.1)] text-[var(--color-accent)]' : 'border-[rgba(0,0,0,0.3)] bg-[rgba(0,0,0,0.05)] text-[var(--color-accent)] hover:border-[rgba(0,0,0,0.5)] hover:bg-[rgba(0,0,0,0.08)]'}`
+                    return `whitespace-nowrap rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${isActive ? 'border-[var(--color-accent)]/75 bg-[var(--color-accent)]/10 text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-accent)] hover:border-[var(--color-accent)]/65 hover:bg-[var(--color-accent)]/10'}`
                   }
 
-                  const baseClass = `whitespace-nowrap px-0 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:text-[12px] sm:tracking-[0.22em] md:text-[13px] md:font-medium md:tracking-[0.22em] ${
+                  const baseClass = `whitespace-nowrap px-0 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                     isActive
-                      ? 'text-[var(--color-accent)] md:text-[var(--color-accent)] md:font-semibold md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
-                      : 'text-[var(--color-text)]/86 hover:text-[var(--color-text)] md:hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
+                      ? 'text-[var(--color-accent)] md:after:absolute md:after:-bottom-3 md:after:left-0 md:after:h-[2px] md:after:w-full md:after:bg-[var(--color-accent)] md:after:content-[\'\']'
+                      : 'text-[var(--color-text)]/86 hover:text-[var(--color-text)] md:after:absolute md:after:-bottom-3 md:after:left-1/2 md:after:h-[1px] md:after:w-0 md:after:-translate-x-1/2 md:after:bg-[var(--color-accent)] md:after:content-[\'\'] md:after:transition-all md:after:duration-200 md:after:ease-out md:hover:after:left-0 md:hover:after:w-full md:hover:after:translate-x-0'
                   }`
 
                   return baseClass
@@ -133,7 +133,7 @@ export default function Navbar() {
             </div>
           </nav>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
             <IconButton label="Search" onClick={toggleSearch}>
               <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
                 <circle cx="11" cy="11" r="5.5" />
@@ -144,7 +144,7 @@ export default function Navbar() {
               to="/cart"
               onClick={closeOverlays}
               title="Cart"
-              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.08)] bg-[rgba(0,0,0,0.03)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[rgba(0,0,0,0.24)] hover:bg-[rgba(0,0,0,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:h-9 sm:w-9"
+              className="relative flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] antialiased transition-colors duration-200 hover:border-[var(--color-accent-soft)] hover:bg-[rgba(180,106,70,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:h-9 sm:w-9"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2.1">
@@ -152,7 +152,7 @@ export default function Navbar() {
                 <circle cx="10" cy="18" r="1.2" />
                 <circle cx="17" cy="18" r="1.2" />
               </svg>
-              {itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[7px] font-bold text-white sm:-right-1.5 sm:-top-1.5 sm:h-4 sm:min-w-4 sm:text-[8px]">{itemCount}</span> : null}
+              {itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[var(--color-accent)] px-0.5 text-[7px] font-bold text-[#fff9f1] sm:-right-1.5 sm:-top-1.5 sm:h-4 sm:min-w-4 sm:text-[8px]">{itemCount}</span> : null}
             </Link>
             <IconButton label={isMenuOpen ? 'Close menu' : 'Open menu'} onClick={toggleMenu}>
               {isMenuOpen ? (
@@ -173,7 +173,7 @@ export default function Navbar() {
 
         <AnimatePresence>
           {isSearchOpen ? (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-t border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.98)] px-4 py-3 sm:px-6 lg:px-10">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="border-t border-[var(--color-border)] bg-[rgba(253,248,241,0.98)] px-4 py-3 sm:px-6 lg:px-10">
               <div className="flex gap-2">
                 <label htmlFor="site-search" className="sr-only">Search SHIS Fashion products</label>
                 <input
@@ -193,7 +193,7 @@ export default function Navbar() {
                     }
                   }}
                   placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                  className="flex-1 rounded-full border border-[var(--color-border)] bg-[rgba(0,0,0,0.03)] px-4 py-2.5 text-sm tracking-[0.18em] text-[var(--color-text)] outline-none transition-colors duration-200 hover:border-[rgba(0,0,0,0.3)] focus:border-[rgba(0,0,0,0.45)] focus-visible:ring-2 focus-visible:ring-[rgba(0,0,0,0.24)] focus-visible:ring-offset-1 focus-visible:ring-offset-white"
+                  className="flex-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm tracking-[0.1em] text-[var(--color-text)] outline-none transition-colors duration-200 hover:border-[var(--color-accent-soft)] focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[rgba(123,50,22,0.18)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-surface)]"
                 />
                 <button
                   type="button"
@@ -206,7 +206,7 @@ export default function Navbar() {
                     setIsSearchOpen(false)
                     setSearchTerm('')
                   }}
-                  className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[linear-gradient(180deg,#1a1a1a,#000000)] px-4 py-2 text-sm font-semibold tracking-[0.18em] text-white transition-colors duration-200 hover:border-[rgba(255,255,255,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                  className="rounded-full border border-[var(--color-accent)]/50 bg-[linear-gradient(180deg,#9a4826,#7b3216)] px-4 py-2 text-sm font-semibold tracking-[0.12em] text-[#fff8f0] transition-colors duration-200 hover:border-[var(--color-accent)] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
                 >
                   Search
                 </button>
@@ -234,12 +234,12 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="fixed inset-x-3 top-[calc(4.5rem+env(safe-area-inset-top))] z-50 max-h-[calc(100dvh-5.5rem-env(safe-area-inset-top))] overflow-y-auto rounded-[1.5rem] border border-[rgba(0,0,0,0.1)] bg-[rgba(255,255,255,0.98)] p-3 shadow-[0_26px_80px_rgba(0,0,0,0.16)] backdrop-blur-xl sm:inset-x-6 md:top-[calc(5.25rem+env(safe-area-inset-top))] lg:hidden"
+              className="fixed inset-x-2.5 top-[calc(4.2rem+env(safe-area-inset-top))] z-50 max-h-[calc(100dvh-5.2rem-env(safe-area-inset-top))] overflow-y-auto rounded-[1.3rem] border border-[var(--color-border)] bg-[rgba(253,248,241,0.98)] p-3 shadow-[0_20px_60px_rgba(48,30,18,0.18)] backdrop-blur-xl sm:inset-x-4 sm:rounded-[1.5rem] md:top-[calc(4.8rem+env(safe-area-inset-top))] lg:hidden"
             >
-              <div className="rounded-[1.2rem] border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.02)] p-3">
+              <div className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
                 <div className="flex items-center justify-between gap-3 px-1.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">Browse</p>
-                  <span className="rounded-full border border-[rgba(0,0,0,0.08)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">{theme}</span>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">Collections</p>
+                  <span className="rounded-full border border-[var(--color-border)] bg-[rgba(180,106,70,0.08)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">{theme}</span>
                 </div>
                 <nav className="mt-3 grid gap-1" aria-label="Mobile navigation">
                   {links.map((link) => (
@@ -249,10 +249,10 @@ export default function Navbar() {
                       onClick={closeOverlays}
                       className={({ isActive }) => {
                         if (link.href === '/brands') {
-                          return `flex items-center justify-between rounded-[0.95rem] border px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'border-[rgba(0,0,0,0.45)] bg-[rgba(0,0,0,0.1)] text-[var(--color-accent)]' : 'border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.04)] text-[var(--color-accent)] hover:border-[rgba(0,0,0,0.45)]'}`
+                          return `flex items-center justify-between rounded-[0.95rem] border px-3.5 py-3 text-[13px] font-semibold tracking-[0.05em] transition-colors ${isActive ? 'border-[var(--color-accent)]/80 bg-[var(--color-accent)]/10 text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[#fcf6ef] text-[var(--color-accent)] hover:border-[var(--color-accent-soft)]'}`
                         }
 
-                        return `flex items-center justify-between rounded-[0.95rem] px-3.5 py-3 text-[13px] font-semibold tracking-[0.08em] transition-colors ${isActive ? 'bg-[rgba(0,0,0,0.08)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(0,0,0,0.04)]'}`
+                        return `flex items-center justify-between rounded-[0.95rem] px-3.5 py-3 text-[13px] font-semibold tracking-[0.05em] transition-colors ${isActive ? 'bg-[rgba(180,106,70,0.12)] text-[var(--color-accent)]' : 'text-[var(--color-text)] hover:bg-[rgba(180,106,70,0.08)]'}`
                       }}
                     >
                       <span>{link.label}</span>
@@ -263,7 +263,7 @@ export default function Navbar() {
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-3">
-                <Link to="/checkout" onClick={closeOverlays} className="rounded-[1rem] border border-[rgba(0,0,0,0.16)] bg-[linear-gradient(180deg,#1a1a1a,#000000)] px-4 py-2.5 text-center text-sm font-semibold tracking-[0.14em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
+                <Link to="/checkout" onClick={closeOverlays} className="rounded-[1rem] border border-[var(--color-accent)]/65 bg-[linear-gradient(180deg,#9a4826,#7b3216)] px-4 py-2.5 text-center text-sm font-semibold tracking-[0.1em] text-[#fff8f0] shadow-[0_14px_30px_rgba(74,34,16,0.32)]">
                   Checkout now
                 </Link>
               </div>

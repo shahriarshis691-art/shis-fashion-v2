@@ -13,10 +13,10 @@ export default function SectionTitle({ eyebrow, title, description, align = 'lef
 
   return (
     <div className={`max-w-2xl ${alignmentClass}`}>
-      {eyebrow ? <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)] sm:text-xs">{eyebrow}</p> : null}
-      <h2 className="text-4xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl md:text-5xl">{title}</h2>
-      {description ? <p className="mt-4 text-lg leading-7 text-[var(--color-muted)] sm:text-base">{description}</p> : null}
-      {children ? <div className="mt-6">{children}</div> : null}
+      {eyebrow ? <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)] sm:text-[11px]">{eyebrow}</p> : null}
+      <h2 className="text-[2.05rem] font-semibold leading-[0.95] tracking-[-0.01em] text-[var(--color-text)] sm:text-[2.65rem] md:text-[3rem]">{title}</h2>
+      {description ? <p className="mt-3 text-[0.95rem] leading-7 text-[var(--color-muted)] sm:text-base">{description}</p> : null}
+      {children ? <div className="mt-5">{children}</div> : null}
     </div>
   )
 }

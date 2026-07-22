@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import './styles/design-system.css';
 @import 'tailwindcss';
 
 :root {
   font-family: 'Manrope', 'Segoe UI', sans-serif;
-  --font-sans: 'Manrope', 'Segoe UI', sans-serif;
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --tracking-label: 0.22em;
+  --tracking-label: 0.16em;
   --tracking-heading: -0.01em;
   line-height: 1.5;
   font-weight: 400;
@@ -13,23 +12,13 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-bg: #ffffff;
-  --color-surface: #f7f7f5;
-  --color-text: #111111;
-  --color-muted: #4f4f4f;
-  --color-border: #dcdcd8;
-  --color-accent: #000000;
   color: var(--color-text);
   background-color: var(--color-bg);
 }
 
 :root[data-theme='midnight'] {
-  --color-bg: #ffffff;
-  --color-surface: #f7f7f5;
-  --color-text: #111111;
-  --color-muted: #4f4f4f;
-  --color-border: #dcdcd8;
-  --color-accent: #000000;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 }
 
 html {
@@ -57,9 +46,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.015) 0%, rgba(0, 0, 0, 0) 24%),
-    linear-gradient(180deg, #ffffff 0%, #f8f8f6 100%);
+  background: var(--color-bg);
   color: var(--color-text);
 }
 
@@ -85,10 +72,11 @@ h3,
 h4,
 h5,
 h6 {
+  color: var(--color-text);
   font-family: var(--font-display);
   letter-spacing: var(--tracking-heading);
   line-height: 1.08;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 p,
@@ -121,19 +109,19 @@ span {
 }
 
 .shis-media-tone {
-  filter: saturate(0.82) contrast(1.03) brightness(0.95);
+  filter: saturate(0.9) contrast(1.01) brightness(0.98);
   transition: filter 0.3s ease;
 }
 
 /* Keep typography calm for product-first mobile reading */
 h1, h2, h3, h4, h5, h6 {
-  transition: color 0.2s ease;
-  font-weight: 600;
+  transition: color var(--transition-fast) var(--ease-standard);
+  font-weight: var(--fw-semibold);
 }
 
 /* Smooth Page Transitions */
 main {
-  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.22s var(--ease-standard);
 }
 
 @keyframes fadeIn {
@@ -149,12 +137,13 @@ main {
 
 /* Form Elements Premium */
 input, textarea, select {
-  transition: all 0.3s ease;
+  transition: border-color var(--transition-fast) var(--ease-standard), box-shadow var(--transition-fast) var(--ease-standard);
   border-color: var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   outline: none;
 }

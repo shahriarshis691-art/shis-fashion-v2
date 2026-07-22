@@ -1,0 +1,98 @@
+/* SHIS Design System Foundation - Step 2 */
+:root {
+  --font-sans: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+
+  /* Typography scale */
+  --fs-h1: clamp(2.125rem, 7vw, 3.5rem);
+  --fs-h2: clamp(1.625rem, 5.3vw, 2.5rem);
+  --fs-body: 1rem;
+  --fs-caption: 0.75rem;
+
+  /* All-black hierarchy via weight */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Spacing rhythm: 4 / 8 / 12 / 16 / 24 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+
+  /* UI color tokens */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-text: #000000;
+  --color-muted: #4a4a4a;
+  --color-border: #e6e6e6;
+  --color-accent: #000000;
+
+  /* Radius: minimal */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+
+  /* Border style: mostly none */
+  --border-none: none;
+  --border-subtle: 1px solid var(--color-border);
+
+  /* Interaction style: subtle and clean */
+  --transition-fast: 180ms;
+  --transition-base: 220ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+:root[data-theme='midnight'] {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-text: #000000;
+  --color-muted: #4a4a4a;
+  --color-border: #e6e6e6;
+  --color-accent: #000000;
+}
+
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  line-height: 0.94;
+  font-weight: var(--fw-semibold);
+}
+
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: 0.98;
+  font-weight: var(--fw-semibold);
+}
+
+.text-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  font-weight: var(--fw-regular);
+}
+
+.text-caption {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  font-weight: var(--fw-medium);
+}
+
+.ui-interactive {
+  transition:
+    color var(--transition-fast) var(--ease-standard),
+    background-color var(--transition-fast) var(--ease-standard),
+    border-color var(--transition-fast) var(--ease-standard),
+    opacity var(--transition-fast) var(--ease-standard);
+}
+
+.ui-interactive:hover {
+  opacity: 0.9;
+}

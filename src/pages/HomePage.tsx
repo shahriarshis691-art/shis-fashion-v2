@@ -200,12 +200,12 @@ function SectionHeader({
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="max-w-2xl">
-        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]">{eyebrow}</p>
-        <h2 className="mt-2.5 font-sans text-[1.75rem] font-bold leading-[1] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
-        {description ? <p className="mt-2.5 max-w-xl text-sm leading-6 text-[var(--color-muted)] sm:text-[0.98rem] sm:leading-7">{description}</p> : null}
+        <p className="text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">{eyebrow}</p>
+        <h2 className="mt-2 text-[1.7rem] font-semibold leading-[0.98] text-[var(--color-text)] sm:text-[2.15rem]">{title}</h2>
+        {description ? <p className="mt-2.5 max-w-xl text-[0.94rem] leading-6 text-[var(--color-muted)] sm:text-[0.98rem] sm:leading-7">{description}</p> : null}
       </div>
       {to && linkLabel ? (
-        <Link to={to} className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)] md:inline-flex">
+        <Link to={to} className="hidden shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--color-accent)] md:inline-flex">
           <span>{linkLabel}</span>
           <span aria-hidden className="text-base leading-none">→</span>
         </Link>
@@ -393,8 +393,8 @@ export default function HomePage() {
       order: heroConfig?.order ?? 0,
       node: (
         <section className="px-0 pb-6 pt-0 lg:pb-12">
-          <div className="overflow-hidden bg-[#111111]">
-            <div className="relative min-h-[23rem] sm:min-h-[31rem] lg:min-h-[36rem]">
+          <div className="overflow-hidden border-b border-[var(--color-border)]/70 bg-[#20160f]">
+            <div className="relative min-h-[24rem] sm:min-h-[31rem] lg:min-h-[36rem]">
               {heroVideo ? (
                 <video
                   src={heroVideo}
@@ -417,26 +417,26 @@ export default function HomePage() {
                   className={`absolute inset-0 h-full w-full object-cover object-center ${isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''}`}
                 />
               ) : (
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,#0d0d0d,#2c2c2c)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#2d1d12,#54301d)]" />
               )}
 
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,10,0.76)_0%,rgba(10,10,10,0.56)_42%,rgba(10,10,10,0.2)_74%,rgba(10,10,10,0.03)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-hero-overlay)_0%,rgba(43,30,21,0.52)_44%,rgba(43,30,21,0.2)_74%,rgba(43,30,21,0.03)_100%)]" />
 
-              <div className="relative z-10 flex min-h-[23rem] items-center px-5 py-8 sm:min-h-[31rem] sm:px-10 lg:min-h-[36rem] lg:px-12">
+              <div className="relative z-10 flex min-h-[24rem] items-end px-4 pb-7 pt-11 sm:min-h-[31rem] sm:items-center sm:px-10 lg:min-h-[36rem] lg:px-12">
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, ease: 'easeOut' }}
-                  className="max-w-[14.8rem] sm:max-w-[21rem] lg:max-w-[24rem]"
+                  className="max-w-[16rem] sm:max-w-[21rem] lg:max-w-[24rem]"
                 >
-                  <h1 className="home-hero-title font-sans text-[2.8rem] font-bold leading-[0.9] tracking-[-0.03em] text-white sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
-                  <h2 className="mt-4 max-w-[16rem] text-[1.05rem] leading-7 text-white/80 sm:text-[1.1rem] sm:leading-8">
+                  <h1 className="home-hero-title text-[2.32rem] font-semibold leading-[0.9] tracking-[-0.02em] text-[#fff4e8] sm:text-[4.1rem] lg:text-[5rem]">{homepageContent.heroTitle}</h1>
+                  <h2 className="mt-3.5 max-w-[15.5rem] text-[0.95rem] leading-6 text-[#f7e6d7]/90 sm:text-[1.1rem] sm:leading-8">
                     Premium oversized T-shirts, Polo Shirts, Denim and fashion essentials for modern living in Bangladesh.
                   </h2>
-                  <div className="mt-6 flex max-w-[12.75rem] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:flex-wrap">
+                  <div className="mt-5 flex max-w-[12.75rem] flex-col gap-2.5 sm:mt-6 sm:max-w-none sm:flex-row sm:flex-wrap">
                     <Button
                       to={homepageContent.heroPrimaryLink ?? '/shop'}
-                      className="min-w-[11.25rem] rounded-full border-white/10 bg-black/78 px-6 py-3 text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-white/18 hover:bg-black/84 hover:text-white sm:text-[0.75rem]"
+                      className="min-w-[11.25rem] rounded-full border border-[#eec9a6]/45 bg-[linear-gradient(180deg,#9d4d2b,#7b3216)] px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#fff8f0] shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-md hover:border-[#f7d3b1]/60 hover:brightness-105 hover:text-[#fff8f0] sm:text-[0.75rem]"
                     >
                       {homepageContent.heroCta}
                     </Button>
@@ -446,11 +446,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-2 w-full max-w-7xl px-3 sm:mt-3 sm:px-6 lg:px-8">
-              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-white after:to-transparent after:content-[''] sm:after:hidden">
+          <div className="mx-auto mt-2.5 w-full max-w-7xl px-3 sm:mt-3 sm:px-6 lg:px-8">
+              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#f8f3eb] after:to-transparent after:content-[''] sm:after:hidden">
               <div className="-mx-3 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {serviceHighlights.map((item) => (
-                <div key={item.label} className="min-w-[13.6rem] snap-start rounded-[0.9rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.25 py-2 text-center shadow-[0_8px_18px_rgba(0,0,0,0.15)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.02rem] sm:px-2.75 sm:py-2.5">
+                <div key={item.label} className="min-w-[13.6rem] snap-start rounded-[0.9rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,#fdf9f4,#f7efe5)] px-2.25 py-2 text-center shadow-[0_8px_18px_rgba(69,39,21,0.11)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.02rem] sm:px-2.75 sm:py-2.5">
                   <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text)] sm:text-[0.72rem]">{item.label}</p>
                   <p className="mt-0.5 line-clamp-1 text-[0.64rem] leading-4 text-[var(--color-muted)] sm:text-[0.68rem]">{item.value}</p>
                 </div>
@@ -590,11 +590,11 @@ export default function HomePage() {
 
       <div className="h-20 sm:hidden" aria-hidden />
       <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
-        <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-2 shadow-[0_14px_34px_rgba(0,0,0,0.14)] backdrop-blur-xl">
-          <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-border)] bg-[rgba(0,0,0,0.04)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]">
+        <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-[var(--color-border)] bg-[rgba(253,248,241,0.96)] p-2 shadow-[0_14px_34px_rgba(57,35,22,0.18)] backdrop-blur-xl">
+          <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-accent)]/35 bg-[rgba(180,106,70,0.12)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">
             Shop collection
           </Link>
-          <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[rgba(0,0,0,0.24)] bg-[rgba(0,0,0,0.06)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">
+          <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-accent)]/55 bg-[linear-gradient(180deg,#9a4826,#7b3216)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-[#fff8f0]">
             Size help
           </a>
         </div>
