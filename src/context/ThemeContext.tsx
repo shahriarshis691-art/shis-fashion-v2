@@ -23,7 +23,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    document.documentElement.style.colorScheme = 'dark'
+    document.documentElement.style.colorScheme = 'light'
     window.localStorage.setItem(STORAGE_KEY, theme)
   }, [theme])
 

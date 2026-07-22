@@ -33,7 +33,7 @@ export default function CartPage() {
   }
 
   return (
-    <section className="px-3 pb-32 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-3">
@@ -48,7 +48,7 @@ export default function CartPage() {
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">COD checkout</span>
                 <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">Phone confirm before dispatch</span>
-                <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-3 py-1.5 text-[var(--color-accent)]">WhatsApp support</a>
+                <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-3 py-1.5 text-[var(--color-accent)]">WhatsApp support</a>
               </div>
             </div>
 
@@ -111,17 +111,17 @@ export default function CartPage() {
           </div>
         </div>
 
-        <div className="fixed inset-x-2.5 bottom-3.5 z-40 rounded-[1.2rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
-          <div className="flex items-center justify-between gap-3 rounded-[0.95rem] bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
+        <div className="fixed inset-x-2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-[1.1rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.14)] backdrop-blur-xl sm:hidden">
+          <div className="flex items-center justify-between gap-3 rounded-[0.9rem] bg-[rgba(0,0,0,0.03)] px-3 py-2">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
-              <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{totalLabel}</p>
+              <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
-            <Button onClick={() => navigate('/checkout')} className="min-w-[8.75rem] justify-center px-4.5">
+            <Button onClick={() => navigate('/checkout')} className="min-w-[8.25rem] justify-center px-4 py-2.5 text-sm">
               Secure checkout
             </Button>
           </div>
-          <div className="mt-2 flex items-center justify-between px-1 text-[10px] uppercase tracking-[0.14em] text-[var(--color-muted)]">
+          <div className="mt-2 flex items-center justify-between px-1 text-[10px] uppercase tracking-[0.12em] text-[var(--color-muted)]">
             <span>No prepayment required</span>
             <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
           </div>

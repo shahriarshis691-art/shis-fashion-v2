@@ -251,21 +251,21 @@ export default function ShopPage() {
             <button
               type="button"
               onClick={() => navigate('/shop')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === '/shop' ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === '/shop' ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
             >
               All categories
             </button>
             <button
               type="button"
               onClick={() => navigate('/shop/new-arrivals')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isNewArrivalsRoute ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isNewArrivalsRoute ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
             >
               New Arrivals
             </button>
             <button
               type="button"
               onClick={() => navigate('/shop/best-sellers')}
-              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isBestSellersRoute ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+              className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${isBestSellersRoute ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
             >
               Best Sellers
             </button>
@@ -274,7 +274,7 @@ export default function ShopPage() {
                 key={item.slug}
                 type="button"
                 onClick={() => navigate(`/shop/${item.slug}`)}
-                className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === `/shop/${item.slug}` ? 'border-[var(--color-accent)] bg-[rgba(201,162,39,0.12)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
+                className={`snap-start whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${location.pathname === `/shop/${item.slug}` ? 'border-[var(--color-accent)] bg-[rgba(0,0,0,0.06)] text-[var(--color-accent)]' : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-accent)]'}`}
               >
                 {item.title}
               </button>

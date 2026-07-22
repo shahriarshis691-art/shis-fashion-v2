@@ -106,7 +106,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="px-3 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="px-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="grid gap-4 lg:grid-cols-[1fr_0.85fr]">
           <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
@@ -116,7 +116,7 @@ export default function CheckoutPage() {
 
             <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:text-[11px]">
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">1. Address</span>
-              <span className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-2 py-1.5 text-[var(--color-accent)]">2. Confirm</span>
+              <span className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-2 py-1.5 text-[var(--color-accent)]">2. Confirm</span>
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5">3. Delivery call</span>
             </div>
 
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
             <div className="mt-3 grid grid-cols-1 gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)] sm:grid-cols-3">
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Phone confirm before dispatch</span>
               <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-center">Delivery charge shown upfront</span>
-              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(210,180,122,0.22)] bg-[rgba(210,180,122,0.08)] px-3 py-2 text-center text-[var(--color-accent)]">WhatsApp support</a>
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-3 py-2 text-center text-[var(--color-accent)]">WhatsApp support</a>
             </div>
 
             {!backendReady ? <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Live order backend is not connected. Do not run campaigns until Firebase production credentials are configured.</p> : null}
@@ -236,18 +236,18 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="fixed inset-x-2.5 bottom-3.5 z-40 rounded-[1.2rem] border border-[rgba(210,180,122,0.14)] bg-[rgba(7,7,7,0.95)] p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:hidden">
-          <div className="rounded-[0.95rem] bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
+        <div className="fixed inset-x-2 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-[1.1rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.14)] backdrop-blur-xl sm:hidden">
+          <div className="rounded-[0.9rem] bg-[rgba(0,0,0,0.03)] px-3 py-2">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Grand total</p>
-                <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{summaryLabel}</p>
+                <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{summaryLabel}</p>
               </div>
-              <Button type="submit" form="checkout-form" className="min-w-[9.5rem] justify-center px-4" disabled={isSubmitting}>
+              <Button type="submit" form="checkout-form" className="min-w-[8.75rem] justify-center px-4 py-2.5 text-sm" disabled={isSubmitting}>
                 {isSubmitting ? 'Placing...' : 'Place order'}
               </Button>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-[var(--color-muted)]">
+            <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--color-muted)]">
               <span>{items.length} item{items.length > 1 ? 's' : ''} • COD</span>
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="font-semibold text-[var(--color-accent)]">Need help?</a>
             </div>

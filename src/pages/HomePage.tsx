@@ -10,10 +10,10 @@ import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, typ
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
 const serviceHighlights = [
-  { label: 'Nationwide delivery', value: 'Fast dispatch' },
-  { label: 'Premium finishing', value: 'Refined daily wear' },
-  { label: 'COD checkout', value: 'Simple delivery confirmation' },
-  { label: 'Direct support', value: 'Phone and WhatsApp help' },
+  { label: 'All Bangladesh delivery', value: 'Reliable dispatch' },
+  { label: 'Everyday premium wear', value: 'Clean finishing' },
+  { label: 'Cash on delivery', value: 'Simple confirmation' },
+  { label: 'WhatsApp assistance', value: 'Direct support' },
 ]
 
 const defaultHomepage: HomepageContent = {
@@ -21,11 +21,11 @@ const defaultHomepage: HomepageContent = {
   navbarBrandSecondary: 'Fashion',
   navbarSearchPlaceholder: 'Search products',
   heroEyebrow: 'SHIS FASHION',
-  heroTitle: 'Style Meets Comfort.',
-  heroSubtitle: 'Discover elevated staples designed for modern living, with premium materials and an effortless silhouette that turns every look into a statement.',
-  heroCta: 'Shop Collection',
+  heroTitle: 'Crafted for Everyday Elegance.',
+  heroSubtitle: 'Contemporary Bangladeshi wardrobe essentials with refined fabrics, calm silhouettes, and comfort you can wear from morning to midnight.',
+  heroCta: 'Shop now',
   heroPrimaryLink: '/shop',
-  heroSecondaryCta: 'New Arrivals',
+  heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
   heroImageTitle: 'Homepage hero image',
   heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
@@ -40,8 +40,8 @@ const defaultHomepage: HomepageContent = {
     {
       slug: 'winter',
       title: 'Winter Collection',
-      subtitle: 'Layer-ready staples',
-      description: 'Cold-season essentials with premium texture and clean tailoring.',
+      subtitle: 'Warm layers, clean structure',
+      description: 'Comfort-led pieces tailored for cooler days, with sharp lines and premium texture.',
       href: '/collections/winter',
       images: [
         'https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80',
@@ -54,8 +54,8 @@ const defaultHomepage: HomepageContent = {
     {
       slug: 'summer',
       title: 'Summer Collection',
-      subtitle: 'Breathable premium edits',
-      description: 'Lightweight silhouettes designed for warm days and evening plans.',
+      subtitle: 'Lightweight and breathable',
+      description: 'Easy silhouettes for warm weather with polished finishing and movement-friendly fits.',
       href: '/collections/summer',
       images: [
         'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80',
@@ -68,8 +68,8 @@ const defaultHomepage: HomepageContent = {
     {
       slug: 'everyday-wear',
       title: 'Everyday Wear',
-      subtitle: 'Daily go-to luxury',
-      description: 'Reliable daily pieces balancing comfort, polish, and movement.',
+      subtitle: 'Built for daily comfort',
+      description: 'Dependable daily outfits that balance comfort, shape, and understated style.',
       href: '/collections/everyday-wear',
       images: [
         'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
@@ -85,26 +85,26 @@ const defaultHomepage: HomepageContent = {
     href: item.href,
     image: item.image,
   })),
-  featuredCollectionEyebrow: 'Featured collection',
-  featuredCollectionTitle: 'Premium categories for every moment',
-  featuredCollectionSubtitle: 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.',
-  newArrivalsEyebrow: 'New arrivals',
-  newArrivalsTitle: 'Freshly composed for the season',
-  newArrivalsSubtitle: 'Newly released pieces with an effortless, sculpted feel.',
-  bestSellerEyebrow: 'Best seller',
-  featuredTitle: 'The pieces clients return for',
-  featuredSubtitle: 'Soft structure, refined texture, and everyday ease in every silhouette.',
-  brandPromiseEyebrow: 'Brand promise',
-  brandPromiseTitle: 'Luxury that feels personal.',
-  brandPromiseDescription: 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.',
-  brandSignatureLabel: 'Signature',
-  brandSignatureText: 'Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight.',
-  footerBrandTitle: 'Style Meets Comfort',
-  footerDescription: 'A refined digital presence for modern luxury, designed with comfort, clarity, and effortless elegance in mind.',
+  featuredCollectionEyebrow: 'Featured collections',
+  featuredCollectionTitle: 'Designed for modern Bangladeshi wardrobes',
+  featuredCollectionSubtitle: 'Minimal, refined, and wearable edits that fit daily life and special moments alike.',
+  newArrivalsEyebrow: 'Latest edit',
+  newArrivalsTitle: 'New arrivals, curated weekly',
+  newArrivalsSubtitle: 'Fresh additions selected for comfort, quality, and a polished finish.',
+  bestSellerEyebrow: 'Best sellers',
+  featuredTitle: 'Most-loved pieces',
+  featuredSubtitle: 'Timeless staples our customers reorder for fit, fabric, and comfort.',
+  brandPromiseEyebrow: 'Our promise',
+  brandPromiseTitle: 'Quality, comfort, and consistency.',
+  brandPromiseDescription: 'SHIS Fashion focuses on better materials, thoughtful fits, and clean detailing to make everyday style easier.',
+  brandSignatureLabel: 'SHIS Signature',
+  brandSignatureText: 'Minimal design language, balanced proportions, and soft everyday luxury.',
+  footerBrandTitle: 'Modern essentials for Bangladesh',
+  footerDescription: 'A calm shopping experience with clear styling, dependable quality, and mobile-first checkout convenience.',
   footerContactEmail: 'shisfashion18@gmail.com',
   footerContactPhone: '+88 01887848304',
   footerContactAddress: 'Mirpur, Dhaka',
-  footerBottomText: 'Crafted for premium, calm, and timeless browsing.',
+  footerBottomText: 'Built for comfortable browsing, confident choices, and repeat wear.',
   sections: [
     { key: 'hero', label: 'Hero', enabled: true, order: 0 },
     { key: 'featuredCollection', label: 'Featured collection', enabled: true, order: 1 },
@@ -447,7 +447,7 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-2 w-full max-w-7xl px-3 sm:mt-3 sm:px-6 lg:px-8">
-              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-[#090909] after:to-transparent after:content-[''] sm:after:hidden">
+              <div className="relative after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-8 after:bg-gradient-to-l after:from-white after:to-transparent after:content-[''] sm:after:hidden">
               <div className="-mx-3 flex snap-x snap-mandatory gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {serviceHighlights.map((item) => (
                 <div key={item.label} className="min-w-[13.6rem] snap-start rounded-[0.9rem] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-2.25 py-2 text-center shadow-[0_8px_18px_rgba(0,0,0,0.15)] backdrop-blur-sm sm:min-w-0 sm:rounded-[1.02rem] sm:px-2.75 sm:py-2.5">
@@ -499,7 +499,7 @@ export default function HomePage() {
                             className={`h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03] ${toneClass}`}
                           />
                         ) : (
-                          <div className="h-full w-full bg-[linear-gradient(135deg,rgba(201,162,39,0.22),rgba(17,17,17,0.24))]" />
+                          <div className="h-full w-full bg-[linear-gradient(135deg,rgba(0,0,0,0.1),rgba(0,0,0,0.16))]" />
                         )}
                         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04)_10%,rgba(0,0,0,0.16)_56%,rgba(0,0,0,0.58)_100%)]" />
                         <div className="absolute inset-x-0 bottom-0 px-3.5 pb-3.5 pt-12 text-white">
@@ -590,11 +590,11 @@ export default function HomePage() {
 
       <div className="h-20 sm:hidden" aria-hidden />
       <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
-        <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-white/10 bg-[#0b0b0b]/95 p-2 shadow-[0_14px_34px_rgba(0,0,0,0.4)] backdrop-blur-xl">
-          <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-white/14 bg-white/6 px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-white">
+        <div className="grid grid-cols-2 gap-2 rounded-[1.05rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-2 shadow-[0_14px_34px_rgba(0,0,0,0.14)] backdrop-blur-xl">
+          <Link to={homepageContent.heroPrimaryLink ?? '/shop'} className="inline-flex items-center justify-center rounded-[0.8rem] border border-[var(--color-border)] bg-[rgba(0,0,0,0.04)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-text)]">
             Shop collection
           </Link>
-          <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[rgba(210,180,122,0.32)] bg-[rgba(210,180,122,0.12)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">
+          <a href={supportWhatsappHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-[0.8rem] border border-[rgba(0,0,0,0.24)] bg-[rgba(0,0,0,0.06)] px-3 py-2.5 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)]">
             Size help
           </a>
         </div>

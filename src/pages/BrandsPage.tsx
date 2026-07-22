@@ -17,9 +17,9 @@ function BrandCard({ brand, index }: { brand: BrandEntry; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="relative overflow-hidden rounded-[1.3rem] border border-[rgba(210,180,122,0.2)] bg-[#0b0b0b] p-3 shadow-[0_20px_65px_rgba(0,0,0,0.4)] sm:p-4"
+      className="relative overflow-hidden rounded-[1.3rem] border border-white/14 bg-[#0b0b0b] p-3 shadow-[0_20px_65px_rgba(0,0,0,0.4)] sm:p-4"
     >
-      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(201,162,39,0.2),rgba(201,162,39,0))]" aria-hidden />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.14),rgba(255,255,255,0))]" aria-hidden />
 
       <div className="overflow-hidden rounded-[1rem] border border-white/10 bg-[#141414]">
         <img
@@ -33,7 +33,7 @@ function BrandCard({ brand, index }: { brand: BrandEntry; index: number }) {
       </div>
 
       <div className="mt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">{brand.tag}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">{brand.tag}</p>
         <h2 className="mt-1 text-xl font-semibold text-white">{brand.name}</h2>
         <p className="mt-2 text-sm leading-6 text-white/72">{brand.summary}</p>
         <p className="mt-2 text-sm leading-6 text-white/60">{brand.details}</p>
@@ -43,7 +43,7 @@ function BrandCard({ brand, index }: { brand: BrandEntry; index: number }) {
             href={brand.contacts.website}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-white/16 bg-white/5 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-white transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            className="inline-flex items-center rounded-full border border-white/16 bg-white/5 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-white transition hover:border-white/32 hover:bg-white/10"
           >
             Visit website
           </a>
@@ -51,7 +51,7 @@ function BrandCard({ brand, index }: { brand: BrandEntry; index: number }) {
             href={brand.contacts.contact}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-[rgba(210,180,122,0.34)] bg-[rgba(210,180,122,0.13)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]"
+            className="inline-flex items-center rounded-full border border-white/24 bg-white/10 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-white"
           >
             Contact brand
           </a>
@@ -65,12 +65,12 @@ export default function BrandsPage() {
   return (
     <section className="px-3 pb-16 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pt-8">
       <Container>
-        <div className="relative overflow-hidden rounded-[1.6rem] border border-[rgba(210,180,122,0.22)] bg-[#090909] px-4 py-8 shadow-[0_30px_90px_rgba(0,0,0,0.44)] sm:rounded-[2.1rem] sm:px-8 sm:py-10">
-          <div className="pointer-events-none absolute -left-12 -top-16 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(210,180,122,0.25),rgba(210,180,122,0))]" aria-hidden />
+        <div className="relative overflow-hidden rounded-[1.6rem] border border-white/14 bg-[#090909] px-4 py-8 shadow-[0_30px_90px_rgba(0,0,0,0.44)] sm:rounded-[2.1rem] sm:px-8 sm:py-10">
+          <div className="pointer-events-none absolute -left-12 -top-16 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0))]" aria-hidden />
           <div className="pointer-events-none absolute -right-16 bottom-0 h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),rgba(255,255,255,0))]" aria-hidden />
 
           <div className="relative max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Group Showcase</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/75">Group Showcase</p>
             <h1 className="mt-3 text-[2rem] font-semibold leading-[0.95] text-white sm:text-[2.9rem]">Three Distinct Brands. One Design-Driven Vision.</h1>
             <p className="mt-4 text-sm leading-7 text-white/72 sm:text-base">
               Explore our connected brand ecosystem across luxury watches, development materials, and decorative paints, each crafted with a premium customer-first standard.
@@ -102,7 +102,7 @@ export default function BrandsPage() {
             <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{founderProfile.story}</p>
 
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <a href={founderProfile.socials.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[rgba(210,180,122,0.32)] bg-[rgba(210,180,122,0.1)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]">WhatsApp</a>
+              <a href={founderProfile.socials.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[rgba(0,0,0,0.28)] bg-[rgba(0,0,0,0.06)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]">WhatsApp</a>
               <a href={founderProfile.socials.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Facebook</a>
               <a href={founderProfile.socials.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Instagram</a>
               <a href={founderProfile.socials.email} className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">E-mail</a>
