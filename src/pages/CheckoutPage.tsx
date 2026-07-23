@@ -116,7 +116,6 @@ export default function CheckoutPage() {
     form.division &&
     form.district &&
     form.upazila &&
-    form.streetAddress.trim() &&
     !isSubmitting,
   )
 
@@ -177,12 +176,16 @@ export default function CheckoutPage() {
       return
     }
 
+    const composedAddress = [form.streetAddress.trim(), form.upazila, form.district, form.division]
+      .filter(Boolean)
+      .join(', ')
+
     try {
       const createdOrder = await createOrder({
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
         customerEmail: form.email.trim(),
-        address: `${form.streetAddress.trim()}, ${form.upazila}, ${form.district}, ${form.division}`,
+        address: composedAddress,
         deliveryCharge,
         notes: form.deliveryNote.trim(),
         items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity })),
@@ -195,7 +198,7 @@ export default function CheckoutPage() {
         orderId: createdOrder.id,
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
-        address: `${form.streetAddress.trim()}, ${form.upazila}, ${form.district}, ${form.division}`,
+        address: composedAddress,
         paymentMethod: 'Cash on Delivery',
         deliveryCharge,
         subtotal,
@@ -334,15 +337,14 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="checkout-address" className="text-sm font-medium text-[var(--color-text)]">Full Address *</label>
+                <label htmlFor="checkout-address" className="text-sm font-medium text-[var(--color-text)]">Full Address (Optional)</label>
                 <textarea
                   id="checkout-address"
-                  required
                   autoComplete="street-address"
                   value={form.streetAddress}
                   onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
                   className="min-h-24 w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
-                  placeholder="House/Road/Village/Area"
+                  placeholder="House/Road/Village/Area (optional)"
                 />
               </div>
 
