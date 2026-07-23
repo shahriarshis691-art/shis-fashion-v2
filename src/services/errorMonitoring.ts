@@ -1,4 +1,5 @@
 import { googleAnalytics } from './googleAnalytics'
+import { incidentAlerts } from './incidentAlerts'
 
 function normalizeErrorMessage(value: unknown) {
   if (value instanceof Error) {
@@ -32,6 +33,12 @@ class ErrorMonitoringService {
   capture(source: string, message: string, fatal: boolean) {
     googleAnalytics.trackEvent('exception', {
       description: `${source}: ${message}`.slice(0, 500),
+      fatal,
+    })
+
+    incidentAlerts.notify({
+      source,
+      message,
       fatal,
     })
   }

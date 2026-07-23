@@ -31,6 +31,9 @@ Notes:
 
 - Global browser errors are captured through `window.error` and `unhandledrejection`.
 - Exceptions are sent into GA as `exception` events with `fatal` flag.
+- Optional real-time incident forwarding via `/api/incident-alert` when:
+  - `VITE_ERROR_ALERTS_ENABLED=true`
+  - `INCIDENT_ALERT_WEBHOOK_URL=<your-webhook>`
 
 ### Session Replay
 
@@ -53,6 +56,16 @@ Escalation:
 3. Assign owner + ETA
 4. Hotfix + verification
 5. Post-fix validation on real device matrix
+
+## 3.1) Checkout Anti-Abuse Controls
+
+- Honeypot field in checkout form (bots commonly fill hidden fields).
+- Minimum dwell-time before submit to reduce scripted instant submissions.
+- Short cooldown between submits from same browser session.
+- Firestore order create rules tightened:
+  - phone format check (`01XXXXXXXXX`)
+  - item count bounds
+  - total must be positive
 
 ## 4) Daily Conversion Funnel Review
 

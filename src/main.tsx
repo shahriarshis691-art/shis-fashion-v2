@@ -9,11 +9,13 @@ import { metaPixel } from './services/metaPixel'
 import { googleAnalytics } from './services/googleAnalytics'
 import { sessionReplay } from './services/sessionReplay'
 import { errorMonitoring } from './services/errorMonitoring'
+import { incidentAlerts } from './services/incidentAlerts'
 
 // Initialize analytics
 googleAnalytics.initialize()
 metaPixel.initialize()
 sessionReplay.initialize()
+incidentAlerts.initialize()
 errorMonitoring.initialize()
 
 createRoot(document.getElementById('root')!).render(

@@ -9,6 +9,9 @@ import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, getUpa
 import { googleAnalytics } from '../services/googleAnalytics'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
+const CHECKOUT_ANTI_BOT_COOLDOWN_KEY = 'shis-checkout-last-submit-at'
+const CHECKOUT_ANTI_BOT_MIN_DWELL_MS = 2000
+const CHECKOUT_ANTI_BOT_COOLDOWN_MS = 15000
 
 interface CheckoutFormState {
   name: string
@@ -78,6 +81,10 @@ function isPermissionDeniedError(error: unknown) {
   return code.includes('permission-denied') || message.includes('permission-denied') || message.includes('missing or insufficient permissions')
 }
 
+function currentTimeMs() {
+  return Date.now()
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
@@ -96,8 +103,10 @@ export default function CheckoutPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [websiteField, setWebsiteField] = useState('')
   const submissionLockRef = useRef(false)
   const hasTrackedCheckoutRef = useRef(false)
+  const enteredAtRef = useRef(0)
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
   const grandTotal = subtotal + deliveryCharge
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
@@ -139,6 +148,10 @@ export default function CheckoutPage() {
     hasTrackedCheckoutRef.current = true
   }, [grandTotal, items])
 
+  useEffect(() => {
+    enteredAtRef.current = currentTimeMs()
+  }, [])
+
   if (!items.length) {
     return (
       <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -167,6 +180,30 @@ export default function CheckoutPage() {
     setIsSubmitting(true)
     setSubmitError('')
     let shouldReleaseLock = true
+
+    if (websiteField.trim()) {
+      setSubmitError('Order যাচাই করা যায়নি। একটু পরে আবার চেষ্টা করুন।')
+      setIsSubmitting(false)
+      submissionLockRef.current = false
+      return
+    }
+
+    if (currentTimeMs() - enteredAtRef.current < CHECKOUT_ANTI_BOT_MIN_DWELL_MS) {
+      setSubmitError('Please wait a moment and submit again.')
+      setIsSubmitting(false)
+      submissionLockRef.current = false
+      return
+    }
+
+    if (typeof window !== 'undefined') {
+      const lastSubmitAt = Number(window.localStorage.getItem(CHECKOUT_ANTI_BOT_COOLDOWN_KEY) ?? '0')
+      if (lastSubmitAt && currentTimeMs() - lastSubmitAt < CHECKOUT_ANTI_BOT_COOLDOWN_MS) {
+        setSubmitError('You are submitting too quickly. Please wait a few seconds and try again.')
+        setIsSubmitting(false)
+        submissionLockRef.current = false
+        return
+      }
+    }
 
     const phoneNumber = normalizeBangladeshPhone(form.phone)
     if (!phoneNumber) {
@@ -217,6 +254,7 @@ export default function CheckoutPage() {
 
       if (typeof window !== 'undefined') {
         window.sessionStorage.setItem(ORDER_CONFIRMATION_KEY, JSON.stringify(orderSnapshot))
+        window.localStorage.setItem(CHECKOUT_ANTI_BOT_COOLDOWN_KEY, String(currentTimeMs()))
       }
 
       clearCart()
@@ -241,6 +279,18 @@ export default function CheckoutPage() {
       <Container>
         <div className="mx-auto max-w-[760px]">
           <form id="checkout-form" className="space-y-8" onSubmit={handleSubmit}>
+            <div className="hidden" aria-hidden>
+              <label htmlFor="checkout-website">Website</label>
+              <input
+                id="checkout-website"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={websiteField}
+                onChange={(event) => setWebsiteField(event.target.value)}
+              />
+            </div>
+
             <div className="space-y-5">
               <div className="space-y-2">
                 <label htmlFor="checkout-name" className="text-sm font-medium text-[var(--color-text)]">Full Name *</label>
