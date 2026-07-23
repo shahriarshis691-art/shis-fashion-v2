@@ -179,7 +179,7 @@ const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
 const LAUNCH_MODE_USER_KEY = 'shis-launch-mode-user'
 const AUDIT_LOGS_KEY = 'shis-admin-audit-logs'
 
-type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage'
+type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage' | 'brand'
 
 interface AdminAuditLogEntry {
   id: string
@@ -1290,6 +1290,190 @@ export async function restoreProduct(id: string) {
     }
 
     await recordAdminAudit('product.restore', 'product', id, { mode: 'fallback-local' })
+  }
+}
+
+// Brand Management Functions
+const BRANDS_KEY = 'admin_brands'
+const defaultBrands: AdminBrand[] = []
+
+export function subscribeToAdminBrands(callback: (brands: AdminBrand[]) => void) {
+  const localBrands = () => readStored(BRANDS_KEY, defaultBrands).filter((brand) => !brand.archived)
+  callback(localBrands())
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(BRANDS_KEY, defaultBrands, (brands) => callback(brands.filter((brand) => !brand.archived)))
+  }
+
+  const brandsRef = query(collection(firebaseDb, 'brands'), orderBy('createdAt', 'desc'))
+  return onSnapshot(
+    brandsRef,
+    (snapshot) => {
+      const brands = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<AdminBrand, 'id'>) }))
+      const visibleBrands = brands.filter((brand) => !brand.archived)
+      callback(visibleBrands.length ? visibleBrands : localBrands())
+    },
+    (error) => {
+      if (shouldFallbackToLocal(error)) {
+        callback(localBrands())
+      }
+    },
+  )
+}
+
+export function subscribeToArchivedBrands(callback: (brands: AdminBrand[]) => void) {
+  const archivedLocalBrands = () => readStored(BRANDS_KEY, defaultBrands).filter((brand) => brand.archived)
+  callback(archivedLocalBrands())
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(BRANDS_KEY, defaultBrands, (brands) => callback(brands.filter((brand) => brand.archived)))
+  }
+
+  const brandsRef = query(collection(firebaseDb, 'brands'), orderBy('createdAt', 'desc'))
+  return onSnapshot(
+    brandsRef,
+    (snapshot) => {
+      const brands = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<AdminBrand, 'id'>) }))
+      callback(brands.filter((brand) => brand.archived))
+    },
+    (error) => {
+      if (shouldFallbackToLocal(error)) {
+        callback(archivedLocalBrands())
+      }
+    },
+  )
+}
+
+export async function createBrand(brand: Omit<AdminBrand, 'id' | 'createdAt'>) {
+  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const nextBrand = {
+    ...brand,
+    id: `local-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+  } as AdminBrand
+  writeStored(BRANDS_KEY, [nextBrand, ...currentBrands])
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('brand.create', 'brand', nextBrand.id, {
+      name: nextBrand.name,
+      slug: nextBrand.slug,
+      mode: 'local',
+    })
+    return nextBrand
+  }
+
+  try {
+    const payload = {
+      ...brand,
+      createdAt: serverTimestamp(),
+    }
+
+    const ref = await addDoc(collection(firebaseDb, 'brands'), payload)
+    await recordAdminAudit('brand.create', 'brand', ref.id, {
+      name: brand.name,
+      slug: brand.slug,
+      mode: 'live',
+    })
+    return { ...brand, id: ref.id }
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+
+    await recordAdminAudit('brand.create', 'brand', nextBrand.id, {
+      name: nextBrand.name,
+      slug: nextBrand.slug,
+      mode: 'fallback-local',
+    })
+    return nextBrand
+  }
+}
+
+export async function updateBrand(id: string, brand: Partial<AdminBrand>) {
+  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const updatedBrands = currentBrands.map((item) => (item.id === id ? { ...item, ...brand } : item))
+  writeStored(BRANDS_KEY, updatedBrands)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('brand.update', 'brand', id, {
+      fields: Object.keys(brand),
+      mode: 'local',
+    })
+    return updatedBrands.find((item) => item.id === id)
+  }
+
+  try {
+    const ref = doc(firebaseDb, 'brands', id)
+    await updateDoc(ref, brand)
+    await recordAdminAudit('brand.update', 'brand', id, {
+      fields: Object.keys(brand),
+      mode: 'live',
+    })
+    return { id, ...brand }
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+
+    await recordAdminAudit('brand.update', 'brand', id, {
+      fields: Object.keys(brand),
+      mode: 'fallback-local',
+    })
+    return updatedBrands.find((item) => item.id === id)
+  }
+}
+
+export async function deleteBrand(id: string) {
+  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const updatedBrands = currentBrands.map((item) => (item.id === id
+    ? { ...item, archived: true, archivedAt: new Date().toISOString() }
+    : item))
+  writeStored(BRANDS_KEY, updatedBrands)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('brand.archive', 'brand', id, { mode: 'local' })
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'brands', id), {
+      archived: true,
+      archivedAt: serverTimestamp(),
+    })
+    await recordAdminAudit('brand.archive', 'brand', id, { mode: 'live' })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+
+    await recordAdminAudit('brand.archive', 'brand', id, { mode: 'fallback-local' })
+  }
+}
+
+export async function restoreBrand(id: string) {
+  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const updatedBrands = currentBrands.map((item) => (item.id === id
+    ? { ...item, archived: false, archivedAt: undefined }
+    : item))
+  writeStored(BRANDS_KEY, updatedBrands)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('brand.restore', 'brand', id, { mode: 'local' })
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'brands', id), {
+      archived: false,
+      archivedAt: null,
+    })
+    await recordAdminAudit('brand.restore', 'brand', id, { mode: 'live' })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+
+    await recordAdminAudit('brand.restore', 'brand', id, { mode: 'fallback-local' })
   }
 }
 
