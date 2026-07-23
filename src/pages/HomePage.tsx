@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import { homeCategoryItems } from '../data/homeCategories'
+import { googleAnalytics } from '../services/googleAnalytics'
+import { incidentAlerts } from '../services/incidentAlerts'
 import {
   subscribeToHomepageContent,
   subscribeToProducts,
+  type HomepageCategorySection,
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
@@ -179,9 +182,14 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
+function hasValidSectionHref(section: HomepageCategorySection) {
+  return section.href.trim().startsWith('/')
+}
+
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
   const [products, setProducts] = useState<AdminProduct[]>(defaultProducts)
+  const lastSectionIntegritySignalRef = useRef('')
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -221,6 +229,53 @@ export default function HomePage() {
           image: sectionImage,
         }
       })
+  }, [homepageContent.categorySections])
+
+  useEffect(() => {
+    const sectionEntries = Object.values(homepageContent.categorySections ?? {})
+    if (!sectionEntries.length) {
+      return
+    }
+
+    const enabledSections = sectionEntries.filter((section) => section.enabled)
+    const invalidSections = enabledSections.filter((section) =>
+      !hasValidSectionHref(section) || !section.coverImage.trim(),
+    )
+    const duplicateOrderValues = enabledSections
+      .map((section) => section.order)
+      .filter((order, index, values) => values.indexOf(order) !== index)
+    const hasNoVisibleSection = enabledSections.length === 0
+
+    if (!invalidSections.length && !duplicateOrderValues.length && !hasNoVisibleSection) {
+      lastSectionIntegritySignalRef.current = ''
+      return
+    }
+
+    const integrityKey = [
+      invalidSections.map((section) => section.key).sort().join(','),
+      duplicateOrderValues.sort((left, right) => left - right).join(','),
+      hasNoVisibleSection ? 'no-visible' : 'has-visible',
+    ].join('|')
+
+    if (lastSectionIntegritySignalRef.current === integrityKey) {
+      return
+    }
+
+    lastSectionIntegritySignalRef.current = integrityKey
+
+    googleAnalytics.trackEvent('homepage_category_section_integrity_issue', {
+      invalid_section_count: invalidSections.length,
+      invalid_section_keys: invalidSections.map((section) => section.key).join(','),
+      duplicate_order_values: duplicateOrderValues.join(','),
+      has_no_visible_section: hasNoVisibleSection,
+      path: window.location.pathname,
+    })
+
+    incidentAlerts.notify({
+      source: 'homepage-category-sections',
+      message: `Section integrity issue detected (invalid=${invalidSections.length}, duplicates=${duplicateOrderValues.length}, noVisible=${hasNoVisibleSection})`,
+      fatal: false,
+    })
   }, [homepageContent.categorySections])
 
   const newArrivals = useMemo(() => {
