@@ -186,6 +186,7 @@ export default function ShopPage() {
     newOnly: false,
   })
   const lastTrackedListStateRef = useRef('')
+  const lastTrackedEmptyStateRef = useRef('')
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
@@ -418,6 +419,49 @@ export default function ShopPage() {
       })),
     })
   }, [effectiveSegment, effectiveSubcategory, heading.title, legacyHeading?.title, ready, visibleProducts])
+
+  useEffect(() => {
+    if (!ready || visibleProducts.length > 0) {
+      lastTrackedEmptyStateRef.current = ''
+      return
+    }
+
+    const emptyStateKey = [
+      effectiveSegment,
+      effectiveSubcategory,
+      sortBy,
+      filters.inStockOnly ? 'stock' : 'all-stock',
+      filters.newOnly ? 'new' : 'all-new',
+      location.pathname,
+      location.search,
+    ].join('|')
+
+    if (lastTrackedEmptyStateRef.current === emptyStateKey) {
+      return
+    }
+
+    lastTrackedEmptyStateRef.current = emptyStateKey
+
+    googleAnalytics.trackEvent('listing_empty_state', {
+      segment: effectiveSegment,
+      subcategory: effectiveSubcategory,
+      sort: sortBy,
+      in_stock_only: filters.inStockOnly,
+      new_only: filters.newOnly,
+      path: location.pathname,
+      search: location.search,
+    })
+  }, [
+    effectiveSegment,
+    effectiveSubcategory,
+    filters.inStockOnly,
+    filters.newOnly,
+    location.pathname,
+    location.search,
+    ready,
+    sortBy,
+    visibleProducts.length,
+  ])
 
   const navigateWithSubcategory = (subcategory: string) => {
     const params = new URLSearchParams(location.search)
