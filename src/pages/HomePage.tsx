@@ -116,16 +116,9 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
-function isSectionEnabled(content: HomepageContent, key: string) {
-  const matched = content.sections.find((section) => section.key === key)
-  return matched?.enabled ?? true
-}
-
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
   const [products, setProducts] = useState<AdminProduct[]>(defaultProducts)
-  const [newsletterEmail, setNewsletterEmail] = useState('')
-  const [newsletterMessage, setNewsletterMessage] = useState('')
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -159,132 +152,81 @@ export default function HomePage() {
     return (flagged.length ? flagged : products).slice(0, 8)
   }, [products])
 
-  const bestSellers = useMemo(() => {
-    const flagged = products.filter((product) => product.featured)
-    return (flagged.length ? flagged : products).slice(0, 6)
-  }, [products])
-
-  const featuredCollections = useMemo(() => {
-    const configured = homepageContent.featuredCollectionPages.filter((page) =>
-      Boolean(page?.slug?.trim() && page?.title?.trim()),
-    )
-
-    if (configured.length) {
-      return configured.slice(0, 3)
-    }
-
-    return homepageContent.categories.slice(0, 3).map((category, index) => {
-      const slug = category.href?.split('/').filter(Boolean).pop() || `collection-${index + 1}`
-      return {
-        slug,
-        title: category.title,
-        subtitle: category.caption,
-        description: category.caption,
-        href: category.href || `/collections/${slug}`,
-        images: [category.image || categoryStrips[index]?.image || heroImage],
-        relatedCategorySlugs: [],
-      }
-    })
-  }, [categoryStrips, heroImage, homepageContent.categories, homepageContent.featuredCollectionPages])
-
-  const handleNewsletterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!newsletterEmail.trim()) {
-      setNewsletterMessage('Please enter your email to subscribe.')
-      return
-    }
-
-    setNewsletterMessage('Thank you. You are now on the SHIS Fashion list.')
-    setNewsletterEmail('')
-  }
-
   return (
-    <div className="bg-white pb-20 sm:pb-24 lg:pb-28">
-      {isSectionEnabled(homepageContent, 'hero') ? (
-        <section className="border-b border-black/10 px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6">
-          <Container>
-            <div className="relative overflow-hidden rounded-[1.8rem] bg-black sm:rounded-[2.2rem]">
-              <div className="relative aspect-[4/5] min-h-[24rem] sm:aspect-[16/10] sm:min-h-[30rem] lg:min-h-[38rem]">
-                {heroImage ? (
-                  <img
-                    src={heroImage}
-                    alt={homepageContent.heroImageTitle || 'SHIS Fashion campaign image'}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    sizes="100vw"
-                    onError={handleImageError}
-                    className={`absolute inset-0 h-full w-full object-cover ${
-                      isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''
-                    }`}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-[linear-gradient(145deg,#1a1a1a,#434343)]" />
-                )}
+    <div className="bg-white pb-12">
+      <section className="border-b border-black/10">
+        <div className="relative overflow-hidden bg-black">
+          <div className="relative aspect-[4/5] min-h-[23rem] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
+            {heroImage ? (
+              <img
+                src={heroImage}
+                alt={homepageContent.heroImageTitle || 'SHIS Fashion campaign image'}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                sizes="100vw"
+                onError={handleImageError}
+                className={`absolute inset-0 h-full w-full object-cover ${
+                  isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''
+                }`}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,#1b1b1b,#454545)]" />
+            )}
 
-                <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,0,0,0.68)_8%,rgba(0,0,0,0.36)_48%,rgba(0,0,0,0.1)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.4)_52%,rgba(0,0,0,0.05)_100%)]" />
 
-                <Container className="relative z-10 flex h-full items-end pb-10 pt-16 sm:items-center sm:py-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className="max-w-[18rem] sm:max-w-[30rem]"
+            <Container className="relative z-10 flex h-full items-end pb-8 pt-14 sm:items-center sm:py-0">
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-[17rem] sm:max-w-[25rem]"
+              >
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80">
+                  {homepageContent.heroEyebrow || 'SHIS FASHION'}
+                </p>
+                <h1 className="mt-2 text-h1 text-white">{homepageContent.heroTitle}</h1>
+                <p className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7">
+                  {homepageContent.heroSubtitle}
+                </p>
+                <div className="mt-5">
+                  <Link
+                    to={homepageContent.heroPrimaryLink ?? '/shop'}
+                    className="ui-interactive inline-flex items-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
                   >
-                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/80">
-                      {homepageContent.heroEyebrow || 'SHIS FASHION'}
-                    </p>
-                    <h1 className="mt-3 font-[var(--font-display)] text-[2.2rem] leading-[0.9] text-white sm:text-[3.5rem] lg:text-[4.5rem]">
-                      {homepageContent.heroTitle}
-                    </h1>
-                    <p className="mt-4 max-w-xl text-sm leading-7 text-white/86 sm:text-base">
-                      {homepageContent.heroSubtitle}
-                    </p>
-                    <div className="mt-7 flex flex-wrap items-center gap-3">
-                      <Link
-                        to={homepageContent.heroPrimaryLink ?? '/shop'}
-                        className="ui-interactive inline-flex items-center rounded-full border border-white bg-white px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-black transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/90"
-                      >
-                        {homepageContent.heroCta || 'Shop now'}
-                      </Link>
-                      <Link
-                        to={homepageContent.heroSecondaryLink ?? '/shop/new-arrivals'}
-                        className="ui-interactive inline-flex items-center rounded-full border border-white/55 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition-colors duration-300 hover:border-white hover:bg-white/10"
-                      >
-                        {homepageContent.heroSecondaryCta || 'Explore arrivals'}
-                      </Link>
-                    </div>
-                  </motion.div>
-                </Container>
-              </div>
-            </div>
-          </Container>
-        </section>
-      ) : null}
+                    {homepageContent.heroCta || 'Shop now'}
+                  </Link>
+                </div>
+              </motion.div>
+            </Container>
+          </div>
+        </div>
+      </section>
 
-      <section className="px-4 pt-14 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
+      <section className="py-7 sm:py-9">
         <Container>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">Category edit</p>
-              <h2 className="mt-2 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.6rem]">Shop by Category</h2>
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">Browse by category</p>
+              <h2 className="mt-1 text-h2 text-black">Category Strips</h2>
             </div>
-            <Link to="/shop" className="ui-interactive text-[11px] font-semibold uppercase tracking-[0.18em] text-black/70 transition-colors hover:text-black">
-              View all products
+            <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
+              View all
             </Link>
           </div>
 
-          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {categoryStrips.map((item, index) => (
               <motion.article
                 key={item.label}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.35, delay: index * 0.05 }}
+                transition={{ duration: 0.22, delay: index * 0.04 }}
               >
                 <Link to={item.href} className="group block">
-                  <div className="relative aspect-[11/14] overflow-hidden rounded-[1.1rem] bg-black/5">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
                     <img
                       src={item.image || IMAGE_PLACEHOLDER}
                       alt={item.label}
@@ -292,12 +234,12 @@ export default function HomePage() {
                       decoding="async"
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
                       onError={handleImageError}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                    <div className="absolute inset-x-4 bottom-4 flex items-center justify-between text-white">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">{item.label}</span>
-                      <span aria-hidden className="text-lg leading-none">→</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                    <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
+                      <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.label}</span>
+                      <span aria-hidden className="text-base leading-none">→</span>
                     </div>
                   </div>
                 </Link>
@@ -307,248 +249,57 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {isSectionEnabled(homepageContent, 'newArrivals') ? (
-        <section className="px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8 lg:pt-24">
-          <Container>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">
-                  {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
-                </p>
-                <h2 className="mt-2 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.6rem]">
-                  {homepageContent.newArrivalsTitle ?? 'New Arrivals'}
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">{homepageContent.newArrivalsSubtitle}</p>
-              </div>
-              <Link
-                to="/shop/new-arrivals"
-                className="ui-interactive text-[11px] font-semibold uppercase tracking-[0.18em] text-black/70 transition-colors hover:text-black"
-              >
-                Shop now
-              </Link>
-            </div>
-
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {newArrivals.map((item, index) => {
-                const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
-                const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
-
-                return (
-                  <motion.article
-                    key={item.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.35, delay: index * 0.04 }}
-                  >
-                    <Link to={productHref(item)} className="group block">
-                      <div className="overflow-hidden rounded-[1rem] border border-black/8 bg-white">
-                        <div className="aspect-[4/5] overflow-hidden bg-black/5">
-                          <img
-                            src={productImage || IMAGE_PLACEHOLDER}
-                            alt={item.name}
-                            loading="lazy"
-                            decoding="async"
-                            sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                            onError={handleImageError}
-                            className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] ${toneClass}`}
-                          />
-                        </div>
-                        <div className="p-3.5">
-                          <h3 className="line-clamp-1 text-[0.92rem] font-medium text-black">{item.name}</h3>
-                          <p className="mt-1.5 text-sm font-semibold text-black">{item.price}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.article>
-                )
-              })}
-            </div>
-          </Container>
-        </section>
-      ) : null}
-
-      {isSectionEnabled(homepageContent, 'bestSellers') ? (
-        <section className="px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8 lg:pt-24">
-          <Container>
-            <div className="rounded-[1.6rem] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] p-5 sm:p-7 lg:p-9">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">
-                    {homepageContent.bestSellerEyebrow ?? 'Best sellers'}
-                  </p>
-                  <h2 className="mt-2 font-[var(--font-display)] text-[1.9rem] leading-none text-black sm:text-[2.4rem]">
-                    {homepageContent.featuredTitle ?? 'Most-loved pieces'}
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">{homepageContent.featuredSubtitle}</p>
-                </div>
-                <Link to="/shop" className="ui-interactive text-[11px] font-semibold uppercase tracking-[0.18em] text-black/70 hover:text-black">
-                  Explore shop
-                </Link>
-              </div>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {bestSellers.map((item, index) => {
-                  const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
-                  return (
-                    <motion.article
-                      key={`featured-${item.id}`}
-                      initial={{ opacity: 0, y: 14 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      transition={{ duration: 0.35, delay: index * 0.04 }}
-                    >
-                      <Link
-                        to={productHref(item)}
-                        className="group grid grid-cols-[5.2rem_1fr] gap-3 rounded-xl border border-black/10 bg-white p-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-black/30"
-                      >
-                        <div className="aspect-square overflow-hidden rounded-lg bg-black/5">
-                          <img
-                            src={productImage || IMAGE_PLACEHOLDER}
-                            alt={item.name}
-                            loading="lazy"
-                            decoding="async"
-                            onError={handleImageError}
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                          />
-                        </div>
-                        <div className="flex min-w-0 flex-col justify-center">
-                          <p className="line-clamp-1 text-sm font-medium text-black">{item.name}</p>
-                          <p className="mt-1 text-sm font-semibold text-black">{item.price}</p>
-                        </div>
-                      </Link>
-                    </motion.article>
-                  )
-                })}
-              </div>
-            </div>
-          </Container>
-        </section>
-      ) : null}
-
-      {isSectionEnabled(homepageContent, 'featuredCollection') ? (
-        <section className="px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8 lg:pt-24">
-          <Container>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">
-                  {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
-                </p>
-                <h2 className="mt-2 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.6rem]">
-                  {homepageContent.featuredCollectionTitle ?? 'Editorial Collections'}
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">{homepageContent.featuredCollectionSubtitle}</p>
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-4 lg:grid-cols-3">
-              {featuredCollections.map((collection, index) => {
-                const image = normalizeCatalogImageUrl(collection.images?.[0] ?? '', 1100, 1400)
-                const resolvedHref = collection.href?.trim() ? collection.href : `/collections/${collection.slug}`
-                return (
-                  <motion.article
-                    key={collection.slug}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.35, delay: index * 0.04 }}
-                  >
-                    <Link to={resolvedHref} className="group block overflow-hidden rounded-[1.2rem] border border-black/10 bg-white">
-                      <div className="aspect-[4/5] overflow-hidden bg-black/5">
-                        <img
-                          src={image || IMAGE_PLACEHOLDER}
-                          alt={collection.title}
-                          loading="lazy"
-                          decoding="async"
-                          onError={handleImageError}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                        />
-                      </div>
-                      <div className="p-4 sm:p-5">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-black/55">Collection</p>
-                        <h3 className="mt-2 font-[var(--font-display)] text-[1.6rem] leading-none text-black">{collection.title}</h3>
-                        <p className="mt-3 text-sm leading-7 text-black/70">{collection.subtitle || collection.description}</p>
-                      </div>
-                    </Link>
-                  </motion.article>
-                )
-              })}
-            </div>
-          </Container>
-        </section>
-      ) : null}
-
-      {isSectionEnabled(homepageContent, 'brandPromise') ? (
-        <section className="px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8 lg:pt-24">
-          <Container>
-            <div className="grid gap-6 rounded-[1.5rem] border border-black/10 bg-[#f8f8f8] p-6 sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-10">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">
-                  {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
-                </p>
-                <h2 className="mt-2 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.5rem]">
-                  {homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}
-                </h2>
-              </div>
-              <div>
-                <p className="text-sm leading-7 text-black/75">
-                  {homepageContent.brandPromiseDescription ??
-                    'SHIS Fashion focuses on better materials, thoughtful fits, and clean detailing to make everyday style easier.'}
-                </p>
-                <div className="mt-5 rounded-xl border border-black/10 bg-white p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-black/55">
-                    {homepageContent.brandSignatureLabel ?? 'SHIS Signature'}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-black/75">
-                    {homepageContent.brandSignatureText ??
-                      'Minimal design language, balanced proportions, and soft everyday luxury.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Container>
-        </section>
-      ) : null}
-
-      <section className="px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8 lg:pt-24">
+      <section className="pb-8 sm:pb-10">
         <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.45 }}
-            className="rounded-[1.5rem] border border-black/10 bg-white p-6 sm:p-8 lg:p-10"
-          >
-            <div className="max-w-3xl">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">Newsletter</p>
-              <h2 className="mt-2 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.6rem]">
-                Join the SHIS insiders list
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-black/70">
-                Early access to weekly drops, limited edits, and private offers curated for your wardrobe.
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
               </p>
+              <h2 className="mt-1 text-h2 text-black">{homepageContent.newArrivalsTitle ?? 'New Arrivals'}</h2>
             </div>
+            <Link
+              to="/shop/new-arrivals"
+              className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black"
+            >
+              Shop now
+            </Link>
+          </div>
 
-            <form onSubmit={handleNewsletterSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <label htmlFor="newsletter-email" className="sr-only">Email</label>
-              <input
-                id="newsletter-email"
-                type="email"
-                required
-                value={newsletterEmail}
-                onChange={(event) => setNewsletterEmail(event.target.value)}
-                placeholder="Enter your email"
-                className="w-full rounded-full border border-black/20 px-5 py-3 text-sm text-black outline-none transition-colors duration-300 focus:border-black sm:max-w-sm"
-              />
-              <button
-                type="submit"
-                className="ui-interactive inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition-colors duration-300 hover:bg-black/90"
-              >
-                Subscribe
-              </button>
-            </form>
-            {newsletterMessage ? <p className="mt-3 text-xs text-black/65">{newsletterMessage}</p> : null}
-          </motion.div>
+          <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+            {newArrivals.map((item, index) => {
+              const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
+              const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
+
+              return (
+                <motion.article
+                  key={item.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.22, delay: index * 0.03 }}
+                >
+                  <Link to={productHref(item)} className="group block">
+                    <div className="aspect-[4/5] overflow-hidden bg-black/5">
+                      <img
+                        src={productImage || IMAGE_PLACEHOLDER}
+                        alt={item.name}
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                        onError={handleImageError}
+                        className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
+                      />
+                    </div>
+                    <div className="pt-2.5">
+                      <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
+                      <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
+                    </div>
+                  </Link>
+                </motion.article>
+              )
+            })}
+          </div>
         </Container>
       </section>
     </div>

@@ -28,12 +28,8 @@ function getWhatsAppHref(phone?: string) {
 
 export default function Footer() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
-  const brandTitle = homepageContent?.footerBrandTitle ?? 'Modern essentials for Bangladesh'
-  const brandDescription = homepageContent?.footerDescription ?? 'Clean, mobile-first shopping for modern wardrobes.'
-  const footerBottomText = homepageContent?.footerBottomText ?? 'Built for comfortable browsing, confident choices, and repeat wear.'
   const contactEmail = homepageContent?.footerContactEmail ?? 'hello@shisfashion.com'
   const contactPhone = homepageContent?.footerContactPhone ?? '+88 01887848304'
-  const contactAddress = homepageContent?.footerContactAddress ?? 'Dhaka, Bangladesh'
   const whatsappHref = getWhatsAppHref(contactPhone)
 
   useEffect(() => {
@@ -43,24 +39,21 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-black/10 bg-white">
-      <Container className="py-12 sm:py-16">
-        <div className="grid gap-10 border-b border-black/10 pb-10 sm:pb-12 lg:grid-cols-[1.2fr_0.9fr_0.9fr] lg:gap-12">
-          <div className="max-w-md">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">SHIS Fashion</p>
-            <h3 className="mt-3 font-[var(--font-display)] text-[2rem] leading-none text-black sm:text-[2.4rem]">
-              {brandTitle}
-            </h3>
-            <p className="mt-4 text-sm leading-7 text-black/70">
-              {brandDescription}
+      <Container className="py-8 sm:py-10">
+        <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+          <div>
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">SHIS Fashion</p>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-black/70">
+              Clean, mobile-first shopping for modern wardrobes.
             </p>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">Essential links</h3>
-            <ul className="mt-4 grid gap-2.5">
+            <h3 className="text-caption font-semibold uppercase tracking-[0.14em] text-black">Essential Links</h3>
+            <ul className="mt-3 grid gap-2">
               {essentialLinks.map((link) => (
                 <li key={link.label}>
-                  <Link to={link.href} className="ui-interactive text-sm text-black/75 transition-colors duration-300 hover:text-black">
+                  <Link to={link.href} className="ui-interactive text-sm text-black/75 hover:text-black">
                     {link.label}
                   </Link>
                 </li>
@@ -69,27 +62,26 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/55">Support and social</h3>
-            <div className="mt-4 grid gap-2 text-sm text-black/75">
-              <a href={`mailto:${contactEmail}`} className="ui-interactive transition-colors duration-300 hover:text-black">
+            <h3 className="text-caption font-semibold uppercase tracking-[0.14em] text-black">Support & Social</h3>
+            <div className="mt-3 grid gap-2 text-sm text-black/75">
+              <a href={`mailto:${contactEmail}`} className="ui-interactive hover:text-black">
                 {contactEmail}
               </a>
-              <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="ui-interactive transition-colors duration-300 hover:text-black">
+              <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="ui-interactive hover:text-black">
                 {contactPhone}
               </a>
-              <a href={whatsappHref} target="_blank" rel="noreferrer" className="ui-interactive transition-colors duration-300 hover:text-black">
+              <a href={whatsappHref} target="_blank" rel="noreferrer" className="ui-interactive hover:text-black">
                 WhatsApp Support
               </a>
-              <p className="text-sm text-black/60">{contactAddress}</p>
             </div>
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="ui-interactive rounded-full border border-black/15 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-black/65 transition-colors duration-300 hover:border-black/35 hover:text-black"
+                  className="ui-interactive text-caption uppercase tracking-[0.12em] text-black/65 hover:text-black"
                 >
                   {social.label}
                 </a>
@@ -98,9 +90,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-6 sm:pt-8">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-black/55">© 2026 SHIS Fashion</p>
-          <p className="mt-2 text-xs text-black/55">{footerBottomText}</p>
+        <div className="mt-8 border-t border-black/10 pt-4 text-caption uppercase tracking-[0.12em] text-black/55">
+          © 2026 SHIS Fashion
         </div>
       </Container>
     </footer>
