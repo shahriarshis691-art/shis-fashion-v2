@@ -68,6 +68,15 @@ function formatBangladeshPhoneInput(raw: string) {
   return digits.slice(0, 11)
 }
 
+function isPermissionDeniedError(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : ''
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code ?? '').toLowerCase()
+    : ''
+
+  return code.includes('permission-denied') || message.includes('permission-denied') || message.includes('missing or insufficient permissions')
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
@@ -205,8 +214,8 @@ export default function CheckoutPage() {
       navigate('/order-success', { state: { orderId: createdOrder.id } })
     } catch (error) {
       const rawMessage = error instanceof Error ? error.message : 'Order submission failed. Please try again.'
-      const message = rawMessage.toLowerCase().includes('missing or insufficient permissions')
-        ? 'Order submit করা যায়নি। Please contact support or try again shortly.'
+      const message = isPermissionDeniedError(error)
+        ? 'Order service temporarily unavailable. Please contact support on WhatsApp to confirm your order.'
         : rawMessage
       setSubmitError(message)
     } finally {
