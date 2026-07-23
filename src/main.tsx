@@ -7,10 +7,14 @@ import { CartProvider } from './context/CartContext'
 import { router } from './router'
 import { metaPixel } from './services/metaPixel'
 import { googleAnalytics } from './services/googleAnalytics'
+import { sessionReplay } from './services/sessionReplay'
+import { errorMonitoring } from './services/errorMonitoring'
 
 // Initialize analytics
 googleAnalytics.initialize()
 metaPixel.initialize()
+sessionReplay.initialize()
+errorMonitoring.initialize()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

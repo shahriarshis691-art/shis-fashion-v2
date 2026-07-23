@@ -112,6 +112,10 @@ class GoogleAnalyticsService {
     })
   }
 
+  trackEvent(eventName: string, params: Record<string, unknown>): void {
+    this.track(eventName, params)
+  }
+
   private track(eventName: string, params: Record<string, unknown>): void {
     if (!this.initialized || !this.measurementId || !window.gtag) {
       return
