@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
+import MiniCartConfirmation from '../components/common/MiniCartConfirmation'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
@@ -134,6 +135,7 @@ export default function MainLayout() {
           <Outlet />
         </PageTransition>
       </main>
+      <MiniCartConfirmation />
       <Footer />
     </div>
   )

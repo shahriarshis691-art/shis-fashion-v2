@@ -293,7 +293,6 @@ export default function CollectionListingPage() {
                     price: parseBDT(selectedProduct.price),
                     quantity: 1,
                   }, 'BDT')
-                  navigate('/cart')
                 }}
                 className="justify-center"
                 disabled={selectedProduct.stock <= 0}

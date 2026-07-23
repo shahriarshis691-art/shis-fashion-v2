@@ -10,6 +10,18 @@ export interface CartItem extends Omit<ShopProduct, 'id'> {
   quantity: number
 }
 
+export interface CartAdditionEvent {
+  itemId: string
+  productName: string
+  productImage: string
+  size: string
+  color: string
+  unitPrice: number
+  quantityAdded: number
+  cartSubtotal: number
+  cartItemCount: number
+}
+
 interface CartContextValue {
   items: CartItem[]
   addToCart: (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => void
@@ -18,6 +30,8 @@ interface CartContextValue {
   clearCart: () => void
   itemCount: number
   subtotal: number
+  recentAddition: CartAdditionEvent | null
+  dismissRecentAddition: () => void
 }
 
 const STORAGE_KEY = 'shis-fashion-cart'
@@ -37,6 +51,7 @@ function CartProvider({ children }: { children: ReactNode }) {
       return []
     }
   })
+  const [recentAddition, setRecentAddition] = useState<CartAdditionEvent | null>(null)
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
@@ -51,6 +66,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const itemId = `${product.slug}-${options.size}-${options.color}`
+    let nextAddition: CartAdditionEvent | null = null
 
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === itemId)
@@ -63,10 +79,31 @@ function CartProvider({ children }: { children: ReactNode }) {
           ? Math.min(existingItem.quantity + effectiveQuantity, stockLimit)
           : existingItem.quantity + effectiveQuantity
 
-        return currentItems.map((item) => (item.id === itemId ? { ...item, quantity: nextQuantity } : item))
+        const quantityAdded = Math.max(0, nextQuantity - existingItem.quantity)
+        if (quantityAdded <= 0) {
+          return currentItems
+        }
+
+        const nextItems = currentItems.map((item) => (item.id === itemId ? { ...item, quantity: nextQuantity } : item))
+        const nextSubtotal = nextItems.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
+        const nextItemCount = nextItems.reduce((sum, item) => sum + item.quantity, 0)
+
+        nextAddition = {
+          itemId,
+          productName: existingItem.name,
+          productImage: existingItem.image,
+          size: existingItem.size,
+          color: existingItem.color,
+          unitPrice: parseBDT(existingItem.price),
+          quantityAdded,
+          cartSubtotal: nextSubtotal,
+          cartItemCount: nextItemCount,
+        }
+
+        return nextItems
       }
 
-      return [
+      const nextItems = [
         ...currentItems,
         {
           ...product,
@@ -76,7 +113,28 @@ function CartProvider({ children }: { children: ReactNode }) {
           quantity: effectiveQuantity,
         },
       ]
+
+      const nextSubtotal = nextItems.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
+      const nextItemCount = nextItems.reduce((sum, item) => sum + item.quantity, 0)
+
+      nextAddition = {
+        itemId,
+        productName: product.name,
+        productImage: product.image,
+        size: options.size,
+        color: options.color,
+        unitPrice: parseBDT(product.price),
+        quantityAdded: effectiveQuantity,
+        cartSubtotal: nextSubtotal,
+        cartItemCount: nextItemCount,
+      }
+
+      return nextItems
     })
+
+    if (nextAddition) {
+      setRecentAddition(nextAddition)
+    }
   }
 
   const updateQuantity = (itemId: string, change: number) => {
@@ -111,6 +169,10 @@ function CartProvider({ children }: { children: ReactNode }) {
     setItems([])
   }
 
+  const dismissRecentAddition = () => {
+    setRecentAddition(null)
+  }
+
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
 
@@ -123,8 +185,10 @@ function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       itemCount,
       subtotal,
+      recentAddition,
+      dismissRecentAddition,
     }),
-    [items, itemCount, subtotal],
+    [items, itemCount, recentAddition, subtotal],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

@@ -180,6 +180,7 @@ export interface HomepageContent {
   footerContactPhone?: string
   footerContactAddress?: string
   footerBottomText?: string
+  freeDeliveryThreshold?: number
   sections: HomepageSectionConfig[]
 }
 
@@ -1091,6 +1092,7 @@ const defaultHomepage: HomepageContent = {
   footerContactPhone: '+88 01887848304',
   footerContactAddress: 'Mirpur, Dhaka',
   footerBottomText: 'Crafted for premium, calm, and timeless browsing.',
+  freeDeliveryThreshold: 3000,
   sections: [
     { key: 'hero', label: 'Hero', enabled: true, order: 0 },
     { key: 'featuredCollection', label: 'Featured collection', enabled: true, order: 1 },
@@ -1112,6 +1114,12 @@ function normalizeProduct(product: AdminProduct): AdminProduct {
 }
 
 function normalizeHomepageContent(content: Partial<HomepageContent> | undefined): HomepageContent {
+  const incomingFreeDeliveryThreshold = content?.freeDeliveryThreshold
+  const normalizedFreeDeliveryThreshold =
+    typeof incomingFreeDeliveryThreshold === 'number' && Number.isFinite(incomingFreeDeliveryThreshold) && incomingFreeDeliveryThreshold >= 0
+      ? Math.round(incomingFreeDeliveryThreshold)
+      : (defaultHomepage.freeDeliveryThreshold ?? 3000)
+
   const mergedCategories = (content?.categories && content.categories.length ? content.categories : defaultHomepage.categories).map((category, index) => {
     const fallback = defaultHomepage.categories[index] ?? defaultHomepage.categories[0]
     const legacyTitle = (category.title ?? '').trim().toLowerCase()
@@ -1191,6 +1199,7 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     featuredCollectionPages: mergedFeaturedCollectionPages,
     shopByCategories: mergedShopByCategories,
     categorySections: mergedCategorySections,
+    freeDeliveryThreshold: normalizedFreeDeliveryThreshold,
     sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
       ...defaultHomepage.sections[index],
       ...section,

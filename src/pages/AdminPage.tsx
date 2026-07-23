@@ -1593,6 +1593,27 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 <input value={homepageContent.footerContactAddress ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, footerContactAddress: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Footer contact address" />
                 <input value={homepageContent.footerBottomText ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, footerBottomText: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Footer bottom text" />
+                <div className="grid gap-2">
+                  <label htmlFor="free-delivery-threshold" className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                    Free delivery threshold (BDT)
+                  </label>
+                  <input
+                    id="free-delivery-threshold"
+                    type="number"
+                    min="0"
+                    value={String(homepageContent.freeDeliveryThreshold ?? 3000)}
+                    onChange={(event) => {
+                      const parsed = Number(event.target.value)
+                      setHomepageContent({
+                        ...homepageContent,
+                        freeDeliveryThreshold: Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0,
+                      })
+                    }}
+                    className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                    placeholder="3000"
+                  />
+                  <p className="text-xs text-[var(--color-muted)]">Mini cart confirmation uses this amount to show free-delivery progress.</p>
+                </div>
                 <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'hero-image')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
                   <label className="cursor-pointer">
                     <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'hero-image')} className="hidden" />

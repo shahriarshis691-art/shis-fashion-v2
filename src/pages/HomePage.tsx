@@ -135,6 +135,7 @@ const defaultHomepage: HomepageContent = {
   footerContactPhone: '+88 01887848304',
   footerContactAddress: 'Mirpur, Dhaka',
   footerBottomText: 'Built for comfortable browsing, confident choices, and repeat wear.',
+  freeDeliveryThreshold: 3000,
   sections: [
     { key: 'hero', label: 'Hero', enabled: true, order: 0 },
     { key: 'featuredCollection', label: 'Featured collection', enabled: true, order: 1 },
