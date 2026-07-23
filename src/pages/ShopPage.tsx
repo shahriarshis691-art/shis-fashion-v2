@@ -261,7 +261,7 @@ export default function ShopPage() {
       )
     }
 
-    const rawSegment = searchParams.get('segment')?.trim().toLowerCase() ?? ''
+    const rawSegment = params.get('segment')?.trim().toLowerCase() ?? ''
     if (pathSegment !== 'all') {
       if (rawSegment) {
         params.delete('segment')
@@ -339,6 +339,8 @@ export default function ShopPage() {
     location.pathname,
     location.search,
     navigate,
+    pathSegment,
+    querySegment,
     rawQuerySubcategory,
   ])
 
