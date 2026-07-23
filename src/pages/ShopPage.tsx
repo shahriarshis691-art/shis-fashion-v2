@@ -99,6 +99,25 @@ function normalizeSegmentFromQuery(rawSegment: string | null): ShopSegment {
   return 'all'
 }
 
+function normalizeSubcategoryFromQuery(
+  segment: ShopSegment,
+  rawSubcategory: string | null,
+) {
+  if (!rawSubcategory) {
+    return 'all'
+  }
+
+  const canonical = resolveCanonicalSubcategorySlug(rawSubcategory)
+  if (!canonical || canonical === 'all') {
+    return 'all'
+  }
+
+  const segmentSubcategories = getSubcategoriesForSegment(segment)
+  const isKnownSubcategory = segmentSubcategories.some((item) => item.slug === canonical)
+
+  return isKnownSubcategory ? canonical : 'all'
+}
+
 function segmentMatchesProduct(segment: ShopSegment, category: string) {
   return matchesSegmentByAlias(segment, category)
 }
@@ -148,15 +167,13 @@ export default function ShopPage() {
   })
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
-  const querySubcategory = searchParams.get('sub')?.trim().toLowerCase() ?? 'all'
+  const rawQuerySubcategory = searchParams.get('sub')
   const activeSegment = normalizeSegmentFromPath(location.pathname) !== 'all'
     ? normalizeSegmentFromPath(location.pathname)
     : querySegment
   const legacyCategorySlug = getLegacyCategorySlug(location.pathname)
   const segmentSubcategories = getSubcategoriesForSegment(activeSegment)
-  const activeSubcategory = segmentSubcategories.some((item) => item.slug === querySubcategory)
-    ? querySubcategory
-    : 'all'
+  const activeSubcategory = normalizeSubcategoryFromQuery(activeSegment, rawQuerySubcategory)
   const legacySegment = legacyCategorySlug ? getLegacySegmentFromSlug(legacyCategorySlug) : null
   const legacySubcategory = legacyCategorySlug && !legacySegment
     ? resolveCanonicalSubcategorySlug(legacyCategorySlug)
@@ -184,6 +201,36 @@ export default function ShopPage() {
       document.body.style.overflow = ''
     }
   }, [isFilterSheetOpen])
+
+  useEffect(() => {
+    const pathSegment = normalizeSegmentFromPath(location.pathname)
+    if (pathSegment === 'all') {
+      return
+    }
+
+    const rawSub = rawQuerySubcategory?.trim().toLowerCase() ?? ''
+    if (!rawSub) {
+      return
+    }
+
+    const params = new URLSearchParams(location.search)
+
+    if (activeSubcategory === 'all') {
+      params.delete('sub')
+    } else if (rawSub !== activeSubcategory) {
+      params.set('sub', activeSubcategory)
+    } else {
+      return
+    }
+
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      },
+      { replace: true },
+    )
+  }, [activeSubcategory, location.pathname, location.search, navigate, rawQuerySubcategory])
 
   const heading = getSegmentDescription(activeSegment)
   const legacyHeading = legacyCategorySlug
