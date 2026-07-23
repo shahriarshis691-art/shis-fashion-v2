@@ -3,6 +3,7 @@ const CLOUDINARY_HOST = 'res.cloudinary.com'
 
 export interface ManagedImageSource {
   images?: string[]
+  image?: string
   imageTitles?: string[]
   imageDescriptions?: string[]
 }
@@ -78,7 +79,11 @@ export function normalizeCatalogImageUrl(url: string, width: number, height: num
 }
 
 export function getManagedImageEntries(source: ManagedImageSource, minLength = 0): ManagedImageEntry[] {
-  const images = Array.isArray(source.images) ? source.images.filter((entry): entry is string => typeof entry === 'string') : []
+  const explicitImages = Array.isArray(source.images)
+    ? source.images.filter((entry): entry is string => typeof entry === 'string')
+    : []
+  const legacyImage = typeof source.image === 'string' ? source.image.trim() : ''
+  const images = explicitImages.length ? explicitImages : (legacyImage ? [legacyImage] : [])
   const total = Math.max(images.length, minLength)
 
   return Array.from({ length: total }, (_, index) => ({

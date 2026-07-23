@@ -993,7 +993,8 @@ export async function signOutAdmin() {
 
 export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
   ensureSeedData()
-  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived))
+  const localProducts = () => readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived)
+  callback(localProducts())
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => !product.archived)))
@@ -1004,11 +1005,12 @@ export function subscribeToProducts(callback: (products: AdminProduct[]) => void
     productsRef,
     (snapshot) => {
       const products = snapshot.docs.map((doc) => normalizeProduct({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
-      callback(products.filter((product) => !product.archived))
+      const visibleProducts = products.filter((product) => !product.archived)
+      callback(visibleProducts.length ? visibleProducts : localProducts())
     },
     (error) => {
       if (shouldFallbackToLocal(error)) {
-        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived))
+        callback(localProducts())
       }
     },
   )
