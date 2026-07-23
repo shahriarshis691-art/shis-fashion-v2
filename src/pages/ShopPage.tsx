@@ -84,15 +84,15 @@ function normalizeSegmentFromQuery(rawSegment: string | null): ShopSegment {
   }
 
   const value = rawSegment.trim().toLowerCase()
-  if (value === 'women') {
+  if (value === 'women' || value === 'womens') {
     return 'women'
   }
 
-  if (value === 'men') {
+  if (value === 'men' || value === 'mens') {
     return 'men'
   }
 
-  if (value === 'kids') {
+  if (value === 'kids' || value === 'kid') {
     return 'kids'
   }
 
@@ -110,6 +110,13 @@ function normalizeSubcategoryFromQuery(
   const canonical = resolveCanonicalSubcategorySlug(rawSubcategory)
   if (!canonical || canonical === 'all') {
     return 'all'
+  }
+
+  if (segment === 'all') {
+    const hasMatchInAnySegment = (['women', 'men', 'kids'] as Array<Exclude<ShopSegment, 'all'>>)
+      .some((segmentKey) => getSubcategoriesForSegment(segmentKey).some((item) => item.slug === canonical))
+
+    return hasMatchInAnySegment ? canonical : 'all'
   }
 
   const segmentSubcategories = getSubcategoriesForSegment(segment)
@@ -152,6 +159,18 @@ function getLegacySegmentFromSlug(slug: string): Exclude<ShopSegment, 'all'> | n
   return null
 }
 
+function getSegmentForCanonicalSubcategory(subcategorySlug: string): Exclude<ShopSegment, 'all'> | null {
+  const matchedSegments = (['women', 'men', 'kids'] as Array<Exclude<ShopSegment, 'all'>>).filter((segmentKey) =>
+    getSubcategoriesForSegment(segmentKey).some((item) => item.slug === subcategorySlug),
+  )
+
+  if (matchedSegments.length === 1) {
+    return matchedSegments[0]
+  }
+
+  return null
+}
+
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -168,16 +187,20 @@ export default function ShopPage() {
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
-  const activeSegment = normalizeSegmentFromPath(location.pathname) !== 'all'
-    ? normalizeSegmentFromPath(location.pathname)
+  const pathSegment = normalizeSegmentFromPath(location.pathname)
+  const activeSegment = pathSegment !== 'all'
+    ? pathSegment
     : querySegment
   const legacyCategorySlug = getLegacyCategorySlug(location.pathname)
-  const segmentSubcategories = getSubcategoriesForSegment(activeSegment)
-  const activeSubcategory = normalizeSubcategoryFromQuery(activeSegment, rawQuerySubcategory)
   const legacySegment = legacyCategorySlug ? getLegacySegmentFromSlug(legacyCategorySlug) : null
   const legacySubcategory = legacyCategorySlug && !legacySegment
     ? resolveCanonicalSubcategorySlug(legacyCategorySlug)
     : null
+  const inferredLegacySegment = legacySubcategory ? getSegmentForCanonicalSubcategory(legacySubcategory) : null
+  const effectiveSegment = legacySegment ?? inferredLegacySegment ?? activeSegment
+  const segmentSubcategories = getSubcategoriesForSegment(effectiveSegment)
+  const activeSubcategory = normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
+  const effectiveSubcategory = legacySubcategory || activeSubcategory
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -203,23 +226,71 @@ export default function ShopPage() {
   }, [isFilterSheetOpen])
 
   useEffect(() => {
-    const pathSegment = normalizeSegmentFromPath(location.pathname)
-    if (pathSegment === 'all') {
-      return
+    const params = new URLSearchParams(location.search)
+    let shouldReplace = false
+
+    const rawSegment = searchParams.get('segment')?.trim().toLowerCase() ?? ''
+    if (pathSegment !== 'all') {
+      if (rawSegment) {
+        params.delete('segment')
+        shouldReplace = true
+      }
+    } else if (querySegment === 'all') {
+      if (rawSegment) {
+        params.delete('segment')
+        shouldReplace = true
+      }
+    } else if (rawSegment !== querySegment) {
+      params.set('segment', querySegment)
+      shouldReplace = true
+    }
+
+    if (legacyCategorySlug && location.pathname.startsWith('/shop/')) {
+      if (legacySegment) {
+        navigate(
+          {
+            pathname: `/${legacySegment}`,
+            search: params.toString() ? `?${params.toString()}` : '',
+          },
+          { replace: true },
+        )
+        return
+      }
+
+      if (legacySubcategory && inferredLegacySegment) {
+        params.set('sub', legacySubcategory)
+        navigate(
+          {
+            pathname: `/${inferredLegacySegment}`,
+            search: `?${params.toString()}`,
+          },
+          { replace: true },
+        )
+        return
+      }
     }
 
     const rawSub = rawQuerySubcategory?.trim().toLowerCase() ?? ''
     if (!rawSub) {
+      if (!shouldReplace) {
+        return
+      }
+
+      navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString() ? `?${params.toString()}` : '',
+        },
+        { replace: true },
+      )
       return
     }
-
-    const params = new URLSearchParams(location.search)
 
     if (activeSubcategory === 'all') {
       params.delete('sub')
     } else if (rawSub !== activeSubcategory) {
       params.set('sub', activeSubcategory)
-    } else {
+    } else if (!shouldReplace) {
       return
     }
 
@@ -230,9 +301,19 @@ export default function ShopPage() {
       },
       { replace: true },
     )
-  }, [activeSubcategory, location.pathname, location.search, navigate, rawQuerySubcategory])
+  }, [
+    activeSubcategory,
+    inferredLegacySegment,
+    legacyCategorySlug,
+    legacySegment,
+    legacySubcategory,
+    location.pathname,
+    location.search,
+    navigate,
+    rawQuerySubcategory,
+  ])
 
-  const heading = getSegmentDescription(activeSegment)
+  const heading = getSegmentDescription(effectiveSegment)
   const legacyHeading = legacyCategorySlug
     ? {
       title: legacyCategorySlug.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
@@ -240,18 +321,12 @@ export default function ShopPage() {
     }
     : null
 
-  const bySegment = products.filter((product) => segmentMatchesProduct(activeSegment, product.category))
+  const bySegment = products.filter((product) => segmentMatchesProduct(effectiveSegment, product.category))
 
-  const byLegacyCategory = legacySegment
-    ? bySegment.filter((product) => matchesSegmentByAlias(legacySegment, product.category))
-    : legacySubcategory
-      ? bySegment.filter((product) => matchesSubcategoryByAlias('all', legacySubcategory, product.category))
-      : bySegment
-
-  const bySubcategory = activeSubcategory === 'all'
-    ? byLegacyCategory
-    : byLegacyCategory.filter((product) =>
-      matchesSubcategoryByAlias(activeSegment, activeSubcategory, product.category),
+  const bySubcategory = effectiveSubcategory === 'all'
+    ? bySegment
+    : bySegment.filter((product) =>
+      matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
     )
 
   const byFilter = bySubcategory.filter((product) => {
@@ -325,7 +400,7 @@ export default function ShopPage() {
                   navigate(tab.path)
                 }}
                 className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                  activeSegment === tab.key
+                  effectiveSegment === tab.key
                     ? 'border-black text-black'
                     : 'border-transparent text-black/65 hover:text-black'
                 }`}
