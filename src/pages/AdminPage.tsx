@@ -41,6 +41,10 @@ import {
   type HomepageSectionConfig,
   onAdminAuthChanged,
 } from '../firebase/adminService'
+import {
+  getAllTaxonomyCategoryOptions,
+  resolveCanonicalSubcategorySlug,
+} from '../data/categoryTaxonomy'
 
 const emptyProductForm = {
   name: '',
@@ -263,6 +267,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const names = categories.map((category) => category.name).filter(Boolean)
     return Array.from(new Set(names)).sort((left, right) => left.localeCompare(right))
   }, [categories])
+
+  const taxonomyCategoryOptions = useMemo(() => getAllTaxonomyCategoryOptions(), [])
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -544,7 +550,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     name: productForm.name.trim(),
     price: productForm.price.trim(),
     description: productForm.description.trim(),
-    category: productForm.category.trim(),
+    category: resolveCanonicalSubcategorySlug(productForm.category),
     sizes: productForm.sizes.map((size) => size.trim()).filter(Boolean),
     colors: productForm.colors.map((color) => color.trim()).filter(Boolean),
   })
@@ -569,10 +575,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         setMessage('Product updated.')
       } else {
         await createProduct({
-          ...form,
+          ...normalizedForm,
           ...normalizedMedia,
-          sizes: form.sizes,
-          colors: form.colors,
+          sizes: normalizedForm.sizes,
+          colors: normalizedForm.colors,
         })
         setMessage('Product created.')
       }
@@ -915,7 +921,24 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
                   <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
                 </div>
-                  <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category slug (example: women-kurti)" />
+                  <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category slug (example: shirts, polos, kurti)" />
+                  {taxonomyCategoryOptions.length ? (
+                    <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/60 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">Recommended category map</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {taxonomyCategoryOptions.map((option) => (
+                          <button
+                            key={`${option.segment}-${option.slug}`}
+                            type="button"
+                            onClick={() => setForm((current) => ({ ...current, category: option.slug }))}
+                            className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${form.category === option.slug ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {availableCategoryNames.length ? (
                     <div className="flex flex-wrap gap-2">
                       {availableCategoryNames.map((name) => (

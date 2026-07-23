@@ -6,6 +6,12 @@ export interface SubcategoryConfig {
   aliases: string[]
 }
 
+export interface TaxonomyCategoryOption {
+  segment: Exclude<ShopSegment, 'all'>
+  slug: string
+  label: string
+}
+
 interface SegmentConfig {
   key: Exclude<ShopSegment, 'all'>
   label: string
@@ -113,6 +119,43 @@ export function getSubcategoryLinksForSegment(segment: Exclude<ShopSegment, 'all
 
 function normalizeCategoryValue(category: string) {
   return category.trim().toLowerCase()
+}
+
+export function getAllTaxonomyCategoryOptions() {
+  const options: TaxonomyCategoryOption[] = []
+
+  for (const segment of SEGMENTS) {
+    for (const subcategory of segment.subcategories) {
+      options.push({
+        segment: segment.key,
+        slug: subcategory.slug,
+        label: `${segment.label} - ${subcategory.label}`,
+      })
+    }
+  }
+
+  return options
+}
+
+export function resolveCanonicalSubcategorySlug(category: string) {
+  const normalized = normalizeCategoryValue(category)
+  if (!normalized) {
+    return ''
+  }
+
+  for (const segment of SEGMENTS) {
+    for (const subcategory of segment.subcategories) {
+      if (subcategory.slug === normalized) {
+        return subcategory.slug
+      }
+
+      if (subcategory.aliases.some((alias) => alias.toLowerCase() === normalized)) {
+        return subcategory.slug
+      }
+    }
+  }
+
+  return normalized
 }
 
 export function matchesSegmentByAlias(segment: ShopSegment, category: string) {
