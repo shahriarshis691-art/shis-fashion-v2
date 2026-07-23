@@ -11,7 +11,7 @@ export default function NewArrivalsPage() {
           <h1 className="mt-2 text-3xl font-semibold text-[var(--color-text)]">Fresh drops, just in</h1>
           <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">The latest pieces from SHIS Fashion, curated for a premium, modern wardrobe.</p>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-8 sm:gap-x-2.5 sm:gap-y-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {shopProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

@@ -471,7 +471,7 @@ export default function ProductDetailPage() {
               <span className="text-caption uppercase tracking-[0.12em] text-black/55">You may also like</span>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5">
+            <div className="mt-5 grid grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-3 sm:gap-x-3 sm:gap-y-6 lg:grid-cols-4 lg:gap-x-4">
               {relatedProducts.map((item) => (
                 <ProductCard
                   key={item.id}
