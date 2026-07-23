@@ -319,19 +319,6 @@ export default function CollectionListingPage() {
                     currency: 'BDT',
                     content_type: 'product',
                   })
-                  googleAnalytics.beginCheckout({
-                    value: parseBDT(selectedProduct.price),
-                    currency: 'BDT',
-                    items: [
-                      {
-                        item_id: selectedProduct.id,
-                        item_name: selectedProduct.name,
-                        item_category: selectedProduct.category,
-                        price: parseBDT(selectedProduct.price),
-                        quantity: 1,
-                      },
-                    ],
-                  })
                   navigate('/checkout')
                 }}
                 variant="secondary"

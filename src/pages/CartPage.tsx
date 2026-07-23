@@ -4,7 +4,6 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { useCart } from '../context/CartContext'
 import { formatBDT, parseBDT } from '../utils/currency'
-import { googleAnalytics } from '../services/googleAnalytics'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
@@ -17,18 +16,6 @@ export default function CartPage() {
   const supportWhatsAppHref = getWhatsAppHref()
 
   const handleBeginCheckout = () => {
-    googleAnalytics.beginCheckout({
-      value: subtotal,
-      currency: 'BDT',
-      items: items.map((item) => ({
-        item_id: item.id,
-        item_name: item.name,
-        item_category: item.category,
-        price: parseBDT(item.price),
-        quantity: item.quantity,
-      })),
-    })
-
     navigate('/checkout')
   }
 

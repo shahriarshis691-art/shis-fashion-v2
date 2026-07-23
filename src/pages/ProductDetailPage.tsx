@@ -250,20 +250,6 @@ export default function ProductDetailPage() {
       currency: 'BDT',
       content_type: 'product',
     })
-
-    googleAnalytics.beginCheckout({
-      value: parseBDT(product.price) * effectiveQuantity,
-      currency: 'BDT',
-      items: [
-        {
-          item_id: String(product.id),
-          item_name: product.name,
-          item_category: product.category,
-          price: parseBDT(product.price),
-          quantity: effectiveQuantity,
-        },
-      ],
-    })
     navigate('/checkout')
   }
 
