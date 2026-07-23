@@ -11,14 +11,19 @@ Use one mode at a time via environment variables:
 - Percentage rollout:
   - `VITE_SOFT_LAUNCH_MODE=percentage`
   - `VITE_SOFT_LAUNCH_PERCENT=20` (or `30`)
+  - `SOFT_LAUNCH_MODE=percentage`
+  - `SOFT_LAUNCH_PERCENT=20` (or `30`)
 - Invite-only campaign:
   - `VITE_SOFT_LAUNCH_MODE=invite-only`
   - `VITE_SOFT_LAUNCH_INVITE_CODES=codeA,codeB,codeC`
+  - `SOFT_LAUNCH_MODE=invite-only`
+  - `SOFT_LAUNCH_INVITE_CODES=codeA,codeB,codeC`
   - Shared links: `https://www.shisfashion.com/?invite=codeA`
 
 Notes:
 - Admin routes are always accessible.
 - In local development, soft launch is bypassed unless `VITE_SOFT_LAUNCH_ENFORCE_IN_DEV=true`.
+- Edge middleware applies server-side enforcement in production.
 
 ## 2) Error Monitoring + Session Replay
 
