@@ -12,6 +12,20 @@ import { applySeoMetadata } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
+const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
+
+function shouldSendStabilizationHeartbeat() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  if (window.sessionStorage.getItem(STABILIZATION_HEARTBEAT_SESSION_KEY) === '1') {
+    return false
+  }
+
+  window.sessionStorage.setItem(STABILIZATION_HEARTBEAT_SESSION_KEY, '1')
+  return true
+}
 
 export default function MainLayout() {
   const location = useLocation()
@@ -26,6 +40,21 @@ export default function MainLayout() {
     metaPixel.pageView()
     googleAnalytics.pageView()
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!shouldSendStabilizationHeartbeat()) {
+      return
+    }
+
+    googleAnalytics.trackEvent('stabilization_heartbeat', {
+      path: location.pathname,
+      soft_launch_mode: softLaunchDecision.mode,
+      soft_launch_allowed: softLaunchDecision.allowed,
+      launch_mode_enabled: String(import.meta.env.VITE_LAUNCH_MODE ?? 'false').trim().toLowerCase() === 'true',
+      ga_configured: Boolean(import.meta.env.VITE_GA_MEASUREMENT_ID),
+      meta_pixel_configured: Boolean(import.meta.env.VITE_META_PIXEL_ID),
+    })
+  }, [location.pathname, softLaunchDecision.allowed, softLaunchDecision.mode])
 
   useEffect(() => {
     applySeoMetadata(location.pathname)
