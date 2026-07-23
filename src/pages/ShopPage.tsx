@@ -231,6 +231,30 @@ export default function ShopPage() {
     const params = new URLSearchParams(location.search)
     let shouldReplace = false
 
+    const replaceWithCanonical = (
+      pathname: string,
+      search: string,
+      reason: string,
+    ) => {
+      googleAnalytics.trackEvent('listing_query_normalized', {
+        reason,
+        from_path: location.pathname,
+        from_search: location.search,
+        to_path: pathname,
+        to_search: search,
+        segment: effectiveSegment,
+        subcategory: effectiveSubcategory,
+      })
+
+      navigate(
+        {
+          pathname,
+          search,
+        },
+        { replace: true },
+      )
+    }
+
     const rawSegment = searchParams.get('segment')?.trim().toLowerCase() ?? ''
     if (pathSegment !== 'all') {
       if (rawSegment) {
@@ -249,24 +273,20 @@ export default function ShopPage() {
 
     if (legacyCategorySlug && location.pathname.startsWith('/shop/')) {
       if (legacySegment) {
-        navigate(
-          {
-            pathname: `/${legacySegment}`,
-            search: params.toString() ? `?${params.toString()}` : '',
-          },
-          { replace: true },
+        replaceWithCanonical(
+          `/${legacySegment}`,
+          params.toString() ? `?${params.toString()}` : '',
+          'legacy-segment-route',
         )
         return
       }
 
       if (legacySubcategory && inferredLegacySegment) {
         params.set('sub', legacySubcategory)
-        navigate(
-          {
-            pathname: `/${inferredLegacySegment}`,
-            search: `?${params.toString()}`,
-          },
-          { replace: true },
+        replaceWithCanonical(
+          `/${inferredLegacySegment}`,
+          `?${params.toString()}`,
+          'legacy-subcategory-route',
         )
         return
       }
@@ -278,33 +298,34 @@ export default function ShopPage() {
         return
       }
 
-      navigate(
-        {
-          pathname: location.pathname,
-          search: params.toString() ? `?${params.toString()}` : '',
-        },
-        { replace: true },
+      replaceWithCanonical(
+        location.pathname,
+        params.toString() ? `?${params.toString()}` : '',
+        'segment-query-canonicalization',
       )
       return
     }
 
+    let normalizationReason = ''
     if (activeSubcategory === 'all') {
       params.delete('sub')
+      normalizationReason = 'invalid-sub-for-segment'
     } else if (rawSub !== activeSubcategory) {
       params.set('sub', activeSubcategory)
+      normalizationReason = 'legacy-sub-to-canonical-sub'
     } else if (!shouldReplace) {
       return
     }
 
-    navigate(
-      {
-        pathname: location.pathname,
-        search: params.toString() ? `?${params.toString()}` : '',
-      },
-      { replace: true },
+    replaceWithCanonical(
+      location.pathname,
+      params.toString() ? `?${params.toString()}` : '',
+      normalizationReason || 'mixed-query-canonicalization',
     )
   }, [
     activeSubcategory,
+    effectiveSegment,
+    effectiveSubcategory,
     inferredLegacySegment,
     legacyCategorySlug,
     legacySegment,
