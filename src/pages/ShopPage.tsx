@@ -187,6 +187,8 @@ export default function ShopPage() {
   })
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
+  const listingStateSnapshotRef = useRef('')
+  const didTrackInitialListingStateRef = useRef(false)
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
@@ -461,6 +463,53 @@ export default function ShopPage() {
     ready,
     sortBy,
     visibleProducts.length,
+  ])
+
+  useEffect(() => {
+    if (!ready) {
+      return
+    }
+
+    const listingStateSnapshot = [
+      effectiveSegment,
+      effectiveSubcategory,
+      sortBy,
+      filters.inStockOnly ? 'stock' : 'all-stock',
+      filters.newOnly ? 'new' : 'all-new',
+      location.pathname,
+      location.search,
+    ].join('|')
+
+    if (!didTrackInitialListingStateRef.current) {
+      didTrackInitialListingStateRef.current = true
+      listingStateSnapshotRef.current = listingStateSnapshot
+      return
+    }
+
+    if (listingStateSnapshotRef.current === listingStateSnapshot) {
+      return
+    }
+
+    listingStateSnapshotRef.current = listingStateSnapshot
+
+    googleAnalytics.trackEvent('listing_state_changed', {
+      segment: effectiveSegment,
+      subcategory: effectiveSubcategory,
+      sort: sortBy,
+      in_stock_only: filters.inStockOnly,
+      new_only: filters.newOnly,
+      path: location.pathname,
+      search: location.search,
+    })
+  }, [
+    effectiveSegment,
+    effectiveSubcategory,
+    filters.inStockOnly,
+    filters.newOnly,
+    location.pathname,
+    location.search,
+    ready,
+    sortBy,
   ])
 
   const navigateWithSubcategory = (subcategory: string) => {
