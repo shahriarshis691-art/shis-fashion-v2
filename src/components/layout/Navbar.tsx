@@ -6,6 +6,7 @@ import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
+import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -25,22 +26,12 @@ const megaMenuGroups = {
   women: {
     label: 'Women',
     href: '/women',
-    links: [
-      { label: 'Shop Women', href: '/women' },
-      { label: 'New Arrivals', href: '/shop/new-arrivals' },
-      { label: 'Sale Picks', href: '/sale' },
-      { label: 'Shop All', href: '/shop' },
-    ],
+    links: getSubcategoryLinksForSegment('women'),
   },
   men: {
     label: 'Men',
     href: '/men',
-    links: [
-      { label: 'Shop Men', href: '/men' },
-      { label: 'Best Sellers', href: '/shop/best-sellers' },
-      { label: 'New Arrivals', href: '/shop/new-arrivals' },
-      { label: 'Shop All', href: '/shop' },
-    ],
+    links: getSubcategoryLinksForSegment('men'),
   },
 } as const
 

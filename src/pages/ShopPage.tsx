@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
@@ -10,27 +10,21 @@ import {
 } from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries } from '../utils/media'
+import {
+  type ShopSegment,
+  SEGMENT_TABS,
+  getSegmentDescription,
+  getSubcategoriesForSegment,
+  matchesSegmentByAlias,
+  matchesSubcategoryByAlias,
+} from '../data/categoryTaxonomy'
 
-type ShopSegment = 'all' | 'women' | 'men' | 'kids'
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
 
 interface ProductFilters {
   inStockOnly: boolean
   newOnly: boolean
 }
-
-interface SegmentTab {
-  key: ShopSegment
-  label: string
-  path: string
-}
-
-const segmentTabs: SegmentTab[] = [
-  { key: 'women', label: 'Women', path: '/women' },
-  { key: 'men', label: 'Men', path: '/men' },
-  { key: 'kids', label: 'Kids', path: '/kids' },
-  { key: 'all', label: 'All', path: '/shop' },
-]
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'popular', label: 'Popular' },
@@ -105,49 +99,7 @@ function normalizeSegmentFromQuery(rawSegment: string | null): ShopSegment {
 }
 
 function segmentMatchesProduct(segment: ShopSegment, category: string) {
-  if (segment === 'all') {
-    return true
-  }
-
-  const normalizedCategory = category.trim().toLowerCase()
-
-  if (segment === 'women') {
-    return ['womens', 'women', 'dress', 'western', 'couples'].some((token) => normalizedCategory.includes(token))
-  }
-
-  if (segment === 'men') {
-    return ['mens', 'men', 'shirt', 'denim', 'oversized', 'unisex'].some((token) => normalizedCategory.includes(token))
-  }
-
-  return ['kids', 'kid', 'children'].some((token) => normalizedCategory.includes(token))
-}
-
-function segmentHeading(segment: ShopSegment) {
-  if (segment === 'women') {
-    return {
-      title: 'Women',
-      description: 'Editorial silhouettes and daily essentials tailored for modern women.',
-    }
-  }
-
-  if (segment === 'men') {
-    return {
-      title: 'Men',
-      description: 'Refined men\'s edits focused on comfort, fit, and repeat wear.',
-    }
-  }
-
-  if (segment === 'kids') {
-    return {
-      title: 'Kids',
-      description: 'Soft, practical, and polished pieces for active little wardrobes.',
-    }
-  }
-
-  return {
-    title: 'Shop All',
-    description: 'Explore all available products across women, men, and kids.',
-  }
+  return matchesSegmentByAlias(segment, category)
 }
 
 function getLegacyCategorySlug(pathname: string) {
@@ -179,10 +131,15 @@ export default function ShopPage() {
   })
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
+  const querySubcategory = searchParams.get('sub')?.trim().toLowerCase() ?? 'all'
   const activeSegment = normalizeSegmentFromPath(location.pathname) !== 'all'
     ? normalizeSegmentFromPath(location.pathname)
     : querySegment
   const legacyCategorySlug = getLegacyCategorySlug(location.pathname)
+  const segmentSubcategories = getSubcategoriesForSegment(activeSegment)
+  const activeSubcategory = segmentSubcategories.some((item) => item.slug === querySubcategory)
+    ? querySubcategory
+    : 'all'
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -207,7 +164,7 @@ export default function ShopPage() {
     }
   }, [isFilterSheetOpen])
 
-  const heading = segmentHeading(activeSegment)
+  const heading = getSegmentDescription(activeSegment)
   const legacyHeading = legacyCategorySlug
     ? {
       title: legacyCategorySlug.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
@@ -215,45 +172,68 @@ export default function ShopPage() {
     }
     : null
 
-  const visibleProducts = useMemo(() => {
-    const bySegment = products.filter((product) => segmentMatchesProduct(activeSegment, product.category))
+  const bySegment = products.filter((product) => segmentMatchesProduct(activeSegment, product.category))
 
-    const byLegacyCategory = legacyCategorySlug
-      ? bySegment.filter((product) => product.category.trim().toLowerCase().includes(legacyCategorySlug))
-      : bySegment
+  const byLegacyCategory = legacyCategorySlug
+    ? bySegment.filter((product) => product.category.trim().toLowerCase().includes(legacyCategorySlug))
+    : bySegment
 
-    const byFilter = byLegacyCategory.filter((product) => {
-      if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
-        return false
-      }
+  const bySubcategory = activeSubcategory === 'all'
+    ? byLegacyCategory
+    : byLegacyCategory.filter((product) =>
+      matchesSubcategoryByAlias(activeSegment, activeSubcategory, product.category),
+    )
 
-      if (filters.newOnly && !product.newArrival) {
-        return false
-      }
+  const byFilter = bySubcategory.filter((product) => {
+    if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
+      return false
+    }
 
-      return true
-    })
+    if (filters.newOnly && !product.newArrival) {
+      return false
+    }
 
+    return true
+  })
+
+  const visibleProducts = (() => {
+    const sorted = [...byFilter]
     if (sortBy === 'new') {
-      return [...byFilter].sort(
-        (left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)),
-      )
+      sorted.sort((left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)))
+      return sorted
     }
 
     if (sortBy === 'price-low') {
-      return [...byFilter].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
+      sorted.sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
+      return sorted
     }
 
     if (sortBy === 'price-high') {
-      return [...byFilter].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
+      sorted.sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
+      return sorted
     }
 
-    return [...byFilter].sort(
+    sorted.sort(
       (left, right) =>
         Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
         (right.stock ?? 0) - (left.stock ?? 0),
     )
-  }, [activeSegment, filters.inStockOnly, filters.newOnly, legacyCategorySlug, products, sortBy])
+    return sorted
+  })()
+
+  const navigateWithSubcategory = (subcategory: string) => {
+    const params = new URLSearchParams(location.search)
+    if (subcategory === 'all') {
+      params.delete('sub')
+    } else {
+      params.set('sub', subcategory)
+    }
+
+    navigate({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : '',
+    })
+  }
 
   return (
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
@@ -266,7 +246,7 @@ export default function ShopPage() {
           </div>
 
           <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {segmentTabs.map((tab) => (
+            {SEGMENT_TABS.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
@@ -296,6 +276,36 @@ export default function ShopPage() {
               New Arrivals
             </Link>
           </div>
+
+          {segmentSubcategories.length ? (
+            <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button
+                type="button"
+                onClick={() => navigateWithSubcategory('all')}
+                className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                  activeSubcategory === 'all'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-black/65 hover:text-black'
+                }`}
+              >
+                All
+              </button>
+              {segmentSubcategories.map((subcategory) => (
+                <button
+                  key={subcategory.slug}
+                  type="button"
+                  onClick={() => navigateWithSubcategory(subcategory.slug)}
+                  className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                    activeSubcategory === subcategory.slug
+                      ? 'border-black text-black'
+                      : 'border-transparent text-black/65 hover:text-black'
+                  }`}
+                >
+                  {subcategory.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           <div className="flex items-center justify-between border-b border-black/10 pb-2.5">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">
