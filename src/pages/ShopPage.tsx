@@ -17,6 +17,7 @@ import {
   getSubcategoriesForSegment,
   matchesSegmentByAlias,
   matchesSubcategoryByAlias,
+  resolveCanonicalSubcategorySlug,
 } from '../data/categoryTaxonomy'
 
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
@@ -116,6 +117,22 @@ function getLegacyCategorySlug(pathname: string) {
   return slug
 }
 
+function getLegacySegmentFromSlug(slug: string): Exclude<ShopSegment, 'all'> | null {
+  if (slug === 'women' || slug === 'womens') {
+    return 'women'
+  }
+
+  if (slug === 'men' || slug === 'mens') {
+    return 'men'
+  }
+
+  if (slug === 'kids' || slug === 'kid') {
+    return 'kids'
+  }
+
+  return null
+}
+
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -140,6 +157,10 @@ export default function ShopPage() {
   const activeSubcategory = segmentSubcategories.some((item) => item.slug === querySubcategory)
     ? querySubcategory
     : 'all'
+  const legacySegment = legacyCategorySlug ? getLegacySegmentFromSlug(legacyCategorySlug) : null
+  const legacySubcategory = legacyCategorySlug && !legacySegment
+    ? resolveCanonicalSubcategorySlug(legacyCategorySlug)
+    : null
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -174,9 +195,11 @@ export default function ShopPage() {
 
   const bySegment = products.filter((product) => segmentMatchesProduct(activeSegment, product.category))
 
-  const byLegacyCategory = legacyCategorySlug
-    ? bySegment.filter((product) => product.category.trim().toLowerCase().includes(legacyCategorySlug))
-    : bySegment
+  const byLegacyCategory = legacySegment
+    ? bySegment.filter((product) => matchesSegmentByAlias(legacySegment, product.category))
+    : legacySubcategory
+      ? bySegment.filter((product) => matchesSubcategoryByAlias('all', legacySubcategory, product.category))
+      : bySegment
 
   const bySubcategory = activeSubcategory === 'all'
     ? byLegacyCategory
