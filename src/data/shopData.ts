@@ -1,3 +1,5 @@
+import { resolveCanonicalSubcategorySlug } from './categoryTaxonomy'
+
 export interface ShopCategory {
   slug: string
   title: string
@@ -45,11 +47,27 @@ export const shopProducts: ShopProduct[] = [
 ]
 
 export function getCategoryBySlug(slug: string) {
-  return shopCategories.find((category) => category.slug === slug)
+  const normalized = resolveCanonicalSubcategorySlug(slug)
+
+  return shopCategories.find((category) => {
+    if (category.slug === slug) {
+      return true
+    }
+
+    return resolveCanonicalSubcategorySlug(category.slug) === normalized
+  })
 }
 
 export function getProductsByCategory(slug: string) {
-  return shopProducts.filter((product) => product.category === slug)
+  const normalized = resolveCanonicalSubcategorySlug(slug)
+
+  return shopProducts.filter((product) => {
+    if (product.category === slug) {
+      return true
+    }
+
+    return resolveCanonicalSubcategorySlug(product.category) === normalized
+  })
 }
 
 export function getFeaturedProducts(limit = 4) {
