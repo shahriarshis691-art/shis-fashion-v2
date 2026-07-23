@@ -1037,6 +1037,23 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     })
   }
 
+  const handlePreviewSectionRoute = (href: string) => {
+    const normalizedHref = href.trim()
+    if (!normalizedHref.startsWith('/')) {
+      setMessage('Section route must start with /.')
+      setToast({ kind: 'error', message: 'Section route must start with / for preview.' })
+      return
+    }
+
+    try {
+      const targetUrl = new URL(normalizedHref, window.location.origin)
+      window.open(targetUrl.toString(), '_blank', 'noopener,noreferrer')
+    } catch {
+      setMessage('Unable to preview this section route.')
+      setToast({ kind: 'error', message: 'Unable to preview section route.' })
+    }
+  }
+
   const handleEditCategory = (category: AdminCategory) => {
     setEditingCategoryId(category.id)
     setCategoryName(category.name)
@@ -1778,13 +1795,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <div key={section.key} className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-semibold text-[var(--color-text)]">{section.key.toUpperCase()}</p>
-                          <button
-                            type="button"
-                            onClick={() => updateHomepageCategorySection(section.key, { enabled: !section.enabled })}
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${section.enabled ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
-                          >
-                            {section.enabled ? 'Visible' : 'Hidden'}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handlePreviewSectionRoute(section.href)}
+                              className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-semibold text-[var(--color-text)]"
+                            >
+                              Preview
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateHomepageCategorySection(section.key, { enabled: !section.enabled })}
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${section.enabled ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                            >
+                              {section.enabled ? 'Visible' : 'Hidden'}
+                            </button>
+                          </div>
                         </div>
 
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
