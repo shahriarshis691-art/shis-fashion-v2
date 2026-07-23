@@ -169,8 +169,8 @@ export default function CollectionListingPage() {
     }
 
     applySeoMetadata(location.pathname, {
-      title: `${activeCollection.title} | SHIS Fashion Bangladesh`,
-      description: `${activeCollection.description} Discover premium fashion collections from SHIS Fashion Bangladesh.`,
+      title: `${activeCollection.title} | SHIS Fashion`,
+      description: `${activeCollection.description} Discover premium fashion collections from SHIS Fashion.`,
     })
   }, [activeCollection.description, activeCollection.title, location.pathname, selectedProduct])
 

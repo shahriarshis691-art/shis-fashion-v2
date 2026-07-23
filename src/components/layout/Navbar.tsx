@@ -155,6 +155,18 @@ export default function Navbar() {
             </IconButton>
 
             <Link
+              to="/shop?wishlist=1"
+              onClick={closeOverlays}
+              title="Wishlist"
+              className="ui-interactive relative flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text)] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:h-9 sm:w-9"
+              aria-label="Wishlist"
+            >
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 20.3 4.9 13.8a4.8 4.8 0 0 1 6.8-6.8L12 7.3l.3-.3a4.8 4.8 0 0 1 6.8 6.8L12 20.3Z" />
+              </svg>
+            </Link>
+
+            <Link
               to="/cart"
               onClick={closeOverlays}
               title="Cart"

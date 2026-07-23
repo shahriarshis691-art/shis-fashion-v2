@@ -303,7 +303,7 @@ export default function CheckoutPage() {
                 </label>
 
                 <label className="space-y-2">
-                  <span className="text-sm font-medium text-[var(--color-text)]">District *</span>
+                  <span className="text-sm font-medium text-[var(--color-text)]">District (Zilla) *</span>
                   <select
                     required
                     value={form.district}
@@ -319,7 +319,7 @@ export default function CheckoutPage() {
                 </label>
 
                 <label className="space-y-2 sm:col-span-2 lg:col-span-1">
-                  <span className="text-sm font-medium text-[var(--color-text)]">Upazila *</span>
+                  <span className="text-sm font-medium text-[var(--color-text)]">Area / Upazila *</span>
                   <select
                     required
                     value={form.upazila}
@@ -330,6 +330,10 @@ export default function CheckoutPage() {
                   </select>
                 </label>
               </div>
+
+              <p className="-mt-2 text-xs text-[var(--color-muted)]">
+                Select your zilla from District, then select your local area from Area / Upazila.
+              </p>
 
               <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3 text-sm text-[var(--color-muted)]">
                 <span>{form.division}</span>

@@ -10,6 +10,7 @@ import {
 } from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries } from '../utils/media'
+import { getWishlistKeys, toWishlistKey } from '../utils/wishlist'
 
 type ShopSegment = 'all' | 'women' | 'men' | 'kids'
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
@@ -177,8 +178,11 @@ export default function ShopPage() {
     inStockOnly: false,
     newOnly: false,
   })
+  const [wishlistKeys, setWishlistKeys] = useState<string[]>([])
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
+  const searchQuery = (searchParams.get('q') ?? '').trim().toLowerCase()
+  const wishlistOnly = searchParams.get('wishlist') === '1'
   const activeSegment = normalizeSegmentFromPath(location.pathname) !== 'all'
     ? normalizeSegmentFromPath(location.pathname)
     : querySegment
@@ -207,6 +211,13 @@ export default function ShopPage() {
     }
   }, [isFilterSheetOpen])
 
+  useEffect(() => {
+    const syncWishlist = () => setWishlistKeys(getWishlistKeys())
+    syncWishlist()
+    window.addEventListener('wishlist:updated', syncWishlist)
+    return () => window.removeEventListener('wishlist:updated', syncWishlist)
+  }, [])
+
   const heading = segmentHeading(activeSegment)
   const legacyHeading = legacyCategorySlug
     ? {
@@ -234,26 +245,47 @@ export default function ShopPage() {
       return true
     })
 
+    const bySearch = searchQuery
+      ? byFilter.filter((product) => {
+        const searchableText = `${product.name} ${product.description} ${product.category}`.toLowerCase()
+        return searchableText.includes(searchQuery)
+      })
+      : byFilter
+
+    const byWishlist = wishlistOnly
+      ? bySearch.filter((product) => wishlistKeys.includes(toWishlistKey(product)))
+      : bySearch
+
     if (sortBy === 'new') {
-      return [...byFilter].sort(
+      return [...byWishlist].sort(
         (left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)),
       )
     }
 
     if (sortBy === 'price-low') {
-      return [...byFilter].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
+      return [...byWishlist].sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
     }
 
     if (sortBy === 'price-high') {
-      return [...byFilter].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
+      return [...byWishlist].sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
     }
 
-    return [...byFilter].sort(
+    return [...byWishlist].sort(
       (left, right) =>
         Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
         (right.stock ?? 0) - (left.stock ?? 0),
     )
-  }, [activeSegment, filters.inStockOnly, filters.newOnly, legacyCategorySlug, products, sortBy])
+  }, [
+    activeSegment,
+    filters.inStockOnly,
+    filters.newOnly,
+    legacyCategorySlug,
+    products,
+    searchQuery,
+    sortBy,
+    wishlistKeys,
+    wishlistOnly,
+  ])
 
   return (
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
@@ -328,6 +360,24 @@ export default function ShopPage() {
               Filter & Sort
             </button>
           </div>
+
+          {searchQuery || wishlistOnly ? (
+            <div className="flex flex-wrap items-center gap-2 border-b border-black/10 pb-2">
+              {searchQuery ? (
+                <p className="text-caption uppercase tracking-[0.12em] text-black/55">
+                  Search: "{searchQuery}"
+                </p>
+              ) : null}
+              {wishlistOnly ? (
+                <Link
+                  to="/shop"
+                  className="ui-interactive border border-black/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/80 hover:text-black"
+                >
+                  Wishlist only (clear)
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         {!ready ? (
@@ -343,7 +393,11 @@ export default function ShopPage() {
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
-            <p className="mt-2 text-sm text-black/70">Try another filter combination.</p>
+            <p className="mt-2 text-sm text-black/70">
+              {wishlistOnly
+                ? 'Your wishlist is empty for this segment. Add products with the heart icon.'
+                : 'Try another filter combination.'}
+            </p>
             <button
               type="button"
               onClick={() => {
