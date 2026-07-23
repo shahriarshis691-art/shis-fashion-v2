@@ -462,13 +462,31 @@ async function isAdminUser(user: User) {
     return isEmailAllowListed === true ? true : hasAdminClaim
   }
 
-  const [adminDocSnapshot, adminsSettingsSnapshot] = await Promise.all([
-    getDoc(doc(firebaseDb, 'admins', user.uid)),
-    getDoc(doc(firebaseDb, 'settings', 'admins')),
-  ])
+  let adminDocSnapshot: Awaited<ReturnType<typeof getDoc>> | null = null
+  let adminsSettingsSnapshot: Awaited<ReturnType<typeof getDoc>> | null = null
+
+  try {
+    ;[adminDocSnapshot, adminsSettingsSnapshot] = await Promise.all([
+      getDoc(doc(firebaseDb, 'admins', user.uid)),
+      getDoc(doc(firebaseDb, 'settings', 'admins')),
+    ])
+  } catch (error) {
+    const details = describeFirebaseError(error)
+
+    if (import.meta.env.DEV) {
+      console.warn('[admin-auth] unable to read admin metadata', {
+        code: details.code,
+        message: details.message,
+      })
+    }
+
+    // Continue with claims-only fallback. This prevents generic login failures and
+    // allows signInAdmin() to surface a specific admin-permission-required message.
+    return hasAdminClaim
+  }
 
   if (adminDocSnapshot.exists()) {
-    const adminDocData = adminDocSnapshot.data()
+    const adminDocData = adminDocSnapshot.data() as any
     const isActive = adminDocData.active !== false
     if (isActive && includesAdminRole(adminDocData.role, adminDocData.roles)) {
       return true
@@ -476,7 +494,7 @@ async function isAdminUser(user: User) {
   }
 
   if (adminsSettingsSnapshot.exists()) {
-    const settingsData = adminsSettingsSnapshot.data()
+    const settingsData = adminsSettingsSnapshot.data() as any
     if (listIncludesIdentifier(settingsData.emails, normalizedEmail)) {
       return true
     }
