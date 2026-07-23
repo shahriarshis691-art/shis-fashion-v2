@@ -9,6 +9,53 @@ const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
 const IMAGE_PLACEHOLDER =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f4f4f4"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="%23777777"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
+function triggerHapticAndTone() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion || document.visibilityState !== 'visible') {
+    return
+  }
+
+  if ('vibrate' in navigator) {
+    navigator.vibrate(16)
+  }
+
+  const AudioContextCtor: typeof AudioContext | undefined =
+    window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+
+  if (!AudioContextCtor) {
+    return
+  }
+
+  try {
+    const context = new AudioContextCtor()
+    const now = context.currentTime
+    const oscillator = context.createOscillator()
+    const gain = context.createGain()
+
+    oscillator.type = 'triangle'
+    oscillator.frequency.setValueAtTime(740, now)
+    oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.09)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.028, now + 0.012)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13)
+
+    oscillator.connect(gain)
+    gain.connect(context.destination)
+    oscillator.start(now)
+    oscillator.stop(now + 0.14)
+
+    window.setTimeout(() => {
+      void context.close()
+    }, 220)
+  } catch {
+    // Ignore blocked audio contexts silently.
+  }
+}
+
 export default function MiniCartConfirmation() {
   const { recentAddition, dismissRecentAddition } = useCart()
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
@@ -31,6 +78,8 @@ export default function MiniCartConfirmation() {
     if (!recentAddition) {
       return
     }
+
+    triggerHapticAndTone()
 
     const timeoutId = window.setTimeout(() => {
       dismissRecentAddition()
@@ -63,9 +112,17 @@ export default function MiniCartConfirmation() {
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Added to bag</p>
                 <h3 className="mt-1 text-base font-semibold text-[var(--color-text)] sm:text-lg">{recentAddition.productName}</h3>
-                <p className="mt-1 text-xs text-[var(--color-muted)]">
-                  {recentAddition.color} • {recentAddition.size} • Qty +{recentAddition.quantityAdded}
-                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  <span className="rounded-full border border-[var(--color-border)] bg-[rgba(0,0,0,0.03)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-text)]">
+                    {recentAddition.color}
+                  </span>
+                  <span className="rounded-full border border-[var(--color-border)] bg-[rgba(0,0,0,0.03)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-text)]">
+                    {recentAddition.size}
+                  </span>
+                  <span className="rounded-full border border-black/15 bg-black text-[11px] font-semibold text-white px-2.5 py-0.5">
+                    Qty +{recentAddition.quantityAdded}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
