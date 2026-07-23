@@ -325,6 +325,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       if (errorCode === 'auth/forbidden-admin') {
         setMessage('Access denied. This account is not authorized for admin dashboard access.')
         navigate('/', { replace: true })
+      } else if (errorCode === 'auth/admin-firestore-permission-required') {
+        setMessage('Login blocked: this account is allow-listed but does not have Firestore admin permission. Add admins/{uid} with role="admin" and active=true, then sign in again.')
       } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
         setMessage('Invalid email or password. Please try again.')
       } else if (errorCode === 'auth/firebase-not-configured') {
@@ -679,8 +681,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       })
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown error'
-      setMessage(`Homepage save failed: ${reason}`)
-      setToast({ kind: 'error', message: `Homepage save failed: ${reason}` })
+      const normalizedReason = reason.toLowerCase()
+      if (normalizedReason.includes('permission-denied') || normalizedReason.includes('missing or insufficient permissions')) {
+        const uidHint = user?.uid ? `admins/${user.uid}` : 'admins/<your-uid>'
+        const permissionHelp = `Homepage save blocked by Firestore rules. Add admin access for this account (${user?.email ?? 'unknown email'}). Create document ${uidHint} with { role: "admin", active: true } or set custom claim admin=true, then sign out/in.`
+        setMessage(permissionHelp)
+        setToast({ kind: 'error', message: permissionHelp })
+      } else {
+        setMessage(`Homepage save failed: ${reason}`)
+        setToast({ kind: 'error', message: `Homepage save failed: ${reason}` })
+      }
       setHomepageSaveDebug({
         status: 'error',
         message: reason,
@@ -717,16 +727,20 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setMessage('Firestore write test passed.')
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown error'
+      const normalizedReason = reason.toLowerCase()
+      const permissionHelp = (normalizedReason.includes('permission-denied') || normalizedReason.includes('missing or insufficient permissions'))
+        ? `Firestore write blocked for ${user?.email ?? 'unknown email'}. Add admins/${user?.uid ?? '<your-uid>'} with role=admin and active=true, or custom claim admin=true.`
+        : reason
       setHomepageSaveDebug({
         status: 'error',
-        message: reason,
+        message: permissionHelp,
         mode: 'unknown',
         path: 'settings/homepage',
         heroImage: homepageContent.heroImage ?? '',
         savedAt: new Date().toISOString(),
       })
-      setToast({ kind: 'error', message: `Firestore write test failed: ${reason}` })
-      setMessage(`Firestore write test failed: ${reason}`)
+      setToast({ kind: 'error', message: `Firestore write test failed: ${permissionHelp}` })
+      setMessage(`Firestore write test failed: ${permissionHelp}`)
     } finally {
       setLoading(false)
     }
@@ -1321,6 +1335,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p><span className="font-semibold text-[var(--color-text)]">Local-first mode:</span> {isHomepageLocalFirstMode() ? 'enabled' : 'disabled'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Firebase configured:</span> {firebaseReady ? 'yes' : 'no'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Firebase project:</span> {(import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Auth email:</span> {user?.email ?? '(not signed in)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Auth uid:</span> {user?.uid ?? '(not signed in)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Hero URL snapshot:</span> {homepageSaveDebug.heroImage || '(empty)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Last save time:</span> {homepageSaveDebug.savedAt ? new Date(homepageSaveDebug.savedAt).toLocaleString('en-BD') : '-'}</p>
               </div>

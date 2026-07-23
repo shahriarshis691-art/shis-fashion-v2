@@ -446,19 +446,20 @@ function listIncludesIdentifier(value: unknown, identifier: string) {
 
 async function isAdminUser(user: User) {
   const normalizedEmail = user.email?.trim().toLowerCase() ?? ''
+  const isEmailAllowListed = configuredAdminEmails.size > 0
+    ? Boolean(normalizedEmail && configuredAdminEmails.has(normalizedEmail))
+    : null
 
-  if (configuredAdminEmails.size > 0) {
-    return normalizedEmail ? configuredAdminEmails.has(normalizedEmail) : false
+  if (configuredAdminEmails.size > 0 && !isEmailAllowListed) {
+    return false
   }
 
   const tokenResult = await user.getIdTokenResult()
   const claims = tokenResult.claims as Record<string, unknown>
-  if (claims.admin === true || includesAdminRole(claims.role, claims.roles)) {
-    return true
-  }
+  const hasAdminClaim = claims.admin === true || includesAdminRole(claims.role, claims.roles)
 
   if (!firebaseDb) {
-    return false
+    return isEmailAllowListed === true ? true : hasAdminClaim
   }
 
   const [adminDocSnapshot, adminsSettingsSnapshot] = await Promise.all([
@@ -485,6 +486,16 @@ async function isAdminUser(user: User) {
     if (listIncludesIdentifier(settingsData.admins, normalizedEmail) || listIncludesIdentifier(settingsData.admins, user.uid.toLowerCase())) {
       return true
     }
+  }
+
+  if (hasAdminClaim) {
+    return true
+  }
+
+  // If an allow-list is configured, require Firestore-recognized admin authority
+  // so dashboard access reflects actual write permissions.
+  if (isEmailAllowListed === true) {
+    return false
   }
 
   return false
@@ -1107,12 +1118,17 @@ export async function signInAdmin(email: string, password: string) {
 
   const result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
   const hasAdminAccess = await isAdminUser(result.user)
+  const emailIsAllowListed = configuredAdminEmails.size > 0
+    ? configuredAdminEmails.has(normalizedEmail)
+    : false
 
   if (!hasAdminAccess) {
     markAccessDenied()
     await signOut(firebaseAuth)
-    const error = new Error('Access Denied')
-    ;(error as Error & { code?: string }).code = 'auth/forbidden-admin'
+    const error = new Error(emailIsAllowListed
+      ? 'Access denied. This account is allow-listed but missing Firestore admin permissions.'
+      : 'Access Denied')
+    ;(error as Error & { code?: string }).code = emailIsAllowListed ? 'auth/admin-firestore-permission-required' : 'auth/forbidden-admin'
     throw error
   }
 
