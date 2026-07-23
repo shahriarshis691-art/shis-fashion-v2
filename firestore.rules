@@ -5,6 +5,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
     match /orders/{orderId} {
       allow create: if
         request.resource.data.customerName is string &&
@@ -22,30 +29,35 @@ service cloud.firestore {
         request.resource.data.total > 0 &&
         request.resource.data.status == 'new';
 
-      allow read, update, delete: if isSignedIn();
+      allow read, update, delete: if isAdmin();
     }
 
     match /products/{productId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /categories/{categoryId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /settings/homepage {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /settings/admins {
-      allow read, create, update, delete: if isSignedIn();
+      allow read, create, update, delete: if isAdmin();
     }
 
     match /admins/{adminDocId} {
-      allow read, create, update, delete: if isSignedIn();
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /adminAuditLogs/{logId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
     }
 
     match /{document=**} {

@@ -67,6 +67,18 @@ Escalation:
   - item count bounds
   - total must be positive
 
+## 3.2) Admin Action Audit Trail
+
+- All critical admin mutations now emit audit logs (`adminAuditLogs`):
+  - product create/update/archive/restore
+  - order update/archive/restore
+  - category create/update/archive/restore
+  - homepage settings update
+- Log fields include actor uid/email, action, target id/type, metadata, and timestamp.
+- Firestore rule policy:
+  - `adminAuditLogs` read/create only by admin
+  - update/delete denied (immutable trail)
+
 ## 4) Daily Conversion Funnel Review
 
 Track daily (GA4):

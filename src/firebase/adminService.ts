@@ -159,6 +159,20 @@ const DATA_MODE_KEY = 'shis-admin-data-mode'
 const LEGACY_AUTH_KEY = 'shis-admin-auth'
 const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
 const LAUNCH_MODE_USER_KEY = 'shis-launch-mode-user'
+const AUDIT_LOGS_KEY = 'shis-admin-audit-logs'
+
+type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage'
+
+interface AdminAuditLogEntry {
+  id: string
+  action: string
+  targetType: AdminAuditTarget
+  targetId: string
+  actorUid: string
+  actorEmail: string
+  metadata?: Record<string, unknown>
+  createdAt: string
+}
 
 function parseConfiguredAdminEmails() {
   const rawValue = (import.meta.env.VITE_ADMIN_EMAILS ?? '') as string
@@ -282,6 +296,70 @@ function clearLegacyAdminBypassState() {
   }
 
   window.localStorage.removeItem(LEGACY_AUTH_KEY)
+}
+
+function getCurrentAdminActor() {
+  const authUser = firebaseAuth?.currentUser
+  if (authUser) {
+    return {
+      uid: authUser.uid,
+      email: authUser.email?.trim().toLowerCase() ?? 'unknown',
+    }
+  }
+
+  const launchUser = getLaunchModeUser()
+  if (launchUser) {
+    return {
+      uid: launchUser.uid,
+      email: launchUser.email.trim().toLowerCase(),
+    }
+  }
+
+  return {
+    uid: 'unknown',
+    email: 'unknown',
+  }
+}
+
+function appendLocalAuditLog(entry: AdminAuditLogEntry) {
+  const current = readStored<AdminAuditLogEntry[]>(AUDIT_LOGS_KEY, [])
+  writeStored(AUDIT_LOGS_KEY, [entry, ...current].slice(0, 300))
+}
+
+async function recordAdminAudit(
+  action: string,
+  targetType: AdminAuditTarget,
+  targetId: string,
+  metadata?: Record<string, unknown>,
+) {
+  const actor = getCurrentAdminActor()
+  const entry: AdminAuditLogEntry = {
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    action,
+    targetType,
+    targetId,
+    actorUid: actor.uid,
+    actorEmail: actor.email,
+    metadata,
+    createdAt: new Date().toISOString(),
+  }
+
+  appendLocalAuditLog(entry)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return
+  }
+
+  try {
+    await addDoc(collection(firebaseDb, 'adminAuditLogs'), {
+      ...entry,
+      createdAt: serverTimestamp(),
+    })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error) && import.meta.env.DEV) {
+      console.warn('[admin-audit] failed to persist audit log', error)
+    }
+  }
 }
 
 async function getCurrentAdminIdToken() {
@@ -908,6 +986,7 @@ export function onAdminAuthChanged(callback: (user: { uid: string; email: string
         }
 
         if (!user) {
+          callback(null)
           return
         }
 
@@ -1056,6 +1135,12 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
   writeStored(PRODUCTS_KEY, [nextProduct, ...currentProducts])
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('product.create', 'product', nextProduct.id, {
+      name: nextProduct.name,
+      category: nextProduct.category,
+      stock: nextProduct.stock,
+      mode: 'local',
+    })
     return nextProduct
   }
 
@@ -1066,12 +1151,24 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
     }
 
     const ref = await addDoc(collection(firebaseDb, 'products'), payload)
+    await recordAdminAudit('product.create', 'product', ref.id, {
+      name: productPayload.name,
+      category: productPayload.category,
+      stock: productPayload.stock,
+      mode: 'live',
+    })
     return { ...productPayload, id: ref.id }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('product.create', 'product', nextProduct.id, {
+      name: nextProduct.name,
+      category: nextProduct.category,
+      stock: nextProduct.stock,
+      mode: 'fallback-local',
+    })
     return nextProduct
   }
 }
@@ -1086,6 +1183,10 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
     : undefined
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('product.update', 'product', id, {
+      fields: Object.keys(product),
+      mode: 'local',
+    })
     return updatedProducts.find((item) => item.id === id)
   }
 
@@ -1101,12 +1202,20 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
     } else {
       await updateDoc(ref, product)
     }
+    await recordAdminAudit('product.update', 'product', id, {
+      fields: Object.keys(product),
+      mode: 'live',
+    })
     return normalizedUpdate ?? { id, ...product }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('product.update', 'product', id, {
+      fields: Object.keys(product),
+      mode: 'fallback-local',
+    })
     return updatedProducts.find((item) => item.id === id)
   }
 }
@@ -1119,6 +1228,7 @@ export async function deleteProduct(id: string) {
   writeStored(PRODUCTS_KEY, updatedProducts)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('product.archive', 'product', id, { mode: 'local' })
     return
   }
 
@@ -1127,11 +1237,13 @@ export async function deleteProduct(id: string) {
       archived: true,
       archivedAt: serverTimestamp(),
     })
+    await recordAdminAudit('product.archive', 'product', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('product.archive', 'product', id, { mode: 'fallback-local' })
     return
   }
 }
@@ -1144,6 +1256,7 @@ export async function restoreProduct(id: string) {
   writeStored(PRODUCTS_KEY, updatedProducts)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('product.restore', 'product', id, { mode: 'local' })
     return
   }
 
@@ -1152,10 +1265,13 @@ export async function restoreProduct(id: string) {
       archived: false,
       archivedAt: null,
     })
+    await recordAdminAudit('product.restore', 'product', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
+
+    await recordAdminAudit('product.restore', 'product', id, { mode: 'fallback-local' })
   }
 }
 
@@ -1229,18 +1345,30 @@ export async function updateOrderDetails(
   writeStored(ORDERS_KEY, updatedOrders)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('order.update', 'order', id, {
+      fields: Object.keys(updates),
+      mode: 'local',
+    })
     return updatedOrders.find((order) => order.id === id)
   }
 
   try {
     const ref = doc(firebaseDb, 'orders', id)
     await updateDoc(ref, updates)
+    await recordAdminAudit('order.update', 'order', id, {
+      fields: Object.keys(updates),
+      mode: 'live',
+    })
     return { id, ...updates }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('order.update', 'order', id, {
+      fields: Object.keys(updates),
+      mode: 'fallback-local',
+    })
     return updatedOrders.find((order) => order.id === id)
   }
 }
@@ -1253,6 +1381,7 @@ export async function deleteOrder(id: string) {
   writeStored(ORDERS_KEY, updatedOrders)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('order.archive', 'order', id, { mode: 'local' })
     return
   }
 
@@ -1261,11 +1390,13 @@ export async function deleteOrder(id: string) {
       archived: true,
       archivedAt: serverTimestamp(),
     })
+    await recordAdminAudit('order.archive', 'order', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('order.archive', 'order', id, { mode: 'fallback-local' })
     return
   }
 }
@@ -1278,6 +1409,7 @@ export async function restoreOrder(id: string) {
   writeStored(ORDERS_KEY, updatedOrders)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('order.restore', 'order', id, { mode: 'local' })
     return
   }
 
@@ -1286,10 +1418,13 @@ export async function restoreOrder(id: string) {
       archived: false,
       archivedAt: null,
     })
+    await recordAdminAudit('order.restore', 'order', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
+
+    await recordAdminAudit('order.restore', 'order', id, { mode: 'fallback-local' })
   }
 }
 
@@ -1432,6 +1567,11 @@ export async function createCategory(name: string) {
   writeStored(CATEGORIES_KEY, [...current, nextCategory])
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('category.create', 'category', nextCategory.id, {
+      name: nextCategory.name,
+      slug: nextCategory.slug,
+      mode: 'local',
+    })
     return nextCategory
   }
 
@@ -1442,6 +1582,11 @@ export async function createCategory(name: string) {
       createdAt: serverTimestamp(),
     }
     const ref = await addDoc(collection(firebaseDb, 'categories'), payload)
+    await recordAdminAudit('category.create', 'category', ref.id, {
+      name: normalizedName,
+      slug,
+      mode: 'live',
+    })
     return { id: ref.id, ...payload }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
@@ -1449,6 +1594,11 @@ export async function createCategory(name: string) {
     }
 
 
+    await recordAdminAudit('category.create', 'category', nextCategory.id, {
+      name: nextCategory.name,
+      slug: nextCategory.slug,
+      mode: 'fallback-local',
+    })
     return nextCategory
   }
 }
@@ -1465,12 +1615,22 @@ export async function updateCategory(id: string, name: string) {
   writeStored(CATEGORIES_KEY, updated)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('category.update', 'category', id, {
+      name: normalizedName,
+      slug,
+      mode: 'local',
+    })
     return updated.find((item) => item.id === id)
   }
 
   try {
     const ref = doc(firebaseDb, 'categories', id)
     await updateDoc(ref, { name: normalizedName, slug })
+    await recordAdminAudit('category.update', 'category', id, {
+      name: normalizedName,
+      slug,
+      mode: 'live',
+    })
     return { id, name: normalizedName, slug }
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
@@ -1478,6 +1638,11 @@ export async function updateCategory(id: string, name: string) {
     }
 
 
+    await recordAdminAudit('category.update', 'category', id, {
+      name: normalizedName,
+      slug,
+      mode: 'fallback-local',
+    })
     return updated.find((item) => item.id === id)
   }
 }
@@ -1490,6 +1655,7 @@ export async function deleteCategory(id: string) {
   writeStored(CATEGORIES_KEY, updated)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('category.archive', 'category', id, { mode: 'local' })
     return
   }
 
@@ -1498,11 +1664,13 @@ export async function deleteCategory(id: string) {
       archived: true,
       archivedAt: serverTimestamp(),
     })
+    await recordAdminAudit('category.archive', 'category', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('category.archive', 'category', id, { mode: 'fallback-local' })
     return
   }
 }
@@ -1515,6 +1683,7 @@ export async function restoreCategory(id: string) {
   writeStored(CATEGORIES_KEY, updated)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('category.restore', 'category', id, { mode: 'local' })
     return
   }
 
@@ -1523,10 +1692,13 @@ export async function restoreCategory(id: string) {
       archived: false,
       archivedAt: null,
     })
+    await recordAdminAudit('category.restore', 'category', id, { mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
+
+    await recordAdminAudit('category.restore', 'category', id, { mode: 'fallback-local' })
   }
 }
 
@@ -1535,18 +1707,30 @@ export async function updateHomepageContent(content: HomepageContent) {
   writeStored(HOMEPAGE_KEY, normalized)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
+      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
+      mode: 'local',
+    })
     return normalized
   }
 
   try {
     const ref = doc(firebaseDb, 'settings', 'homepage')
     await setDoc(ref, normalized)
+    await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
+      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
+      mode: 'live',
+    })
     return normalized
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
       throw error
     }
 
+    await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
+      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
+      mode: 'fallback-local',
+    })
     return normalized
   }
 }
