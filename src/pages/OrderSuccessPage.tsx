@@ -100,6 +100,10 @@ export default function OrderSuccessPage() {
               Our team will call your phone number to confirm delivery details before dispatch.
             </p>
 
+            <div className="mt-4 rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/70">
+              Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.
+            </div>
+
             <div className="mt-5 grid gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60 sm:grid-cols-3">
               <span className="border border-black/15 px-3 py-2 text-center">COD confirmed</span>
               <span className="border border-black/15 px-3 py-2 text-center">Phone verification</span>

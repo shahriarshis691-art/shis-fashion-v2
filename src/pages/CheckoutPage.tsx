@@ -5,7 +5,7 @@ import Container from '../components/ui/Container'
 import { useCart } from '../context/CartContext'
 import { createOrder, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
-import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, type BangladeshDivision } from '../utils/bangladeshAddress'
+import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { googleAnalytics } from '../services/googleAnalytics'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
@@ -16,6 +16,7 @@ interface CheckoutFormState {
   email: string
   division: BangladeshDivision
   district: string
+  upazila: string
   streetAddress: string
   deliveryNote: string
 }
@@ -80,12 +81,16 @@ function isPermissionDeniedError(error: unknown) {
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, subtotal, clearCart } = useCart()
+  const initialDivision = bangladeshDivisions[0]
+  const initialDistrict = getDistrictsForDivision(initialDivision)[0]
+  const initialUpazila = getUpazilasForDistrict(initialDistrict)[0]
   const [form, setForm] = useState<CheckoutFormState>({
     name: '',
     phone: '',
     email: '',
-    division: bangladeshDivisions[0],
-    district: getDistrictsForDivision(bangladeshDivisions[0])[0],
+    division: initialDivision,
+    district: initialDistrict,
+    upazila: initialUpazila,
     streetAddress: '',
     deliveryNote: '',
   })
@@ -96,6 +101,7 @@ export default function CheckoutPage() {
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
   const grandTotal = subtotal + deliveryCharge
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
+  const upazilaOptions = getUpazilasForDistrict(form.district)
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(grandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
@@ -109,6 +115,7 @@ export default function CheckoutPage() {
     isPhoneValid &&
     form.division &&
     form.district &&
+    form.upazila &&
     form.streetAddress.trim() &&
     !isSubmitting,
   )
@@ -175,7 +182,7 @@ export default function CheckoutPage() {
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
         customerEmail: form.email.trim(),
-        address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
+        address: `${form.streetAddress.trim()}, ${form.upazila}, ${form.district}, ${form.division}`,
         deliveryCharge,
         notes: form.deliveryNote.trim(),
         items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity })),
@@ -188,7 +195,7 @@ export default function CheckoutPage() {
         orderId: createdOrder.id,
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
-        address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
+        address: `${form.streetAddress.trim()}, ${form.upazila}, ${form.district}, ${form.division}`,
         paymentMethod: 'Cash on Delivery',
         deliveryCharge,
         subtotal,
@@ -268,7 +275,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <label className="space-y-2">
                   <span className="text-sm font-medium text-[var(--color-text)]">Division *</span>
                   <select
@@ -277,10 +284,13 @@ export default function CheckoutPage() {
                     onChange={(event) => {
                       const nextDivision = event.target.value as BangladeshDivision
                       const nextDistricts = getDistrictsForDivision(nextDivision)
+                      const nextDistrict = nextDistricts[0]
+                      const nextUpazilas = getUpazilasForDistrict(nextDistrict)
                       setForm({
                         ...form,
                         division: nextDivision,
-                        district: nextDistricts[0],
+                        district: nextDistrict,
+                        upazila: nextUpazilas[0],
                       })
                     }}
                     className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
@@ -294,10 +304,26 @@ export default function CheckoutPage() {
                   <select
                     required
                     value={form.district}
-                    onChange={(event) => setForm({ ...form, district: event.target.value })}
+                    onChange={(event) => {
+                      const nextDistrict = event.target.value
+                      const nextUpazilas = getUpazilasForDistrict(nextDistrict)
+                      setForm({ ...form, district: nextDistrict, upazila: nextUpazilas[0] })
+                    }}
                     className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
                   >
                     {districtOptions.map((district) => <option key={district} value={district}>{district}</option>)}
+                  </select>
+                </label>
+
+                <label className="space-y-2 sm:col-span-2 lg:col-span-1">
+                  <span className="text-sm font-medium text-[var(--color-text)]">Upazila *</span>
+                  <select
+                    required
+                    value={form.upazila}
+                    onChange={(event) => setForm({ ...form, upazila: event.target.value })}
+                    className="w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
+                  >
+                    {upazilaOptions.map((upazila) => <option key={upazila} value={upazila}>{upazila}</option>)}
                   </select>
                 </label>
               </div>
