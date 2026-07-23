@@ -94,6 +94,24 @@ const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
   cancelled: 'Cancelled',
 }
 
+const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string) => boolean> = {
+  women: (href) => /^\/women(?:\?sub=[a-z0-9-]+)?$/i.test(href),
+  men: (href) => /^\/men(?:\?sub=[a-z0-9-]+)?$/i.test(href),
+  kids: (href) => /^\/kids(?:\?sub=[a-z0-9-]+)?$/i.test(href),
+  western: (href) => /^\/women\?sub=tunic$/i.test(href),
+  sale: (href) => /^\/sale$/i.test(href),
+  'new-arrivals': (href) => /^\/(?:shop\/new-arrivals|new-arrivals)$/i.test(href),
+}
+
+const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
+  women: 'Allowed: /women or /women?sub=tunic',
+  men: 'Allowed: /men or /men?sub=shirts',
+  kids: 'Allowed: /kids or /kids?sub=kids',
+  western: 'Allowed: /women?sub=tunic',
+  sale: 'Allowed: /sale',
+  'new-arrivals': 'Allowed: /shop/new-arrivals or /new-arrivals',
+}
+
 interface AdminPageProps {
   initialView?: 'login' | 'dashboard'
 }
@@ -718,6 +736,33 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleHomepageSave = async () => {
     if (!homepageContent) {
+      return
+    }
+
+    const sectionEntries = Object.values(homepageContent.categorySections ?? {})
+    const invalidSection = sectionEntries.find((section) => {
+      const href = section.href.trim()
+      const isHrefValid = SECTION_ROUTE_VALIDATORS[section.key](href)
+      if (!isHrefValid) {
+        return true
+      }
+
+      if (section.enabled && !section.coverImage.trim()) {
+        return true
+      }
+
+      return false
+    })
+
+    if (invalidSection) {
+      const href = invalidSection.href.trim()
+      const isHrefValid = SECTION_ROUTE_VALIDATORS[invalidSection.key](href)
+      const reason = !isHrefValid
+        ? `Invalid route for ${invalidSection.key.toUpperCase()}.`
+        : `Cover image is required for enabled section ${invalidSection.key.toUpperCase()}.`
+
+      setMessage(reason)
+      setToast({ kind: 'error', message: reason })
       return
     }
 
@@ -1755,6 +1800,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                             className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
                             placeholder="Section route (example: /women?sub=tunic)"
                           />
+                          <p className="sm:col-span-2 -mt-1 text-[11px] text-[var(--color-muted)]">
+                            {SECTION_ROUTE_HINTS[section.key]}
+                          </p>
                           <input
                             value={String(section.order)}
                             onChange={(event) => {
