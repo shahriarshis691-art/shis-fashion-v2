@@ -1,6 +1,6 @@
 const SITE_URL = 'https://www.shisfashion.com'
-const DEFAULT_TITLE = 'SHIS Fashion | Premium Fashion Brand in Bangladesh'
-const DEFAULT_DESCRIPTION = 'Shop premium oversized t-shirts, polos, shirts, denim and modern fashion at SHIS Fashion Bangladesh.'
+const DEFAULT_TITLE = 'SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim'
+const DEFAULT_DESCRIPTION = 'Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available.'
 const DEFAULT_KEYWORDS = 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh'
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.svg`
 
@@ -234,7 +234,7 @@ function buildBaseSchemas(pathname: string, canonicalUrl: string, metadata: SeoM
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: 'SHIS Fashion',
+      name: 'SHIS Fashion Bangladesh',
       url: canonicalUrl,
       description: metadata.description,
       image: DEFAULT_OG_IMAGE,
@@ -301,8 +301,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/shop') {
     return {
-      title: 'Shop SHIS Fashion | Premium T-Shirts, Polo Shirts & Denim',
-      description: 'Browse premium oversized t-shirts, polos, shirts, denim, and modern essentials at SHIS Fashion Bangladesh.',
+      title: 'Shop SHIS Fashion Bangladesh | Premium T-Shirts, Polo Shirts & Denim',
+      description: 'Browse premium oversized T-shirts, Polo Shirts, Shirts, Denim and women’s and kids fashion at SHIS Fashion Bangladesh.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: '/shop',
       ogImage: DEFAULT_OG_IMAGE,
@@ -313,8 +313,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/shop/new-arrivals') {
     return {
-      title: 'New Arrivals | SHIS Fashion',
-      description: 'Explore the latest oversized essentials, polos, shirts, and denim arrivals from SHIS Fashion.',
+      title: 'New Arrivals | SHIS Fashion Bangladesh',
+      description: 'Explore the latest oversized essentials, polos, shirts, and denim arrivals from SHIS Fashion Bangladesh.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: '/shop/new-arrivals',
       ogImage: DEFAULT_OG_IMAGE,
@@ -325,8 +325,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/new-arrivals') {
     return {
-      title: 'New Arrivals | SHIS Fashion',
-      description: 'Explore the latest oversized essentials, polos, shirts, and denim arrivals from SHIS Fashion.',
+      title: 'New Arrivals | SHIS Fashion Bangladesh',
+      description: 'Explore the latest oversized essentials, polos, shirts, and denim arrivals from SHIS Fashion Bangladesh.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: '/shop/new-arrivals',
       ogImage: DEFAULT_OG_IMAGE,
@@ -337,8 +337,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/shop/best-sellers') {
     return {
-      title: 'Best Sellers | SHIS Fashion',
-      description: 'Shop best-selling oversized tees, polo shirts, denim, and premium fashion essentials from SHIS Fashion.',
+      title: 'Best Sellers | SHIS Fashion Bangladesh',
+      description: 'Shop best-selling oversized tees, polo shirts, denim and premium fashion essentials from SHIS Fashion Bangladesh.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: '/shop/best-sellers',
       ogImage: DEFAULT_OG_IMAGE,
@@ -349,7 +349,7 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/about') {
     return {
-      title: 'About SHIS Fashion',
+      title: 'About SHIS Fashion Bangladesh',
       description: 'Learn about SHIS Fashion, our premium fashion philosophy and the craftsmanship behind every oversized tee, polo shirt and denim edit.',
       keywords: 'About SHIS Fashion, Bangladesh fashion brand',
       canonicalPath: '/about',
@@ -361,8 +361,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/brands') {
     return {
-      title: 'Our Brands | SHIS Fashion',
-      description: 'Discover the signature brands and fashion stories behind SHIS Fashion.',
+      title: 'Our Brands | SHIS Fashion Bangladesh',
+      description: 'Discover the signature brands and fashion stories behind SHIS Fashion Bangladesh.',
       keywords: 'SHIS Fashion brands, Bangladesh fashion',
       canonicalPath: '/brands',
       ogImage: DEFAULT_OG_IMAGE,
@@ -373,8 +373,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/contact') {
     return {
-      title: 'Contact SHIS Fashion',
-      description: 'Contact SHIS Fashion for support, WhatsApp orders, and premium fashion inquiries.',
+      title: 'Contact SHIS Fashion Bangladesh',
+      description: 'Contact SHIS Fashion Bangladesh for support, WhatsApp orders, and premium fashion inquiries.',
       keywords: 'Contact SHIS Fashion, Bangladesh fashion support',
       canonicalPath: '/contact',
       ogImage: DEFAULT_OG_IMAGE,
@@ -385,8 +385,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/privacy') {
     return {
-      title: 'Privacy Policy | SHIS Fashion',
-      description: 'Read SHIS Fashion privacy practices for website visitors, customers, and order support.',
+      title: 'Privacy Policy | SHIS Fashion Bangladesh',
+      description: 'Read SHIS Fashion Bangladesh privacy practices for website visitors, customers and order support.',
       keywords: 'SHIS Fashion privacy policy',
       canonicalPath: '/privacy',
       ogImage: DEFAULT_OG_IMAGE,
@@ -397,8 +397,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/terms') {
     return {
-      title: 'Terms & Conditions | SHIS Fashion',
-      description: 'Review SHIS Fashion terms and conditions for orders, delivery, and customer support.',
+      title: 'Terms & Conditions | SHIS Fashion Bangladesh',
+      description: 'Review SHIS Fashion Bangladesh terms and conditions for orders, delivery and customer support.',
       keywords: 'SHIS Fashion terms and conditions',
       canonicalPath: '/terms',
       ogImage: DEFAULT_OG_IMAGE,
@@ -409,8 +409,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/sale') {
     return {
-      title: 'Sale | SHIS Fashion',
-      description: 'Shop premium fashion sale items from SHIS Fashion with fast delivery and COD.',
+      title: 'Sale | SHIS Fashion Bangladesh',
+      description: 'Shop premium fashion sale items from SHIS Fashion Bangladesh with fast delivery and COD.',
       keywords: 'SHIS Fashion sale, Bangladesh fashion sale',
       canonicalPath: '/sale',
       ogImage: DEFAULT_OG_IMAGE,
@@ -421,8 +421,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/women') {
     return {
-      title: 'Women | SHIS Fashion',
-      description: 'Shop women\'s fashion essentials from SHIS Fashion designed for modern comfort and premium daily styling.',
+      title: 'Women | SHIS Fashion Bangladesh',
+      description: 'Shop women\'s fashion essentials from SHIS Fashion Bangladesh designed for modern comfort and premium daily styling.',
       keywords: 'Women fashion Bangladesh, SHIS women collection, premium women wear',
       canonicalPath: '/women',
       ogImage: DEFAULT_OG_IMAGE,
@@ -433,8 +433,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/men') {
     return {
-      title: 'Men | SHIS Fashion',
-      description: 'Explore men\'s premium polos, oversized tees, shirts, and denim from SHIS Fashion.',
+      title: 'Men | SHIS Fashion Bangladesh',
+      description: 'Explore men\'s premium polos, oversized tees, shirts, and denim from SHIS Fashion Bangladesh.',
       keywords: 'Men fashion Bangladesh, SHIS men collection, premium men wear',
       canonicalPath: '/men',
       ogImage: DEFAULT_OG_IMAGE,
@@ -445,7 +445,7 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/kids') {
     return {
-      title: 'Kids | SHIS Fashion',
+      title: 'Kids | SHIS Fashion Bangladesh',
       description: 'Discover SHIS kids essentials with comfortable fabrics and durable styling for everyday wear.',
       keywords: 'Kids fashion Bangladesh, SHIS kids collection, children wear Bangladesh',
       canonicalPath: '/kids',
@@ -457,37 +457,37 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
 
   if (normalizedPath === '/cart') {
     return {
-      title: 'Cart | SHIS Fashion',
+      title: 'Cart | SHIS Fashion Bangladesh',
       description: 'Review your chosen SHIS Fashion pieces and complete checkout quickly with COD.',
       keywords: 'SHIS Fashion cart',
       canonicalPath: '/cart',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'noindex,nofollow',
+      robots: 'index,follow',
     }
   }
 
   if (normalizedPath === '/checkout') {
     return {
-      title: 'Checkout | SHIS Fashion',
+      title: 'Checkout | SHIS Fashion Bangladesh',
       description: 'Complete your SHIS Fashion order with fast checkout and cash on delivery on the Bangladesh store.',
       keywords: 'SHIS Fashion checkout',
       canonicalPath: '/checkout',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'noindex,nofollow',
+      robots: 'index,follow',
     }
   }
 
   if (normalizedPath === '/order-success') {
     return {
-      title: 'Order Confirmed | SHIS Fashion',
+      title: 'Order Confirmed | SHIS Fashion Bangladesh',
       description: 'Your SHIS Fashion order has been placed successfully and is being prepared for fast delivery.',
       keywords: 'SHIS Fashion order success',
       canonicalPath: '/order-success',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'noindex,nofollow',
+      robots: 'index,follow',
     }
   }
 
@@ -495,8 +495,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
     const segments = normalizedPath.split('/').filter(Boolean)
     const lastSegment = segments[segments.length - 1] ?? 'shop'
     return {
-      title: `${toTitleCase(lastSegment)} | SHIS Fashion`,
-      description: 'Explore premium fashion essentials from SHIS Fashion with quality craftsmanship and fast delivery.',
+      title: `${toTitleCase(lastSegment)} | SHIS Fashion Bangladesh`,
+      description: 'Explore premium fashion essentials from SHIS Fashion Bangladesh with quality craftsmanship and fast delivery.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: normalizedPath,
       ogImage: DEFAULT_OG_IMAGE,
@@ -508,8 +508,8 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
   if (normalizedPath.startsWith('/collections/')) {
     const slug = normalizedPath.split('/').filter(Boolean).at(-1) ?? 'collection'
     return {
-      title: `${getCollectionTitle(slug)} | SHIS Fashion`,
-      description: 'Discover premium fashion collections from SHIS Fashion designed for modern style and comfort.',
+      title: `${getCollectionTitle(slug)} | SHIS Fashion Bangladesh`,
+      description: 'Discover premium fashion collections from SHIS Fashion Bangladesh designed for modern style and comfort.',
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: normalizedPath,
       ogImage: DEFAULT_OG_IMAGE,
@@ -558,15 +558,13 @@ function removeExistingJsonLd() {
 
 export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   const metadata = getRouteMetadata(pathname)
+  const canonicalUrl = createCanonicalUrl(pathname)
   const mergedSchemas = options?.schema ?? options?.schemas ?? []
   const mergedMetadata = {
     ...metadata,
     ...options,
     schema: mergedSchemas,
   }
-  const canonicalUrl = createCanonicalUrl(mergedMetadata.canonicalPath)
-  const hasSearchQuery = pathname.includes('?q=')
-  const effectiveRobots = hasSearchQuery ? 'noindex,follow' : (mergedMetadata.robots ?? 'index,follow')
 
   document.title = mergedMetadata.title
   upsertMeta('meta[name="description"]', { name: 'description', content: mergedMetadata.description })
@@ -581,7 +579,7 @@ export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: mergedMetadata.title })
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: mergedMetadata.description })
   upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: mergedMetadata.ogImage ?? DEFAULT_OG_IMAGE })
-  upsertMeta('meta[name="robots"]', { name: 'robots', content: effectiveRobots })
+  upsertMeta('meta[name="robots"]', { name: 'robots', content: mergedMetadata.robots ?? 'index,follow' })
   upsertMeta('link[rel="canonical"]', { rel: 'canonical', href: canonicalUrl })
 
   const baseSchemas = buildBaseSchemas(pathname, canonicalUrl, mergedMetadata)

@@ -149,7 +149,7 @@ export default function ProductDetailPage() {
     }, 'BDT')
 
     applySeoMetadata(location.pathname, {
-      title: `${product.name} | SHIS Fashion`,
+      title: `${product.name} | SHIS Fashion Bangladesh`,
       description: `${product.description} Shop now with fast dispatch and cash on delivery in Bangladesh.`,
       schema: [
         buildProductSchema(

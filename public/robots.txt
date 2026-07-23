@@ -1,17 +1,7 @@
 User-agent: Googlebot
 Allow: /
-Disallow: /admin
-Disallow: /shis-admin
-Disallow: /cart
-Disallow: /checkout
-Disallow: /order-success
 
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /shis-admin
-Disallow: /cart
-Disallow: /checkout
-Disallow: /order-success
 
 Sitemap: https://www.shisfashion.com/sitemap.xml

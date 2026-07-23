@@ -17,10 +17,10 @@ export default function MainLayout() {
     // Track PageView on every page change
     metaPixel.pageView()
     googleAnalytics.pageView()
-  }, [location.pathname, location.search])
+  }, [location.pathname])
 
   useEffect(() => {
-    applySeoMetadata(`${location.pathname}${location.search}`)
+    applySeoMetadata(location.pathname)
 
     if (GOOGLE_SITE_VERIFICATION) {
       let element = document.head.querySelector('meta[name="google-site-verification"]') as HTMLMetaElement | null
@@ -32,7 +32,7 @@ export default function MainLayout() {
       element.setAttribute('name', 'google-site-verification')
       element.setAttribute('content', GOOGLE_SITE_VERIFICATION)
     }
-  }, [location.pathname, location.search])
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">

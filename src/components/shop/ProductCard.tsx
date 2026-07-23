@@ -1,9 +1,7 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../data/shopData'
 import { isDemoImageUrl, normalizeCatalogImageUrl } from '../../utils/media'
-import { isWishlistedProduct, toggleWishlistedProduct } from '../../utils/wishlist'
 
 interface ProductCardProps {
   product: ShopProduct
@@ -42,7 +40,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
   const imagePositionClass = getImagePositionClass(product.category)
-  const [wishlisted, setWishlisted] = useState(() => isWishlistedProduct(product))
 
   return (
     <motion.article
@@ -54,20 +51,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block">
         <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
-          <button
-            type="button"
-            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              setWishlisted(toggleWishlistedProduct(product))
-            }}
-            className="ui-interactive absolute right-2 top-2 z-10 rounded-full border border-black/20 bg-white/90 p-1.5 text-black backdrop-blur-sm"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
-              <path d="M12 20.3 4.9 13.8a4.8 4.8 0 0 1 6.8-6.8L12 7.3l.3-.3a4.8 4.8 0 0 1 6.8 6.8L12 20.3Z" />
-            </svg>
-          </button>
           <img
             src={imageSrc}
             alt={product.name}

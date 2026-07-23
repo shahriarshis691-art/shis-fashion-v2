@@ -11,9 +11,9 @@ const essentialLinks = [
 ]
 
 const socialLinks = [
-  { label: 'Instagram', href: 'https://www.instagram.com/shisfashion' },
-  { label: 'Facebook', href: 'https://www.facebook.com/shisfashion' },
-  { label: 'WhatsApp', href: 'https://wa.me/8801887848304' },
+  { label: 'Instagram', href: 'https://www.instagram.com' },
+  { label: 'Facebook', href: 'https://www.facebook.com' },
+  { label: 'YouTube', href: 'https://www.youtube.com' },
 ]
 
 function getWhatsAppHref(phone?: string) {
