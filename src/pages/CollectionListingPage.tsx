@@ -336,7 +336,7 @@ export default function CollectionListingPage() {
             <h2 className="text-xl font-semibold text-[var(--color-text)]">More from this collection</h2>
             <p className="text-sm text-[var(--color-muted)]">{featuredProducts.length} items</p>
           </div>
-          <div className="grid grid-cols-2 gap-3.5 min-[420px]:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+          <div className="grid grid-cols-2 gap-x-1.5 gap-y-4 min-[420px]:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 lg:gap-y-5">
             {featuredProducts.map((product) => (
               <ProductCard
                 key={product.id}

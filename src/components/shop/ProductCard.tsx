@@ -47,10 +47,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden"
+      className="overflow-hidden rounded-[0.6rem] border border-black/10 bg-white p-1.5 sm:rounded-[0.7rem] sm:p-2"
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[0.45rem] bg-black/5 sm:aspect-[4/5] sm:rounded-[0.5rem]">
           <img
             src={imageSrc}
             alt={product.name}
@@ -59,12 +59,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             onError={handleImageError}
             className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.02] ${imageToneClass}`}
             fetchPriority="low"
-            sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
+            sizes="(max-width: 639px) 48vw, (max-width: 1023px) 33vw, 25vw"
           />
         </div>
-        <div className="pt-2.5">
-          <h3 className="line-clamp-1 text-sm font-medium text-black">{product.name}</h3>
-          <p className="mt-1 text-sm font-semibold text-black">{product.price}</p>
+        <div className="px-0.5 pb-0.5 pt-2">
+          <h3 className="line-clamp-1 text-[0.84rem] font-medium text-black sm:text-sm">{product.name}</h3>
+          <p className="mt-0.5 text-[0.84rem] font-semibold text-black sm:mt-1 sm:text-sm">{product.price}</p>
         </div>
       </Link>
     </motion.article>

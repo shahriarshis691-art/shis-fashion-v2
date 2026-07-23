@@ -398,7 +398,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5">
             {newArrivals.map((item, index) => {
               const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
               const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
@@ -411,21 +411,21 @@ export default function HomePage() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.22, delay: index * 0.03 }}
                 >
-                  <Link to={productHref(item)} className="group block">
-                    <div className="aspect-[4/5] overflow-hidden bg-black/5">
+                  <Link to={productHref(item)} className="group block rounded-[0.6rem] border border-black/10 bg-white p-1.5 sm:rounded-[0.7rem] sm:p-2">
+                    <div className="aspect-[3/4] overflow-hidden rounded-[0.45rem] bg-black/5 sm:aspect-[4/5] sm:rounded-[0.5rem]">
                       <img
                         src={productImage || IMAGE_PLACEHOLDER}
                         alt={item.name}
                         loading="lazy"
                         decoding="async"
-                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                        sizes="(max-width: 639px) 48vw, (max-width: 1023px) 33vw, 25vw"
                         onError={handleImageError}
                         className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
                       />
                     </div>
-                    <div className="pt-2.5">
-                      <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
-                      <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
+                    <div className="px-0.5 pb-0.5 pt-2">
+                      <h3 className="line-clamp-1 text-[0.84rem] font-medium text-black sm:text-body">{item.name}</h3>
+                      <p className="mt-0.5 text-[0.84rem] font-semibold text-black sm:mt-1 sm:text-body">{item.price}</p>
                     </div>
                   </Link>
                 </motion.article>

@@ -26,7 +26,7 @@ export default function ShopCategoryPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-8 sm:gap-x-2.5 sm:gap-y-5 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
