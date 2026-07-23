@@ -413,7 +413,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={handleAddToBag}
                 disabled={availableStock <= 0}
-                className="ui-interactive flex-1 border border-black bg-black px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
+                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-5 py-3.5 text-[1.02rem] font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
               >
                 {didAddToBag ? 'Added' : 'Add to Bag'}
               </button>
@@ -501,7 +501,7 @@ export default function ProductDetailPage() {
             type="button"
             onClick={handleAddToBag}
             disabled={availableStock <= 0}
-            className="ui-interactive border border-black bg-black px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
+            className="ui-interactive rounded-[2px] border border-black bg-black px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
           >
             {didAddToBag ? 'Added' : 'Add to Bag'}
           </button>

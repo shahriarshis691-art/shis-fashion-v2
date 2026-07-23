@@ -294,10 +294,11 @@ export default function CollectionListingPage() {
                     quantity: 1,
                   }, 'BDT')
                 }}
-                className="justify-center"
+                variant="cta"
+                className="min-h-[3.25rem] justify-center px-5 text-[1rem] font-semibold"
                 disabled={selectedProduct.stock <= 0}
               >
-                Add to cart
+                Add to Bag
               </Button>
               <Button
                 onClick={() => navigate(`/shop/${selectedProduct.category}/${selectedProduct.slug}`)}

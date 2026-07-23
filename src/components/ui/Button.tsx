@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'cta'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
@@ -17,6 +17,8 @@ const variants: Record<ButtonVariant, string> = {
     'border border-[var(--color-border)] bg-[rgba(0,0,0,0.03)] text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[rgba(0,0,0,0.3)] hover:bg-[rgba(0,0,0,0.06)] hover:text-[var(--color-text)]',
   ghost:
     'border border-transparent bg-transparent text-[var(--color-text)] hover:bg-[rgba(0,0,0,0.05)] hover:text-[var(--color-text)]',
+  cta:
+    'rounded-[2px] border border-black bg-black text-white shadow-none hover:translate-y-0 hover:bg-[#121212] hover:border-black',
 }
 
 export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {
