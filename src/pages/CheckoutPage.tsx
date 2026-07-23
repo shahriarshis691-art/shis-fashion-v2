@@ -93,7 +93,8 @@ export default function CheckoutPage() {
   const normalizedPhone = useMemo(() => normalizeBangladeshPhone(form.phone), [form.phone])
   const isPhoneValid = normalizedPhone !== null
   const phoneHasValue = form.phone.trim().length > 0
-  const discountAmount = 0
+  const previewItems = items.slice(0, 2)
+  const remainingItemsCount = Math.max(0, items.length - previewItems.length)
   const canSubmit = Boolean(
     form.name.trim() &&
     isPhoneValid &&
@@ -166,12 +167,6 @@ export default function CheckoutPage() {
         customerPhone: phoneNumber,
         customerEmail: form.email.trim(),
         address: `${form.streetAddress.trim()}, ${form.district}, ${form.division}`,
-        deliveryAddress: {
-          division: form.division as BangladeshDivision,
-          district: form.district,
-          streetAddress: form.streetAddress.trim(),
-          deliveryNote: form.deliveryNote.trim(),
-        },
         deliveryCharge,
         notes: form.deliveryNote.trim(),
         items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity })),
@@ -209,7 +204,10 @@ export default function CheckoutPage() {
       shouldReleaseLock = false
       navigate('/order-success', { state: { orderId: createdOrder.id } })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Order submission failed. Please try again.'
+      const rawMessage = error instanceof Error ? error.message : 'Order submission failed. Please try again.'
+      const message = rawMessage.toLowerCase().includes('missing or insufficient permissions')
+        ? 'Order submit করা যায়নি। Please contact support or try again shortly.'
+        : rawMessage
       setSubmitError(message)
     } finally {
       setIsSubmitting(false)
@@ -348,36 +346,16 @@ export default function CheckoutPage() {
                 <p className="text-sm font-semibold text-[var(--color-text)]">{summaryLabel}</p>
               </div>
 
-              <details className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 sm:hidden">
-                <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-[var(--color-text)] focus-visible:outline-none">
-                  <span>Products</span>
-                  <span className="text-[var(--color-muted)]">Tap to view</span>
-                </summary>
-                <div className="mt-4 space-y-3">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex gap-3">
-                      <img src={item.image} alt={item.name} loading="lazy" decoding="async" sizes="64px" className="h-16 w-16 rounded-[0.75rem] object-cover" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-[var(--color-text)]">{item.name}</p>
-                        <p className="mt-1 text-xs text-[var(--color-muted)]">Qty {item.quantity} • {item.size}</p>
-                        <p className="mt-1 text-xs text-[var(--color-muted)]">{item.price}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </details>
-
-              <div className="mt-4 hidden space-y-3 sm:block">
-                {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" sizes="64px" className="h-16 w-16 rounded-[0.75rem] object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[var(--color-text)]">{item.name}</p>
-                      <p className="mt-1 text-xs text-[var(--color-muted)]">Qty {item.quantity} • {item.size} • {item.color}</p>
-                    </div>
-                    <p className="text-sm font-medium text-[var(--color-text)]">{formatBDT(item.quantity * parseBDT(item.price))}</p>
+              <div className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3">
+                {previewItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-3 py-1 text-sm">
+                    <p className="min-w-0 truncate text-[var(--color-text)]">{item.name} × {item.quantity}</p>
+                    <p className="shrink-0 text-[var(--color-text)]">{formatBDT(item.quantity * parseBDT(item.price))}</p>
                   </div>
                 ))}
+                {remainingItemsCount > 0 ? (
+                  <p className="pt-1 text-xs text-[var(--color-muted)]">+{remainingItemsCount} more item{remainingItemsCount > 1 ? 's' : ''}</p>
+                ) : null}
               </div>
 
               <div className="mt-5 space-y-3 border-t border-[var(--color-border)] pt-4 text-sm">
@@ -388,10 +366,6 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between text-[var(--color-muted)]">
                   <span>Delivery</span>
                   <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
-                </div>
-                <div className="flex items-center justify-between text-[var(--color-muted)]">
-                  <span>Discount</span>
-                  <span className="text-[var(--color-text)]">{formatBDT(discountAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-base font-semibold text-[var(--color-text)]">
                   <span>Grand Total</span>
