@@ -15,6 +15,7 @@ const lockedCategoryLinks = [
   { label: 'Women', href: '/women' },
   { label: 'Men', href: '/men' },
   { label: 'Kids', href: '/kids' },
+  { label: 'Western', href: '/women?sub=tunic' },
   { label: 'Sale', href: '/sale' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
 ]
