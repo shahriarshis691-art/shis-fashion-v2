@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import BrandManagement from '../components/admin/BrandManagement'
 import { compactManagedImages, getManagedImageEntries } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import {
@@ -21,6 +22,8 @@ import {
   restoreProduct,
   signInAdmin,
   signOutAdmin,
+  subscribeToAdminBrands,
+  subscribeToArchivedBrands,
   subscribeToArchivedCategories,
   subscribeToArchivedOrders,
   subscribeToArchivedProducts,
@@ -34,6 +37,7 @@ import {
   updateOrderStatus,
   updateProduct,
   uploadAssets,
+  type AdminBrand,
   type AdminOrder,
   type AdminProduct,
   type AdminCategory,
@@ -101,9 +105,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [categories, setCategories] = useState<AdminCategory[]>([])
+  const [brands, setBrands] = useState<AdminBrand[]>([])
   const [archivedProducts, setArchivedProducts] = useState<AdminProduct[]>([])
   const [archivedOrders, setArchivedOrders] = useState<AdminOrder[]>([])
   const [archivedCategories, setArchivedCategories] = useState<AdminCategory[]>([])
+  const [archivedBrands, setArchivedBrands] = useState<AdminBrand[]>([])
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const [form, setForm] = useState(emptyProductForm)
   const [isEditing, setIsEditing] = useState<string | null>(null)
@@ -118,6 +124,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [orderEdits, setOrderEdits] = useState<Record<string, Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'notes' | 'trackingNumber'>>>>({})
   const [customerEdits, setCustomerEdits] = useState<Record<string, { name: string; phone: string; email: string }>>({})
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | AdminOrder['status']>('all')
+  const [showBrandManagement, setShowBrandManagement] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -154,18 +161,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => setHomepageContent(nextContent))
     const unsubscribeCategories = subscribeToCategories((nextCategories) => setCategories(nextCategories))
+    const unsubscribeBrands = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
     const unsubscribeArchivedProducts = subscribeToArchivedProducts((nextProducts) => setArchivedProducts(nextProducts))
     const unsubscribeArchivedOrders = subscribeToArchivedOrders((nextOrders) => setArchivedOrders(nextOrders))
     const unsubscribeArchivedCategories = subscribeToArchivedCategories((nextCategories) => setArchivedCategories(nextCategories))
+    const unsubscribeArchivedBrands = subscribeToArchivedBrands((nextArchivedBrands) => setArchivedBrands(nextArchivedBrands))
 
     return () => {
       unsubscribeProducts()
       unsubscribeOrders()
       unsubscribeHomepage()
       unsubscribeCategories()
+      unsubscribeBrands()
       unsubscribeArchivedProducts()
       unsubscribeArchivedOrders()
       unsubscribeArchivedCategories()
+      unsubscribeArchivedBrands()
     }
   }, [authMode, user])
 
@@ -227,8 +238,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       totalProducts: products.length,
       outOfStockProducts,
       totalCustomers: customers.length,
+      totalBrands: brands.length,
+      archivedBrandsCount: archivedBrands.length,
     }
-  }, [customers.length, orders, products])
+  }, [archivedBrands.length, brands.length, customers.length, orders, products])
 
   const filteredOrders = useMemo(() => {
     const query = search.toLowerCase()
@@ -866,6 +879,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Edit Homepage</Button>
               <Button variant="secondary" onClick={() => handleSummaryCardClick('orders', 'new')}>View New Orders</Button>
               <Button variant="secondary" onClick={() => scrollToSection('categories-management')}>Manage Categories</Button>
+              <Button variant="secondary" onClick={() => { setShowBrandManagement(!showBrandManagement); scrollToSection('brands-management') }}>Manage Brands</Button>
             </div>
           </div>
 
@@ -892,6 +906,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers') },
+              { label: 'Total Brands', value: dashboardSummary.totalBrands, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
+              { label: 'Archived Brands', value: dashboardSummary.archivedBrandsCount, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
               { label: 'Live Mode', value: firebaseReady ? 'Firebase' : launchModeEnabled ? 'Launch Mode' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
             ].map((card) => (
               <button key={card.label} type="button" onClick={card.target} className="text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
@@ -1615,6 +1631,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </Card>
           </div>
         </div>
+
+        {showBrandManagement && <BrandManagement onDone={() => setShowBrandManagement(false)} />}
       </Container>
     </section>
   )
