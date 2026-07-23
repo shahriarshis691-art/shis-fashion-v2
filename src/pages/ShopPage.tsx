@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
@@ -185,6 +185,7 @@ export default function ShopPage() {
     inStockOnly: false,
     newOnly: false,
   })
+  const lastTrackedListStateRef = useRef('')
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
@@ -369,11 +370,20 @@ export default function ShopPage() {
 
   useEffect(() => {
     if (!ready || !visibleProducts.length) {
+      lastTrackedListStateRef.current = ''
       return
     }
 
     const itemListId = `${effectiveSegment}:${effectiveSubcategory}`
     const itemListName = legacyHeading?.title ?? heading.title
+    const visibleProductIds = visibleProducts.slice(0, 12).map((product) => String(product.id))
+    const listStateKey = `${itemListId}|${visibleProductIds.join(',')}`
+
+    if (lastTrackedListStateRef.current === listStateKey) {
+      return
+    }
+
+    lastTrackedListStateRef.current = listStateKey
 
     googleAnalytics.viewItemList({
       item_list_id: itemListId,
