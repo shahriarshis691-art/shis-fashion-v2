@@ -107,6 +107,27 @@ export interface HomepageShopCategory {
   image?: string
 }
 
+export type HomepageCategorySectionKey =
+  | 'women'
+  | 'men'
+  | 'kids'
+  | 'western'
+  | 'sale'
+  | 'new-arrivals'
+
+export interface HomepageCategorySection {
+  key: HomepageCategorySectionKey
+  label: string
+  href: string
+  enabled: boolean
+  order: number
+  coverImage: string
+  images: string[]
+  updatedAt?: string | { seconds: number } | null
+}
+
+export type HomepageCategorySections = Record<HomepageCategorySectionKey, HomepageCategorySection>
+
 export interface FeaturedCollectionPage {
   slug: string
   title: string
@@ -138,6 +159,7 @@ export interface HomepageContent {
   categories: Array<{ title: string; caption: string; href?: string; image?: string }>
   featuredCollectionPages: FeaturedCollectionPage[]
   shopByCategories: HomepageShopCategory[]
+  categorySections?: HomepageCategorySections
   featuredCollectionEyebrow?: string
   featuredCollectionTitle?: string
   featuredCollectionSubtitle?: string
@@ -783,6 +805,199 @@ const defaultOrders: AdminOrder[] = [
   },
 ]
 
+const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
+  key: HomepageCategorySectionKey
+  label: string
+  href: string
+  order: number
+  legacyImageKey: string
+}> = [
+  { key: 'women', label: 'Women', href: '/women', order: 10, legacyImageKey: 'womens' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
+  { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
+  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
+  { key: 'sale', label: 'Sale', href: '/sale', order: 50, legacyImageKey: 'denim' },
+  { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, legacyImageKey: 'couples' },
+]
+
+function getLegacyCategoryImage(legacyImageKey: string) {
+  return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? ''
+}
+
+const defaultCategorySections: HomepageCategorySections = {
+  women: {
+    key: 'women',
+    label: 'Women',
+    href: '/women',
+    enabled: true,
+    order: 10,
+    coverImage: getLegacyCategoryImage('womens'),
+    images: [],
+    updatedAt: null,
+  },
+  men: {
+    key: 'men',
+    label: 'Men',
+    href: '/men',
+    enabled: true,
+    order: 20,
+    coverImage: getLegacyCategoryImage('mens'),
+    images: [],
+    updatedAt: null,
+  },
+  kids: {
+    key: 'kids',
+    label: 'Kids',
+    href: '/kids',
+    enabled: true,
+    order: 30,
+    coverImage: getLegacyCategoryImage('kids'),
+    images: [],
+    updatedAt: null,
+  },
+  western: {
+    key: 'western',
+    label: 'Western',
+    href: '/women?sub=tunic',
+    enabled: true,
+    order: 40,
+    coverImage: getLegacyCategoryImage('western'),
+    images: [],
+    updatedAt: null,
+  },
+  sale: {
+    key: 'sale',
+    label: 'Sale',
+    href: '/sale',
+    enabled: true,
+    order: 50,
+    coverImage: getLegacyCategoryImage('denim'),
+    images: [],
+    updatedAt: null,
+  },
+  'new-arrivals': {
+    key: 'new-arrivals',
+    label: 'New Arrivals',
+    href: '/shop/new-arrivals',
+    enabled: true,
+    order: 60,
+    coverImage: getLegacyCategoryImage('couples'),
+    images: [],
+    updatedAt: null,
+  },
+}
+
+function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey | null {
+  const normalizedHref = href.trim().toLowerCase()
+
+  if (!normalizedHref) {
+    return null
+  }
+
+  if (normalizedHref.startsWith('/women')) {
+    if (normalizedHref.includes('sub=tunic')) {
+      return 'western'
+    }
+    return 'women'
+  }
+
+  if (normalizedHref.startsWith('/men')) {
+    return 'men'
+  }
+
+  if (normalizedHref.startsWith('/kids')) {
+    return 'kids'
+  }
+
+  if (normalizedHref.startsWith('/sale')) {
+    return 'sale'
+  }
+
+  if (normalizedHref.includes('new-arrivals')) {
+    return 'new-arrivals'
+  }
+
+  return null
+}
+
+function toUniqueImages(images: unknown) {
+  if (!Array.isArray(images)) {
+    return [] as string[]
+  }
+
+  const seen = new Set<string>()
+  const normalized: string[] = []
+  for (const image of images) {
+    if (typeof image !== 'string') {
+      continue
+    }
+
+    const trimmed = image.trim()
+    if (!trimmed || seen.has(trimmed)) {
+      continue
+    }
+
+    seen.add(trimmed)
+    normalized.push(trimmed)
+  }
+
+  return normalized
+}
+
+function mapLegacyShopByCategoriesToSections(shopByCategories: HomepageShopCategory[] | undefined) {
+  const mapped: Partial<Record<HomepageCategorySectionKey, HomepageCategorySection>> = {}
+  if (!shopByCategories?.length) {
+    return mapped
+  }
+
+  for (const item of shopByCategories) {
+    const sectionKey = normalizeSectionKeyFromHref(item.href ?? '')
+    if (!sectionKey) {
+      continue
+    }
+
+    const fallback = defaultCategorySections[sectionKey]
+    mapped[sectionKey] = {
+      ...fallback,
+      label: item.title?.trim() || fallback.label,
+      href: item.href?.trim() || fallback.href,
+      coverImage: item.image?.trim() || fallback.coverImage,
+      images: fallback.images,
+    }
+  }
+
+  return mapped
+}
+
+function normalizeHomepageCategorySections(content: Partial<HomepageContent> | undefined) {
+  const legacySections = mapLegacyShopByCategoriesToSections(content?.shopByCategories)
+  const sectionEntries = HOMEPAGE_CATEGORY_SECTION_LAYOUT.map((layout) => {
+    const fallback = defaultCategorySections[layout.key]
+    const incoming = content?.categorySections?.[layout.key]
+    const legacy = legacySections[layout.key]
+    const source = incoming ?? legacy
+    const sourceImages = toUniqueImages(source?.images)
+    const coverImage = source?.coverImage?.trim() || sourceImages[0] || fallback.coverImage
+
+    return [
+      layout.key,
+      {
+        ...fallback,
+        ...source,
+        key: layout.key,
+        label: source?.label?.trim() || fallback.label,
+        href: source?.href?.trim() || fallback.href,
+        enabled: source?.enabled ?? fallback.enabled,
+        order: typeof source?.order === 'number' ? source.order : fallback.order,
+        coverImage,
+        images: sourceImages.length ? sourceImages : fallback.images,
+      },
+    ] as const
+  })
+
+  return Object.fromEntries(sectionEntries) as HomepageCategorySections
+}
+
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
   navbarBrandSecondary: 'Fashion',
@@ -855,6 +1070,7 @@ const defaultHomepage: HomepageContent = {
     href: item.href,
     image: item.image,
   })),
+  categorySections: defaultCategorySections,
   featuredCollectionEyebrow: 'Featured collection',
   featuredCollectionTitle: 'Premium categories for every moment',
   featuredCollectionSubtitle: 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.',
@@ -956,6 +1172,11 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     image: category.image || defaultHomepage.shopByCategories[index]?.image,
   }))
 
+  const mergedCategorySections = normalizeHomepageCategorySections({
+    ...(content ?? {}),
+    shopByCategories: mergedShopByCategories,
+  })
+
   return {
     ...defaultHomepage,
     ...(content ?? {}),
@@ -969,6 +1190,7 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     categories: mergedCategories,
     featuredCollectionPages: mergedFeaturedCollectionPages,
     shopByCategories: mergedShopByCategories,
+    categorySections: mergedCategorySections,
     sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
       ...defaultHomepage.sections[index],
       ...section,
@@ -1027,6 +1249,14 @@ function ensureSeedData() {
 
   const storedHomepage = readStored<HomepageContent>(HOMEPAGE_KEY, defaultHomepage)
   const needsCategoryImageBackfill = (storedHomepage.categories ?? []).some((category, index) => !category.image && defaultHomepage.categories[index]?.image)
+  const needsCategorySectionsBackfill = HOMEPAGE_CATEGORY_SECTION_LAYOUT.some(({ key }) => {
+    const section = storedHomepage.categorySections?.[key]
+    if (!section) {
+      return true
+    }
+
+    return !section.label || !section.href || !section.coverImage
+  })
   const needsShopByBackfill =
     !storedHomepage.shopByCategories?.length ||
     storedHomepage.shopByCategories.some((category, index) => {
@@ -1038,7 +1268,7 @@ function ensureSeedData() {
       return !category.title || !category.href || !category.image
     })
 
-  if (needsCategoryImageBackfill || needsShopByBackfill) {
+  if (needsCategoryImageBackfill || needsShopByBackfill || needsCategorySectionsBackfill) {
     writeStored(HOMEPAGE_KEY, normalizeHomepageContent(storedHomepage))
   }
 }

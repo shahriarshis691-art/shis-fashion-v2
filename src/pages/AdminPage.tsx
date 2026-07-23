@@ -43,6 +43,8 @@ import {
   type AdminProduct,
   type AdminCategory,
   type HomepageContent,
+  type HomepageCategorySection,
+  type HomepageCategorySectionKey,
   type HomepageContentSnapshotMeta,
   type HomepageSaveResult,
   type HomepageSectionConfig,
@@ -433,9 +435,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleUpload = async (
     files: FileList | null,
-    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'featured-page-image' | null = null,
+    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null,
     categoryIndex?: number,
     slotIndex?: number,
+    sectionKey?: HomepageCategorySectionKey,
   ) => {
     if (!files?.length) {
       return
@@ -456,7 +459,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setUploadProgress(0)
 
       const uploadedImages = imageFiles.length
-        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' || target === 'featured-page-image' ? 'homepage' : 'products', {
+        ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' || target === 'category-section-image' || target === 'featured-page-image' ? 'homepage' : 'products', {
           retries: 2,
           onProgress: (progress) => setUploadProgress(progress),
         })
@@ -503,6 +506,31 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
           return { ...current, shopByCategories: nextShopByCategories }
         })
+      } else if (target === 'category-section-image') {
+        setHomepageContent((current) => {
+          if (!current || !current.categorySections || !sectionKey) {
+            return current
+          }
+
+          const section = current.categorySections[sectionKey]
+          if (!section) {
+            return current
+          }
+
+          const nextSection: HomepageCategorySection = {
+            ...section,
+            coverImage: uploadedImages[0] ?? section.coverImage,
+            images: Array.from(new Set([...(section.images ?? []), ...uploadedImages])).filter(Boolean),
+          }
+
+          return {
+            ...current,
+            categorySections: {
+              ...current.categorySections,
+              [sectionKey]: nextSection,
+            },
+          }
+        })
       } else if (target === 'featured-page-image') {
         setHomepageContent((current) => {
           if (!current || !current.featuredCollectionPages.length) {
@@ -536,7 +564,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'featured-page-image' | null = null) => {
+  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null) => {
     event.preventDefault()
     setDragActive(false)
     await handleUpload(event.dataTransfer.files, target)
@@ -899,6 +927,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return [...defaultSections].sort((left, right) => left.order - right.order)
   }, [homepageContent?.sections])
 
+  const homepageCategorySections = useMemo(() => {
+    const categorySections = homepageContent?.categorySections
+    if (!categorySections) {
+      return [] as HomepageCategorySection[]
+    }
+
+    return Object.values(categorySections).sort((left, right) => left.order - right.order)
+  }, [homepageContent?.categorySections])
+
   const updateHomepageSection = (key: HomepageSectionConfig['key'], updates: Partial<HomepageSectionConfig>) => {
     if (!homepageContent) {
       return
@@ -925,6 +962,34 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     nextSections[currentIndex].order = nextSections[targetIndex].order
     nextSections[targetIndex].order = currentOrder
     setHomepageContent({ ...homepageContent, sections: nextSections })
+  }
+
+  const updateHomepageCategorySection = (
+    key: HomepageCategorySectionKey,
+    updates: Partial<HomepageCategorySection>,
+  ) => {
+    if (!homepageContent?.categorySections) {
+      return
+    }
+
+    const target = homepageContent.categorySections[key]
+    if (!target) {
+      return
+    }
+
+    const nextCategorySection: HomepageCategorySection = {
+      ...target,
+      ...updates,
+      key,
+    }
+
+    setHomepageContent({
+      ...homepageContent,
+      categorySections: {
+        ...homepageContent.categorySections,
+        [key]: nextCategorySection,
+      },
+    })
   }
 
   const handleEditCategory = (category: AdminCategory) => {
@@ -1661,52 +1726,78 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
 
                 <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
-                  <p className="text-sm font-semibold text-[var(--color-text)]">Shop by category cards</p>
-                  <p className="mt-1 text-xs text-[var(--color-muted)]">Edit homepage category cards (title, link, image) for mens, womens, couples, kids, western, and denim.</p>
+                  <p className="text-sm font-semibold text-[var(--color-text)]">Category sections manager</p>
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">Edit each storefront section independently. Click Save after updating Men, Women, Kids, Western, Sale, or New Arrivals.</p>
                   <div className="mt-4 space-y-4">
-                    {(homepageContent.shopByCategories ?? []).map((item, index) => (
-                      <div key={`${item.title}-${index}`} className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
-                        <div className="grid gap-3 sm:grid-cols-2">
+                    {homepageCategorySections.map((section) => (
+                      <div key={section.key} className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-semibold text-[var(--color-text)]">{section.key.toUpperCase()}</p>
+                          <button
+                            type="button"
+                            onClick={() => updateHomepageCategorySection(section.key, { enabled: !section.enabled })}
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${section.enabled ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                          >
+                            {section.enabled ? 'Visible' : 'Hidden'}
+                          </button>
+                        </div>
+
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
                           <input
-                            value={item.title}
-                            onChange={(event) => {
-                              const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
-                              nextShopByCategories[index] = { ...nextShopByCategories[index], title: event.target.value }
-                              setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
-                            }}
+                            value={section.label}
+                            onChange={(event) => updateHomepageCategorySection(section.key, { label: event.target.value })}
                             className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
-                            placeholder="Card title"
+                            placeholder="Section label"
                           />
                           <input
-                            value={item.href}
+                            value={section.href}
+                            onChange={(event) => updateHomepageCategorySection(section.key, { href: event.target.value })}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Section route (example: /women?sub=tunic)"
+                          />
+                          <input
+                            value={String(section.order)}
                             onChange={(event) => {
-                              const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
-                              nextShopByCategories[index] = { ...nextShopByCategories[index], href: event.target.value }
-                              setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
+                              const nextOrder = Number(event.target.value)
+                              if (Number.isNaN(nextOrder)) {
+                                return
+                              }
+                              updateHomepageCategorySection(section.key, { order: nextOrder })
                             }}
                             className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
-                            placeholder="Card link (example: /shop/denim)"
+                            placeholder="Display order"
+                          />
+                          <input
+                            value={section.coverImage}
+                            onChange={(event) => updateHomepageCategorySection(section.key, { coverImage: event.target.value })}
+                            className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                            placeholder="Cover image URL"
                           />
                         </div>
+
                         <div className="mt-3">
                           <label className="cursor-pointer text-sm text-[var(--color-muted)]">
-                            <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'shop-category-image', index)} className="hidden" />
-                            Set shop category image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => handleUpload(event.target.files, 'category-section-image', undefined, undefined, section.key)}
+                              className="hidden"
+                            />
+                            Add image for this section
                           </label>
-                          {item.image ? (
-                            <div className="relative">
-                              <img src={item.image} alt={`${item.title || 'Shop category'} card preview`} className="mt-3 h-24 w-full rounded-[1rem] object-cover object-center" />
+
+                          {section.coverImage ? (
+                            <div className="relative mt-3">
+                              <img src={section.coverImage} alt={`${section.label} section preview`} className="h-24 w-full rounded-[1rem] object-cover object-center" />
                               <button
                                 type="button"
                                 onClick={async () => {
                                   try {
-                                    await deleteAsset(item.image!)
-                                    const nextShopByCategories = [...(homepageContent.shopByCategories ?? [])]
-                                    nextShopByCategories[index] = { ...nextShopByCategories[index], image: '' }
-                                    setHomepageContent({ ...homepageContent, shopByCategories: nextShopByCategories })
-                                    setMessage('Shop category image removed.')
+                                    await deleteAsset(section.coverImage)
+                                    updateHomepageCategorySection(section.key, { coverImage: '', images: section.images.filter((image) => image !== section.coverImage) })
+                                    setMessage('Section image removed.')
                                   } catch {
-                                    setMessage('Unable to remove shop category image.')
+                                    setMessage('Unable to remove section image.')
                                   }
                                 }}
                                 className="absolute right-3 top-1 rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent)]"
@@ -1722,7 +1813,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
-                  <p className="text-xs text-[var(--color-muted)]">Save shop-by-category title, link, and image changes from here.</p>
+                  <p className="text-xs text-[var(--color-muted)]">Save section-wise edits to publish exact label, route, and image mapping.</p>
                   <Button onClick={handleHomepageSave} variant="secondary" className="mt-3 sm:mt-0">Save content</Button>
                 </div>
               </div>

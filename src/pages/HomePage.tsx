@@ -11,14 +11,14 @@ import {
 } from '../firebase/adminService'
 import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
-const lockedCategoryLinks = [
-  { label: 'Women', href: '/women' },
-  { label: 'Men', href: '/men' },
-  { label: 'Kids', href: '/kids' },
-  { label: 'Western', href: '/women?sub=tunic' },
-  { label: 'Sale', href: '/sale' },
-  { label: 'New Arrivals', href: '/shop/new-arrivals' },
-]
+const fallbackCategoryStrips = [
+  { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '' },
+  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '' },
+  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '' },
+  { key: 'sale', label: 'Sale', href: '/sale', order: 50, image: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '' },
+  { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '' },
+] as const
 
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
@@ -47,6 +47,68 @@ const defaultHomepage: HomepageContent = {
     href: item.href,
     image: item.image,
   })),
+  categorySections: {
+    women: {
+      key: 'women',
+      label: 'Women',
+      href: '/women',
+      enabled: true,
+      order: 10,
+      coverImage: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    men: {
+      key: 'men',
+      label: 'Men',
+      href: '/men',
+      enabled: true,
+      order: 20,
+      coverImage: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    kids: {
+      key: 'kids',
+      label: 'Kids',
+      href: '/kids',
+      enabled: true,
+      order: 30,
+      coverImage: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    western: {
+      key: 'western',
+      label: 'Western',
+      href: '/women?sub=tunic',
+      enabled: true,
+      order: 40,
+      coverImage: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    sale: {
+      key: 'sale',
+      label: 'Sale',
+      href: '/sale',
+      enabled: true,
+      order: 50,
+      coverImage: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    'new-arrivals': {
+      key: 'new-arrivals',
+      label: 'New Arrivals',
+      href: '/shop/new-arrivals',
+      enabled: true,
+      order: 60,
+      coverImage: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+  },
   featuredCollectionEyebrow: 'Featured collections',
   featuredCollectionTitle: 'Designed for modern Bangladeshi wardrobes',
   featuredCollectionSubtitle:
@@ -134,19 +196,32 @@ export default function HomePage() {
   const heroImage = normalizeCatalogImageUrl(homepageContent.heroImage ?? '', 1400, 900)
 
   const categoryStrips = useMemo(() => {
-    const contentImages = homepageContent.shopByCategories ?? []
+    const sectionEntries = Object.values(homepageContent.categorySections ?? {})
 
-    return lockedCategoryLinks.map((item, index) => {
-      const fallback = homeCategoryItems[index]?.image ?? ''
-      const fromContent = contentImages[index]?.image ?? ''
-      const image = normalizeCatalogImageUrl(fromContent || fallback, 1200, 900)
+    if (!sectionEntries.length) {
+      return fallbackCategoryStrips.map((section) => ({
+        key: section.key,
+        label: section.label,
+        href: section.href,
+        image: normalizeCatalogImageUrl(section.image, 1200, 900),
+      }))
+    }
 
-      return {
-        ...item,
-        image,
-      }
-    })
-  }, [homepageContent.shopByCategories])
+    return sectionEntries
+      .filter((section) => section.enabled)
+      .sort((left, right) => left.order - right.order)
+      .map((section) => {
+        const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
+        const sectionImage = normalizeCatalogImageUrl(section.coverImage || section.images[0] || fallback?.image || '', 1200, 900)
+
+        return {
+          key: section.key,
+          label: section.label,
+          href: section.href,
+          image: sectionImage,
+        }
+      })
+  }, [homepageContent.categorySections])
 
   const newArrivals = useMemo(() => {
     const flagged = products.filter((product) => product.newArrival)
@@ -217,10 +292,10 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             {categoryStrips.map((item, index) => (
               <motion.article
-                key={item.label}
+                key={item.key}
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.25 }}
