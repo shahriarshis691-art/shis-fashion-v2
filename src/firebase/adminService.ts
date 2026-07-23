@@ -74,6 +74,24 @@ export interface AdminCategory {
   archivedAt?: string | { seconds: number }
 }
 
+export interface AdminBrand {
+  id: string
+  slug: string
+  name: string
+  tag: string
+  summary: string
+  description: string
+  website: string
+  contactEmail: string
+  contactPhone: string
+  logo: string
+  bannerImage?: string
+  images: string[]
+  createdAt?: string | { seconds: number }
+  archived?: boolean
+  archivedAt?: string | { seconds: number }
+}
+
 const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
   new: ['confirmed', 'cancelled'],
   confirmed: ['processing', 'cancelled'],
