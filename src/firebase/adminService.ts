@@ -1142,11 +1142,17 @@ export async function signInAdmin(email: string, password: string) {
 
   if (!hasAdminAccess) {
     markAccessDenied()
-    await signOut(firebaseAuth)
+    try {
+      await signOut(firebaseAuth)
+    } catch {
+      // Ignore sign-out failures so we can surface a deterministic auth error to the UI.
+    }
     const error = new Error(emailIsAllowListed
       ? 'Access denied. This account is allow-listed but missing Firestore admin permissions.'
       : 'Access Denied')
-    ;(error as Error & { code?: string }).code = emailIsAllowListed ? 'auth/admin-firestore-permission-required' : 'auth/forbidden-admin'
+    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).code = emailIsAllowListed ? 'auth/admin-firestore-permission-required' : 'auth/forbidden-admin'
+    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminUid = result.user.uid
+    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminEmail = result.user.email ?? normalizedEmail
     throw error
   }
 

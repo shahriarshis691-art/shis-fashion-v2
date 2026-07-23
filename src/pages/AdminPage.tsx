@@ -128,6 +128,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [customerEdits, setCustomerEdits] = useState<Record<string, { name: string; phone: string; email: string }>>({})
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | AdminOrder['status']>('all')
   const [showBrandManagement, setShowBrandManagement] = useState(false)
+  const [blockedAdminUid, setBlockedAdminUid] = useState<string | null>(null)
   const [homepageSaveDebug, setHomepageSaveDebug] = useState<{
     status: 'idle' | 'success' | 'error'
     message: string
@@ -311,28 +312,39 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     event.preventDefault()
     setLoading(true)
     setMessage('')
+    setBlockedAdminUid(null)
     const email = loginForm.email.trim()
     const password = loginForm.password.trim()
     try {
       await signInAdmin(email, password)
       setAuthMode('dashboard')
       setMessage('Welcome back. Your dashboard is ready.')
+      setBlockedAdminUid(null)
       navigate('/admin', { replace: true })
     } catch (error) {
       const errorCode = typeof error === 'object' && error !== null && 'code' in error
         ? String((error as { code?: unknown }).code ?? '')
         : ''
+      const adminUidFromError = typeof error === 'object' && error !== null && 'adminUid' in error
+        ? String((error as { adminUid?: unknown }).adminUid ?? '')
+        : ''
       if (errorCode === 'auth/forbidden-admin') {
         setMessage('Access denied. This account is not authorized for admin dashboard access.')
+        setBlockedAdminUid(null)
         navigate('/', { replace: true })
       } else if (errorCode === 'auth/admin-firestore-permission-required') {
-        setMessage('Login blocked: this account is allow-listed but does not have Firestore admin permission. Add admins/{uid} with role="admin" and active=true, then sign in again.')
+        setBlockedAdminUid(adminUidFromError || null)
+        const uidHint = adminUidFromError || '<uid>'
+        setMessage(`Login blocked: this account is allow-listed but does not have Firestore admin permission. Add admins/${uidHint} with role="admin" and active=true, then sign in again.`)
       } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
         setMessage('Invalid email or password. Please try again.')
+        setBlockedAdminUid(null)
       } else if (errorCode === 'auth/firebase-not-configured') {
         setMessage('Admin authentication is not configured in this environment.')
+        setBlockedAdminUid(null)
       } else {
         setMessage('Sign in failed. Please try again in a moment.')
+        setBlockedAdminUid(null)
       }
 
       if (import.meta.env.DEV) {
@@ -347,7 +359,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     await signOutAdmin()
     setAuthMode('login')
     setUser(null)
+    setBlockedAdminUid(null)
     navigate('/shis-admin/login', { replace: true })
+  }
+
+  const handleCopyAdminDocPath = async () => {
+    if (!blockedAdminUid) {
+      return
+    }
+
+    const path = `admins/${blockedAdminUid}`
+    try {
+      await navigator.clipboard.writeText(path)
+      setMessage(`Copied Firestore document path: ${path}`)
+    } catch {
+      setMessage('Unable to copy admin document path. Please copy it manually.')
+    }
   }
 
   const resetForm = () => {
@@ -963,6 +990,18 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   : 'Admin login requires Firebase authentication configuration or Launch Mode.'}
             </p>
             {message ? <p className="mt-3 text-sm text-[var(--color-accent)]">{message}</p> : null}
+            {blockedAdminUid ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyAdminDocPath}
+                  className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+                >
+                  Copy admins/{blockedAdminUid}
+                </button>
+                <p className="text-xs text-[var(--color-muted)]">Create this Firestore document with role="admin" and active=true.</p>
+              </div>
+            ) : null}
           </Card>
         </Container>
       </section>
