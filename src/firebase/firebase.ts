@@ -27,3 +27,13 @@ export const app: FirebaseApp | undefined = hasFirebaseConfig
 
 export const auth = app ? getAuth(app) : undefined
 export const db = app ? getFirestore(app) : undefined
+
+if (import.meta.env.DEV) {
+  console.info('[firebase] init', {
+    hasFirebaseConfig,
+    projectId: firebaseConfig.projectId || '(missing)',
+    appInitialized: Boolean(app),
+    authInitialized: Boolean(auth),
+    firestoreInitialized: Boolean(db),
+  })
+}

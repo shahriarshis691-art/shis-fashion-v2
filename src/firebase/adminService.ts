@@ -161,6 +161,21 @@ export interface HomepageContent {
   sections: HomepageSectionConfig[]
 }
 
+export interface HomepageSaveResult {
+  content: HomepageContent
+  mode: 'local' | 'live'
+  path: 'settings/homepage'
+  heroImage: string
+  verified: boolean
+  savedAt: string
+}
+
+export interface HomepageContentSnapshotMeta {
+  source: 'local-seed' | 'local-storage-sync' | 'firestore' | 'firestore-missing-doc'
+  path: 'settings/homepage'
+  receivedAt: string
+}
+
 export function isFirebaseConfigured() {
   return Boolean(firebaseAuth && firebaseDb)
 }
@@ -286,6 +301,10 @@ function isLocalFirstDataMode() {
   }
 
   return !isProductionBuild() && window.localStorage.getItem(DATA_MODE_KEY) === 'local-first'
+}
+
+export function isHomepageLocalFirstMode() {
+  return isLocalFirstDataMode()
 }
 
 function markAccessDenied() {
@@ -507,6 +526,30 @@ function shouldFallbackToLocal(error: unknown) {
     'could not reach cloud firestore backend',
     'operation could not be completed',
   ].some((needle) => message.includes(needle) || code.includes(needle))
+}
+
+function toReadableError(error: unknown): Error {
+  if (error instanceof Error) {
+    return error
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error)
+  }
+
+  return new Error('Unknown error')
+}
+
+function describeFirebaseError(error: unknown) {
+  const normalized = toReadableError(error)
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code ?? 'unknown')
+    : 'unknown'
+
+  return {
+    code,
+    message: normalized.message,
+  }
 }
 
 const defaultProducts: AdminProduct[] = [
@@ -1680,27 +1723,66 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
   }
 }
 
-export function subscribeToHomepageContent(callback: (content: HomepageContent) => void) {
+export function subscribeToHomepageContent(callback: (content: HomepageContent, meta?: HomepageContentSnapshotMeta) => void) {
   ensureSeedData()
-  callback(normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage)))
+  const storedHomepage = normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage))
+  callback(storedHomepage, {
+    source: 'local-seed',
+    path: 'settings/homepage',
+    receivedAt: new Date().toISOString(),
+  })
+
+  if (import.meta.env.DEV) {
+    console.info('[homepage] subscribe:init', {
+      hasFirebaseDb: Boolean(firebaseDb),
+      localFirstMode: isLocalFirstDataMode(),
+      heroImage: storedHomepage.heroImage ?? '',
+    })
+  }
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(HOMEPAGE_KEY, defaultHomepage, (content) => callback(normalizeHomepageContent(content)))
+    return subscribeToStored(HOMEPAGE_KEY, defaultHomepage, (content) => callback(normalizeHomepageContent(content), {
+      source: 'local-storage-sync',
+      path: 'settings/homepage',
+      receivedAt: new Date().toISOString(),
+    }))
   }
 
   const homeRef = doc(firebaseDb, 'settings', 'homepage')
   return onSnapshot(
     homeRef,
     (snapshot) => {
+      if (import.meta.env.DEV) {
+        console.info('[homepage] subscribe:snapshot', {
+          exists: snapshot.exists(),
+          path: 'settings/homepage',
+        })
+      }
+
       if (!snapshot.exists()) {
-        callback(defaultHomepage)
+        callback(defaultHomepage, {
+          source: 'firestore-missing-doc',
+          path: 'settings/homepage',
+          receivedAt: new Date().toISOString(),
+        })
         return
       }
-      callback(normalizeHomepageContent(snapshot.data() as Partial<HomepageContent>))
+      callback(normalizeHomepageContent(snapshot.data() as Partial<HomepageContent>), {
+        source: 'firestore',
+        path: 'settings/homepage',
+        receivedAt: new Date().toISOString(),
+      })
     },
     (error) => {
-      if (shouldFallbackToLocal(error)) {
-        callback(normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage)))
+      const details = describeFirebaseError(error)
+      console.error('[homepage] subscribe:error', {
+        path: 'settings/homepage',
+        code: details.code,
+        message: details.message,
+      })
+
+      if (!shouldFallbackToLocal(error) && import.meta.env.DEV) {
+        console.warn('[homepage] live subscription failed and will not silently fallback to local data')
       }
     },
   )
@@ -1904,36 +1986,113 @@ export async function restoreCategory(id: string) {
   }
 }
 
-export async function updateHomepageContent(content: HomepageContent) {
+export async function updateHomepageContent(content: HomepageContent): Promise<HomepageSaveResult> {
   const normalized = normalizeHomepageContent(content)
-  writeStored(HOMEPAGE_KEY, normalized)
+  const heroImage = normalized.heroImage ?? ''
+  const localFirstMode = isLocalFirstDataMode()
 
-  if (!firebaseDb || isLocalFirstDataMode()) {
+  if (import.meta.env.DEV) {
+    console.info('[homepage] save:start', {
+      hasFirebaseDb: Boolean(firebaseDb),
+      localFirstMode,
+      path: 'settings/homepage',
+      heroImage,
+      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
+    })
+  }
+
+  if (!firebaseDb && !localFirstMode) {
+    throw new Error('Firestore is not initialized. Homepage cannot be saved to live data.')
+  }
+
+  if (!firebaseDb || localFirstMode) {
+    writeStored(HOMEPAGE_KEY, normalized)
     await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
       sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
       mode: 'local',
     })
-    return normalized
+
+    if (import.meta.env.DEV) {
+      console.info('[homepage] save:local-complete', {
+        path: 'settings/homepage',
+        heroImage,
+      })
+    }
+
+    return {
+      content: normalized,
+      mode: 'local',
+      path: 'settings/homepage',
+      heroImage,
+      verified: true,
+      savedAt: new Date().toISOString(),
+    }
   }
 
   try {
     const ref = doc(firebaseDb, 'settings', 'homepage')
+
+    console.info('[homepage] save:before-setDoc', {
+      path: 'settings/homepage',
+      heroImage,
+    })
+
     await setDoc(ref, normalized)
+
+    console.info('[homepage] save:after-setDoc', {
+      path: 'settings/homepage',
+      heroImage,
+    })
+
+    const verificationSnapshot = await getDoc(ref)
+    if (!verificationSnapshot.exists()) {
+      throw new Error('Firestore write verification failed: settings/homepage does not exist after save.')
+    }
+
+    const savedContent = verificationSnapshot.data() as Partial<HomepageContent>
+    const savedHeroImage = typeof savedContent.heroImage === 'string' ? savedContent.heroImage : ''
+    if ((normalized.heroImage ?? '') !== savedHeroImage) {
+      throw new Error('Firestore write verification failed: heroImage mismatch after save.')
+    }
+
+    console.info('[homepage] save:verified', {
+      path: 'settings/homepage',
+      heroImage: savedHeroImage,
+    })
+
+    writeStored(HOMEPAGE_KEY, normalized)
     await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
       sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
       mode: 'live',
     })
-    return normalized
-  } catch (error) {
-    if (!shouldFallbackToLocal(error)) {
-      throw error
+
+    if (import.meta.env.DEV) {
+      console.info('[homepage] save:complete', {
+        path: 'settings/homepage',
+        heroImage: savedHeroImage,
+      })
     }
 
-    await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
-      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
-      mode: 'fallback-local',
+    return {
+      content: normalized,
+      mode: 'live',
+      path: 'settings/homepage',
+      heroImage: savedHeroImage,
+      verified: true,
+      savedAt: new Date().toISOString(),
+    }
+  } catch (error) {
+    const details = describeFirebaseError(error)
+    console.error('[homepage] save:error', {
+      path: 'settings/homepage',
+      code: details.code,
+      message: details.message,
+      heroImage,
     })
-    return normalized
+
+    throw new Error(`Homepage save failed (${details.code}): ${details.message}`, {
+      cause: error,
+    })
   }
 }
 

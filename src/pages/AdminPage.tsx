@@ -16,6 +16,7 @@ import {
   deleteAsset,
   deleteProduct,
   isFirebaseConfigured,
+  isHomepageLocalFirstMode,
   isLaunchModeEnabled,
   restoreCategory,
   restoreOrder,
@@ -42,6 +43,8 @@ import {
   type AdminProduct,
   type AdminCategory,
   type HomepageContent,
+  type HomepageContentSnapshotMeta,
+  type HomepageSaveResult,
   type HomepageSectionConfig,
   onAdminAuthChanged,
 } from '../firebase/adminService'
@@ -125,6 +128,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [customerEdits, setCustomerEdits] = useState<Record<string, { name: string; phone: string; email: string }>>({})
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | AdminOrder['status']>('all')
   const [showBrandManagement, setShowBrandManagement] = useState(false)
+  const [homepageSaveDebug, setHomepageSaveDebug] = useState<{
+    status: 'idle' | 'success' | 'error'
+    message: string
+    mode: 'local' | 'live' | 'unknown'
+    path: string
+    heroImage: string
+    savedAt?: string
+  }>({
+    status: 'idle',
+    message: 'No homepage save attempt yet.',
+    mode: 'unknown',
+    path: 'settings/homepage',
+    heroImage: '',
+  })
+  const [homepageSnapshotDebug, setHomepageSnapshotDebug] = useState<HomepageContentSnapshotMeta | null>(null)
+  const [toast, setToast] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -159,7 +178,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
-    const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => setHomepageContent(nextContent))
+    const unsubscribeHomepage = subscribeToHomepageContent((nextContent, meta) => {
+      setHomepageContent(nextContent)
+      if (meta) {
+        setHomepageSnapshotDebug(meta)
+      }
+    })
     const unsubscribeCategories = subscribeToCategories((nextCategories) => setCategories(nextCategories))
     const unsubscribeBrands = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
     const unsubscribeArchivedProducts = subscribeToArchivedProducts((nextProducts) => setArchivedProducts(nextProducts))
@@ -642,12 +666,97 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
     setLoading(true)
     try {
-      await updateHomepageContent(homepageContent)
+      const result: HomepageSaveResult = await updateHomepageContent(homepageContent)
       setMessage('Homepage content saved.')
+      setToast({ kind: 'success', message: 'Homepage saved and verified in Firestore.' })
+      setHomepageSaveDebug({
+        status: 'success',
+        message: `Saved and verified in Firestore (${result.mode} mode).`,
+        mode: result.mode,
+        path: result.path,
+        heroImage: result.heroImage,
+        savedAt: result.savedAt,
+      })
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown error'
+      setMessage(`Homepage save failed: ${reason}`)
+      setToast({ kind: 'error', message: `Homepage save failed: ${reason}` })
+      setHomepageSaveDebug({
+        status: 'error',
+        message: reason,
+        mode: 'unknown',
+        path: 'settings/homepage',
+        heroImage: homepageContent.heroImage ?? '',
+        savedAt: new Date().toISOString(),
+      })
+      if (import.meta.env.DEV) {
+        console.error('[admin] homepage save failed', error)
+      }
     } finally {
       setLoading(false)
     }
   }
+
+  const handleHomepageWriteTest = async () => {
+    if (!homepageContent) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await updateHomepageContent(homepageContent)
+      setHomepageSaveDebug({
+        status: 'success',
+        message: `Firestore write test passed (${result.mode} mode).`,
+        mode: result.mode,
+        path: result.path,
+        heroImage: result.heroImage,
+        savedAt: result.savedAt,
+      })
+      setToast({ kind: 'success', message: 'Firestore write test passed.' })
+      setMessage('Firestore write test passed.')
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown error'
+      setHomepageSaveDebug({
+        status: 'error',
+        message: reason,
+        mode: 'unknown',
+        path: 'settings/homepage',
+        heroImage: homepageContent.heroImage ?? '',
+        savedAt: new Date().toISOString(),
+      })
+      setToast({ kind: 'error', message: `Firestore write test failed: ${reason}` })
+      setMessage(`Firestore write test failed: ${reason}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCopyHomepageDebug = async () => {
+    const payload = {
+      save: homepageSaveDebug,
+      snapshot: homepageSnapshotDebug,
+      localFirstMode: isHomepageLocalFirstMode(),
+      firebaseConfigured: firebaseReady,
+      firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+    }
+
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+      setToast({ kind: 'success', message: 'Homepage debug details copied.' })
+    } catch {
+      setToast({ kind: 'error', message: 'Unable to copy debug details.' })
+    }
+  }
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => setToast(null), 3600)
+    return () => window.clearTimeout(timeoutId)
+  }, [toast])
 
   const handleStatusChange = async (orderId: string, status: AdminOrder['status']) => {
     try {
@@ -848,6 +957,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+      {toast ? (
+        <div className="fixed right-4 top-4 z-50 max-w-md">
+          <div className={`rounded-xl border px-4 py-3 text-sm shadow-lg ${toast.kind === 'success' ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-rose-500 bg-rose-50 text-rose-900'}`}>
+            {toast.message}
+          </div>
+        </div>
+      ) : null}
       <Container>
         <div className="flex flex-col gap-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div>
@@ -1178,7 +1294,36 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Homepage</p>
                 <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Tune the storefront instantly</h2>
               </div>
-              <Button onClick={handleHomepageSave} variant="secondary">Save content</Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button onClick={handleHomepageWriteTest} variant="secondary" disabled={loading}>Test Firestore write</Button>
+                <Button onClick={handleHomepageSave} variant="secondary" disabled={loading}>Save content</Button>
+              </div>
+            </div>
+            <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 text-xs text-[var(--color-muted)]">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Homepage Save Diagnostics</p>
+                <button
+                  type="button"
+                  onClick={handleCopyHomepageDebug}
+                  className="rounded-full border border-[var(--color-border)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text)]"
+                >
+                  Copy debug
+                </button>
+              </div>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                <p><span className="font-semibold text-[var(--color-text)]">Status:</span> {homepageSaveDebug.status}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Message:</span> {homepageSaveDebug.message}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Target document:</span> {homepageSaveDebug.path}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Last mode:</span> {homepageSaveDebug.mode}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Last snapshot source:</span> {homepageSnapshotDebug?.source ?? '-'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Snapshot path:</span> {homepageSnapshotDebug?.path ?? '-'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Snapshot time:</span> {homepageSnapshotDebug?.receivedAt ? new Date(homepageSnapshotDebug.receivedAt).toLocaleString('en-BD') : '-'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Local-first mode:</span> {isHomepageLocalFirstMode() ? 'enabled' : 'disabled'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Firebase configured:</span> {firebaseReady ? 'yes' : 'no'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Firebase project:</span> {(import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Hero URL snapshot:</span> {homepageSaveDebug.heroImage || '(empty)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Last save time:</span> {homepageSaveDebug.savedAt ? new Date(homepageSaveDebug.savedAt).toLocaleString('en-BD') : '-'}</p>
+              </div>
             </div>
             {homepageContent ? (
               <div className="mt-5 space-y-4">
