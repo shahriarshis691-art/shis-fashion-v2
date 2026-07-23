@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { type ShopProduct } from '../data/shopData'
+import { googleAnalytics } from '../services/googleAnalytics'
 import {
   subscribeToProducts,
   type AdminProduct,
@@ -365,6 +366,27 @@ export default function ShopPage() {
     )
     return sorted
   })()
+
+  useEffect(() => {
+    if (!ready || !visibleProducts.length) {
+      return
+    }
+
+    const itemListId = `${effectiveSegment}:${effectiveSubcategory}`
+    const itemListName = legacyHeading?.title ?? heading.title
+
+    googleAnalytics.viewItemList({
+      item_list_id: itemListId,
+      item_list_name: itemListName,
+      items: visibleProducts.slice(0, 12).map((product) => ({
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category,
+        price: parseBDT(product.price),
+        quantity: 1,
+      })),
+    })
+  }, [effectiveSegment, effectiveSubcategory, heading.title, legacyHeading?.title, ready, visibleProducts])
 
   const navigateWithSubcategory = (subcategory: string) => {
     const params = new URLSearchParams(location.search)

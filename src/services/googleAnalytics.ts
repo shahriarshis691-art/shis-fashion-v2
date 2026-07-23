@@ -28,6 +28,13 @@ interface PurchasePayload extends CheckoutPayload {
   transaction_id: string
 }
 
+interface ItemListPayload {
+  item_list_id: string
+  item_list_name: string
+  items: AnalyticsItem[]
+  currency?: string
+}
+
 class GoogleAnalyticsService {
   private measurementId: string | null = null
   private initialized = false
@@ -108,6 +115,15 @@ class GoogleAnalyticsService {
       transaction_id: payload.transaction_id,
       currency: payload.currency ?? 'BDT',
       value: payload.value,
+      items: payload.items,
+    })
+  }
+
+  viewItemList(payload: ItemListPayload): void {
+    this.track('view_item_list', {
+      item_list_id: payload.item_list_id,
+      item_list_name: payload.item_list_name,
+      currency: payload.currency ?? 'BDT',
       items: payload.items,
     })
   }
