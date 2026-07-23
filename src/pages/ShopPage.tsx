@@ -5,6 +5,7 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { type ShopProduct } from '../data/shopData'
 import { googleAnalytics } from '../services/googleAnalytics'
+import { incidentAlerts } from '../services/incidentAlerts'
 import {
   subscribeToProducts,
   type AdminProduct,
@@ -187,6 +188,8 @@ export default function ShopPage() {
   })
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
+  const emptyStateKeysSeenRef = useRef<Set<string>>(new Set())
+  const didReportEmptyStateSpikeRef = useRef(false)
   const listingStateSnapshotRef = useRef('')
   const didTrackInitialListingStateRef = useRef(false)
 
@@ -453,6 +456,23 @@ export default function ShopPage() {
       path: location.pathname,
       search: location.search,
     })
+
+    emptyStateKeysSeenRef.current.add(emptyStateKey)
+    if (!didReportEmptyStateSpikeRef.current && emptyStateKeysSeenRef.current.size >= 3) {
+      didReportEmptyStateSpikeRef.current = true
+      googleAnalytics.trackEvent('listing_empty_state_spike', {
+        unique_empty_states: emptyStateKeysSeenRef.current.size,
+        latest_segment: effectiveSegment,
+        latest_subcategory: effectiveSubcategory,
+        path: location.pathname,
+      })
+
+      incidentAlerts.notify({
+        source: 'listing-empty',
+        message: `Repeated empty listing states detected (${emptyStateKeysSeenRef.current.size})`,
+        fatal: false,
+      })
+    }
   }, [
     effectiveSegment,
     effectiveSubcategory,
