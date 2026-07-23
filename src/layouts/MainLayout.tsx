@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -7,6 +7,7 @@ import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
+import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
 
@@ -14,6 +15,7 @@ const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?
 
 export default function MainLayout() {
   const location = useLocation()
+  const lastSoftLaunchEventRef = useRef('')
   const softLaunchDecision = useMemo(
     () => evaluateSoftLaunchAccess(location.pathname, location.search),
     [location.pathname, location.search],
@@ -41,14 +43,49 @@ export default function MainLayout() {
   }, [location.pathname])
 
   useEffect(() => {
+    const eventKey = [
+      location.pathname,
+      location.search,
+      softLaunchDecision.mode,
+      softLaunchDecision.reason,
+      softLaunchDecision.allowed ? 'allow' : 'block',
+    ].join('|')
+
+    if (lastSoftLaunchEventRef.current === eventKey) {
+      return
+    }
+
+    lastSoftLaunchEventRef.current = eventKey
+
+    googleAnalytics.trackEvent('soft_launch_decision', {
+      mode: softLaunchDecision.mode,
+      reason: softLaunchDecision.reason,
+      bucket: softLaunchDecision.bucket,
+      allowed: softLaunchDecision.allowed,
+      path: location.pathname,
+    })
+
     if (!softLaunchDecision.allowed) {
       googleAnalytics.trackEvent('soft_launch_blocked', {
         mode: softLaunchDecision.mode,
         reason: softLaunchDecision.reason,
         bucket: softLaunchDecision.bucket,
       })
+
+      incidentAlerts.notify({
+        source: 'soft-launch',
+        message: `Blocked access (${softLaunchDecision.mode}:${softLaunchDecision.reason}) on ${location.pathname}`,
+        fatal: false,
+      })
     }
-  }, [softLaunchDecision.allowed, softLaunchDecision.bucket, softLaunchDecision.mode, softLaunchDecision.reason])
+  }, [
+    location.pathname,
+    location.search,
+    softLaunchDecision.allowed,
+    softLaunchDecision.bucket,
+    softLaunchDecision.mode,
+    softLaunchDecision.reason,
+  ])
 
   if (!softLaunchDecision.allowed) {
     return (
