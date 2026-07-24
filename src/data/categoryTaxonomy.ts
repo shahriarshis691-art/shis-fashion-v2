@@ -121,6 +121,20 @@ function normalizeCategoryValue(category: string) {
   return category.trim().toLowerCase()
 }
 
+const SEGMENT_KEYWORDS: Record<Exclude<ShopSegment, 'all'>, RegExp> = {
+  women: /(women|woman|womens|lady|ladies|female|girl|kurti|saree|tunic|dress|blouse)/,
+  men: /(men|man|mens|male|shirt|polo|panjabi|tee|t-?shirt|denim|pant|jacket)/,
+  kids: /(kids?|children|child|baby|babies|toddler|junior|mini)/,
+}
+
+function matchesSegmentKeyword(segment: Exclude<ShopSegment, 'all'>, value: string) {
+  return SEGMENT_KEYWORDS[segment].test(value)
+}
+
+function getSegmentConfig(segment: Exclude<ShopSegment, 'all'>) {
+  return SEGMENTS.find((entry) => entry.key === segment)
+}
+
 export function getAllTaxonomyCategoryOptions() {
   const options: TaxonomyCategoryOption[] = []
 
@@ -164,13 +178,27 @@ export function matchesSegmentByAlias(segment: ShopSegment, category: string) {
   }
 
   const normalized = normalizeCategoryValue(category)
-  const config = SEGMENTS.find((entry) => entry.key === segment)
+  const canonical = resolveCanonicalSubcategorySlug(normalized)
+  const config = getSegmentConfig(segment)
   if (!config) {
     return false
   }
 
+  if (normalized === segment || canonical === segment) {
+    return true
+  }
+
+  if (matchesSegmentKeyword(segment, normalized) || matchesSegmentKeyword(segment, canonical)) {
+    return true
+  }
+
   return config.subcategories.some((subcategory) =>
-    subcategory.aliases.some((alias) => alias.toLowerCase() === normalized),
+    subcategory.slug === normalized ||
+    subcategory.slug === canonical ||
+    subcategory.aliases.some((alias) => {
+      const normalizedAlias = alias.toLowerCase()
+      return normalizedAlias === normalized || normalizedAlias === canonical
+    }),
   )
 }
 
@@ -195,5 +223,12 @@ export function matchesSubcategoryByAlias(
     return false
   }
 
-  return matchedSubcategory.aliases.some((alias) => alias.toLowerCase() === normalizedCategory)
+  const canonicalCategory = resolveCanonicalSubcategorySlug(normalizedCategory)
+
+  return matchedSubcategory.slug === normalizedCategory ||
+    matchedSubcategory.slug === canonicalCategory ||
+    matchedSubcategory.aliases.some((alias) => {
+      const normalizedAlias = alias.toLowerCase()
+      return normalizedAlias === normalizedCategory || normalizedAlias === canonicalCategory
+    })
 }
