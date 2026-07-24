@@ -294,7 +294,7 @@ export default function HomePage() {
       ...products.filter((product) => product.newArrival),
       ...products.filter((product) => !product.newArrival),
     ]
-    return prioritized.slice(0, 8)
+    return prioritized
   }, [products])
 
   const featuredBrands = useMemo(
