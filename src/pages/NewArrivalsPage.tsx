@@ -47,8 +47,11 @@ export default function NewArrivalsPage() {
   }, [])
 
   const newArrivals = useMemo(() => {
-    const flagged = products.filter((product) => product.newArrival)
-    return (flagged.length ? flagged : products).slice(0, 18)
+    const prioritized = [
+      ...products.filter((product) => product.newArrival),
+      ...products.filter((product) => !product.newArrival),
+    ]
+    return prioritized.slice(0, 18)
   }, [products])
 
   return (

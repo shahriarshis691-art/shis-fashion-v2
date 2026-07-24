@@ -290,8 +290,11 @@ export default function HomePage() {
   }, [homepageContent.categorySections])
 
   const newArrivals = useMemo(() => {
-    const flagged = products.filter((product) => product.newArrival)
-    return (flagged.length ? flagged : products).slice(0, 8)
+    const prioritized = [
+      ...products.filter((product) => product.newArrival),
+      ...products.filter((product) => !product.newArrival),
+    ]
+    return prioritized.slice(0, 8)
   }, [products])
 
   const featuredBrands = useMemo(
