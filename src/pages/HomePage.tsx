@@ -315,7 +315,10 @@ export default function HomePage() {
                 transition={{ duration: 0.3 }}
                 className="max-w-[17rem] sm:max-w-[25rem]"
               >
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80">
+                <p
+                  className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80"
+                  style={{ textShadow: '0 1px 8px rgba(0, 0, 0, 0.4)' }}
+                >
                   {homepageContent.heroEyebrow || 'SHIS FASHION'}
                 </p>
                 <h1
@@ -324,7 +327,10 @@ export default function HomePage() {
                 >
                   {homepageContent.heroTitle}
                 </h1>
-                <p className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7">
+                <p
+                  className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7"
+                  style={{ textShadow: '0 1px 10px rgba(0, 0, 0, 0.42)' }}
+                >
                   {homepageContent.heroSubtitle}
                 </p>
                 <div className="mt-5">
