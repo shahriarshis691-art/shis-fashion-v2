@@ -664,19 +664,32 @@ export default function ShopPage() {
         </div>
 
         {ready && visibleProducts.length === 0 ? (
-          <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
-            <p className="mt-2 text-sm text-black/70">Try another filter combination.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setFilters({ inStockOnly: false, newOnly: false })
-                setSortBy('popular')
-              }}
-              className="ui-interactive mt-4 border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
-            >
-              Reset filters
-            </button>
+          <div className="mt-8">
+            <div className="border border-dashed border-black/20 px-4 py-6 text-center">
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
+              <p className="mt-2 text-sm text-black/70">Try another filter combination.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({ inStockOnly: false, newOnly: false })
+                  setSortBy('popular')
+                }}
+                className="ui-interactive mt-4 border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              >
+                Reset filters
+              </button>
+            </div>
+
+            {products.length > 0 ? (
+              <div className="mt-6">
+                <p className="text-sm text-black/60">Fallback: showing all available products (debug view)</p>
+                <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid">
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </Container>
