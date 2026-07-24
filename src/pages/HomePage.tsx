@@ -223,23 +223,7 @@ export default function HomePage() {
       .sort((left, right) => left.order - right.order)
       .map((section) => {
         const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const normalizedLabel = section.label.trim().toLowerCase()
-        const labelMatchedImage =
-          normalizedLabel.includes('women')
-            ? homeCategoryItems.find((item) => item.key === 'womens')?.image
-            : normalizedLabel.includes('men')
-              ? homeCategoryItems.find((item) => item.key === 'mens')?.image
-              : normalizedLabel.includes('kid')
-                ? homeCategoryItems.find((item) => item.key === 'kids')?.image
-                : normalizedLabel.includes('western')
-                  ? homeCategoryItems.find((item) => item.key === 'western')?.image
-                  : normalizedLabel.includes('denim') || normalizedLabel.includes('sale')
-                    ? homeCategoryItems.find((item) => item.key === 'denim')?.image
-                    : normalizedLabel.includes('new') || normalizedLabel.includes('arrival')
-                      ? homeCategoryItems.find((item) => item.key === 'couples')?.image
-                      : undefined
-
-        const sectionImage = normalizeCatalogImageUrl(labelMatchedImage || fallback?.image || section.coverImage || section.images[0] || '', 1200, 900)
+        const sectionImage = normalizeCatalogImageUrl(section.coverImage || section.images[0] || fallback?.image || '', 1200, 900)
 
         return {
           key: section.key,
