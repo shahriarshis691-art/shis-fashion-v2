@@ -95,6 +95,20 @@ export interface AdminBrand {
   archivedAt?: string | { seconds: number }
 }
 
+export interface FounderProfile {
+  name: string
+  title: string
+  image: string
+  bio: string
+  story: string
+  socials: {
+    whatsapp: string
+    facebook: string
+    instagram: string
+    email: string
+  }
+}
+
 const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
   new: ['confirmed', 'cancelled'],
   confirmed: ['processing', 'cancelled'],
@@ -213,6 +227,7 @@ export function isOrderBackendReady() {
 const PRODUCTS_KEY = 'shis-admin-products'
 const ORDERS_KEY = 'shis-admin-orders'
 const HOMEPAGE_KEY = 'shis-admin-homepage'
+const FOUNDER_KEY = 'shis-admin-founder'
 const CATEGORIES_KEY = 'shis-admin-categories'
 const DATA_MODE_KEY = 'shis-admin-data-mode'
 const LEGACY_AUTH_KEY = 'shis-admin-auth'
@@ -1188,6 +1203,20 @@ const defaultHomepage: HomepageContent = {
   ],
 }
 
+const defaultFounderProfile: FounderProfile = {
+  name: 'SM Shahriar Walid',
+  title: 'Founder and Vision Lead',
+  image: '/brands/founder-walid.jpg',
+  bio: 'Building connected premium brands across fashion, lifestyle products, and design-led development.',
+  story: 'From product detail to customer experience, the focus is simple: create trusted brands with strong design identity and dependable service.',
+  socials: {
+    whatsapp: 'https://wa.me/8801887848304',
+    facebook: 'https://facebook.com/',
+    instagram: 'https://instagram.com/',
+    email: 'mailto:shahriarshis@gmail.com',
+  },
+}
+
 function normalizeProduct(product: AdminProduct): AdminProduct {
   const normalizedImages = compactManagedImages(product)
 
@@ -1293,6 +1322,17 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
   }
 }
 
+function normalizeFounderProfile(content: Partial<FounderProfile> | undefined): FounderProfile {
+  return {
+    ...defaultFounderProfile,
+    ...(content ?? {}),
+    socials: {
+      ...defaultFounderProfile.socials,
+      ...(content?.socials ?? {}),
+    },
+  }
+}
+
 const defaultCategories: AdminCategory[] = [
   { id: 'cat-oversized-tee', name: 'Oversized Tee', slug: 'oversized-tee', createdAt: '2026-01-01' },
   { id: 'cat-unisex-tee', name: 'Unisex Tee', slug: 'unisex-tee', createdAt: '2026-01-01' },
@@ -1323,6 +1363,10 @@ function ensureSeedData() {
 
   if (!window.localStorage.getItem(HOMEPAGE_KEY)) {
     writeStored(HOMEPAGE_KEY, defaultHomepage)
+  }
+
+  if (!window.localStorage.getItem(FOUNDER_KEY)) {
+    writeStored(FOUNDER_KEY, defaultFounderProfile)
   }
 
   if (!window.localStorage.getItem(CATEGORIES_KEY)) {
@@ -2153,6 +2197,55 @@ export function subscribeToHomepageContent(callback: (content: HomepageContent, 
   )
 }
 
+export function subscribeToFounderProfile(callback: (profile: FounderProfile, meta?: { source: string; path: string; receivedAt: string }) => void) {
+  ensureSeedData()
+  const stored = normalizeFounderProfile(readStored(FOUNDER_KEY, defaultFounderProfile))
+  callback(stored, { source: 'local-seed', path: 'settings/founder', receivedAt: new Date().toISOString() })
+
+  if (import.meta.env.DEV) {
+    console.info('[founder] subscribe:init', {
+      hasFirebaseDb: Boolean(firebaseDb),
+      localFirstMode: isLocalFirstDataMode(),
+    })
+  }
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return subscribeToStored(FOUNDER_KEY, defaultFounderProfile, (content) => callback(normalizeFounderProfile(content), {
+      source: 'local-storage-sync',
+      path: 'settings/founder',
+      receivedAt: new Date().toISOString(),
+    }))
+  }
+
+  const founderRef = doc(firebaseDb, 'settings', 'founder')
+  return onSnapshot(
+    founderRef,
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        callback(defaultFounderProfile, {
+          source: 'firestore-missing-doc',
+          path: 'settings/founder',
+          receivedAt: new Date().toISOString(),
+        })
+        return
+      }
+      callback(normalizeFounderProfile(snapshot.data() as Partial<FounderProfile>), {
+        source: 'firestore',
+        path: 'settings/founder',
+        receivedAt: new Date().toISOString(),
+      })
+    },
+    (error) => {
+      const details = describeFirebaseError(error)
+      console.error('[founder] subscribe:error', {
+        path: 'settings/founder',
+        code: details.code,
+        message: details.message,
+      })
+    },
+  )
+}
+
 export function subscribeToCategories(callback: (categories: AdminCategory[]) => void) {
   ensureSeedData()
   callback(readStored(CATEGORIES_KEY, defaultCategories).filter((category) => !category.archived))
@@ -2456,6 +2549,54 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
     })
 
     throw new Error(`Homepage save failed (${details.code}): ${details.message}`, {
+      cause: error,
+    })
+  }
+}
+
+export async function updateFounderProfile(profile: FounderProfile): Promise<{ mode: 'local' | 'live'; path: string }> {
+  const normalized = normalizeFounderProfile(profile)
+  const localFirstMode = isLocalFirstDataMode()
+
+  if (import.meta.env.DEV) {
+    console.info('[founder] save:start', {
+      hasFirebaseDb: Boolean(firebaseDb),
+      localFirstMode,
+      path: 'settings/founder',
+      name: normalized.name,
+    })
+  }
+
+  if (!firebaseDb && !localFirstMode) {
+    throw new Error('Firestore is not initialized. Founder profile cannot be saved to live data.')
+  }
+
+  if (!firebaseDb || localFirstMode) {
+    writeStored(FOUNDER_KEY, normalized)
+    await recordAdminAudit('founder.update', 'homepage', 'settings/founder', { mode: 'local' })
+    return { mode: 'local', path: 'settings/founder' }
+  }
+
+  try {
+    const ref = doc(firebaseDb, 'settings', 'founder')
+    await setDoc(ref, normalized)
+    writeStored(FOUNDER_KEY, normalized)
+    await recordAdminAudit('founder.update', 'homepage', 'settings/founder', { mode: 'live' })
+
+    if (import.meta.env.DEV) {
+      console.info('[founder] save:complete', { path: 'settings/founder', name: normalized.name })
+    }
+
+    return { mode: 'live', path: 'settings/founder' }
+  } catch (error) {
+    const details = describeFirebaseError(error)
+    console.error('[founder] save:error', {
+      path: 'settings/founder',
+      code: details.code,
+      message: details.message,
+    })
+
+    throw new Error(`Founder save failed (${details.code}): ${details.message}`, {
       cause: error,
     })
   }

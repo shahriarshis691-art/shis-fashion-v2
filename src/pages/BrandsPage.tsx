@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
-import { brandEntries, founderProfile, type BrandEntry } from '../data/brandShowcase'
-import { subscribeToAdminBrands, type AdminBrand } from '../firebase/adminService'
+import { founderProfile as staticFounderProfile, brandEntries, type BrandEntry } from '../data/brandShowcase'
+import { subscribeToAdminBrands, subscribeToFounderProfile, type AdminBrand, type FounderProfile } from '../firebase/adminService'
 
 const LOGO_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"%3E%3Cdefs%3E%3ClinearGradient id="bg" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0" stop-color="%230b0b0b"/%3E%3Cstop offset="1" stop-color="%23181818"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="1200" height="700" fill="url(%23bg)"/%3E%3Ccircle cx="980" cy="110" r="180" fill="%23c9a227" fill-opacity="0.12"/%3E%3Ctext x="50%25" y="53%25" dominant-baseline="middle" text-anchor="middle" font-family="Georgia, serif" font-size="76" fill="%23e7d6a1" letter-spacing="8"%3EBRAND%3C/text%3E%3C/svg%3E'
 
@@ -82,16 +82,23 @@ function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
 
 export default function BrandsPage() {
   const [liveBrands, setLiveBrands] = useState<AdminBrand[]>([])
+  const [liveFounderProfile, setLiveFounderProfile] = useState<FounderProfile | null>(null)
 
   useEffect(() => {
-    const unsubscribe = subscribeToAdminBrands((nextBrands) => setLiveBrands(nextBrands))
-    return unsubscribe
+    const unsubscribeBrands = subscribeToAdminBrands((nextBrands) => setLiveBrands(nextBrands))
+    const unsubscribeFounder = subscribeToFounderProfile((profile) => setLiveFounderProfile(profile))
+    return () => {
+      unsubscribeBrands?.()
+      unsubscribeFounder?.()
+    }
   }, [])
 
   const displayBrands = useMemo(
     () => (liveBrands.length ? liveBrands.map(mapLiveBrandToDisplayBrand) : brandEntries),
     [liveBrands],
   )
+
+  const displayFounder = liveFounderProfile ?? staticFounderProfile
 
   return (
     <section className="px-3 pb-16 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pt-8">
@@ -116,8 +123,8 @@ export default function BrandsPage() {
         <div className="mt-8 grid gap-4 rounded-[1.35rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:mt-10 sm:rounded-[1.8rem] sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:p-7">
           <div className="overflow-hidden rounded-[1rem] border border-[var(--color-border)] bg-[#0e0e0e]">
             <img
-              src={founderProfile.image}
-              alt={founderProfile.name}
+              src={displayFounder.image}
+              alt={displayFounder.name}
               loading="lazy"
               decoding="async"
               onError={(event) => handleImageError(event, FOUNDER_PLACEHOLDER)}
@@ -127,16 +134,16 @@ export default function BrandsPage() {
 
           <div className="flex flex-col justify-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">Founder</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">{founderProfile.name}</h2>
-            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">{founderProfile.title}</p>
-            <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">{founderProfile.bio}</p>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{founderProfile.story}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">{displayFounder.name}</h2>
+            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">{displayFounder.title}</p>
+            <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.bio}</p>
+            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.story}</p>
 
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <a href={founderProfile.socials.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[rgba(0,0,0,0.28)] bg-[rgba(0,0,0,0.06)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]">WhatsApp</a>
-              <a href={founderProfile.socials.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Facebook</a>
-              <a href={founderProfile.socials.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Instagram</a>
-              <a href={founderProfile.socials.email} className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">E-mail</a>
+              <a href={displayFounder.socials.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[rgba(0,0,0,0.28)] bg-[rgba(0,0,0,0.06)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]">WhatsApp</a>
+              <a href={displayFounder.socials.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Facebook</a>
+              <a href={displayFounder.socials.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Instagram</a>
+              <a href={displayFounder.socials.email} className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">E-mail</a>
             </div>
           </div>
         </div>

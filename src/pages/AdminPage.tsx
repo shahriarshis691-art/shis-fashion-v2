@@ -28,11 +28,13 @@ import {
   subscribeToArchivedCategories,
   subscribeToArchivedOrders,
   subscribeToArchivedProducts,
+  subscribeToFounderProfile,
   subscribeToHomepageContent,
   subscribeToCategories,
   subscribeToOrders,
   subscribeToProducts,
   updateCategory,
+  updateFounderProfile,
   updateHomepageContent,
   updateOrderDetails,
   updateOrderStatus,
@@ -42,6 +44,7 @@ import {
   type AdminOrder,
   type AdminProduct,
   type AdminCategory,
+  type FounderProfile,
   type HomepageContent,
   type HomepageCategorySection,
   type HomepageCategorySectionKey,
@@ -165,6 +168,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   })
   const [homepageSnapshotDebug, setHomepageSnapshotDebug] = useState<HomepageContentSnapshotMeta | null>(null)
   const [toast, setToast] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null)
+  const [founderForm, setFounderForm] = useState<FounderProfile | null>(null)
+  const [founderSaving, setFounderSaving] = useState(false)
+  const [founderMessage, setFounderMessage] = useState('')
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -207,6 +214,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     })
     const unsubscribeCategories = subscribeToCategories((nextCategories) => setCategories(nextCategories))
     const unsubscribeBrands = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
+    const unsubscribeFounder = subscribeToFounderProfile((nextFounder) => setFounderProfile(nextFounder))
     const unsubscribeArchivedProducts = subscribeToArchivedProducts((nextProducts) => setArchivedProducts(nextProducts))
     const unsubscribeArchivedOrders = subscribeToArchivedOrders((nextOrders) => setArchivedOrders(nextOrders))
     const unsubscribeArchivedCategories = subscribeToArchivedCategories((nextCategories) => setArchivedCategories(nextCategories))
@@ -218,6 +226,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       unsubscribeHomepage()
       unsubscribeCategories()
       unsubscribeBrands()
+      unsubscribeFounder?.()
       unsubscribeArchivedProducts()
       unsubscribeArchivedOrders()
       unsubscribeArchivedCategories()
@@ -949,7 +958,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleSummaryCardClick = (target: 'orders' | 'products' | 'homepage' | 'categories' | 'customers', filter?: 'all' | AdminOrder['status']) => {
+  const handleSummaryCardClick = (target: 'orders' | 'products' | 'homepage' | 'categories' | 'customers' | 'founder', filter?: 'all' | AdminOrder['status']) => {
     if (typeof filter !== 'undefined') {
       setOrderStatusFilter(filter)
     }
@@ -964,7 +973,34 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       scrollToSection('categories-management')
     } else if (target === 'customers') {
       scrollToSection('customers-management')
+    } else if (target === 'founder') {
+      scrollToSection('founder-management')
     }
+  }
+
+  const handleEditFounder = () => {
+    if (founderProfile) {
+      setFounderForm({ ...founderProfile })
+    }
+  }
+
+  const handleSaveFounder = async () => {
+    if (!founderForm) return
+    setFounderSaving(true)
+    setFounderMessage('')
+    try {
+      await updateFounderProfile(founderForm)
+      setFounderMessage('Founder profile saved.')
+    } catch (error) {
+      setFounderMessage(`Error: ${error instanceof Error ? error.message : 'Save failed.'}`)
+    } finally {
+      setFounderSaving(false)
+    }
+  }
+
+  const handleCancelFounder = () => {
+    setFounderForm(null)
+    setFounderMessage('')
   }
 
   const homepageSections = useMemo(() => {
@@ -1205,6 +1241,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               { label: 'Total Brands', value: dashboardSummary.totalBrands, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
               { label: 'Archived Brands', value: dashboardSummary.archivedBrandsCount, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
               { label: 'Live Mode', value: firebaseReady ? 'Firebase' : launchModeEnabled ? 'Launch Mode' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
+              { label: 'Founder Profile', value: founderProfile?.name ?? '-', target: () => handleSummaryCardClick('founder') },
             ].map((card) => (
               <button key={card.label} type="button" onClick={card.target} className="text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
                 <Card className="h-full rounded-[1.6rem] p-4">
@@ -2016,6 +2053,95 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </div>
             </Card>
           </div>
+        </div>
+
+        <div id="founder-management" className="mt-8">
+          <Card className="rounded-[2rem] p-5 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Founder</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Edit founder profile</h2>
+              </div>
+              <div className="flex gap-2">
+                {founderForm ? (
+                  <>
+                    <Button onClick={handleSaveFounder} disabled={founderSaving}>{founderSaving ? 'Saving…' : 'Save'}</Button>
+                    <Button variant="secondary" onClick={handleCancelFounder}>Cancel</Button>
+                  </>
+                ) : (
+                  <Button variant="secondary" onClick={handleEditFounder}>Edit</Button>
+                )}
+              </div>
+            </div>
+
+            {founderMessage ? <p className="mt-3 text-sm text-[var(--color-accent)]">{founderMessage}</p> : null}
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <input
+                value={founderForm?.name ?? founderProfile?.name ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, name: event.target.value })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Founder name"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.title ?? founderProfile?.title ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, title: event.target.value })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Title"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.image ?? founderProfile?.image ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, image: event.target.value })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Image URL"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.socials.whatsapp ?? founderProfile?.socials.whatsapp ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, whatsapp: event.target.value } })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="WhatsApp URL"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.socials.facebook ?? founderProfile?.socials.facebook ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, facebook: event.target.value } })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Facebook URL"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.socials.instagram ?? founderProfile?.socials.instagram ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, instagram: event.target.value } })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Instagram URL"
+                disabled={!founderForm}
+              />
+              <input
+                value={founderForm?.socials.email ?? founderProfile?.socials.email ?? ''}
+                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, email: event.target.value } })}
+                className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                placeholder="Email URL"
+                disabled={!founderForm}
+              />
+            </div>
+            <textarea
+              value={founderForm?.bio ?? founderProfile?.bio ?? ''}
+              onChange={(event) => founderForm && setFounderForm({ ...founderForm, bio: event.target.value })}
+              className="mt-4 min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+              placeholder="Bio"
+              disabled={!founderForm}
+            />
+            <textarea
+              value={founderForm?.story ?? founderProfile?.story ?? ''}
+              onChange={(event) => founderForm && setFounderForm({ ...founderForm, story: event.target.value })}
+              className="mt-4 min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+              placeholder="Story"
+              disabled={!founderForm}
+            />
+          </Card>
         </div>
 
         {showBrandManagement && <BrandManagement onDone={() => setShowBrandManagement(false)} />}
