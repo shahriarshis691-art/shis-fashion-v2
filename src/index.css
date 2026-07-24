@@ -16,10 +16,6 @@
   background-color: var(--color-bg);
 }
 
-:root[data-theme='midnight'] {
-  color: var(--color-text);
-  background-color: var(--color-bg);
-}
 
 html {
   font-size: 100%;

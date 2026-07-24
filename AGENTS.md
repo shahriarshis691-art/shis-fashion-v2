@@ -106,7 +106,7 @@ The AI must **NEVER** violate these rules.
 - Reuse existing UI components in `src/components/ui/`.
 - Never introduce inconsistent styling, colors, or typography.
 - Preserve spacing, typography, and visual hierarchy defined by CSS custom properties.
-- Themes (`luxury` | `midnight`) are controlled via `ThemeContext` — do not hardcode theme colors.
+- Themes (`luxury`) are controlled via `ThemeContext` — do not hardcode theme colors.
 - Fonts: **Manrope** (body), **Cormorant Garamond** (display).
 
 ### Components

@@ -1,24 +1,16 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ThemeContext } from './ThemeContextValue'
 
-export type ThemeName = 'luxury' | 'midnight'
-
-export interface ThemeContextValue {
-  theme: ThemeName
-  setTheme: (value: ThemeName) => void
-  toggleTheme: () => void
-}
-
 const STORAGE_KEY = 'shis-fashion-theme'
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>(() => {
+  const [theme, setThemeState] = useState<'luxury'>(() => {
     if (typeof window === 'undefined') {
-      return 'midnight'
+      return 'luxury'
     }
 
     const storedTheme = window.localStorage.getItem(STORAGE_KEY)
-    return storedTheme === 'luxury' ? 'luxury' : 'midnight'
+    return storedTheme === 'luxury' ? 'luxury' : 'luxury'
   })
 
   useEffect(() => {
@@ -27,19 +19,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, theme)
   }, [theme])
 
-  const setTheme = (value: ThemeName) => {
+  const setTheme = (value: 'luxury') => {
     setThemeState(value)
-  }
-
-  const toggleTheme = () => {
-    setThemeState((current) => (current === 'luxury' ? 'midnight' : 'luxury'))
   }
 
   const value = useMemo(
     () => ({
       theme,
       setTheme,
-      toggleTheme,
     }),
     [theme],
   )
