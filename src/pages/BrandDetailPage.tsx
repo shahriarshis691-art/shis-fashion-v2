@@ -1,11 +1,61 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { brandEntries } from '../data/brandShowcase'
+import { subscribeToAdminBrands, type AdminBrand } from '../firebase/adminService'
+
+type DisplayBrand = {
+  id: string
+  name: string
+  tag: string
+  summary: string
+  details: string
+  logo: string
+  contacts: {
+    website: string
+    contact: string
+  }
+}
+
+function mapLiveBrandToDisplayBrand(brand: AdminBrand): DisplayBrand {
+  return {
+    id: brand.slug,
+    name: brand.name,
+    tag: brand.tag,
+    summary: brand.summary,
+    details: brand.description,
+    logo: brand.logo,
+    contacts: {
+      website: brand.website,
+      contact: brand.contactPhone ? `tel:${brand.contactPhone.replace(/\s+/g, '')}` : `mailto:${brand.contactEmail}`,
+    },
+  }
+}
 
 export default function BrandDetailPage() {
   const { slug } = useParams()
-  const brand = brandEntries.find((entry) => entry.id === slug)
+  const [liveBrands, setLiveBrands] = useState<AdminBrand[]>([])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAdminBrands((nextBrands) => setLiveBrands(nextBrands))
+    return unsubscribe
+  }, [])
+
+  const brand = useMemo(() => {
+    const normalizedSlug = (slug ?? '').trim().toLowerCase()
+
+    const liveMatch = liveBrands.find((entry) => {
+      const entrySlug = entry.slug.trim().toLowerCase()
+      const entryName = entry.name.trim().toLowerCase()
+      return entrySlug === normalizedSlug || entryName === normalizedSlug
+    })
+    if (liveMatch) {
+      return mapLiveBrandToDisplayBrand(liveMatch)
+    }
+
+    return brandEntries.find((entry) => entry.id === normalizedSlug)
+  }, [liveBrands, slug])
 
   if (!brand) {
     return (

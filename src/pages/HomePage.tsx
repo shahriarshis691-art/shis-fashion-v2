@@ -7,8 +7,10 @@ import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
+  subscribeToAdminBrands,
   subscribeToHomepageContent,
   subscribeToProducts,
+  type AdminBrand,
   type HomepageCategorySection,
   type AdminProduct,
   type HomepageContent,
@@ -191,6 +193,7 @@ function hasValidSectionHref(section: HomepageCategorySection) {
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
   const [products, setProducts] = useState<AdminProduct[]>(defaultProducts)
+  const [brands, setBrands] = useState<AdminBrand[]>([])
   const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
 
@@ -201,6 +204,11 @@ export default function HomePage() {
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => setProducts(nextProducts.length ? nextProducts : defaultProducts))
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
     return unsubscribe
   }, [])
 
@@ -288,9 +296,27 @@ export default function HomePage() {
 
   const featuredBrands = useMemo(
     () => ['xeroxii', 'ceravo', 'rangkutir']
-      .map((id) => brandEntries.find((brand) => brand.id === id))
+      .map((slug) => {
+        const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
+        if (liveBrand) {
+          return {
+            id: liveBrand.slug,
+            name: liveBrand.name,
+            tag: liveBrand.tag,
+            summary: liveBrand.summary,
+            details: liveBrand.description,
+            logo: liveBrand.logo,
+            contacts: {
+              website: liveBrand.website,
+              contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
+            },
+          }
+        }
+
+        return brandEntries.find((brand) => brand.id === slug) ?? null
+      })
       .filter((brand): brand is NonNullable<typeof brand> => Boolean(brand)),
-    [],
+    [brands],
   )
 
   useEffect(() => {
