@@ -31,13 +31,18 @@ function shouldSendStabilizationHeartbeat() {
 export default function MainLayout() {
   const location = useLocation()
   const lastSoftLaunchEventRef = useRef('')
+  const lastTrackedPathRef = useRef('')
   const softLaunchDecision = useMemo(
     () => evaluateSoftLaunchAccess(location.pathname, location.search),
     [location.pathname, location.search],
   )
 
   useEffect(() => {
-    // Track PageView on every page change
+    if (lastTrackedPathRef.current === location.pathname) {
+      return
+    }
+
+    lastTrackedPathRef.current = location.pathname
     metaPixel.pageView()
     googleAnalytics.pageView()
   }, [location.pathname])

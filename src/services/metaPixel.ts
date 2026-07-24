@@ -70,6 +70,10 @@ class MetaPixelService {
       return
     }
 
+    if (!import.meta.env.PROD) {
+      return
+    }
+
     try {
       // Add Facebook Pixel script
       this.loadPixelScript()
@@ -108,6 +112,7 @@ class MetaPixelService {
    * Fire PageView event (called on every page)
    */
   pageView(): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'PageView')
@@ -120,6 +125,7 @@ class MetaPixelService {
    * Fire ViewContent event (on product details page)
    */
   viewContent(data: ViewContentData): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'ViewContent', {
@@ -138,6 +144,7 @@ class MetaPixelService {
    * Fire Search event (when user performs search)
    */
   search(data: SearchData): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'Search', {
@@ -152,6 +159,7 @@ class MetaPixelService {
    * Fire AddToCart event (when add to cart button clicked)
    */
   addToCart(data: AddToCartData): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'AddToCart', {
@@ -170,6 +178,7 @@ class MetaPixelService {
    * Fire InitiateCheckout event (when checkout begins)
    */
   initiateCheckout(data: InitiateCheckoutData): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'InitiateCheckout', {
@@ -186,6 +195,7 @@ class MetaPixelService {
    * Fire Purchase event (only after successful order)
    */
   purchase(data: PurchaseData): void {
+    if (!import.meta.env.PROD) return
     if (!this.isInitialized || !this.pixelId) return
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'Purchase', {

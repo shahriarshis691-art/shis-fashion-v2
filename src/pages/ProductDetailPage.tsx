@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
@@ -97,6 +97,7 @@ export default function ProductDetailPage() {
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
+  const lastTrackedProductIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -132,6 +133,12 @@ export default function ProductDetailPage() {
     if (!product || !ready) {
       return
     }
+
+    if (lastTrackedProductIdRef.current === product.id) {
+      return
+    }
+
+    lastTrackedProductIdRef.current = product.id
 
     metaPixel.viewContent({
       content_name: product.name,

@@ -49,6 +49,10 @@ class GoogleAnalyticsService {
       return
     }
 
+    if (!import.meta.env.PROD) {
+      return
+    }
+
     window.dataLayer = window.dataLayer || []
     window.gtag = (...args: unknown[]): void => {
       window.dataLayer?.push(args)
@@ -68,6 +72,7 @@ class GoogleAnalyticsService {
   }
 
   pageView(): void {
+    if (!import.meta.env.PROD) return
     if (!this.initialized || !this.measurementId || !window.gtag) return
     this.track('page_view', {
       page_path: window.location.pathname,
@@ -77,6 +82,7 @@ class GoogleAnalyticsService {
   }
 
   search(searchTerm: string): void {
+    if (!import.meta.env.PROD) return
     if (!searchTerm.trim()) {
       return
     }
@@ -87,6 +93,7 @@ class GoogleAnalyticsService {
   }
 
   viewItem(item: AnalyticsItem, currency = 'BDT'): void {
+    if (!import.meta.env.PROD) return
     this.track('view_item', {
       currency,
       value: item.price ?? 0,
@@ -95,6 +102,7 @@ class GoogleAnalyticsService {
   }
 
   addToBag(item: AnalyticsItem, currency = 'BDT'): void {
+    if (!import.meta.env.PROD) return
     this.track('add_to_cart', {
       currency,
       value: (item.price ?? 0) * (item.quantity ?? 1),
@@ -103,6 +111,7 @@ class GoogleAnalyticsService {
   }
 
   beginCheckout(payload: CheckoutPayload): void {
+    if (!import.meta.env.PROD) return
     this.track('begin_checkout', {
       currency: payload.currency ?? 'BDT',
       value: payload.value,
@@ -111,6 +120,7 @@ class GoogleAnalyticsService {
   }
 
   purchase(payload: PurchasePayload): void {
+    if (!import.meta.env.PROD) return
     this.track('purchase', {
       transaction_id: payload.transaction_id,
       currency: payload.currency ?? 'BDT',
@@ -120,6 +130,7 @@ class GoogleAnalyticsService {
   }
 
   viewItemList(payload: ItemListPayload): void {
+    if (!import.meta.env.PROD) return
     this.track('view_item_list', {
       item_list_id: payload.item_list_id,
       item_list_name: payload.item_list_name,
@@ -129,6 +140,7 @@ class GoogleAnalyticsService {
   }
 
   trackEvent(eventName: string, params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
     this.track(eventName, params)
   }
 

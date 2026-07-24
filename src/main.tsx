@@ -11,12 +11,14 @@ import { sessionReplay } from './services/sessionReplay'
 import { errorMonitoring } from './services/errorMonitoring'
 import { incidentAlerts } from './services/incidentAlerts'
 
-// Initialize analytics
-googleAnalytics.initialize()
-metaPixel.initialize()
-sessionReplay.initialize()
-incidentAlerts.initialize()
-errorMonitoring.initialize()
+// Initialize analytics only in production builds
+if (import.meta.env.PROD) {
+  googleAnalytics.initialize()
+  metaPixel.initialize()
+  sessionReplay.initialize()
+  incidentAlerts.initialize()
+  errorMonitoring.initialize()
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

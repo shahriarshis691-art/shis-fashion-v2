@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -150,9 +150,20 @@ export default function CollectionListingPage() {
     return featuredProducts[0]
   }, [featuredProducts, selectedProductId])
 
+  const lastTrackedCollectionProductIdRef = useRef<string | null>(null)
+
   useEffect(() => {
-    if (selectedProduct) {
-      metaPixel.viewContent({
+    if (!selectedProduct) {
+      return
+    }
+
+    if (lastTrackedCollectionProductIdRef.current === selectedProduct.id) {
+      return
+    }
+
+    lastTrackedCollectionProductIdRef.current = selectedProduct.id
+
+    metaPixel.viewContent({
         content_name: activeCollection.title,
         content_ids: [selectedProduct.id],
         content_type: 'product',
@@ -167,7 +178,6 @@ export default function CollectionListingPage() {
         price: parseBDT(selectedProduct.price),
         quantity: 1,
       }, 'BDT')
-    }
 
     applySeoMetadata(location.pathname, {
       title: `${activeCollection.title} | SHIS Fashion Bangladesh`,
