@@ -318,7 +318,12 @@ export default function HomePage() {
                 <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80">
                   {homepageContent.heroEyebrow || 'SHIS FASHION'}
                 </p>
-                <h1 className="mt-2 text-h1 text-white">{homepageContent.heroTitle}</h1>
+                <h1
+                  className="mt-2 text-h1 text-white"
+                  style={{ color: '#ffffff', textShadow: '0 2px 14px rgba(0, 0, 0, 0.45)' }}
+                >
+                  {homepageContent.heroTitle}
+                </h1>
                 <p className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7">
                   {homepageContent.heroSubtitle}
                 </p>
