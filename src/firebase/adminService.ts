@@ -485,8 +485,8 @@ async function isAdminUser(user: User) {
     return isEmailAllowListed === true ? true : hasAdminClaim
   }
 
-  let adminDocSnapshot: Awaited<ReturnType<typeof getDoc>> | null = null
-  let adminsSettingsSnapshot: Awaited<ReturnType<typeof getDoc>> | null = null
+  let adminDocSnapshot: Awaited<ReturnType<typeof getDoc>>
+  let adminsSettingsSnapshot: Awaited<ReturnType<typeof getDoc>>
 
   try {
     ;[adminDocSnapshot, adminsSettingsSnapshot] = await Promise.all([
@@ -509,7 +509,7 @@ async function isAdminUser(user: User) {
   }
 
   if (adminDocSnapshot.exists()) {
-    const adminDocData = adminDocSnapshot.data() as any
+    const adminDocData = adminDocSnapshot.data() as Record<string, unknown>
     const isActive = adminDocData.active !== false
     if (isActive && includesAdminRole(adminDocData.role, adminDocData.roles)) {
       return true
@@ -517,7 +517,7 @@ async function isAdminUser(user: User) {
   }
 
   if (adminsSettingsSnapshot.exists()) {
-    const settingsData = adminsSettingsSnapshot.data() as any
+    const settingsData = adminsSettingsSnapshot.data() as Record<string, unknown>
     if (listIncludesIdentifier(settingsData.emails, normalizedEmail)) {
       return true
     }

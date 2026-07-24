@@ -96,3 +96,23 @@
 .ui-interactive:hover {
   opacity: 0.9;
 }
+
+/* Mobile micro-pass: tighter image gaps for <=420px screens */
+@media (max-width: 420px) {
+  .product-card .product-card-meta {
+    padding-top: 0.25rem; /* reduce from default pt-2 */
+  }
+
+  .product-card .product-card-meta h3 {
+    margin-top: 0;
+  }
+
+  .product-card .product-card-meta p {
+    margin-top: 0.125rem;
+  }
+
+  /* Reduce listing grid gaps on very small screens */
+  .tight-mobile-grid {
+    gap: 0.5rem 0.25rem; /* row-gap column-gap */
+  }
+}

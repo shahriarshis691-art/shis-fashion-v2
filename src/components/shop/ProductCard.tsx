@@ -47,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden"
+      className="overflow-hidden product-card"
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block">
         <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
@@ -62,9 +62,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
         </div>
-        <div className="pt-2.5">
+        <div className="pt-2 product-card-meta">
           <h3 className="line-clamp-1 text-sm font-medium text-black">{product.name}</h3>
-          <p className="mt-1 text-sm font-semibold text-black">{product.price}</p>
+          <p className="mt-0.5 text-sm font-semibold text-black">{product.price}</p>
         </div>
       </Link>
     </motion.article>
