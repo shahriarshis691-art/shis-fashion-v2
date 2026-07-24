@@ -363,17 +363,17 @@ export default function HomePage() {
                 >
                   {homepageContent.heroSubtitle}
                 </p>
-                <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                <div className="mt-5 flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
                   <Link
                     to={homepageContent.heroPrimaryLink ?? '/shop'}
-                    className="ui-interactive inline-flex items-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
+                    className="ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
                   >
                     {homepageContent.heroCta || 'Shop now'}
                   </Link>
                   <button
                     type="button"
                     onClick={() => setIsBrandPanelOpen(true)}
-                    className="ui-interactive inline-flex items-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10"
+                    className="ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
                   >
                     Explore Our Brands
                   </button>
@@ -484,23 +484,33 @@ export default function HomePage() {
       </section>
 
       {isBrandPanelOpen ? (
-        <div className="fixed inset-0 z-[80] bg-black/70 px-3 py-5 sm:px-6 sm:py-8" role="dialog" aria-modal="true" aria-label="Brand details">
-          <div className="mx-auto flex h-full w-full max-w-5xl flex-col" onClick={(event) => event.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/20 pb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">Our Business Brands</p>
-              <button
-                type="button"
-                onClick={() => setIsBrandPanelOpen(false)}
-                className="ui-interactive border border-white/35 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white"
-              >
-                Close
-              </button>
-            </div>
+        <div
+          className="fixed inset-0 z-[80] bg-black/72 px-3 py-3 sm:px-6 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Brand details"
+          onClick={() => setIsBrandPanelOpen(false)}
+        >
+          <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-end sm:justify-start">
+            <div
+              className="max-h-[90vh] overflow-hidden rounded-t-[1.35rem] border border-white/20 bg-[rgba(8,8,8,0.96)] p-3 pb-4 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:max-h-full sm:rounded-[1.4rem] sm:p-5"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-white/20 pb-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">Our Business Brands</p>
+                <button
+                  type="button"
+                  onClick={() => setIsBrandPanelOpen(false)}
+                  className="ui-interactive border border-white/35 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white"
+                >
+                  Close
+                </button>
+              </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-4 overflow-y-auto pr-0.5">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {featuredBrands.map((brand) => (
-                  <article key={brand.id} className="rounded-[1.15rem] border border-white/18 bg-white/8 p-3.5 backdrop-blur-sm">
+                  <article key={brand.id} className="rounded-[1.15rem] border border-white/18 bg-white/8 p-4 backdrop-blur-sm">
                     <div className="overflow-hidden rounded-[0.9rem] border border-white/20 bg-white/95">
                       <img
                         src={brand.logo}
@@ -508,7 +518,7 @@ export default function HomePage() {
                         loading="lazy"
                         decoding="async"
                         onError={handleImageError}
-                        className="h-28 w-full object-contain p-3"
+                        className="h-24 w-full object-contain p-3 sm:h-28"
                       />
                     </div>
 
@@ -517,12 +527,12 @@ export default function HomePage() {
                     <p className="mt-2 text-sm leading-6 text-white/80">{brand.summary}</p>
                     <p className="mt-2 text-sm leading-6 text-white/68">{brand.details}</p>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <a
                         href={brand.contacts.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="ui-interactive inline-flex items-center border border-white bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
+                        className="ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
                       >
                         Website
                       </a>
@@ -530,22 +540,17 @@ export default function HomePage() {
                         href={brand.contacts.contact}
                         target="_blank"
                         rel="noreferrer"
-                        className="ui-interactive inline-flex items-center border border-white/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10"
+                        className="ui-interactive inline-flex w-full items-center justify-center border border-white/40 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
                       >
                         Contact
                       </a>
                     </div>
                   </article>
                 ))}
+                </div>
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsBrandPanelOpen(false)}
-            className="absolute inset-0 -z-10"
-            aria-label="Close brand details overlay"
-          />
         </div>
       ) : null}
     </div>
