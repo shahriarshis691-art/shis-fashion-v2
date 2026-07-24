@@ -223,7 +223,7 @@ export default function HomePage() {
       .sort((left, right) => left.order - right.order)
       .map((section) => {
         const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const sectionImage = normalizeCatalogImageUrl(section.coverImage || section.images[0] || fallback?.image || '', 1200, 900)
+        const sectionImage = normalizeCatalogImageUrl(fallback?.image || section.coverImage || section.images[0] || '', 1200, 900)
 
         return {
           key: section.key,
