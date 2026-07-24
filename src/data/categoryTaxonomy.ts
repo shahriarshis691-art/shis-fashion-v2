@@ -35,7 +35,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
 const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'kurti', label: 'Kurti', aliases: ['kurti'] },
   { slug: 'tops', label: 'Tops', aliases: ['tops'] },
-  { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'shirts', 'womens-shirt'] },
+  { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts'] },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree'] },
   { slug: 'tunic', label: 'Tunic', aliases: ['tunic', 'western', 'western-outfits'] },
