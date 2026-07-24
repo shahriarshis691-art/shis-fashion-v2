@@ -373,6 +373,14 @@ export default function Navbar() {
             </motion.div>
           ) : null}
         </AnimatePresence>
+
+        <nav className="border-t border-black/10 md:hidden" aria-label="Primary categories">
+          <div className="mx-auto flex w-full max-w-7xl items-center gap-4 overflow-x-auto px-3.5 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {primaryLinks.map((link) => (
+              <CategoryLink key={link.label} href={link.href} label={link.label} onNavigate={closeOverlays} />
+            ))}
+          </div>
+        </nav>
       </header>
 
       <AnimatePresence>
