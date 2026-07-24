@@ -24,7 +24,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt'] },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
-  { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee'] },
+  { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'] },
   { slug: 't-shirts', label: 'T-Shirts', aliases: ['t-shirts', 'unisex-tee'] },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'pants', label: 'Pants', aliases: ['pants'] },
@@ -34,8 +34,8 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
 
 const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'kurti', label: 'Kurti', aliases: ['kurti'] },
-  { slug: 'tops', label: 'Tops', aliases: ['tops', 'womens-dresses'] },
-  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'womens-shirt'] },
+  { slug: 'tops', label: 'Tops', aliases: ['tops'] },
+  { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'shirts', 'womens-shirt'] },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree'] },
   { slug: 'tunic', label: 'Tunic', aliases: ['tunic', 'western', 'western-outfits'] },
@@ -147,6 +147,12 @@ export function getAllTaxonomyCategoryOptions() {
       })
     }
   }
+
+  options.push({
+    segment: 'men',
+    slug: 'unisex-oversized-t-shirts',
+    label: 'Unisex Oversized T-Shirts',
+  })
 
   return options
 }
