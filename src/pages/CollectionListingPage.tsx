@@ -5,7 +5,7 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { parseBDT } from '../utils/currency'
-import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -35,6 +35,7 @@ interface ListingProduct {
 
 function toListingProduct(product: AdminProduct): ListingProduct {
   const media = getManagedImageEntries(product, 3)
+  const primaryImage = getProductImage(product)
   return {
     id: product.id,
     slug: slugify(product.name),
@@ -42,7 +43,7 @@ function toListingProduct(product: AdminProduct): ListingProduct {
     price: product.price,
     description: product.description,
     category: product.category,
-    image: media[0]?.url ?? '',
+    image: primaryImage || media[0]?.url || '',
     galleryImages: media.map((entry) => entry.url).filter(Boolean),
     sizes: product.sizes,
     stock: product.stock,

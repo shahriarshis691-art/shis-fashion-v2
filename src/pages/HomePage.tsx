@@ -12,7 +12,7 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
@@ -400,7 +400,7 @@ export default function HomePage() {
 
           <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5">
             {newArrivals.map((item, index) => {
-              const productImage = normalizeCatalogImageUrl(getManagedImageEntries(item, 1)[0]?.url ?? '', 900, 1125)
+              const productImage = normalizeCatalogImageUrl(getProductImage(item), 900, 1125)
               const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
 
               return (

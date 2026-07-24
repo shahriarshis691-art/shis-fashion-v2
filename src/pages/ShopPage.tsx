@@ -11,7 +11,7 @@ import {
   type AdminProduct,
 } from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
-import { getManagedImageEntries } from '../utils/media'
+import { getManagedImageEntries, getProductImage } from '../utils/media'
 import {
   type ShopSegment,
   SEGMENT_TABS,
@@ -65,6 +65,7 @@ function normalizeProductCategory(category: string) {
 
 function mapProduct(product: AdminProduct): ShopProduct {
   const imageEntries = getManagedImageEntries(product, 1)
+  const primaryImage = getProductImage(product)
 
   return {
     id: product.id,
@@ -72,7 +73,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
     name: product.name,
     price: product.price,
     category: normalizeProductCategory(product.category),
-    image: imageEntries[0]?.url ?? '',
+    image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
     stock: product.stock,
@@ -697,17 +698,6 @@ export default function ShopPage() {
                 Reset filters
               </button>
             </div>
-
-            {products.length > 0 ? (
-              <div className="mt-6">
-                <p className="text-sm text-black/60">Fallback: showing all available products (debug view)</p>
-                <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </div>
         ) : null}
       </Container>

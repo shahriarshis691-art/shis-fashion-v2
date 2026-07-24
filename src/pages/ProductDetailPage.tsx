@@ -5,7 +5,7 @@ import Button from '../components/ui/Button'
 import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
-import { getManagedImageEntries, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -22,6 +22,7 @@ function slugify(value: string) {
 
 function toProduct(product: AdminProduct) {
   const imageEntries = getManagedImageEntries(product, 1)
+  const primaryImage = getProductImage(product)
 
   return {
     id: product.id,
@@ -29,7 +30,7 @@ function toProduct(product: AdminProduct) {
     name: product.name,
     price: product.price,
     category: product.category,
-    image: imageEntries[0]?.url ?? '',
+    image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
     galleryImageTitles: imageEntries.map((entry) => entry.title),

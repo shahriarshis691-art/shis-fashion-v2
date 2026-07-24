@@ -35,6 +35,9 @@ export interface AdminProduct {
   colors: string[]
   description: string
   category: string
+  featuredImage?: string
+  thumbnail?: string
+  coverImage?: string
   images: string[]
   imageTitles?: string[]
   imageDescriptions?: string[]

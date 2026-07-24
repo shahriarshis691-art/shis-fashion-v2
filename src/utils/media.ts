@@ -4,6 +4,9 @@ const CLOUDINARY_HOST = 'res.cloudinary.com'
 export interface ManagedImageSource {
   images?: string[]
   image?: string
+  featuredImage?: string
+  thumbnail?: string
+  coverImage?: string
   imageTitles?: string[]
   imageDescriptions?: string[]
 }
@@ -12,6 +15,41 @@ export interface ManagedImageEntry {
   url: string
   title: string
   description: string
+}
+
+function toTrimmedString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function uniqueNonEmpty(values: string[]) {
+  const seen = new Set<string>()
+  return values.filter((value) => {
+    if (!value || seen.has(value)) {
+      return false
+    }
+    seen.add(value)
+    return true
+  })
+}
+
+function collectProductImageCandidates(source: ManagedImageSource) {
+  const arrayImages = Array.isArray(source.images)
+    ? source.images.map((entry) => toTrimmedString(entry)).filter(Boolean)
+    : []
+
+  const priority = [
+    toTrimmedString(source.featuredImage),
+    toTrimmedString(source.thumbnail),
+    toTrimmedString(source.coverImage),
+    ...arrayImages,
+    toTrimmedString(source.image),
+  ]
+
+  return uniqueNonEmpty(priority)
+}
+
+export function getProductImage(source: ManagedImageSource, fallback = '') {
+  return collectProductImageCandidates(source)[0] ?? fallback
 }
 
 export function isDemoImageUrl(url?: string) {
@@ -79,11 +117,7 @@ export function normalizeCatalogImageUrl(url: string, width: number, height: num
 }
 
 export function getManagedImageEntries(source: ManagedImageSource, minLength = 0): ManagedImageEntry[] {
-  const explicitImages = Array.isArray(source.images)
-    ? source.images.filter((entry): entry is string => typeof entry === 'string')
-    : []
-  const legacyImage = typeof source.image === 'string' ? source.image.trim() : ''
-  const images = explicitImages.length ? explicitImages : (legacyImage ? [legacyImage] : [])
+  const images = collectProductImageCandidates(source)
   const total = Math.max(images.length, minLength)
 
   return Array.from({ length: total }, (_, index) => ({
