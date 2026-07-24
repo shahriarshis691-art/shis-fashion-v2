@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import { homeCategoryItems } from '../data/homeCategories'
+import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -190,6 +191,7 @@ function hasValidSectionHref(section: HomepageCategorySection) {
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
   const [products, setProducts] = useState<AdminProduct[]>(defaultProducts)
+  const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
 
   useEffect(() => {
@@ -284,6 +286,34 @@ export default function HomePage() {
     return (flagged.length ? flagged : products).slice(0, 8)
   }, [products])
 
+  const featuredBrands = useMemo(
+    () => ['xeroxii', 'ceravo', 'rangkutir']
+      .map((id) => brandEntries.find((brand) => brand.id === id))
+      .filter((brand): brand is NonNullable<typeof brand> => Boolean(brand)),
+    [],
+  )
+
+  useEffect(() => {
+    if (!isBrandPanelOpen) {
+      return
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsBrandPanelOpen(false)
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [isBrandPanelOpen])
+
   return (
     <div className="bg-white pb-12">
       <section className="border-b border-black/10">
@@ -333,13 +363,20 @@ export default function HomePage() {
                 >
                   {homepageContent.heroSubtitle}
                 </p>
-                <div className="mt-5">
+                <div className="mt-5 flex flex-wrap items-center gap-2.5">
                   <Link
                     to={homepageContent.heroPrimaryLink ?? '/shop'}
                     className="ui-interactive inline-flex items-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
                   >
                     {homepageContent.heroCta || 'Shop now'}
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => setIsBrandPanelOpen(true)}
+                    className="ui-interactive inline-flex items-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10"
+                  >
+                    Explore Our Brands
+                  </button>
                 </div>
               </motion.div>
             </Container>
@@ -445,6 +482,72 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
+
+      {isBrandPanelOpen ? (
+        <div className="fixed inset-0 z-[80] bg-black/70 px-3 py-5 sm:px-6 sm:py-8" role="dialog" aria-modal="true" aria-label="Brand details">
+          <div className="mx-auto flex h-full w-full max-w-5xl flex-col" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-white/20 pb-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">Our Business Brands</p>
+              <button
+                type="button"
+                onClick={() => setIsBrandPanelOpen(false)}
+                className="ui-interactive border border-white/35 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 flex-1 overflow-y-auto">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {featuredBrands.map((brand) => (
+                  <article key={brand.id} className="rounded-[1.15rem] border border-white/18 bg-white/8 p-3.5 backdrop-blur-sm">
+                    <div className="overflow-hidden rounded-[0.9rem] border border-white/20 bg-white/95">
+                      <img
+                        src={brand.logo}
+                        alt={`${brand.name} logo`}
+                        loading="lazy"
+                        decoding="async"
+                        onError={handleImageError}
+                        className="h-28 w-full object-contain p-3"
+                      />
+                    </div>
+
+                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">{brand.tag}</p>
+                    <h3 className="mt-1 text-lg font-semibold text-white">{brand.name}</h3>
+                    <p className="mt-2 text-sm leading-6 text-white/80">{brand.summary}</p>
+                    <p className="mt-2 text-sm leading-6 text-white/68">{brand.details}</p>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <a
+                        href={brand.contacts.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ui-interactive inline-flex items-center border border-white bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90"
+                      >
+                        Website
+                      </a>
+                      <a
+                        href={brand.contacts.contact}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ui-interactive inline-flex items-center border border-white/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10"
+                      >
+                        Contact
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsBrandPanelOpen(false)}
+            className="absolute inset-0 -z-10"
+            aria-label="Close brand details overlay"
+          />
+        </div>
+      ) : null}
     </div>
   )
 }
