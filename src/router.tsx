@@ -17,6 +17,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const BrandsPage = lazy(() => import('./pages/BrandsPage'))
 const BrandDetailPage = lazy(() => import('./pages/BrandDetailPage'))
+const FounderDetailPage = lazy(() => import('./pages/FounderDetailPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const SalePage = lazy(() => import('./pages/SalePage'))
@@ -133,6 +134,10 @@ export const router = createBrowserRouter([
       {
         path: 'brands/:slug',
         element: withSuspense(<BrandDetailPage />),
+      },
+      {
+        path: 'founder',
+        element: withSuspense(<FounderDetailPage />),
       },
       {
         path: 'sale',
