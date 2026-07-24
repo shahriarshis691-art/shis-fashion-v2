@@ -45,6 +45,24 @@ function slugify(value: string) {
     .replace(/-+/g, '-')
 }
 
+function normalizeProductCategory(category: string) {
+  const raw = category.trim().toLowerCase()
+  if (!raw) {
+    return raw
+  }
+
+  const canonical = resolveCanonicalSubcategorySlug(raw)
+  if (canonical !== raw) {
+    return canonical
+  }
+
+  if (/(kids?|children|child|baby|babies|toddler|mini)/.test(raw)) {
+    return 'kids'
+  }
+
+  return raw
+}
+
 function mapProduct(product: AdminProduct): ShopProduct {
   const imageEntries = getManagedImageEntries(product, 1)
 
@@ -53,7 +71,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
     slug: slugify(product.name),
     name: product.name,
     price: product.price,
-    category: product.category,
+    category: normalizeProductCategory(product.category),
     image: imageEntries[0]?.url ?? '',
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),

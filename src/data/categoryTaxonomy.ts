@@ -43,7 +43,7 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
 ]
 
 const KIDS_SUBCATEGORIES: SubcategoryConfig[] = [
-  { slug: 'kids', label: 'Kids', aliases: ['kids'] },
+  { slug: 'kids', label: 'Kids', aliases: ['kids', 'kid', 'kidswear', 'kids-wear', 'children', 'child', 'baby', 'babies', 'toddler', 'mini'] },
 ]
 
 const SEGMENTS: SegmentConfig[] = [
