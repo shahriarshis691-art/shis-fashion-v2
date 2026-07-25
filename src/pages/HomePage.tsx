@@ -355,6 +355,8 @@ export default function HomePage() {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
+                width="1400"
+                height="900"
                 sizes="100vw"
                 onError={handleImageError}
                 className={`absolute inset-0 h-full w-full object-cover ${
@@ -475,7 +477,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5">
+          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
             {newArrivals.map((item, index) => {
               const productImage = normalizeCatalogImageUrl(getProductImage(item), 900, 1125)
               const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''

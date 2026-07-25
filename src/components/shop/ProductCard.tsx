@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../data/shopData'
 import { isDemoImageUrl, normalizeCatalogImageUrl } from '../../utils/media'
@@ -36,7 +37,7 @@ function getImagePositionClass(category: string) {
   }
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
   const imagePositionClass = getImagePositionClass(product.category)
@@ -64,9 +65,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="pt-2 product-card-meta">
           <h3 className="line-clamp-1 text-sm font-medium text-black">{product.name}</h3>
-          <p className="mt-0.5 text-sm font-semibold text-black">{product.price}</p>
+          <div className="mt-0.5 flex items-center gap-2">
+            <p className="text-sm font-semibold text-black">{product.price}</p>
+            {product.comparePrice ? (
+              <p className="text-xs text-black/50 line-through">{product.comparePrice}</p>
+            ) : null}
+          </div>
         </div>
       </Link>
     </motion.article>
   )
-}
+})
+
+export default ProductCard

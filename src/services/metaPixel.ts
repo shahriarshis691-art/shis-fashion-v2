@@ -59,7 +59,9 @@ class MetaPixelService {
    */
   initialize(): void {
     if (this.isInitialized) {
-      console.warn('[MetaPixel] Pixel already initialized, skipping')
+      if (import.meta.env.DEV) {
+        console.warn('[MetaPixel] Pixel already initialized, skipping')
+      }
       return
     }
 
@@ -76,14 +78,15 @@ class MetaPixelService {
     }
 
     try {
-      // Add Facebook Pixel script
       this.loadPixelScript()
       this.isInitialized = true
       if (import.meta.env.DEV) {
         console.log('[MetaPixel] Initialized successfully with ID:', this.pixelId)
       }
     } catch (error) {
-      console.error('[MetaPixel] Initialization failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] Initialization failed:', error)
+      }
     }
   }
 
@@ -118,7 +121,9 @@ class MetaPixelService {
     try {
       ;(window as FacebookPixelWindow).fbq?.('track', 'PageView')
     } catch (error) {
-      console.error('[MetaPixel] PageView tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] PageView tracking failed:', error)
+      }
     }
   }
 
@@ -137,7 +142,9 @@ class MetaPixelService {
         currency: data.currency || 'BDT',
       })
     } catch (error) {
-      console.error('[MetaPixel] ViewContent tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] ViewContent tracking failed:', error)
+      }
     }
   }
 
@@ -152,7 +159,9 @@ class MetaPixelService {
         search_string: data.search_string || '',
       })
     } catch (error) {
-      console.error('[MetaPixel] Search tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] Search tracking failed:', error)
+      }
     }
   }
 
@@ -171,7 +180,9 @@ class MetaPixelService {
         currency: data.currency || 'BDT',
       })
     } catch (error) {
-      console.error('[MetaPixel] AddToCart tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] AddToCart tracking failed:', error)
+      }
     }
   }
 
@@ -188,7 +199,9 @@ class MetaPixelService {
         content_type: data.content_type || 'product',
       })
     } catch (error) {
-      console.error('[MetaPixel] InitiateCheckout tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] InitiateCheckout tracking failed:', error)
+      }
     }
   }
 
@@ -207,7 +220,9 @@ class MetaPixelService {
         content_name: data.content_name || 'Order',
       })
     } catch (error) {
-      console.error('[MetaPixel] Purchase tracking failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] Purchase tracking failed:', error)
+      }
     }
   }
 

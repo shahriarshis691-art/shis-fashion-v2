@@ -29,6 +29,7 @@ function toProduct(product: AdminProduct) {
     slug: slugify(product.name),
     name: product.name,
     price: product.price,
+    comparePrice: product.comparePrice,
     category: product.category,
     image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
@@ -325,6 +326,8 @@ export default function ProductDetailPage() {
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
+                  width="1200"
+                  height="1500"
                   sizes="(max-width: 639px) 100vw, (max-width: 1279px) 58vw, 50vw"
                   onError={handleImageError}
                   onClick={() => setIsZoomOpen(true)}
@@ -393,7 +396,12 @@ export default function ProductDetailPage() {
 
             <div className="mt-4 border border-black/15 p-4">
               <p className="text-caption uppercase tracking-[0.12em] text-black/55">Price</p>
-              <p className="mt-1 text-2xl font-semibold text-black">{product.price}</p>
+              <div className="mt-1 flex items-center gap-3">
+                <p className="text-2xl font-semibold text-black">{product.price}</p>
+                {product.comparePrice ? (
+                  <p className="text-base text-black/50 line-through">{product.comparePrice}</p>
+                ) : null}
+              </div>
               <p className={`mt-2 text-sm font-medium ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>{stockLabel}</p>
             </div>
 

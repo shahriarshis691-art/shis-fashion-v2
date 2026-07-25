@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import { founderProfile as staticFounderProfile, brandEntries, type BrandEntry } from '../data/brandShowcase'
 import { subscribeToAdminBrands, subscribeToFounderProfile, type AdminBrand, type FounderProfile } from '../firebase/adminService'
+import { applySeoMetadata } from '../utils/seo'
 
 const LOGO_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"%3E%3Cdefs%3E%3ClinearGradient id="bg" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0" stop-color="%230b0b0b"/%3E%3Cstop offset="1" stop-color="%23181818"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="1200" height="700" fill="url(%23bg)"/%3E%3Ccircle cx="980" cy="110" r="180" fill="%23c9a227" fill-opacity="0.12"/%3E%3Ctext x="50%25" y="53%25" dominant-baseline="middle" text-anchor="middle" font-family="Georgia, serif" font-size="76" fill="%23e7d6a1" letter-spacing="8"%3EBRAND%3C/text%3E%3C/svg%3E'
 
@@ -81,6 +83,7 @@ function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
 }
 
 export default function BrandsPage() {
+  const location = useLocation()
   const [liveBrands, setLiveBrands] = useState<AdminBrand[]>([])
   const [liveFounderProfile, setLiveFounderProfile] = useState<FounderProfile | null>(null)
 
@@ -92,6 +95,13 @@ export default function BrandsPage() {
       unsubscribeFounder?.()
     }
   }, [])
+
+  useEffect(() => {
+    applySeoMetadata(location.pathname, {
+      title: 'Our Brands | SHIS Fashion Bangladesh',
+      description: 'Discover the signature brands and fashion stories behind SHIS Fashion Bangladesh.',
+    })
+  }, [location.pathname])
 
   const displayBrands = useMemo(
     () => (liveBrands.length ? liveBrands.map(mapLiveBrandToDisplayBrand) : brandEntries),

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { founderProfile as staticFounderProfile } from '../data/brandShowcase'
 import { subscribeToFounderProfile, type FounderProfile } from '../firebase/adminService'
+import { applySeoMetadata } from '../utils/seo'
 
 export default function FounderDetailPage() {
+  const location = useLocation()
   const [liveFounderProfile, setLiveFounderProfile] = useState<FounderProfile | null>(null)
 
   useEffect(() => {
@@ -13,6 +16,13 @@ export default function FounderDetailPage() {
   }, [])
 
   const displayFounder = liveFounderProfile ?? staticFounderProfile
+
+  useEffect(() => {
+    applySeoMetadata(location.pathname, {
+      title: `${displayFounder.name} | SHIS Fashion Bangladesh`,
+      description: displayFounder.bio,
+    })
+  }, [location.pathname, displayFounder])
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">

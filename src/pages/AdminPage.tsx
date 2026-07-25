@@ -61,6 +61,7 @@ import {
 const emptyProductForm = {
   name: '',
   price: '৳ 0',
+  comparePrice: '',
   stock: 1,
   sizes: ['M'],
   colors: ['Ivory'],
@@ -670,6 +671,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     ...productForm,
     name: productForm.name.trim(),
     price: productForm.price.trim(),
+    comparePrice: productForm.comparePrice.trim(),
     description: productForm.description.trim(),
     category: resolveCanonicalSubcategorySlug(productForm.category),
     sizes: productForm.sizes.map((size) => size.trim()).filter(Boolean),
@@ -714,6 +716,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setForm({
       name: product.name,
       price: product.price,
+      comparePrice: product.comparePrice || '',
       stock: product.stock,
       sizes: product.sizes,
       colors: product.colors,
@@ -1270,6 +1273,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
                   <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
                 </div>
+                <input value={form.comparePrice} onChange={(event) => setForm({ ...form, comparePrice: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Compare at price (optional)" />
                   <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category slug (example: shirts, polos, kurti)" />
                   {taxonomyCategoryOptions.length ? (
                     <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/60 p-3">
@@ -1386,9 +1390,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               {filteredProducts.map((product) => (
                 <div key={product.id} className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                     <div>
                       <h3 className="text-base font-semibold text-[var(--color-text)]">{product.name}</h3>
                       <p className="mt-1 text-sm text-[var(--color-muted)]">{product.category} • {product.stock} in stock</p>
+                      {product.comparePrice ? (
+                        <p className="mt-1 text-xs text-black/50 line-through">{product.comparePrice}</p>
+                      ) : null}
                     </div>
                     <p className="text-sm font-semibold text-[var(--color-accent)]">{product.price}</p>
                   </div>

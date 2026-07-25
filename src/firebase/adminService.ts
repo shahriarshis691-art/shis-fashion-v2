@@ -30,6 +30,7 @@ export interface AdminProduct {
   id: string
   name: string
   price: string
+  comparePrice?: string
   stock: number
   sizes: string[]
   colors: string[]

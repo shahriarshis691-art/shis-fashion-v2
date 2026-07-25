@@ -654,7 +654,7 @@ export default function ShopPage() {
           <div className="py-12 text-center text-sm text-black/55">Loading collection...</div>
         ) : null}
 
-        <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid">
+        <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid">
           {visibleProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

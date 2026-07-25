@@ -241,6 +241,17 @@ function buildBaseSchemas(pathname: string, canonicalUrl: string, metadata: SeoM
     })
   }
 
+  if (['/women', '/men', '/kids'].includes(pathname)) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: metadata.title,
+      url: canonicalUrl,
+      description: metadata.description,
+      image: DEFAULT_OG_IMAGE,
+    })
+  }
+
   if (pathname.startsWith('/collections/')) {
     schemas.push({
       '@context': 'https://schema.org',
@@ -575,7 +586,9 @@ export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   upsertMeta('meta[property="og:type"]', { property: 'og:type', content: mergedMetadata.type ?? 'website' })
   upsertMeta('meta[property="og:image"]', { property: 'og:image', content: mergedMetadata.ogImage ?? DEFAULT_OG_IMAGE })
   upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'SHIS Fashion' })
+  upsertMeta('meta[property="og:locale"]', { property: 'og:locale', content: 'en_BD' })
   upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' })
+  upsertMeta('meta[name="twitter:site"]', { name: 'twitter:site', content: '@shisfashion' })
   upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: mergedMetadata.title })
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: mergedMetadata.description })
   upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: mergedMetadata.ogImage ?? DEFAULT_OG_IMAGE })

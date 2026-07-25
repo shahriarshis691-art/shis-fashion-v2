@@ -17,6 +17,7 @@ interface ListingProduct {
   slug: string
   name: string
   price: string
+  comparePrice?: string
   description: string
   category: string
   image: string
@@ -263,7 +264,12 @@ export default function CollectionListingPage() {
                     </div>
                     <div className="px-2.5 py-2.5">
                       <p className="line-clamp-1 text-xs font-semibold text-[var(--color-text)]">{product.name}</p>
-                      <p className="mt-1 text-xs font-semibold text-[var(--color-accent)]">{product.price}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <p className="text-xs font-semibold text-[var(--color-accent)]">{product.price}</p>
+                        {product.comparePrice ? (
+                          <p className="text-[10px] text-black/50 line-through">{product.comparePrice}</p>
+                        ) : null}
+                      </div>
                     </div>
                   </button>
                 )
@@ -275,7 +281,10 @@ export default function CollectionListingPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">Selected</p>
             <h3 className="mt-2 text-xl font-semibold text-[var(--color-text)]">{selectedProduct.name}</h3>
             <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{selectedProduct.description}</p>
-            <p className="mt-3 text-lg font-semibold text-[var(--color-text)]">{selectedProduct.price}</p>
+              <p className="mt-3 text-lg font-semibold text-[var(--color-text)]">{selectedProduct.price}</p>
+              {selectedProduct.comparePrice ? (
+                <p className="mt-1 text-sm text-black/50 line-through">{selectedProduct.comparePrice}</p>
+              ) : null}
             <div className="mt-4 flex flex-col gap-3">
               <Button
                 onClick={() => {

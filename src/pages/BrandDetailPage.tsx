@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { brandEntries } from '../data/brandShowcase'
 import { subscribeToAdminBrands, type AdminBrand } from '../firebase/adminService'
+import { applySeoMetadata } from '../utils/seo'
 
 type DisplayBrand = {
   id: string
@@ -35,6 +36,7 @@ function mapLiveBrandToDisplayBrand(brand: AdminBrand): DisplayBrand {
 
 export default function BrandDetailPage() {
   const { slug } = useParams()
+  const location = useLocation()
   const [liveBrands, setLiveBrands] = useState<AdminBrand[]>([])
 
   useEffect(() => {
@@ -56,6 +58,17 @@ export default function BrandDetailPage() {
 
     return brandEntries.find((entry) => entry.id === normalizedSlug)
   }, [liveBrands, slug])
+
+  useEffect(() => {
+    if (!brand) {
+      return
+    }
+
+    applySeoMetadata(location.pathname, {
+      title: `${brand.name} | SHIS Fashion Bangladesh`,
+      description: brand.summary,
+    })
+  }, [brand, location.pathname])
 
   if (!brand) {
     return (

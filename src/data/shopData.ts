@@ -12,6 +12,7 @@ export interface ShopProduct {
   slug: string
   name: string
   price: string
+  comparePrice?: string
   discount?: string
   category: string
   image: string

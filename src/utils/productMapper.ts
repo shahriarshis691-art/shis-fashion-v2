@@ -14,6 +14,7 @@ export function mapAdminProductToShopProduct(
     slug: slugify(product.name),
     name: product.name,
     price: product.price,
+    comparePrice: product.comparePrice,
     category: product.category,
     image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
