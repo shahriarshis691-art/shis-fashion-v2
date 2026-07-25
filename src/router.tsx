@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import { consumeAdminAccessDeniedFlag, onAdminAuthChanged } from './firebase/adminService'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -24,7 +25,11 @@ const SalePage = lazy(() => import('./pages/SalePage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
-const withSuspense = (element: ReactElement) => <Suspense fallback={<Loading />}>{element}</Suspense>
+const withSuspense = (element: ReactElement) => (
+  <ErrorBoundary>
+    <Suspense fallback={<Loading />}>{element}</Suspense>
+  </ErrorBoundary>
+)
 
 function AdminRouteGuard({ children }: { children: ReactElement }) {
   const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
