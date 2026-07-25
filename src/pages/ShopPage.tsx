@@ -420,6 +420,7 @@ export default function ShopPage() {
         item_category: product.category,
         price: parseBDT(product.price),
         quantity: 1,
+        brand: product.brand,
       })),
     })
   }, [effectiveSegment, effectiveSubcategory, heading.title, legacyHeading?.title, ready, visibleProducts])

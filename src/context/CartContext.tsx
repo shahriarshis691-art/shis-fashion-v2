@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, useCallback } from 'react'
 import type { ShopProduct } from '../data/shopData'
 import { parseBDT } from '../utils/currency'
+import { useCustomerRecovery } from './CustomerRecoveryContext'
 
 export interface CartItem extends Omit<ShopProduct, 'id'> {
   id: string
@@ -52,6 +53,57 @@ function CartProvider({ children }: { children: ReactNode }) {
     }
   })
   const [recentAddition, setRecentAddition] = useState<CartAdditionEvent | null>(null)
+  const { addAbandonedCartItem, clearAbandonedCart } = useCustomerRecovery()
+  const previousItemsRef = useRef<CartItem[]>([])
+
+  useEffect(() => {
+    previousItemsRef.current = items
+  }, [items])
+
+  useEffect(() => {
+    if (items.length === 0 && previousItemsRef.current.length > 0) {
+      const abandonedItems = previousItemsRef.current.map((item) => ({
+        id: item.id,
+        productId: item.slug,
+        productName: item.name,
+        productImage: item.image,
+        price: item.price,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+        abandonedAt: new Date().toISOString(),
+      }))
+
+      abandonedItems.forEach((item) => {
+        addAbandonedCartItem(item)
+      })
+    }
+  }, [items, addAbandonedCartItem])
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (items.length > 0) {
+        const abandonedItems = items.map((item) => ({
+          id: item.id,
+          productId: item.slug,
+          productName: item.name,
+          productImage: item.image,
+          price: item.price,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          abandonedAt: new Date().toISOString(),
+        }))
+
+        abandonedItems.forEach((item) => {
+          addAbandonedCartItem(item)
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [items, addAbandonedCartItem])
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
@@ -162,12 +214,13 @@ function CartProvider({ children }: { children: ReactNode }) {
     setItems((currentItems) => currentItems.filter((item) => item.id !== itemId))
   }
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(STORAGE_KEY)
     }
     setItems([])
-  }
+    clearAbandonedCart()
+  }, [clearAbandonedCart])
 
   const dismissRecentAddition = () => {
     setRecentAddition(null)
@@ -188,7 +241,7 @@ function CartProvider({ children }: { children: ReactNode }) {
       recentAddition,
       dismissRecentAddition,
     }),
-    [items, itemCount, recentAddition, subtotal],
+    [items, itemCount, recentAddition, subtotal, clearCart],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

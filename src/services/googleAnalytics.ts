@@ -16,6 +16,7 @@ interface AnalyticsItem {
   item_category?: string
   price?: number
   quantity?: number
+  brand?: string
 }
 
 interface CheckoutPayload {
@@ -142,6 +143,51 @@ class GoogleAnalyticsService {
   trackEvent(eventName: string, params: Record<string, unknown>): void {
     if (!import.meta.env.PROD) return
     this.track(eventName, params)
+  }
+
+  trackWishlistAdded(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('wishlist_added', params)
+  }
+
+  trackWishlistRemoved(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('wishlist_removed', params)
+  }
+
+  trackWishlistMovedToCart(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('wishlist_moved_to_cart', params)
+  }
+
+  trackProductViewed(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('product_viewed', params)
+  }
+
+  trackRelatedProductClick(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('related_product_click', params)
+  }
+
+  trackAbandonedCart(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('abandoned_cart', params)
+  }
+
+  trackCartRecovered(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('cart_recovered', params)
+  }
+
+  trackBackInStockNotificationRequested(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('back_in_stock_requested', params)
+  }
+
+  trackWishlistReminderViewed(params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    this.track('wishlist_reminder_viewed', params)
   }
 
   private track(eventName: string, params: Record<string, unknown>): void {

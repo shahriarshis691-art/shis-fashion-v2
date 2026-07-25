@@ -15,9 +15,11 @@ export interface ShopProduct {
   comparePrice?: string
   discount?: string
   category: string
+  brand?: string
   image: string
   description: string
   galleryImages?: string[]
+  sizes?: string[]
   stock?: number
   featured?: boolean
   newArrival?: boolean

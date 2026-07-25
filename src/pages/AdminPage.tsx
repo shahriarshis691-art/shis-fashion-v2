@@ -57,6 +57,7 @@ import {
   getAllTaxonomyCategoryOptions,
   resolveCanonicalSubcategorySlug,
 } from '../data/categoryTaxonomy'
+import { normalizeSizes } from '../utils/sizes'
 
 const emptyProductForm = {
   name: '',
@@ -1307,7 +1308,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                   ) : null}
                 <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
-                <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma separated)" />
+                <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: normalizeSizes(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma or space separated)" />
                 <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
                 <div className="space-y-3">
                   {galleryLabels.map((label, index) => (
@@ -1496,11 +1497,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <div>
                         <p className="font-semibold text-[var(--color-text)]">Ordered Products</p>
                         <div className="mt-1 space-y-1">
-                          {order.items.map((item) => (
-                            <p key={`${order.id}-${item.name}`}>
-                              {item.name} × {item.quantity} • {item.price}
-                            </p>
-                          ))}
+                           {order.items.map((item) => (
+                             <p key={`${order.id}-${item.name}`}>
+                               {item.name} × {item.quantity}{item.size ? ` • ${item.size}` : ''} • {item.price}
+                             </p>
+                           ))}
                         </div>
                       </div>
                     </div>

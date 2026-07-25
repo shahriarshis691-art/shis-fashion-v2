@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
+import ProductCard from '../components/shop/ProductCard'
 import { homeCategoryItems } from '../data/homeCategories'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -16,6 +17,7 @@ import {
   type HomepageContent,
 } from '../firebase/adminService'
 import { getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
@@ -196,6 +198,7 @@ export default function HomePage() {
   const [brands, setBrands] = useState<AdminBrand[]>([])
   const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
+  const { items: recentlyViewedItems } = useRecentlyViewed()
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -513,6 +516,37 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
+
+      {recentlyViewedItems.length > 0 ? (
+        <section className="px-3.5 pb-16 pt-6 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-10">
+          <Container>
+            <div className="flex items-end justify-between gap-2 border-b border-black/10 pb-2.5">
+              <h2 className="text-h2 text-black">Recently Viewed</h2>
+              <span className="text-caption uppercase tracking-[0.12em] text-black/55">Continue where you left off</span>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
+              {recentlyViewedItems.slice(0, 4).map((item) => (
+                <ProductCard
+                  key={item.id}
+                  product={{
+                    id: item.product.id,
+                    slug: item.product.slug,
+                    name: item.product.name,
+                    price: item.product.price,
+                    category: item.product.category,
+                    image: item.product.image,
+                    description: item.product.description,
+                    galleryImages: item.product.galleryImages,
+                    stock: item.product.stock,
+                    featured: item.product.featured,
+                    newArrival: item.product.newArrival,
+                  }}
+                />
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       {isBrandPanelOpen ? (
         <div

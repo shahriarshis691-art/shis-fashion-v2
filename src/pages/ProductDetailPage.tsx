@@ -4,9 +4,12 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
+import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
+import { normalizeSizes } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
@@ -30,12 +33,13 @@ function toProduct(product: AdminProduct) {
     name: product.name,
     price: product.price,
     comparePrice: product.comparePrice,
+    brand: product.brand,
     category: product.category,
     image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
     galleryImageTitles: imageEntries.map((entry) => entry.title),
-    sizes: product.sizes,
+    sizes: normalizeSizes(product.sizes),
     stock: product.stock,
     featured: product.featured,
     newArrival: product.newArrival,
@@ -89,6 +93,8 @@ export default function ProductDetailPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { addToCart } = useCart()
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
   const [ready, setReady] = useState(false)
@@ -101,6 +107,7 @@ export default function ProductDetailPage() {
   const lastTrackedProductIdRef = useRef<string | null>(null)
   const hasTrackedAddToCartRef = useRef(false)
   const hasTrackedBuyNowRef = useRef(false)
+  const hasTrackedRecentlyViewedRef = useRef(false)
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -125,12 +132,29 @@ export default function ProductDetailPage() {
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
   const stockLabel = getStockLabel(availableStock)
 
-  const relatedProducts = !product
-    ? []
-    : [
-      ...products.filter((entry) => entry.id !== product.id && entry.category === product.category),
-      ...products.filter((entry) => entry.id !== product.id && entry.category !== product.category),
-    ].slice(0, 4)
+  const relatedProducts = (() => {
+    if (!product) {
+      return []
+    }
+
+    const currentPrice = parseBDT(product.price)
+    const sameCategory = products.filter((entry) => entry.id !== product.id && entry.category === product.category)
+    const otherCategory = products.filter((entry) => entry.id !== product.id && entry.category !== product.category)
+
+    const scored = (entry: ReturnType<typeof toProduct>) => {
+      const price = parseBDT(entry.price)
+      const priceDiff = Math.abs(price - currentPrice)
+      const categoryMatch = entry.category === product.category ? 1 : 0
+      return { entry, score: categoryMatch * 1000 - priceDiff }
+    }
+
+    const ranked = [...sameCategory, ...otherCategory]
+      .map(scored)
+      .sort((a, b) => b.score - a.score)
+      .map((item) => item.entry)
+
+    return ranked.slice(0, 4)
+  })()
 
   useEffect(() => {
     if (!product || !ready) {
@@ -149,6 +173,7 @@ export default function ProductDetailPage() {
       content_type: 'product',
       value: parseBDT(product.price),
       currency: 'BDT',
+      brand: product.brand,
     })
 
     googleAnalytics.viewItem({
@@ -157,6 +182,7 @@ export default function ProductDetailPage() {
       item_category: product.category,
       price: parseBDT(product.price),
       quantity: 1,
+      brand: product.brand,
     }, 'BDT')
 
     applySeoMetadata(location.pathname, {
@@ -172,6 +198,7 @@ export default function ProductDetailPage() {
             image: product.image,
             price: product.price,
             stock: product.stock,
+            brand: product.brand,
           },
           location.pathname,
         ),
@@ -193,6 +220,63 @@ export default function ProductDetailPage() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isZoomOpen])
+
+  useEffect(() => {
+    if (!product || !ready || hasTrackedRecentlyViewedRef.current) {
+      return
+    }
+
+    addToRecentlyViewed(product)
+    hasTrackedRecentlyViewedRef.current = true
+
+    googleAnalytics.trackEvent('product_viewed', {
+      item_id: String(product.id),
+      item_name: product.name,
+      item_category: product.category,
+      value: parseBDT(product.price),
+      currency: 'BDT',
+      brand: product.brand,
+    })
+  }, [product, ready, addToRecentlyViewed])
+
+  const handleToggleWishlist = () => {
+    if (!product) {
+      return
+    }
+
+    if (isInWishlist(String(product.id))) {
+      removeFromWishlist(String(product.id))
+      googleAnalytics.trackEvent('wishlist_removed', {
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category,
+        value: parseBDT(product.price),
+        currency: 'BDT',
+        brand: product.brand,
+      })
+    } else {
+      addToWishlist(product)
+      googleAnalytics.trackEvent('wishlist_added', {
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category,
+        value: parseBDT(product.price),
+        currency: 'BDT',
+        brand: product.brand,
+      })
+    }
+  }
+
+  const handleRelatedProductClick = (relatedProduct: ReturnType<typeof toProduct>) => {
+    googleAnalytics.trackEvent('related_product_click', {
+      item_id: String(relatedProduct.id),
+      item_name: relatedProduct.name,
+      item_category: relatedProduct.category,
+      value: parseBDT(relatedProduct.price),
+      currency: 'BDT',
+      brand: relatedProduct.brand,
+    })
+  }
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     event.currentTarget.src = getPlaceholderDataUri()
@@ -222,10 +306,13 @@ export default function ProductDetailPage() {
   }
 
   const safeSize = selectedSize && product?.sizes.includes(selectedSize) ? selectedSize : product?.sizes[0] ?? 'M'
+  const isSizeSelected = selectedSize && product?.sizes.includes(selectedSize)
+  const canAddToBag = product != null && availableStock > 0 && isSizeSelected
+  const canBuyNow = product != null && availableStock > 0 && isSizeSelected
   const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, effectiveQuantity) : getWhatsAppHref()
 
   const handleAddToBag = () => {
-    if (!product || availableStock <= 0 || hasTrackedAddToCartRef.current) {
+    if (!product || availableStock <= 0 || hasTrackedAddToCartRef.current || !isSizeSelected) {
       return
     }
 
@@ -237,6 +324,7 @@ export default function ProductDetailPage() {
       content_type: 'product',
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
+      brand: product.brand,
     })
 
     googleAnalytics.addToBag({
@@ -245,6 +333,7 @@ export default function ProductDetailPage() {
       item_category: product.category,
       price: parseBDT(product.price),
       quantity: effectiveQuantity,
+      brand: product.brand,
     }, 'BDT')
 
     setDidAddToBag(true)
@@ -252,7 +341,7 @@ export default function ProductDetailPage() {
   }
 
   const handleBuyNow = () => {
-    if (!product || availableStock <= 0 || hasTrackedBuyNowRef.current) {
+    if (!product || availableStock <= 0 || hasTrackedBuyNowRef.current || !isSizeSelected) {
       return
     }
 
@@ -263,6 +352,7 @@ export default function ProductDetailPage() {
       currency: 'BDT',
       content_type: 'product',
       content_ids: [String(product.id)],
+      brand: product.brand,
     })
     googleAnalytics.beginCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
@@ -274,6 +364,7 @@ export default function ProductDetailPage() {
           item_category: product.category,
           price: parseBDT(product.price),
           quantity: effectiveQuantity,
+          brand: product.brand,
         },
       ],
     })
@@ -446,7 +537,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToBag}
-                disabled={availableStock <= 0}
+                disabled={!canAddToBag}
                 className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-5 py-3.5 text-[1.02rem] font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
               >
                 {didAddToBag ? 'Added' : 'Add to Bag'}
@@ -454,10 +545,45 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleBuyNow}
-                disabled={availableStock <= 0}
+                disabled={!canBuyNow}
                 className="ui-interactive flex-1 border border-black px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
               >
                 Buy Now
+              </button>
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
+                aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                {isInWishlist(String(product.id)) ? '♥' : '♡'}
+              </button>
+            </div>
+
+            <div className="mt-3 flex gap-2 sm:hidden">
+              <button
+                type="button"
+                onClick={handleAddToBag}
+                disabled={!canAddToBag}
+                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
+              >
+                {didAddToBag ? 'Added' : 'Add to Bag'}
+              </button>
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                disabled={!canBuyNow}
+                className="ui-interactive flex-1 border border-black px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
+              >
+                Buy Now
+              </button>
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
+                aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                {isInWishlist(String(product.id)) ? '♥' : '♡'}
               </button>
             </div>
 
@@ -496,6 +622,28 @@ export default function ProductDetailPage() {
               </li>
             </ul>
           </div>
+
+          <div className="border border-black/15 p-4 lg:col-span-2">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Why Customers Trust SHIS</h2>
+            <ul className="mt-3 grid grid-cols-1 gap-2 text-sm text-black/75 sm:grid-cols-2">
+              <li className="flex gap-2">
+                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
+                <span>Premium quality fabrics with careful quality checks.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
+                <span>Easy exchange within 3 days of delivery.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
+                <span>Secure checkout with Cash on Delivery option.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
+                <span>Fast dispatch and nationwide delivery across Bangladesh.</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {relatedProducts.length ? (
@@ -522,6 +670,9 @@ export default function ProductDetailPage() {
                     featured: item.featured,
                     newArrival: item.newArrival,
                   }}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(item.id))}
+                  onProductClick={() => handleRelatedProductClick(item)}
                 />
               ))}
             </div>

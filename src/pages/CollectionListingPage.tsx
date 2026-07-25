@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext'
 import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -18,6 +19,7 @@ interface ListingProduct {
   name: string
   price: string
   comparePrice?: string
+  brand?: string
   description: string
   category: string
   image: string
@@ -37,7 +39,8 @@ function toListingProduct(product: AdminProduct): ListingProduct {
   return {
     ...base,
     id: String(base.id),
-    sizes: product.sizes,
+    brand: product.brand,
+    sizes: normalizeSizes(product.sizes),
     galleryImages: base.galleryImages ?? [],
     stock: base.stock ?? 0,
   }
@@ -164,6 +167,7 @@ export default function CollectionListingPage() {
         content_type: 'product',
         value: parseBDT(selectedProduct.price),
         currency: 'BDT',
+        brand: selectedProduct.brand,
       })
 
       googleAnalytics.viewItem({
@@ -172,6 +176,7 @@ export default function CollectionListingPage() {
         item_category: selectedProduct.category,
         price: parseBDT(selectedProduct.price),
         quantity: 1,
+        brand: selectedProduct.brand,
       }, 'BDT')
 
     applySeoMetadata(location.pathname, {
@@ -304,6 +309,7 @@ export default function CollectionListingPage() {
                     content_type: 'product',
                     value: parseBDT(selectedProduct.price),
                     currency: 'BDT',
+                    brand: selectedProduct.brand,
                   })
                   googleAnalytics.addToBag({
                     item_id: selectedProduct.id,
@@ -311,6 +317,7 @@ export default function CollectionListingPage() {
                     item_category: selectedProduct.category,
                     price: parseBDT(selectedProduct.price),
                     quantity: 1,
+                    brand: selectedProduct.brand,
                   }, 'BDT')
                 }}
                 variant="cta"
@@ -343,6 +350,7 @@ export default function CollectionListingPage() {
                     currency: 'BDT',
                     content_type: 'product',
                     content_ids: [selectedProduct.id],
+                    brand: selectedProduct.brand,
                   })
                   googleAnalytics.beginCheckout({
                     value: parseBDT(selectedProduct.price),
@@ -354,6 +362,7 @@ export default function CollectionListingPage() {
                         item_category: selectedProduct.category,
                         price: parseBDT(selectedProduct.price),
                         quantity: 1,
+                        brand: selectedProduct.brand,
                       },
                     ],
                   })

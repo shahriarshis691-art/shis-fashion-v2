@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
+import type { ShopProduct } from '../data/shopData'
 import { formatBDT, parseBDT } from '../utils/currency'
 
 function getWhatsAppHref() {
@@ -11,12 +13,18 @@ function getWhatsAppHref() {
 
 export default function CartPage() {
   const navigate = useNavigate()
-  const { items, updateQuantity, removeFromCart, subtotal, itemCount } = useCart()
+  const { items, updateQuantity, removeFromCart, addToCart, subtotal, itemCount } = useCart()
+  const { items: wishlistItems, removeFromWishlist } = useWishlist()
   const totalLabel = formatBDT(subtotal)
   const supportWhatsAppHref = getWhatsAppHref()
 
   const handleBeginCheckout = () => {
     navigate('/checkout')
+  }
+
+  const handleMoveToCart = (wishlistItem: { product: ShopProduct }) => {
+    addToCart(wishlistItem.product, { size: 'M', color: 'Default', quantity: 1 })
+    removeFromWishlist(String(wishlistItem.product.id))
   }
 
   if (items.length === 0) {
@@ -93,6 +101,30 @@ export default function CartPage() {
                 </div>
               </motion.div>
             ))}
+
+            {wishlistItems.length > 0 ? (
+              <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Wishlist</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">Saved for later</h2>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {wishlistItems.map((wishlistItem) => (
+                    <div key={wishlistItem.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} loading="lazy" decoding="async" className="h-16 w-16 rounded-[0.75rem] object-cover sm:h-20 sm:w-20" />
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-[var(--color-text)]">{wishlistItem.product.name}</h3>
+                        <p className="mt-1 text-sm text-[var(--color-accent)]">{wishlistItem.product.price}</p>
+                      </div>
+                      <Button to={`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`} variant="secondary" className="text-xs">View</Button>
+                      <button type="button" onClick={() => handleMoveToCart(wishlistItem)} className="text-xs font-semibold text-[var(--color-accent)]">Move to cart</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:block sm:p-7">

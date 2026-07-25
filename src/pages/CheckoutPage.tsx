@@ -142,6 +142,7 @@ export default function CheckoutPage() {
         item_category: item.category,
         price: parseBDT(item.price),
         quantity: item.quantity,
+        brand: item.brand,
       })),
     })
 
@@ -225,7 +226,7 @@ export default function CheckoutPage() {
         address: composedAddress,
         deliveryCharge,
         notes: form.deliveryNote.trim(),
-        items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity })),
+        items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity, size: item.size })),
         total: grandTotal,
         status: 'new',
         trackingNumber: '',

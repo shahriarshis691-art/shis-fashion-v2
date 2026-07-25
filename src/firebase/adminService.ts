@@ -14,6 +14,7 @@ import {
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
 import { compactManagedImages } from '../utils/media'
+import { normalizeSizes } from '../utils/sizes'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
 
@@ -31,6 +32,7 @@ export interface AdminProduct {
   name: string
   price: string
   comparePrice?: string
+  brand?: string
   stock: number
   sizes: string[]
   colors: string[]
@@ -60,7 +62,7 @@ export interface AdminOrder {
   deliveryAddress?: DeliveryAddress
   deliveryCharge?: number
   notes?: string
-  items: Array<{ name: string; price: string; quantity: number }>
+  items: Array<{ name: string; price: string; quantity: number; size?: string }>
   total: number
   status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   trackingNumber?: string
@@ -1226,6 +1228,7 @@ function normalizeProduct(product: AdminProduct): AdminProduct {
     images: normalizedImages.images,
     imageTitles: normalizedImages.imageTitles,
     imageDescriptions: normalizedImages.imageDescriptions,
+    sizes: normalizeSizes(product.sizes),
   }
 }
 

@@ -15,6 +15,7 @@ interface ViewContentData {
   content_type?: string
   value?: number
   currency?: string
+  brand?: string
 }
 
 interface AddToCartData {
@@ -23,6 +24,7 @@ interface AddToCartData {
   content_type?: string
   value?: number
   currency?: string
+  brand?: string
 }
 
 interface SearchData {
@@ -34,6 +36,7 @@ interface InitiateCheckoutData {
   currency?: string
   content_type?: string
   content_ids?: string[]
+  brand?: string
 }
 
 interface PurchaseData {

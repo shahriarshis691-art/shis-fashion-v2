@@ -22,6 +22,8 @@ interface ProductSeoInput {
   category: string
   image: string
   price: string
+  comparePrice?: string
+  brand?: string
   stock: number
 }
 
@@ -271,6 +273,22 @@ export function buildProductSchema(product: ProductSeoInput, pathname: string) {
   const numericPrice = Number.parseFloat(product.price.replace(/[^\d.]/g, '')) || 0
   const currency = product.price.includes('৳') ? 'BDT' : 'USD'
 
+  const offers: Record<string, unknown> = {
+    '@type': 'Offer',
+    priceCurrency: currency,
+    price: numericPrice,
+    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    url: canonicalUrl,
+    itemCondition: 'https://schema.org/NewCondition',
+  }
+
+  if (product.comparePrice) {
+    const numericComparePrice = Number.parseFloat(product.comparePrice.replace(/[^\d.]/g, '')) || 0
+    if (numericComparePrice > 0) {
+      offers.priceValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    }
+  }
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -281,16 +299,9 @@ export function buildProductSchema(product: ProductSeoInput, pathname: string) {
     url: canonicalUrl,
     brand: {
       '@type': 'Brand',
-      name: 'SHIS Fashion',
+      name: product.brand || 'SHIS Fashion',
     },
-    offers: {
-      '@type': 'Offer',
-      priceCurrency: currency,
-      price: numericPrice,
-      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: canonicalUrl,
-      itemCondition: 'https://schema.org/NewCondition',
-    },
+    offers,
   }
 }
 

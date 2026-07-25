@@ -1,6 +1,7 @@
 import type { AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
 import { getManagedImageEntries, getProductImage } from './media'
+import { normalizeSizes } from './sizes'
 
 export function mapAdminProductToShopProduct(
   product: AdminProduct,
@@ -15,6 +16,7 @@ export function mapAdminProductToShopProduct(
     name: product.name,
     price: product.price,
     comparePrice: product.comparePrice,
+    brand: product.brand,
     category: product.category,
     image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
@@ -22,6 +24,7 @@ export function mapAdminProductToShopProduct(
     stock: product.stock,
     featured: product.featured,
     newArrival: product.newArrival,
+    sizes: normalizeSizes(product.sizes),
     ...overrides,
   }
 }
