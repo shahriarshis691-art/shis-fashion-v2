@@ -108,6 +108,8 @@ export default function CollectionListingPage() {
   const [products, setProducts] = useState<ListingProduct[]>([])
   const [ready, setReady] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<string>('')
+  const hasTrackedAddToCartRef = useRef(false)
+  const hasTrackedBuyNowRef = useRef(false)
 
   useEffect(() => {
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => {
@@ -285,6 +287,11 @@ export default function CollectionListingPage() {
             <div className="mt-4 flex flex-col gap-3">
               <Button
                 onClick={() => {
+                  if (hasTrackedAddToCartRef.current) {
+                    return
+                  }
+
+                  hasTrackedAddToCartRef.current = true
                   addToCart(selectedProduct, {
                     size: selectedProduct.sizes[0] ?? 'M',
                     color: 'Default',
@@ -320,6 +327,11 @@ export default function CollectionListingPage() {
               </Button>
               <Button
                 onClick={() => {
+                  if (hasTrackedBuyNowRef.current) {
+                    return
+                  }
+
+                  hasTrackedBuyNowRef.current = true
                   addToCart(selectedProduct, {
                     size: selectedProduct.sizes[0] ?? 'M',
                     color: 'Default',
@@ -329,6 +341,20 @@ export default function CollectionListingPage() {
                     value: parseBDT(selectedProduct.price),
                     currency: 'BDT',
                     content_type: 'product',
+                    content_ids: [selectedProduct.id],
+                  })
+                  googleAnalytics.beginCheckout({
+                    value: parseBDT(selectedProduct.price),
+                    currency: 'BDT',
+                    items: [
+                      {
+                        item_id: selectedProduct.id,
+                        item_name: selectedProduct.name,
+                        item_category: selectedProduct.category,
+                        price: parseBDT(selectedProduct.price),
+                        quantity: 1,
+                      },
+                    ],
                   })
                   navigate('/checkout')
                 }}

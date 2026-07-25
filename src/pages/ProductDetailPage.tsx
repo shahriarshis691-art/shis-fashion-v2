@@ -98,6 +98,8 @@ export default function ProductDetailPage() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
   const lastTrackedProductIdRef = useRef<string | null>(null)
+  const hasTrackedAddToCartRef = useRef(false)
+  const hasTrackedBuyNowRef = useRef(false)
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -222,10 +224,11 @@ export default function ProductDetailPage() {
   const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, effectiveQuantity) : getWhatsAppHref()
 
   const handleAddToBag = () => {
-    if (!product || availableStock <= 0) {
+    if (!product || availableStock <= 0 || hasTrackedAddToCartRef.current) {
       return
     }
 
+    hasTrackedAddToCartRef.current = true
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
     metaPixel.addToCart({
       content_name: product.name,
@@ -248,15 +251,30 @@ export default function ProductDetailPage() {
   }
 
   const handleBuyNow = () => {
-    if (!product || availableStock <= 0) {
+    if (!product || availableStock <= 0 || hasTrackedBuyNowRef.current) {
       return
     }
 
+    hasTrackedBuyNowRef.current = true
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
     metaPixel.initiateCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
       content_type: 'product',
+      content_ids: [String(product.id)],
+    })
+    googleAnalytics.beginCheckout({
+      value: parseBDT(product.price) * effectiveQuantity,
+      currency: 'BDT',
+      items: [
+        {
+          item_id: String(product.id),
+          item_name: product.name,
+          item_category: product.category,
+          price: parseBDT(product.price),
+          quantity: effectiveQuantity,
+        },
+      ],
     })
     navigate('/checkout')
   }

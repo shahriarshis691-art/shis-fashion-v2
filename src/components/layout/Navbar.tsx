@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import shisLogo from '../../assets/logo/shis-logo.svg'
 import { useCart } from '../../context/CartContext'
@@ -150,6 +150,7 @@ export default function Navbar() {
   const [openMegaMenu, setOpenMegaMenu] = useState<keyof typeof megaMenuGroups | null>(null)
   const [expandedMobileGroup, setExpandedMobileGroup] = useState<(typeof mobileMenuGroups)[number]['key'] | null>('women')
   const [searchTerm, setSearchTerm] = useState('')
+  const lastSearchQueryRef = useRef<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { itemCount } = useCart()
@@ -341,7 +342,8 @@ export default function Navbar() {
                     if (event.key === 'Enter') {
                       event.preventDefault()
                       const query = searchTerm.trim()
-                      if (query) {
+                      if (query && lastSearchQueryRef.current !== query) {
+                        lastSearchQueryRef.current = query
                         metaPixel.search({ search_string: query })
                         googleAnalytics.search(query)
                       }
@@ -357,7 +359,8 @@ export default function Navbar() {
                   type="button"
                   onClick={() => {
                     const query = searchTerm.trim()
-                    if (query) {
+                    if (query && lastSearchQueryRef.current !== query) {
+                      lastSearchQueryRef.current = query
                       metaPixel.search({ search_string: query })
                       googleAnalytics.search(query)
                     }

@@ -33,6 +33,7 @@ interface InitiateCheckoutData {
   value?: number
   currency?: string
   content_type?: string
+  content_ids?: string[]
 }
 
 interface PurchaseData {
