@@ -3,36 +3,14 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
-import { getManagedImageEntries, getProductImage } from '../utils/media'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { resolveCanonicalSubcategorySlug } from '../data/categoryTaxonomy'
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
-
 function mapProduct(product: AdminProduct): ShopProduct {
-  const imageEntries = getManagedImageEntries(product, 1)
-  const primaryImage = getProductImage(product)
-  const category = resolveCanonicalSubcategorySlug(product.category)
-
-  return {
-    id: product.id,
-    slug: slugify(product.name),
-    name: product.name,
-    price: product.price,
-    category: category && category !== 'all' ? category : product.category.trim().toLowerCase(),
-    image: primaryImage || imageEntries[0]?.url || '',
-    description: product.description,
-    galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
-    stock: product.stock,
-    featured: product.featured,
-    newArrival: product.newArrival,
-  }
+  const canonicalCategory = resolveCanonicalSubcategorySlug(product.category)
+  return mapAdminProductToShopProduct(product, {
+    category: canonicalCategory && canonicalCategory !== 'all' ? canonicalCategory : product.category.trim().toLowerCase(),
+  })
 }
 
 export default function NewArrivalsPage() {

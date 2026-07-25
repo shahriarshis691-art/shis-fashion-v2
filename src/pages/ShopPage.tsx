@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { type ShopProduct } from '../data/shopData'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -11,7 +12,6 @@ import {
   type AdminProduct,
 } from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
-import { getManagedImageEntries, getProductImage } from '../utils/media'
 import {
   type ShopSegment,
   SEGMENT_TABS,
@@ -36,15 +36,6 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'price-high', label: 'Price: high to low' },
 ]
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
-
 function normalizeProductCategory(category: string) {
   const raw = category.trim().toLowerCase()
   if (!raw) {
@@ -64,23 +55,10 @@ function normalizeProductCategory(category: string) {
 }
 
 function mapProduct(product: AdminProduct): ShopProduct {
-  const imageEntries = getManagedImageEntries(product, 1)
-  const primaryImage = getProductImage(product)
-
-  return {
-    id: product.id,
-    slug: slugify(product.name),
-    name: product.name,
-    price: product.price,
+  return mapAdminProductToShopProduct(product, {
     category: normalizeProductCategory(product.category),
-    image: primaryImage || imageEntries[0]?.url || '',
-    description: product.description,
-    galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
-    stock: product.stock,
-    featured: product.featured,
-    newArrival: product.newArrival,
     discount: product.stock <= 5 ? 'Low stock' : undefined,
-  }
+  })
 }
 
 function normalizeSegmentFromPath(pathname: string): ShopSegment {

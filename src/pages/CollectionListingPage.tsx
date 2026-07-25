@@ -6,19 +6,11 @@ import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { parseBDT } from '../utils/currency'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata } from '../utils/seo'
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
 
 interface ListingProduct {
   id: string
@@ -36,17 +28,17 @@ interface ListingProduct {
 function toListingProduct(product: AdminProduct): ListingProduct {
   const media = getManagedImageEntries(product, 3)
   const primaryImage = getProductImage(product)
-  return {
-    id: product.id,
-    slug: slugify(product.name),
-    name: product.name,
-    price: product.price,
-    description: product.description,
-    category: product.category,
+  const base = mapAdminProductToShopProduct(product, {
     image: primaryImage || media[0]?.url || '',
     galleryImages: media.map((entry) => entry.url).filter(Boolean),
+  })
+
+  return {
+    ...base,
+    id: String(base.id),
     sizes: product.sizes,
-    stock: product.stock,
+    galleryImages: base.galleryImages ?? [],
+    stock: base.stock ?? 0,
   }
 }
 
