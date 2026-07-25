@@ -502,6 +502,29 @@ export default function ShopPage() {
     if (!didTrackInitialListingStateRef.current) {
       didTrackInitialListingStateRef.current = true
       listingStateSnapshotRef.current = listingStateSnapshot
+
+      const searchQuery = new URLSearchParams(location.search).get('q')?.trim() ?? ''
+      const resultCount = visibleProducts.length
+      const searchSuccess = resultCount > 0
+
+      googleAnalytics.trackEvent('listing_view', {
+        segment: effectiveSegment,
+        subcategory: effectiveSubcategory,
+        result_count: resultCount,
+        search_query: searchQuery || undefined,
+        search_success: searchSuccess,
+        path: location.pathname,
+        search: location.search,
+      })
+
+      if (searchQuery) {
+        googleAnalytics.trackEvent('search_result_count', {
+          search_term: searchQuery,
+          result_count: resultCount,
+          search_success: searchSuccess,
+        })
+      }
+
       return
     }
 
@@ -529,6 +552,7 @@ export default function ShopPage() {
     location.search,
     ready,
     sortBy,
+    visibleProducts.length,
   ])
 
   const navigateWithSubcategory = (subcategory: string) => {
