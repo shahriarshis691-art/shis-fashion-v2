@@ -26,15 +26,15 @@ if (import.meta.env.PROD) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <RecentlyViewedProvider>
-            <CustomerRecoveryProvider>
+      <CustomerRecoveryProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <RecentlyViewedProvider>
               <RouterProvider router={router} />
-            </CustomerRecoveryProvider>
-          </RecentlyViewedProvider>
-        </WishlistProvider>
-      </CartProvider>
+            </RecentlyViewedProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </CustomerRecoveryProvider>
     </ThemeProvider>
   </StrictMode>,
 )
