@@ -5,12 +5,14 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
@@ -2649,8 +2651,16 @@ export async function subscribeNewsletter(email: string): Promise<void> {
     return
   }
 
+  const trimmed = email.trim().toLowerCase()
+  const q = query(collection(firebaseDb, 'newsletterSubscribers'), where('email', '==', trimmed), limit(1))
+  const snapshot = await getDocs(q)
+
+  if (!snapshot.empty) {
+    throw new Error('This email is already subscribed.')
+  }
+
   await addDoc(collection(firebaseDb, 'newsletterSubscribers'), {
-    email,
+    email: trimmed,
     signupDate: serverTimestamp(),
     source: 'website_popup',
     couponUsed: '',

@@ -14,9 +14,11 @@ interface FormState {
   error: string
   submitting: boolean
   success: boolean
+  touched: boolean
 }
 
 const COUPON_CODE = 'WELCOME5'
+const PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80'
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
@@ -34,8 +36,9 @@ function copyToClipboard(value: string) {
 }
 
 export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePopupProps) {
-  const [form, setForm] = useState<FormState>({ email: '', error: '', submitting: false, success: false })
+  const [form, setForm] = useState<FormState>({ email: '', error: '', submitting: false, success: false, touched: false })
   const [copied, setCopied] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
 
@@ -78,16 +81,16 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
 
     const trimmed = form.email.trim()
     if (!trimmed) {
-      setForm((current) => ({ ...current, error: 'Please enter your email address.' }))
+      setForm((current) => ({ ...current, error: 'Please enter your email address.', touched: true }))
       return
     }
 
     if (!isValidEmail(trimmed)) {
-      setForm((current) => ({ ...current, error: 'Please enter a valid email address.' }))
+      setForm((current) => ({ ...current, error: 'Invalid email address.', touched: true }))
       return
     }
 
-    setForm((current) => ({ ...current, error: '', submitting: true }))
+    setForm((current) => ({ ...current, error: '', touched: true, submitting: true }))
 
     try {
       await onSubscribe(trimmed)
@@ -96,8 +99,15 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
       metaPixel.trackEvent('popup_signup', { source: 'welcome_discount', email: trimmed })
       googleAnalytics.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
       metaPixel.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
-    } catch {
-      setForm((current) => ({ ...current, error: 'Something went wrong. Please try again.', submitting: false }))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : ''
+      if (message.toLowerCase().includes('already') || message.toLowerCase().includes('exists')) {
+        setForm((current) => ({ ...current, error: 'This email is already subscribed.', submitting: false }))
+      } else if (message.toLowerCase().includes('network') || message.toLowerCase().includes('connect')) {
+        setForm((current) => ({ ...current, error: 'Unable to connect. Please try again later.', submitting: false }))
+      } else {
+        setForm((current) => ({ ...current, error: 'Something went wrong. Please try again.', submitting: false }))
+      }
     }
   }
 
@@ -110,6 +120,8 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
     }
   }
 
+  const showError = form.touched && form.error
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -118,14 +130,14 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.22 }}
+          transition={{ duration: 0.3 }}
         >
           <motion.div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
+            transition={{ duration: 0.3 }}
             onClick={handleClose}
             aria-hidden="true"
           />
@@ -134,105 +146,145 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
             role="dialog"
             aria-modal="true"
             aria-label="Welcome discount"
-            className="relative w-full max-w-[520px] rounded-[16px] border border-white/10 bg-black p-6 shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:p-8"
-            style={{ width: '95%', maxWidth: '520px' }}
+            className="relative flex w-full max-w-3xl flex-col overflow-hidden rounded-[16px] border border-white/10 bg-black shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:flex-row"
+            style={{ width: '95%', maxWidth: '900px' }}
             initial={{ opacity: 0, scale: 0.94, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 10 }}
-            transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+            transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
           >
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={handleClose}
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] sm:right-4 sm:top-4"
-              aria-label="Close welcome popup"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 6 18 18" />
-                <path d="M18 6 6 18" />
-              </svg>
-            </button>
+            <div className="relative h-48 w-full sm:h-auto sm:w-[40%]">
+              <img
+                src={PRODUCT_IMAGE}
+                alt="SHIS Fashion collection"
+                loading="lazy"
+                decoding="async"
+                onError={(event) => {
+                  event.currentTarget.style.display = 'none'
+                }}
+                onLoad={() => setImageLoaded(true)}
+                className={`h-full w-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-gradient-to-r" />
+            </div>
 
-            {form.success ? (
-              <div className="text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">Congratulations!</p>
-                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Your 5% discount has been unlocked</h2>
-                <p className="mt-3 text-sm leading-7 text-white/75">
-                  Use this exclusive coupon code at checkout to save on your first order.
-                </p>
+            <div className="relative flex w-full flex-1 flex-col p-6 sm:p-8">
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={handleClose}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] sm:right-4 sm:top-4"
+                aria-label="Close welcome popup"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 6 18 18" />
+                  <path d="M18 6 6 18" />
+                </svg>
+              </button>
 
-                <div className="mt-6 flex items-center justify-center gap-3">
-                  <div className="flex-1 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-center">
+              {form.success ? (
+                <motion.div
+                  className="flex flex-1 flex-col items-center justify-center text-center"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">Welcome to SHIS Fashion!</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Your exclusive discount has been unlocked</h2>
+                  <p className="mt-3 text-sm leading-7 text-white/75">
+                    Use this exclusive coupon code at checkout to save on your first order.
+                  </p>
+
+                  <div className="mt-6 w-full">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/60">Coupon Code</p>
-                    <p className="mt-1 text-xl font-semibold text-[#D4AF37]">{COUPON_CODE}</p>
+                    <div className="mt-2 flex items-center justify-center gap-3">
+                      <div className="flex-1 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-center">
+                        <p className="text-xl font-semibold text-[#D4AF37]">{COUPON_CODE}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                  <button
-                    type="button"
-                    onClick={handleCopyCode}
-                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#D4AF37] bg-[#D4AF37] px-6 py-3 text-[15px] font-semibold leading-none text-black transition hover:bg-[#c9a62e]"
-                  >
-                    {copied ? 'Copied!' : 'Copy Code'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-6 py-3 text-[15px] font-semibold leading-none text-white transition hover:bg-white/10"
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">Welcome to SHIS Fashion</p>
-                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Unlock 5% OFF Your First Order</h2>
-                <p className="mt-3 text-sm leading-7 text-white/75">
-                  Join our exclusive community and receive:
-                </p>
-                <ul className="mt-3 space-y-2 text-sm leading-7 text-white/80">
-                  <li>• 5% OFF on your first purchase</li>
-                  <li>• Early access to new collections</li>
-                  <li>• Exclusive member-only offers</li>
-                </ul>
-
-                <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
+                  <div className="mt-5 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+                    <button
+                      type="button"
+                      onClick={handleCopyCode}
+                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#D4AF37] bg-[#D4AF37] px-6 py-3 text-[15px] font-semibold leading-none text-black transition hover:bg-[#c9a62e]"
+                    >
+                      {copied ? 'Copied!' : 'Copy Code'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-6 py-3 text-[15px] font-semibold leading-none text-white transition hover:bg-white/10"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <>
                   <div>
-                    <label htmlFor="welcome-email" className="sr-only">
-                      Enter your email address
-                    </label>
-                    <input
-                      id="welcome-email"
-                      type="email"
-                      value={form.email}
-                      onChange={(event) => setForm((current) => ({ ...current, email: event.target.value, error: '' }))}
-                      placeholder="Enter your email address"
-                      className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#D4AF37]"
-                      disabled={form.submitting}
-                    />
+                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">🎉 GET 5% OFF YOUR FIRST ORDER</p>
+                    <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Join the SHIS Fashion community and unlock your exclusive welcome discount.</h2>
                   </div>
 
-                  {form.error ? (
-                    <p className="text-xs text-rose-300">{form.error}</p>
-                  ) : null}
+                  <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+                    <div>
+                      <label htmlFor="welcome-email" className="sr-only">
+                        Enter your email address
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                          <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/50" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          id="welcome-email"
+                          type="email"
+                          value={form.email}
+                          onChange={(event) => setForm((current) => ({ ...current, email: event.target.value, error: '' }))}
+                          onBlur={() => setForm((current) => ({ ...current, touched: true }))}
+                          placeholder="Enter your email address"
+                          className={`w-full rounded-2xl border bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/50 outline-none transition ${
+                            showError ? 'border-rose-400 focus:border-rose-400' : 'border-white/15 focus:border-[#D4AF37]'
+                          }`}
+                          disabled={form.submitting}
+                        />
+                      </div>
+                    </div>
 
-                  <button
-                    type="submit"
-                    disabled={form.submitting}
-                    className="inline-flex w-full min-h-12 items-center justify-center rounded-full border border-[#D4AF37] bg-[#D4AF37] px-6 py-3 text-[15px] font-semibold leading-none text-black transition hover:bg-[#c9a62e] disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {form.submitting ? 'Unlocking…' : '🎁 Unlock My Discount'}
-                  </button>
-                </form>
+                    {showError ? (
+                      <p className="text-xs text-rose-300">{form.error}</p>
+                    ) : null}
 
-                <p className="mt-4 text-center text-xs text-white/50">
-                  We respect your privacy. No spam.
-                </p>
-              </>
-            )}
+                    <button
+                      type="submit"
+                      disabled={form.submitting}
+                      className="inline-flex w-full min-h-12 items-center justify-center gap-2 rounded-full border border-[#D4AF37] bg-[linear-gradient(180deg,#D4AF37,#b8962e)] px-6 py-3 text-[15px] font-semibold leading-none text-black shadow-[0_8px_24px_rgba(212,175,55,0.25)] transition hover:shadow-[0_12px_32px_rgba(212,175,55,0.35)] hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {form.submitting ? (
+                        <>
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                          Claiming…
+                        </>
+                      ) : (
+                        '🎁 Claim My 5% OFF'
+                      )}
+                    </button>
+                  </form>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-white/60">
+                    <span>✔ No Spam</span>
+                    <span>✔ Unsubscribe Anytime</span>
+                    <span>✔ Exclusive Member Offers</span>
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
         </motion.div>
       )}
