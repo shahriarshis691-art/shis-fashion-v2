@@ -204,7 +204,7 @@ export default function Navbar() {
           isScrolled ? 'shadow-[0_8px_22px_rgba(0,0,0,0.08)]' : 'shadow-none'
         }`}
       >
-        <div className="mx-auto flex h-[3.7rem] w-full max-w-7xl items-center px-3.5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-[4rem] sm:h-[3.7rem] w-full max-w-7xl items-center px-3.5 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => {
@@ -229,7 +229,7 @@ export default function Navbar() {
           </button>
 
           <Link to="/" onClick={closeOverlays} className="ml-2 md:ml-0" aria-label="SHIS Fashion home">
-            <img src={shisLogo} alt="SHIS Fashion" className="h-7 w-auto sm:h-8" loading="eager" />
+            <img src={shisLogo} alt="SHIS Fashion" className="h-9 w-auto sm:h-8" loading="eager" />
           </Link>
 
           <nav className="ml-8 hidden min-w-0 flex-1 items-center gap-5 md:flex" aria-label="Primary navigation">
@@ -405,7 +405,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-x-3 top-[calc(3.9rem+env(safe-area-inset-top))] z-50 rounded-md bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.22)] md:hidden"
+              className="fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 rounded-md bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.22)] md:hidden"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/50">Categories</p>
               <div className="mt-2 grid gap-2" aria-label="Mobile category menu">
