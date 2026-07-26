@@ -39,6 +39,9 @@ Production Launch Checklist
 
 Use this before running paid traffic.
 
+Primary campaign-day runbook:
+- See `docs/campaign-day-qa-checklist.md` for the final go/no-go sequence (Meta + GA4 + checkout verification).
+
 1. Environment variables
 - Copy `.env.example` values into your production environment.
 - Set all `VITE_FIREBASE_*` values from the live Firebase project.
@@ -77,6 +80,9 @@ Meta Pixel Live Test Checklist
 ==============================
 
 Run these checks on the live domain after deployment.
+
+Note:
+- For full launch validation (including GA4 and decision rules), follow `docs/campaign-day-qa-checklist.md`.
 
 1. Browser/devtools quick check
 - Open the live site and verify `https://connect.facebook.net/en_US/fbevents.js` loads successfully.

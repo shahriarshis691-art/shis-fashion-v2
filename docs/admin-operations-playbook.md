@@ -104,3 +104,11 @@ Use restore when:
 2. Review cancelled order reasons in notes.
 3. Clean old or incorrect media assets.
 4. Ensure featured/homepage campaigns match current season.
+
+## 9) Campaign day verification (before ads go live)
+
+Run the dedicated launch checklist before turning on paid traffic:
+
+1. Open [campaign-day-qa-checklist.md](campaign-day-qa-checklist.md).
+2. Complete the full shopper flow and event checks.
+3. Use the Go/No-Go rules in that checklist as the final decision gate.
