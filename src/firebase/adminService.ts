@@ -167,6 +167,40 @@ export interface FeaturedCollectionPage {
   relatedCategorySlugs: string[]
 }
 
+export interface HomepageSeoEntry {
+  title: string
+  description: string
+  keywords: string
+  ogImage?: string
+}
+
+export interface HomepageSeoConfig {
+  home?: HomepageSeoEntry
+  shop?: HomepageSeoEntry
+  oversized?: HomepageSeoEntry
+}
+
+const defaultHomepageSeo: Required<HomepageSeoConfig> = {
+  home: {
+    title: 'SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim',
+    description: 'Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available.',
+    keywords: 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh',
+    ogImage: 'https://www.shisfashion.com/og-image.svg',
+  },
+  shop: {
+    title: 'Shop SHIS Fashion Bangladesh | Premium T-Shirts, Polo Shirts & Denim',
+    description: 'Browse premium oversized T-shirts, Polo Shirts, Shirts, Denim and women\'s and kids fashion at SHIS Fashion Bangladesh.',
+    keywords: 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh',
+    ogImage: 'https://www.shisfashion.com/og-image.svg',
+  },
+  oversized: {
+    title: 'Oversized Tee | SHIS Fashion Bangladesh',
+    description: 'Shop premium oversized T-shirts from SHIS Fashion Bangladesh with fast Dhaka delivery and cash on delivery support.',
+    keywords: 'Oversized T Shirt Bangladesh, SHIS oversized tee, baggy t shirt dhaka',
+    ogImage: 'https://www.shisfashion.com/og-image.svg',
+  },
+}
+
 export interface HomepageContent {
   navbarBrandPrimary?: string
   navbarBrandSecondary?: string
@@ -210,6 +244,7 @@ export interface HomepageContent {
   footerContactAddress?: string
   footerBottomText?: string
   freeDeliveryThreshold?: number
+  seo?: HomepageSeoConfig
   sections: HomepageSectionConfig[]
 }
 
@@ -1206,6 +1241,7 @@ const defaultHomepage: HomepageContent = {
   footerContactAddress: 'Mirpur, Dhaka',
   footerBottomText: 'Crafted for premium, calm, and timeless browsing.',
   freeDeliveryThreshold: 3000,
+  seo: defaultHomepageSeo,
   sections: [
     { key: 'hero', label: 'Hero', enabled: true, order: 0 },
     { key: 'featuredCollection', label: 'Featured collection', enabled: true, order: 1 },
@@ -1313,6 +1349,19 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     shopByCategories: mergedShopByCategories,
   })
 
+  const normalizeSeoEntry = (incoming: Partial<HomepageSeoEntry> | undefined, fallback: HomepageSeoEntry): HomepageSeoEntry => ({
+    title: incoming?.title?.trim() || fallback.title,
+    description: incoming?.description?.trim() || fallback.description,
+    keywords: incoming?.keywords?.trim() || fallback.keywords,
+    ogImage: incoming?.ogImage?.trim() || fallback.ogImage,
+  })
+
+  const mergedSeo: HomepageSeoConfig = {
+    home: normalizeSeoEntry(content?.seo?.home, defaultHomepageSeo.home),
+    shop: normalizeSeoEntry(content?.seo?.shop, defaultHomepageSeo.shop),
+    oversized: normalizeSeoEntry(content?.seo?.oversized, defaultHomepageSeo.oversized),
+  }
+
   return {
     ...defaultHomepage,
     ...(content ?? {}),
@@ -1328,6 +1377,7 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     shopByCategories: mergedShopByCategories,
     categorySections: mergedCategorySections,
     freeDeliveryThreshold: normalizedFreeDeliveryThreshold,
+    seo: mergedSeo,
     sections: (content?.sections && content.sections.length ? content.sections : defaultHomepage.sections).map((section, index) => ({
       ...defaultHomepage.sections[index],
       ...section,

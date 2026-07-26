@@ -11,7 +11,7 @@ import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
-import { applySeoMetadata } from '../utils/seo'
+import { applySeoMetadata, setRuntimeSeoOverrides } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
 import { subscribeToHomepageContent } from '../firebase/adminService'
 import { normalizeCatalogImageUrl } from '../utils/media'
@@ -49,6 +49,11 @@ export default function MainLayout() {
     const unsubscribe = subscribeToHomepageContent((content) => {
       const normalized = normalizeCatalogImageUrl(content.heroImage ?? '', 1400, 900)
       setHeroImage(normalized)
+      setRuntimeSeoOverrides({
+        home: content.seo?.home,
+        shop: content.seo?.shop,
+        oversized: content.seo?.oversized,
+      })
     })
     return unsubscribe
   }, [])

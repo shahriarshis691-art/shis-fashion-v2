@@ -39,6 +39,42 @@ interface ApplySeoOptions {
   schema?: Array<Record<string, unknown>>
 }
 
+interface RuntimeSeoEntry {
+  title?: string
+  description?: string
+  keywords?: string
+  ogImage?: string
+}
+
+interface RuntimeSeoOverrides {
+  home?: RuntimeSeoEntry
+  shop?: RuntimeSeoEntry
+  oversized?: RuntimeSeoEntry
+}
+
+let runtimeSeoOverrides: RuntimeSeoOverrides = {}
+
+export function setRuntimeSeoOverrides(overrides?: RuntimeSeoOverrides) {
+  runtimeSeoOverrides = overrides ?? {}
+}
+
+function getRuntimeOverride(pathname: string): RuntimeSeoEntry | undefined {
+  const normalizedPath = normalizePath(pathname)
+  if (normalizedPath === '/') {
+    return runtimeSeoOverrides.home
+  }
+
+  if (normalizedPath === '/shop') {
+    return runtimeSeoOverrides.shop
+  }
+
+  if (normalizedPath === '/shop/oversized-tee') {
+    return runtimeSeoOverrides.oversized
+  }
+
+  return undefined
+}
+
 function normalizePath(pathname: string) {
   const [pathOnly] = pathname.split('?')
   const cleanPath = pathOnly?.split('#')[0] ?? '/'
@@ -581,9 +617,11 @@ function removeExistingJsonLd() {
 export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   const metadata = getRouteMetadata(pathname)
   const canonicalUrl = createCanonicalUrl(pathname)
+  const runtimeOverride = getRuntimeOverride(pathname)
   const mergedSchemas = options?.schema ?? options?.schemas ?? []
   const mergedMetadata = {
     ...metadata,
+    ...(runtimeOverride ?? {}),
     ...options,
     schema: mergedSchemas,
   }

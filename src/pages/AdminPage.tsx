@@ -1668,6 +1668,167 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 <input value={homepageContent.navbarSearchPlaceholder ?? ''} onChange={(event) => setHomepageContent({ ...homepageContent, navbarSearchPlaceholder: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Navbar search placeholder" />
                 <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">SEO quick controls</p>
+                    <p className="mt-1 text-xs text-[var(--color-muted)]">Update title, description, and keywords for Home, Shop, and Oversized listing pages.</p>
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    <div className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Home page SEO</p>
+                      <div className="mt-3 grid gap-3">
+                        <input
+                          value={homepageContent.seo?.home?.title ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              home: {
+                                ...(homepageContent.seo?.home ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                title: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Home meta title"
+                        />
+                        <textarea
+                          value={homepageContent.seo?.home?.description ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              home: {
+                                ...(homepageContent.seo?.home ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                description: event.target.value,
+                              },
+                            },
+                          })}
+                          className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Home meta description"
+                        />
+                        <input
+                          value={homepageContent.seo?.home?.keywords ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              home: {
+                                ...(homepageContent.seo?.home ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                keywords: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Home keywords (comma separated)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Shop page SEO (/shop)</p>
+                      <div className="mt-3 grid gap-3">
+                        <input
+                          value={homepageContent.seo?.shop?.title ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              shop: {
+                                ...(homepageContent.seo?.shop ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                title: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Shop meta title"
+                        />
+                        <textarea
+                          value={homepageContent.seo?.shop?.description ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              shop: {
+                                ...(homepageContent.seo?.shop ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                description: event.target.value,
+                              },
+                            },
+                          })}
+                          className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Shop meta description"
+                        />
+                        <input
+                          value={homepageContent.seo?.shop?.keywords ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              shop: {
+                                ...(homepageContent.seo?.shop ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                keywords: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Shop keywords (comma separated)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Oversized listing SEO (/shop/oversized-tee)</p>
+                      <div className="mt-3 grid gap-3">
+                        <input
+                          value={homepageContent.seo?.oversized?.title ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              oversized: {
+                                ...(homepageContent.seo?.oversized ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                title: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Oversized meta title"
+                        />
+                        <textarea
+                          value={homepageContent.seo?.oversized?.description ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              oversized: {
+                                ...(homepageContent.seo?.oversized ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                description: event.target.value,
+                              },
+                            },
+                          })}
+                          className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Oversized meta description"
+                        />
+                        <input
+                          value={homepageContent.seo?.oversized?.keywords ?? ''}
+                          onChange={(event) => setHomepageContent({
+                            ...homepageContent,
+                            seo: {
+                              ...(homepageContent.seo ?? {}),
+                              oversized: {
+                                ...(homepageContent.seo?.oversized ?? { title: '', description: '', keywords: '', ogImage: '' }),
+                                keywords: event.target.value,
+                              },
+                            },
+                          })}
+                          className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+                          placeholder="Oversized keywords (comma separated)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-[var(--color-text)]">Homepage structure</p>
