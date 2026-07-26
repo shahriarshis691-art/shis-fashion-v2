@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { googleAnalytics } from '../../services/googleAnalytics'
 import { metaPixel } from '../../services/metaPixel'
+import { setPopupCompleted } from '../../firebase/adminService'
 
 interface WelcomePopupProps {
   isOpen: boolean
   onClose: () => void
-  onSubscribe: (email: string) => Promise<void>
+  onSubscribe: (email: string) => Promise<{ subscriberId: string; couponCode: string; couponId: string }>
+  onWelcomeBack: (email: string) => void
   heroImage?: string
 }
 
@@ -17,8 +19,6 @@ interface FormState {
   success: boolean
   touched: boolean
 }
-
-const COUPON_CODE = 'WELCOME5'
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
@@ -35,12 +35,19 @@ function copyToClipboard(value: string) {
   )
 }
 
-export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage = '' }: WelcomePopupProps) {
+export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBack, heroImage = '' }: WelcomePopupProps) {
   const [form, setForm] = useState<FormState>({ email: '', error: '', submitting: false, success: false, touched: false })
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false)
+  const [welcomeBackEmail, setWelcomeBackEmail] = useState('')
   const [copied, setCopied] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
+  const handleCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    handleCloseRef.current = onClose
+  }, [onClose])
 
   const popupImage = heroImage || ''
 
@@ -59,7 +66,7 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose()
+        handleCloseRef.current()
       }
     }
 
@@ -70,12 +77,33 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
       document.body.style.overflow = ''
       previousActiveElement.current?.focus()
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     googleAnalytics.trackEvent('popup_close', { source: 'welcome_discount' })
     metaPixel.trackEvent('popup_close', { source: 'welcome_discount' })
     onClose()
+  }, [onClose])
+
+  const handleSubscribe = async (email: string) => {
+    try {
+      await onSubscribe(email)
+      setPopupCompleted(email)
+      googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email })
+      metaPixel.trackEvent('popup_signup', { source: 'welcome_discount', email })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const lower = message.toLowerCase()
+      if (lower.includes('already') || lower.includes('welcome back')) {
+        setWelcomeBackEmail(email)
+        setShowWelcomeBack(true)
+        setForm((current) => ({ ...current, submitting: false }))
+        setPopupCompleted(email)
+        onWelcomeBack(email)
+        return
+      }
+      throw error
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -95,31 +123,29 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
     setForm((current) => ({ ...current, error: '', touched: true, submitting: true }))
 
     try {
-      await onSubscribe(trimmed)
+      await handleSubscribe(trimmed)
       setForm((current) => ({ ...current, success: true, submitting: false }))
-      googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email: trimmed })
-      metaPixel.trackEvent('popup_signup', { source: 'welcome_discount', email: trimmed })
-      googleAnalytics.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
-      metaPixel.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      const lower = message.toLowerCase()
-      if (lower.includes('already') || lower.includes('exists')) {
-        setForm((current) => ({ ...current, error: 'This email is already subscribed.', submitting: false }))
-      } else if (lower.includes('network') || lower.includes('connect') || lower.includes('unavailable')) {
-        setForm((current) => ({ ...current, error: 'Unable to connect. Please try again later.', submitting: false }))
-      } else {
-        setForm((current) => ({ ...current, error: 'Something went wrong. Please try again.', submitting: false }))
-      }
+    } catch {
+      setForm((current) => ({ ...current, submitting: false, error: 'Something went wrong. Please try again.' }))
+    }
+  }
+
+  const handleWelcomeBackClaim = async () => {
+    setForm((current) => ({ ...current, submitting: true }))
+    try {
+      await onSubscribe(welcomeBackEmail)
+      setForm((current) => ({ ...current, success: true, submitting: false }))
+    } catch {
+      setForm((current) => ({ ...current, submitting: false, error: 'Something went wrong. Please try again.' }))
     }
   }
 
   const handleCopyCode = async () => {
-    const success = await copyToClipboard(COUPON_CODE)
+    const success = await copyToClipboard('WELCOME-5OFF')
     if (success) {
       setCopied(true)
-      googleAnalytics.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: COUPON_CODE })
-      metaPixel.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: COUPON_CODE })
+      googleAnalytics.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: 'WELCOME-5OFF' })
+      metaPixel.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: 'WELCOME-5OFF' })
     }
   }
 
@@ -187,7 +213,36 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
                 </svg>
               </button>
 
-              {form.success ? (
+              {showWelcomeBack ? (
+                <motion.div
+                  className="flex flex-1 flex-col items-center justify-center text-center"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">Welcome Back!</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">You're already a SHIS Fashion member.</h2>
+                  <p className="mt-3 text-sm leading-7 text-white/75">
+                    Your exclusive welcome discount is waiting. Check your email for your coupon code, or visit any product page to apply it at checkout.
+                  </p>
+                  <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+                    <button
+                      type="button"
+                      onClick={handleWelcomeBackClaim}
+                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#D4AF37] bg-[#D4AF37] px-6 py-3 text-[15px] font-semibold leading-none text-black transition hover:bg-[#c9a62e]"
+                    >
+                      Claim My Discount
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-6 py-3 text-[15px] font-semibold leading-none text-white transition hover:bg-white/10"
+                    >
+                      Continue Shopping
+                    </button>
+                  </div>
+                </motion.div>
+              ) : form.success ? (
                 <motion.div
                   className="flex flex-1 flex-col items-center justify-center text-center"
                   initial={{ opacity: 0, y: 8 }}
@@ -204,7 +259,7 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
                     <p className="text-xs uppercase tracking-[0.18em] text-white/60">Coupon Code</p>
                     <div className="mt-2 flex items-center justify-center gap-3">
                       <div className="flex-1 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-center">
-                        <p className="text-xl font-semibold text-[#D4AF37]">{COUPON_CODE}</p>
+                        <p className="text-xl font-semibold text-[#D4AF37]">WELCOME-5OFF</p>
                       </div>
                     </div>
                   </div>

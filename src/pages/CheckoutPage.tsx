@@ -87,7 +87,7 @@ function currentTimeMs() {
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, subtotal, clearCart } = useCart()
+  const { items, subtotal, clearCart, appliedCoupon, discountAmount, grandTotal } = useCart()
   const initialDivision = bangladeshDivisions[0]
   const initialDistrict = getDistrictsForDivision(initialDivision)[0]
   const initialUpazila = getUpazilasForDistrict(initialDistrict)[0]
@@ -108,11 +108,11 @@ export default function CheckoutPage() {
   const hasTrackedCheckoutRef = useRef(false)
   const enteredAtRef = useRef(0)
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
-  const grandTotal = subtotal + deliveryCharge
+  const effectiveGrandTotal = appliedCoupon ? (subtotal + deliveryCharge - discountAmount) : grandTotal
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const upazilaOptions = getUpazilasForDistrict(form.district)
   const backendReady = isOrderBackendReady()
-  const summaryLabel = formatBDT(grandTotal)
+  const summaryLabel = formatBDT(effectiveGrandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
   const normalizedPhone = useMemo(() => normalizeBangladeshPhone(form.phone), [form.phone])
   const isPhoneValid = normalizedPhone !== null
@@ -227,10 +227,15 @@ export default function CheckoutPage() {
         deliveryCharge,
         notes: form.deliveryNote.trim(),
         items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity, size: item.size })),
-        total: grandTotal,
+        total: effectiveGrandTotal,
         status: 'new',
         trackingNumber: '',
-      })
+      }, appliedCoupon ? {
+        code: appliedCoupon.code,
+        discountPercent: appliedCoupon.discountPercent,
+        discountAmount: appliedCoupon.discountAmount,
+        couponId: appliedCoupon.couponId,
+      } : null)
 
       const orderSnapshot = {
         orderId: createdOrder.id,
@@ -240,7 +245,7 @@ export default function CheckoutPage() {
         paymentMethod: 'Cash on Delivery',
         deliveryCharge,
         subtotal,
-        grandTotal,
+        grandTotal: effectiveGrandTotal,
         items: items.map((item) => ({
           id: item.id,
           name: item.name,
@@ -250,6 +255,9 @@ export default function CheckoutPage() {
           size: item.size,
           color: item.color,
         })),
+        couponCode: appliedCoupon?.code ?? '',
+        couponDiscountPercent: appliedCoupon?.discountPercent ?? 0,
+        couponDiscountAmount: appliedCoupon?.discountAmount ?? 0,
         createdAt: new Date().toISOString(),
       }
 
@@ -451,6 +459,12 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
                 </div>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between text-emerald-600">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>-{formatBDT(discountAmount)}</span>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between text-[var(--color-muted)]">
                   <span>Delivery</span>
                   <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>

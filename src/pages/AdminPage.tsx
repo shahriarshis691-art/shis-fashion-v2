@@ -10,11 +10,16 @@ import { formatBDT } from '../utils/currency'
 import {
   consumeAdminAccessDeniedFlag,
   createCategory,
+  createCoupon,
   createProduct,
   deleteCategory,
+  deleteCoupon,
   deleteOrder,
   deleteAsset,
   deleteProduct,
+  getCouponStats,
+  getCoupons,
+  getNewsletterSubscribers,
   isFirebaseConfigured,
   isHomepageLocalFirstMode,
   isLaunchModeEnabled,
@@ -34,17 +39,18 @@ import {
   subscribeToOrders,
   subscribeToProducts,
   updateCategory,
+  updateCoupon,
   updateFounderProfile,
   updateHomepageContent,
   updateOrderDetails,
   updateOrderStatus,
   updateProduct,
   uploadAssets,
-  getNewsletterSubscribers,
   type AdminBrand,
   type AdminOrder,
   type AdminProduct,
   type AdminCategory,
+  type Coupon,
   type FounderProfile,
   type HomepageContent,
   type HomepageCategorySection,
@@ -176,8 +182,20 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [founderForm, setFounderForm] = useState<FounderProfile | null>(null)
   const [founderSaving, setFounderSaving] = useState(false)
   const [founderMessage, setFounderMessage] = useState('')
-  const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([])
-  const [newsletterLoading, setNewsletterLoading] = useState(false)
+   const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([])
+   const [newsletterLoading, setNewsletterLoading] = useState(false)
+   const [coupons, setCoupons] = useState<Coupon[]>([])
+   const [couponLoading, setCouponLoading] = useState(false)
+   const [couponSearch, setCouponSearch] = useState('')
+   const [couponStats, setCouponStats] = useState({ total: 0, active: 0, used: 0, expired: 0, disabled: 0 })
+   const [showCouponForm, setShowCouponForm] = useState(false)
+   const [newCouponForm, setNewCouponForm] = useState({
+     code: '',
+     discountPercent: 5,
+     customerEmail: '',
+     expiryDays: 30,
+     maxUsage: 1,
+   })
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -260,28 +278,71 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     loadNewsletterSubscribers()
   }, [authMode, user])
 
-  const exportNewsletterSubscribers = () => {
-    if (!newsletterSubscribers.length) {
-      setMessage('No subscribers to export.')
-      return
+  useEffect(() => {
+    if (!user || authMode !== 'dashboard') {
+      return () => undefined
     }
 
-    const header = 'Email,Signup Date,Source,Coupon Used\n'
-    const rows = newsletterSubscribers.map((subscriber) => {
-      const signupDate = subscriber.signupDate ? new Date(subscriber.signupDate).toISOString() : ''
-      return [subscriber.email, signupDate, subscriber.source, subscriber.couponUsed || ''].join(',')
-    }).join('\n')
+    const loadCoupons = async () => {
+      setCouponLoading(true)
+      try {
+        const allCoupons = await getCoupons()
+        setCoupons(allCoupons)
+        setCouponStats(getCouponStats())
+      } catch {
+        // ignore
+      } finally {
+        setCouponLoading(false)
+      }
+    }
 
-    const csv = header + rows
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-    setMessage('Newsletter subscribers exported.')
-  }
+    loadCoupons()
+  }, [authMode, user])
+
+   const exportNewsletterSubscribers = () => {
+     if (!newsletterSubscribers.length) {
+       setMessage('No subscribers to export.')
+       return
+     }
+
+     const header = 'Email,Signup Date,Source,Coupon Used\n'
+     const rows = newsletterSubscribers.map((subscriber) => {
+       const signupDate = subscriber.signupDate ? new Date(subscriber.signupDate).toISOString() : ''
+       return [subscriber.email, signupDate, subscriber.source, subscriber.couponUsed || ''].join(',')
+     }).join('\n')
+
+     const csv = header + rows
+     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+     const url = URL.createObjectURL(blob)
+     const link = document.createElement('a')
+     link.href = url
+     link.download = `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`
+     link.click()
+     URL.revokeObjectURL(url)
+     setMessage('Newsletter subscribers exported.')
+   }
+
+   const exportCouponsCSV = () => {
+     if (!coupons.length) {
+       setMessage('No coupons to export.')
+       return
+     }
+
+     const header = 'Code,Customer Email,Discount %,Status,Usage Count,Max Usage,Expiry Date,Created At\n'
+     const rows = coupons.map((coupon) => {
+       return [coupon.code, coupon.customerEmail, `${coupon.discountPercent}%`, coupon.status, `${coupon.usageCount}/${coupon.maxUsage}`, coupon.expiryDate ? new Date(coupon.expiryDate).toISOString() : '', coupon.createdDate].join(',')
+     }).join('\n')
+
+     const csv = header + rows
+     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+     const url = URL.createObjectURL(blob)
+     const link = document.createElement('a')
+     link.href = url
+     link.download = `coupons-${new Date().toISOString().slice(0, 10)}.csv`
+     link.click()
+     URL.revokeObjectURL(url)
+     setMessage('Coupons exported.')
+   }
 
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
@@ -2196,10 +2257,233 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               placeholder="Story"
               disabled={!founderForm}
             />
-          </Card>
-        </div>
+         </Card>
+         </div>
 
         {showBrandManagement && <BrandManagement onDone={() => setShowBrandManagement(false)} />}
+
+        <div id="coupon-management" className="mt-8">
+          <Card className="rounded-[2rem] p-5 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Coupons</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Coupon Management</h2>
+              </div>
+              <Button variant="secondary" onClick={() => setShowCouponForm(!showCouponForm)}>
+                {showCouponForm ? 'Close Form' : '+ Generate Coupon'}
+              </Button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
+              <div className="rounded-xl border border-black/10 bg-black/[0.02] p-3 text-center">
+                <p className="text-2xl font-semibold text-black">{couponStats.total}</p>
+                <p className="text-xs text-black/60">Total</p>
+              </div>
+              <div className="rounded-xl border border-black/10 bg-black/[0.02] p-3 text-center">
+                <p className="text-2xl font-semibold text-emerald-600">{couponStats.active}</p>
+                <p className="text-xs text-black/60">Active</p>
+              </div>
+              <div className="rounded-xl border border-black/10 bg-black/[0.02] p-3 text-center">
+                <p className="text-2xl font-semibold text-black">{couponStats.used}</p>
+                <p className="text-xs text-black/60">Used</p>
+              </div>
+              <div className="rounded-xl border border-black/10 bg-black/[0.02] p-3 text-center">
+                <p className="text-2xl font-semibold text-rose-600">{couponStats.expired}</p>
+                <p className="text-xs text-black/60">Expired</p>
+              </div>
+              <div className="rounded-xl border border-black/10 bg-black/[0.02] p-3 text-center">
+                <p className="text-2xl font-semibold text-black">{couponStats.disabled}</p>
+                <p className="text-xs text-black/60">Disabled</p>
+              </div>
+            </div>
+
+            {showCouponForm ? (
+              <div className="mt-6 rounded-xl border border-black/10 bg-black/[0.02] p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black">Generate New Coupon</h3>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Customer Email</label>
+                    <input
+                      type="email"
+                      value={newCouponForm.customerEmail}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, customerEmail: event.target.value })}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                      placeholder="customer@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Discount (%)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={newCouponForm.discountPercent}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, discountPercent: Number(event.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Expiry (days)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={newCouponForm.expiryDays}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, expiryDays: Number(event.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Max Usage</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={newCouponForm.maxUsage}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, maxUsage: Number(event.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-3">
+                  <Button
+                    onClick={async () => {
+                      if (!newCouponForm.customerEmail.trim()) return
+                      try {
+                        await createCoupon({
+                          code: (newCouponForm.code || '').toUpperCase(),
+                          discountPercent: newCouponForm.discountPercent,
+                          customerEmail: newCouponForm.customerEmail.trim(),
+                          expiryDate: new Date(Date.now() + newCouponForm.expiryDays * 86400000).toISOString(),
+                          maxUsage: newCouponForm.maxUsage,
+                          status: 'active',
+                        })
+                        setNewCouponForm({ code: '', discountPercent: 5, customerEmail: '', expiryDays: 30, maxUsage: 1 })
+                        setShowCouponForm(false)
+                        const allCoupons = await getCoupons()
+                        setCoupons(allCoupons)
+                        setCouponStats(getCouponStats())
+                        setToast({ kind: 'success', message: 'Coupon generated successfully.' })
+                      } catch {
+                        setToast({ kind: 'error', message: 'Failed to generate coupon.' })
+                      }
+                    }}
+                  >
+                    Generate
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowCouponForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-4 flex items-center gap-3">
+              <input
+                type="text"
+                value={couponSearch}
+                onChange={(event) => setCouponSearch(event.target.value)}
+                placeholder="Search coupons or customers..."
+                className="flex-1 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+              />
+              <Button variant="secondary" onClick={exportCouponsCSV}>
+                Export CSV
+              </Button>
+            </div>
+
+            {couponLoading ? (
+              <p className="mt-4 text-sm text-[var(--color-muted)]">Loading coupons...</p>
+            ) : (
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-black/10">
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Code</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Customer</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Discount</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Status</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Usage</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Expiry</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {coupons
+                      .filter((coupon) => {
+                        const q = couponSearch.toLowerCase()
+                        return (coupon.code || '').toLowerCase().includes(q) || coupon.customerEmail.toLowerCase().includes(q)
+                      })
+                      .map((coupon) => (
+                        <tr key={coupon.id} className="border-b border-black/5">
+                          <td className="py-2 font-mono text-[var(--color-text)]">{coupon.code}</td>
+                          <td className="py-2 text-[var(--color-muted)]">{coupon.customerEmail}</td>
+                          <td className="py-2 text-[var(--color-text)]">{coupon.discountPercent}%</td>
+                          <td className="py-2">
+                            <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              coupon.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                              coupon.status === 'used' ? 'bg-black/10 text-black/60' :
+                              coupon.status === 'expired' ? 'bg-rose-100 text-rose-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>{coupon.status}</span>
+                          </td>
+                          <td className="py-2 text-[var(--color-muted)]">{coupon.usageCount} / {coupon.maxUsage}</td>
+                          <td className="py-2 text-[var(--color-muted)]">{new Date(coupon.expiryDate).toLocaleDateString()}</td>
+                          <td className="py-2">
+                            <div className="flex gap-2">
+                              {coupon.status === 'active' ? (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    await updateCoupon(coupon.id, { status: 'disabled' })
+                                    const allCoupons = await getCoupons()
+                                    setCoupons(allCoupons)
+                                    setCouponStats(getCouponStats())
+                                  }}
+                                  className="text-xs text-rose-600 hover:underline"
+                                >
+                                  Disable
+                                </button>
+                              ) : coupon.status === 'disabled' ? (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    await updateCoupon(coupon.id, { status: 'active' })
+                                    const allCoupons = await getCoupons()
+                                    setCoupons(allCoupons)
+                                    setCouponStats(getCouponStats())
+                                  }}
+                                  className="text-xs text-emerald-600 hover:underline"
+                                >
+                                  Enable
+                                </button>
+                              ) : null}
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await deleteCoupon(coupon.id)
+                                  const allCoupons = await getCoupons()
+                                  setCoupons(allCoupons)
+                                  setCouponStats(getCouponStats())
+                                }}
+                                className="text-xs text-rose-600 hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    {!coupons.length ? (
+                      <tr>
+                        <td colSpan={7} className="py-6 text-center text-[var(--color-muted)]">No coupons yet.</td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
 
         <div id="newsletter-management" className="mt-8">
           <Card className="rounded-[2rem] p-5 sm:p-7">

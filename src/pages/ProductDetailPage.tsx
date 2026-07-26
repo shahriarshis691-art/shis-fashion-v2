@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
+import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
-import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
+import { subscribeToProducts, getCouponByCode, type AdminProduct } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { normalizeSizes } from '../utils/sizes'
@@ -92,7 +92,7 @@ export default function ProductDetailPage() {
   const decodedSlug = decodeURIComponent(productSlug ?? '')
   const location = useLocation()
   const navigate = useNavigate()
-  const { addToCart } = useCart()
+  const { addToCart, applyCoupon } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
@@ -104,6 +104,9 @@ export default function ProductDetailPage() {
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponResult, setCouponResult] = useState<{ valid: boolean; message: string; discountPercent?: number; discountAmount?: number } | null>(null)
   const lastTrackedProductIdRef = useRef<string | null>(null)
   const hasTrackedAddToCartRef = useRef(false)
   const hasTrackedBuyNowRef = useRef(false)
@@ -371,6 +374,50 @@ export default function ProductDetailPage() {
     navigate('/checkout')
   }
 
+  const handleApplyCoupon = async () => {
+    const trimmed = couponCode.trim()
+    if (!trimmed) {
+      setCouponResult({ valid: false, message: 'Please enter a coupon code.' })
+      return
+    }
+
+    setCouponLoading(true)
+
+    try {
+      const result = await getCouponByCode(trimmed)
+
+      if (!result) {
+        setCouponResult({ valid: false, message: 'Invalid or expired coupon code.' })
+        setCouponLoading(false)
+        return
+      }
+
+      if (result.status !== 'active') {
+        setCouponResult({ valid: false, message: 'This coupon is no longer active.' })
+        setCouponLoading(false)
+        return
+      }
+
+      if (!result.code) {
+        setCouponResult({ valid: false, message: 'Invalid coupon code.' })
+        setCouponLoading(false)
+        return
+      }
+
+      applyCoupon(result.code, result.id)
+      setCouponResult({
+        valid: true,
+        message: `Coupon applied! You save ${result.discountPercent}%`,
+        discountPercent: result.discountPercent,
+        discountAmount: product ? Math.round(parseBDT(product.price) * effectiveQuantity * result.discountPercent / 100) : 0,
+      })
+    } catch {
+      setCouponResult({ valid: false, message: 'Unable to validate coupon. Please try again.' })
+    }
+
+    setCouponLoading(false)
+  }
+
   if (!ready) {
     return (
       <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -599,6 +646,33 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <div className="border border-black/15 p-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Promo Code</h2>
+            <div className="mt-3 flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(event) => { setCouponCode(event.target.value.toUpperCase()) }}
+                placeholder="Enter coupon code"
+                className="flex-1 rounded-[1rem] border border-black/15 bg-[var(--color-bg)] px-4 py-3 text-sm text-black outline-none transition placeholder:text-black/40 focus:border-black focus:ring-2 focus:ring-black/5"
+                maxLength={12}
+              />
+              <button
+                type="button"
+                onClick={handleApplyCoupon}
+                disabled={couponLoading || !couponCode.trim()}
+                className="ui-interactive rounded-[1rem] border border-black bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35"
+              >
+                {couponLoading ? 'Applying…' : 'Apply'}
+              </button>
+            </div>
+            {couponResult ? (
+              <p className={`mt-2 text-sm ${couponResult.valid ? 'text-emerald-600' : 'text-red-600'}`} role={couponResult.valid ? 'status' : 'alert'}>
+                {couponResult.message}
+              </p>
+            ) : null}
+          </div>
+
           <div className="border border-black/15 p-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Product Highlights</h2>
             <ul className="mt-3 space-y-2 text-sm text-black/75">

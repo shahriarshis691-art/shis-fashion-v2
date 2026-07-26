@@ -43,7 +43,7 @@ export default function MainLayout() {
   )
   const [heroImage, setHeroImage] = useState('')
 
-  const { isPopupOpen, closePopup } = useWelcomePopup()
+  const { isPopupOpen, closePopup, completePopup } = useWelcomePopup()
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => {
@@ -64,21 +64,6 @@ export default function MainLayout() {
   }, [location.pathname])
 
   useEffect(() => {
-    if (!shouldSendStabilizationHeartbeat()) {
-      return
-    }
-
-    googleAnalytics.trackEvent('stabilization_heartbeat', {
-      path: location.pathname,
-      soft_launch_mode: softLaunchDecision.mode,
-      soft_launch_allowed: softLaunchDecision.allowed,
-      launch_mode_enabled: String(import.meta.env.VITE_LAUNCH_MODE ?? 'false').trim().toLowerCase() === 'true',
-      ga_configured: Boolean(import.meta.env.VITE_GA_MEASUREMENT_ID),
-      meta_pixel_configured: Boolean(import.meta.env.VITE_META_PIXEL_ID),
-    })
-  }, [location.pathname, softLaunchDecision.allowed, softLaunchDecision.mode])
-
-  useEffect(() => {
     applySeoMetadata(location.pathname)
 
     if (GOOGLE_SITE_VERIFICATION) {
@@ -92,6 +77,21 @@ export default function MainLayout() {
       element.setAttribute('content', GOOGLE_SITE_VERIFICATION)
     }
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!shouldSendStabilizationHeartbeat()) {
+      return
+    }
+
+    googleAnalytics.trackEvent('stabilization_heartbeat', {
+      path: location.pathname,
+      soft_launch_mode: softLaunchDecision.mode,
+      soft_launch_allowed: softLaunchDecision.allowed,
+      launch_mode_enabled: String(import.meta.env.VITE_LAUNCH_MODE ?? 'false').trim().toLowerCase() === 'true',
+      ga_configured: Boolean(import.meta.env.VITE_GA_MEASUREMENT_ID),
+      meta_pixel_configured: Boolean(import.meta.env.VITE_META_PIXEL_ID),
+    })
+  }, [location.pathname, softLaunchDecision.allowed, softLaunchDecision.mode])
 
   useEffect(() => {
     const eventKey = [
@@ -138,6 +138,15 @@ export default function MainLayout() {
     softLaunchDecision.reason,
   ])
 
+  const handleSubscribe = async (email: string) => {
+    const result = await subscribeNewsletter(email)
+    return result
+  }
+
+  const handleWelcomeBack = (email: string) => {
+    completePopup(email)
+  }
+
   if (!softLaunchDecision.allowed) {
     return (
       <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
@@ -158,7 +167,13 @@ export default function MainLayout() {
       </main>
       <MiniCartConfirmation />
       <Footer />
-      <WelcomePopup isOpen={isPopupOpen} onClose={closePopup} onSubscribe={subscribeNewsletter} heroImage={heroImage} />
+      <WelcomePopup
+        isOpen={isPopupOpen}
+        onClose={closePopup}
+        onSubscribe={handleSubscribe}
+        onWelcomeBack={handleWelcomeBack}
+        heroImage={heroImage}
+      />
     </div>
   )
 }

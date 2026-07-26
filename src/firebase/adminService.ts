@@ -2,6 +2,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged, type User } fr
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -18,6 +19,7 @@ import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cl
 import { homeCategoryItems } from '../data/homeCategories'
 import { compactManagedImages } from '../utils/media'
 import { normalizeSizes } from '../utils/sizes'
+import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
 
@@ -72,6 +74,10 @@ export interface AdminOrder {
   createdAt?: string | { seconds: number }
   archived?: boolean
   archivedAt?: string | { seconds: number }
+  couponCode?: string
+  couponDiscountPercent?: number
+  couponDiscountAmount?: number
+  couponId?: string
 }
 
 export interface AdminCategory {
@@ -241,7 +247,7 @@ const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
 const LAUNCH_MODE_USER_KEY = 'shis-launch-mode-user'
 const AUDIT_LOGS_KEY = 'shis-admin-audit-logs'
 
-type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage' | 'brand'
+type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage' | 'brand' | 'coupon'
 
 interface AdminAuditLogEntry {
   id: string
@@ -2089,7 +2095,7 @@ export async function restoreOrder(id: string) {
   }
 }
 
-export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
+export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, couponData?: { code: string; discountPercent: number; discountAmount: number; couponId?: string } | null) {
   if (requiresLiveBackend() && !firebaseDb) {
     throw new Error('Live order backend is not configured. Add Firebase production credentials before accepting orders.')
   }
@@ -2099,6 +2105,12 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
     ...order,
     id: `local-${Date.now()}`,
     createdAt: new Date().toISOString(),
+    ...(couponData ? {
+      couponCode: couponData.code,
+      couponDiscountPercent: couponData.discountPercent,
+      couponDiscountAmount: couponData.discountAmount,
+      couponId: couponData.couponId,
+    } : {}),
   } as AdminOrder
   writeStored(ORDERS_KEY, [optimisticOrder, ...currentOrders])
 
@@ -2108,6 +2120,10 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
       throw new Error('Live order backend is unavailable. Order was not submitted.')
     }
 
+    if (couponData) {
+      await markCouponUsed(couponData.couponId ?? couponData.code, optimisticOrder.id, couponData.discountAmount)
+    }
+
     return optimisticOrder
   }
 
@@ -2115,12 +2131,23 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
     const payload = {
       ...order,
       createdAt: serverTimestamp(),
+      ...(couponData ? {
+        couponCode: couponData.code,
+        couponDiscountPercent: couponData.discountPercent,
+        couponDiscountAmount: couponData.discountAmount,
+        couponId: couponData.couponId,
+      } : {}),
     }
 
     const ref = await addDoc(collection(firebaseDb, 'orders'), payload)
     const syncedOrder: AdminOrder = { ...optimisticOrder, id: ref.id }
     const syncedOrders = readStored(ORDERS_KEY, defaultOrders).map((entry) => (entry.id === optimisticOrder.id ? syncedOrder : entry))
     writeStored(ORDERS_KEY, syncedOrders)
+
+    if (couponData) {
+      await markCouponUsed(couponData.couponId ?? couponData.code, syncedOrder.id, couponData.discountAmount)
+    }
+
     return syncedOrder
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
@@ -2133,6 +2160,10 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>) {
       throw new Error('Live order backend is unavailable. Order was not submitted.', {
         cause: error,
       })
+    }
+
+    if (couponData) {
+      await markCouponUsed(couponData.couponId ?? couponData.code, optimisticOrder.id, couponData.discountAmount)
     }
 
     return optimisticOrder
@@ -2644,9 +2675,69 @@ export interface NewsletterSubscriber {
   signupDate: string
   source: 'website_popup'
   couponUsed?: string
+  couponId?: string
+  popupStatus?: string
 }
 
-export async function subscribeNewsletter(email: string): Promise<void> {
+export interface Subscriber {
+  id: string
+  email: string
+  createdDate: string
+  lastVisit: string
+  popupStatus: 'pending' | 'completed' | 'closed'
+  couponId?: string
+  couponStatus: 'pending' | 'active' | 'used' | 'expired' | 'disabled'
+  couponUsed: boolean
+  firstOrderCompleted: boolean
+  marketingConsent: boolean
+  deviceInfo?: string
+}
+
+export interface Coupon {
+  id: string
+  code?: string
+  discountPercent: number
+  customerEmail: string
+  createdDate: string
+  expiryDate: string
+  status: 'active' | 'used' | 'disabled' | 'expired'
+  usageCount: number
+  maxUsage: number
+  orderId?: string
+  discountAmount?: number
+  usedAt?: string
+}
+
+const COUPON_PREFIX = 'SHIS-'
+const COUPON_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+const COUPON_CODE_LENGTH = 6
+const COUPON_DEFAULT_PERCENT = 5
+const COUPON_MAX_USAGE = 1
+const COUPON_EXPIRY_DAYS = 30
+
+function generateCouponCodeInternal(): string {
+  let code = ''
+  for (let i = 0; i < COUPON_CODE_LENGTH; i++) {
+    code += COUPON_CODE_CHARS.charAt(Math.floor(Math.random() * COUPON_CODE_CHARS.length))
+  }
+  return `${COUPON_PREFIX}${code}`
+}
+
+function computeCouponExpiry(): string {
+  const expiry = new Date()
+  expiry.setDate(expiry.getDate() + COUPON_EXPIRY_DAYS)
+  return expiry.toISOString()
+}
+
+function computeCouponDiscountPercent(): number {
+  return COUPON_DEFAULT_PERCENT
+}
+
+function computeCouponMaxUsage(): number {
+  return COUPON_MAX_USAGE
+}
+
+export async function subscribeNewsletter(email: string): Promise<{ subscriberId: string; couponCode: string; couponId: string }> {
   if (!firebaseDb) {
     throw new Error('Newsletter service unavailable: database not configured.')
   }
@@ -2661,15 +2752,35 @@ export async function subscribeNewsletter(email: string): Promise<void> {
   const snapshot = await getDocs(q)
 
   if (!snapshot.empty) {
-    throw new Error('This email is already subscribed.')
+    throw new Error(`Welcome back! You're already a SHIS Fashion member.`)
   }
 
-  await addDoc(collection(firebaseDb, 'newsletterSubscribers'), {
+  const couponCode = generateCouponCodeInternal()
+  const couponExpiry = computeCouponExpiry()
+  const couponDiscount = computeCouponDiscountPercent()
+  const couponMaxUsage = computeCouponMaxUsage()
+
+  const couponRef = await addDoc(collection(firebaseDb, 'coupons'), {
+    code: couponCode,
+    discountPercent: couponDiscount,
+    customerEmail: trimmed,
+    createdDate: serverTimestamp(),
+    expiryDate: couponExpiry,
+    status: 'active',
+    usageCount: 0,
+    maxUsage: couponMaxUsage,
+  })
+
+  const subscriberRef = await addDoc(collection(firebaseDb, 'newsletterSubscribers'), {
     email: trimmed,
     signupDate: serverTimestamp(),
     source: 'website_popup',
-    couponUsed: '',
+    couponUsed: couponCode,
+    couponId: couponRef.id,
+    popupStatus: 'completed',
   })
+
+  return { subscriberId: subscriberRef.id, couponCode, couponId: couponRef.id }
 }
 
 export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
@@ -2680,4 +2791,340 @@ export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]
   const q = query(collection(firebaseDb, 'newsletterSubscribers'), orderBy('signupDate', 'desc'))
   const snapshot = await getDocs(q)
   return snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<NewsletterSubscriber, 'id'>) }))
+}
+
+const POPUP_STATE_KEY = 'shis-popup-state'
+const SUBSCRIBERS_KEY = 'shis-admin-subscribers'
+
+export function getPopupState(): { completed: boolean; closed: boolean; email?: string } {
+  if (typeof window === 'undefined') {
+    return { completed: false, closed: false }
+  }
+
+  try {
+    const stored = window.localStorage.getItem(POPUP_STATE_KEY)
+    return stored ? (JSON.parse(stored) as { completed: boolean; closed: boolean; email?: string }) : { completed: false, closed: false }
+  } catch {
+    return { completed: false, closed: false }
+  }
+}
+
+export function setPopupCompleted(email?: string): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const current = getPopupState()
+  window.localStorage.setItem(POPUP_STATE_KEY, JSON.stringify({ ...current, completed: true, email }))
+}
+
+export function setPopupClosed(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const current = getPopupState()
+  window.localStorage.setItem(POPUP_STATE_KEY, JSON.stringify({ ...current, closed: true }))
+}
+
+export function resetPopupState(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.removeItem(POPUP_STATE_KEY)
+}
+
+export async function createCoupon(coupon: Omit<Coupon, 'id' | 'createdDate' | 'usageCount'>): Promise<Coupon> {
+  if (requiresLiveBackend() && !firebaseDb) {
+    throw new Error('Coupon service unavailable: database not configured.')
+  }
+
+  const code = coupon.code || generateCouponCodeInternal()
+  const discountPercent = coupon.discountPercent ?? computeCouponDiscountPercent()
+  const maxUsage = coupon.maxUsage ?? computeCouponMaxUsage()
+  const expiryDate = coupon.expiryDate || computeCouponExpiry()
+
+  const newCoupon: Coupon = {
+    id: `local-coupon-${Date.now()}`,
+    code: code.toUpperCase().trim(),
+    discountPercent,
+    customerEmail: coupon.customerEmail.trim().toLowerCase(),
+    createdDate: new Date().toISOString(),
+    expiryDate,
+    status: 'active',
+    usageCount: 0,
+    maxUsage,
+    orderId: coupon.orderId,
+    discountAmount: coupon.discountAmount,
+    usedAt: coupon.usedAt,
+  }
+
+  const currentCoupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  writeStored(COUPON_PREFIX + 'coupons', [newCoupon, ...currentCoupons])
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('coupon.create', 'coupon', newCoupon.id, {
+      code: newCoupon.code,
+      customerEmail: newCoupon.customerEmail,
+      mode: 'local',
+    })
+    return newCoupon
+  }
+
+  try {
+    const ref = await addDoc(collection(firebaseDb, 'coupons'), {
+      code: newCoupon.code,
+      discountPercent: newCoupon.discountPercent,
+      customerEmail: newCoupon.customerEmail,
+      createdDate: serverTimestamp(),
+      expiryDate: newCoupon.expiryDate,
+      status: newCoupon.status,
+      usageCount: newCoupon.usageCount,
+      maxUsage: newCoupon.maxUsage,
+    })
+    const syncedCoupon = { ...newCoupon, id: ref.id }
+    const syncedCoupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', []).map((c) => (c.id === newCoupon.id ? syncedCoupon : c))
+    writeStored(COUPON_PREFIX + 'coupons', syncedCoupons)
+    await recordAdminAudit('coupon.create', 'coupon', ref.id, { code: syncedCoupon.code, mode: 'live' })
+    return syncedCoupon
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+    await recordAdminAudit('coupon.create', 'coupon', newCoupon.id, { mode: 'fallback-local' })
+    return newCoupon
+  }
+}
+
+export async function getCoupons(): Promise<Coupon[]> {
+  if (!firebaseDb) {
+    return readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  }
+
+  if (isLocalFirstDataMode()) {
+    return readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  }
+
+  try {
+    const q = query(collection(firebaseDb, 'coupons'), orderBy('createdDate', 'desc'))
+    const snapshot = await getDocs(q)
+    const coupons = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Coupon, 'id'>) }))
+    writeStored(COUPON_PREFIX + 'coupons', coupons)
+    return coupons
+  } catch {
+    return readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  }
+}
+
+export async function getCouponByCode(code: string): Promise<Coupon | null> {
+  const trimmed = code.trim().toUpperCase()
+
+  if (!isValidCouponCode(trimmed)) {
+    return null
+  }
+
+  if (!firebaseDb) {
+    const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+  }
+
+  if (isLocalFirstDataMode()) {
+    const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+  }
+
+  try {
+    const q = query(collection(firebaseDb, 'coupons'), where('code', '==', trimmed), limit(1))
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) {
+      return null
+    }
+    const doc = snapshot.docs[0]
+    const coupon = { id: doc.id, ...(doc.data() as Omit<Coupon, 'id'>) } as Coupon
+    if (coupon.status !== 'active' || isCouponExpired(coupon.expiryDate) || coupon.usageCount >= coupon.maxUsage) {
+      return null
+    }
+    return coupon
+  } catch {
+    const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+  }
+}
+
+export async function updateCoupon(id: string, updates: Partial<Pick<Coupon, 'discountPercent' | 'expiryDate' | 'status' | 'maxUsage'>>): Promise<void> {
+  const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  const updated = current.map((coupon) => (coupon.id === id ? { ...coupon, ...updates } : coupon))
+  writeStored(COUPON_PREFIX + 'coupons', updated)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('coupon.update', 'coupon', id, { mode: 'local', updates })
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'coupons', id), updates)
+    await recordAdminAudit('coupon.update', 'coupon', id, { mode: 'live', updates })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+    await recordAdminAudit('coupon.update', 'coupon', id, { mode: 'fallback-local', updates })
+  }
+}
+
+export async function deleteCoupon(id: string): Promise<void> {
+  const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  writeStored(COUPON_PREFIX + 'coupons', current.filter((c) => c.id !== id))
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('coupon.delete', 'coupon', id, { mode: 'local' })
+    return
+  }
+
+  try {
+    await deleteDoc(doc(firebaseDb, 'coupons', id))
+    await recordAdminAudit('coupon.delete', 'coupon', id, { mode: 'live' })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+    await recordAdminAudit('coupon.delete', 'coupon', id, { mode: 'fallback-local' })
+  }
+}
+
+export function getCouponStats() {
+  const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  return {
+    total: coupons.length,
+    active: coupons.filter((c) => c.status === 'active').length,
+    used: coupons.filter((c) => c.status === 'used').length,
+    expired: coupons.filter((c) => c.status === 'expired' || isCouponExpired(c.expiryDate)).length,
+    disabled: coupons.filter((c) => c.status === 'disabled').length,
+  }
+}
+
+export async function linkCouponToSubscriber(subscriberEmail: string, couponCode: string, couponId: string): Promise<void> {
+  if (!firebaseDb) {
+    const subscribers = readStored<Subscriber[]>(SUBSCRIBERS_KEY, [])
+    const updated = subscribers.map((s) =>
+      s.email === subscriberEmail.toLowerCase()
+        ? { ...s, couponId, couponStatus: 'active' as const, popupStatus: 'completed' as const }
+        : s,
+    )
+    writeStored(SUBSCRIBERS_KEY, updated)
+    return
+  }
+
+  try {
+    const q = query(collection(firebaseDb, 'newsletterSubscribers'), where('email', '==', subscriberEmail.toLowerCase()), limit(1))
+    const snapshot = await getDocs(q)
+    if (!snapshot.empty) {
+      const docRef = snapshot.docs[0].ref
+      await updateDoc(docRef, {
+        popupStatus: 'completed',
+        couponId,
+        couponUsed: couponCode,
+      })
+    }
+  } catch {
+    // Best effort
+  }
+}
+
+export async function markCouponUsed(couponId: string, orderId: string, discountAmount: number): Promise<void> {
+  const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+  const updated = current.map((coupon) =>
+    coupon.id === couponId
+      ? { ...coupon, status: 'used' as const, usageCount: 1, orderId, discountAmount, usedAt: new Date().toISOString() }
+      : coupon,
+  )
+  writeStored(COUPON_PREFIX + 'coupons', updated)
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    await recordAdminAudit('coupon.use', 'coupon', couponId, { orderId, mode: 'local' })
+    return
+  }
+
+  try {
+    await updateDoc(doc(firebaseDb, 'coupons', couponId), {
+      status: 'used',
+      usageCount: 1,
+      orderId,
+      discountAmount,
+      usedAt: serverTimestamp(),
+    })
+    await recordAdminAudit('coupon.use', 'coupon', couponId, { orderId, mode: 'live' })
+  } catch (error) {
+    if (!shouldFallbackToLocal(error)) {
+      throw error
+    }
+    await recordAdminAudit('coupon.use', 'coupon', couponId, { orderId, mode: 'fallback-local' })
+  }
+}
+
+export async function getSubscriberByEmail(email: string): Promise<Subscriber | null> {
+  const trimmed = email.trim().toLowerCase()
+
+  if (!firebaseDb) {
+    const subscribers = readStored<Subscriber[]>(SUBSCRIBERS_KEY, [])
+    return subscribers.find((s) => s.email === trimmed) || null
+  }
+
+  try {
+    const q = query(collection(firebaseDb, 'newsletterSubscribers'), where('email', '==', trimmed), limit(1))
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) {
+      return null
+    }
+    const doc = snapshot.docs[0]
+    const data = doc.data() as NewsletterSubscriber
+    return {
+      id: doc.id,
+      email: data.email,
+      createdDate: data.signupDate,
+      lastVisit: new Date().toISOString(),
+      popupStatus: 'completed',
+      couponId: data.couponId,
+      couponStatus: data.couponUsed ? 'used' : 'active',
+      couponUsed: !!data.couponUsed,
+      firstOrderCompleted: false,
+      marketingConsent: true,
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function validateCouponServer(code: string, customerEmail: string): Promise<{ valid: boolean; coupon?: Coupon; error?: string }> {
+  const trimmedCode = code.trim().toUpperCase()
+  const trimmedEmail = customerEmail.trim().toLowerCase()
+
+  if (!isValidCouponCode(trimmedCode)) {
+    return { valid: false, error: 'Invalid coupon code format.' }
+  }
+
+  const coupon = await getCouponByCode(trimmedCode)
+
+  if (!coupon) {
+    return { valid: false, error: 'Invalid or expired coupon code.' }
+  }
+
+  if (coupon.status !== 'active') {
+    return { valid: false, error: 'This coupon is no longer active.' }
+  }
+
+  if (isCouponExpired(coupon.expiryDate)) {
+    return { valid: false, error: 'This coupon has expired.' }
+  }
+
+  if (coupon.usageCount >= coupon.maxUsage) {
+    return { valid: false, error: 'This coupon has already been used.' }
+  }
+
+  if (coupon.customerEmail !== trimmedEmail) {
+    return { valid: false, error: 'This coupon is not valid for this email.' }
+  }
+
+  return { valid: true, coupon }
 }

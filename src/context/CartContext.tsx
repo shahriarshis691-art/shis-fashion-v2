@@ -23,6 +23,13 @@ export interface CartAdditionEvent {
   cartItemCount: number
 }
 
+export interface CouponApplied {
+  code: string
+  discountPercent: number
+  discountAmount: number
+  couponId?: string
+}
+
 interface CartContextValue {
   items: CartItem[]
   addToCart: (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => void
@@ -31,11 +38,17 @@ interface CartContextValue {
   clearCart: () => void
   itemCount: number
   subtotal: number
+  appliedCoupon: CouponApplied | null
+  applyCoupon: (couponCode: string, couponId?: string) => boolean
+  removeCoupon: () => void
+  discountAmount: number
+  grandTotal: number
   recentAddition: CartAdditionEvent | null
   dismissRecentAddition: () => void
 }
 
 const STORAGE_KEY = 'shis-fashion-cart'
+const COUPON_STORAGE_KEY = 'shis-fashion-coupon'
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
 
@@ -50,6 +63,18 @@ function CartProvider({ children }: { children: ReactNode }) {
       return stored ? (JSON.parse(stored) as CartItem[]) : []
     } catch {
       return []
+    }
+  })
+  const [coupon, setCoupon] = useState<CouponApplied | null>(() => {
+    if (typeof window === 'undefined') {
+      return null
+    }
+
+    try {
+      const stored = window.localStorage.getItem(COUPON_STORAGE_KEY)
+      return stored ? (JSON.parse(stored) as CouponApplied) : null
+    } catch {
+      return null
     }
   })
   const [recentAddition, setRecentAddition] = useState<CartAdditionEvent | null>(null)
@@ -108,6 +133,14 @@ function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
+
+  useEffect(() => {
+    if (coupon) {
+      window.localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(coupon))
+    } else {
+      window.localStorage.removeItem(COUPON_STORAGE_KEY)
+    }
+  }, [coupon])
 
   const addToCart = (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => {
     const requestedQuantity = Math.max(1, options.quantity ?? 1)
@@ -217,8 +250,10 @@ function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(STORAGE_KEY)
+      window.localStorage.removeItem(COUPON_STORAGE_KEY)
     }
     setItems([])
+    setCoupon(null)
     clearAbandonedCart()
   }, [clearAbandonedCart])
 
@@ -226,8 +261,31 @@ function CartProvider({ children }: { children: ReactNode }) {
     setRecentAddition(null)
   }
 
+  const applyCoupon = useCallback((code: string, couponId?: string): boolean => {
+    const trimmedCode = code.trim().toUpperCase()
+    if (!trimmedCode) {
+      return false
+    }
+
+    const newCoupon: CouponApplied = {
+      code: trimmedCode,
+      discountPercent: 5,
+      discountAmount: 0,
+      couponId,
+    }
+
+    setCoupon(newCoupon)
+    return true
+  }, [])
+
+  const removeCoupon = useCallback(() => {
+    setCoupon(null)
+  }, [])
+
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
+  const discountAmount = coupon ? Math.round(subtotal * coupon.discountPercent / 100 * 100) / 100 : 0
+  const grandTotal = subtotal - discountAmount
 
   const value = useMemo<CartContextValue>(
     () => ({
@@ -238,10 +296,15 @@ function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       itemCount,
       subtotal,
+      appliedCoupon: coupon,
+      applyCoupon,
+      removeCoupon,
+      discountAmount,
+      grandTotal,
       recentAddition,
       dismissRecentAddition,
     }),
-    [items, itemCount, recentAddition, subtotal, clearCart],
+    [items, itemCount, recentAddition, subtotal, coupon, applyCoupon, removeCoupon, discountAmount, grandTotal, clearCart],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

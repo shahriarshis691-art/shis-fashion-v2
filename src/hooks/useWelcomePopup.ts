@@ -1,26 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import { auth } from '../firebase/firebase'
 
+const STORAGE_KEY_COMPLETED = 'shis_popup_completed'
 const STORAGE_KEY_CLOSED = 'shis_popup_closed'
-const STORAGE_KEY_SUBSCRIBED = 'shis_popup_subscribed'
+const STORAGE_KEY_EMAIL = 'shis_popup_email'
 const TRIGGER_DELAY_MS = 8000
 const SCROLL_THRESHOLD = 0.4
 
-function isSubscribed() {
+function isPopupCompleted(): boolean {
   if (typeof window === 'undefined') {
-    return false
+    return true
   }
 
   try {
-    return window.localStorage.getItem(STORAGE_KEY_SUBSCRIBED) === '1'
+    return window.localStorage.getItem(STORAGE_KEY_COMPLETED) === '1'
   } catch {
-    return false
+    return true
   }
 }
 
-function isRecentlyDismissed() {
+function isRecentlyDismissed(): boolean {
   if (typeof window === 'undefined') {
-    return false
+    return true
   }
 
   try {
@@ -37,11 +38,11 @@ function isRecentlyDismissed() {
     const sevenDays = 7 * 24 * 60 * 60 * 1000
     return Date.now() - dismissedAt < sevenDays
   } catch {
-    return false
+    return true
   }
 }
 
-function isLoggedIn() {
+function isLoggedIn(): boolean {
   if (typeof window === 'undefined') {
     return false
   }
@@ -53,6 +54,7 @@ export interface UseWelcomePopupResult {
   isPopupOpen: boolean
   openPopup: () => void
   closePopup: () => void
+  completePopup: (email?: string) => void
   resetPopup: () => void
 }
 
@@ -71,6 +73,16 @@ export function useWelcomePopup(): UseWelcomePopupResult {
 
   const closePopup = () => {
     setIsPopupOpen(false)
+    window.localStorage.setItem(STORAGE_KEY_CLOSED, String(Date.now()))
+  }
+
+  const completePopup = (email?: string) => {
+    setIsPopupOpen(false)
+    window.localStorage.setItem(STORAGE_KEY_COMPLETED, '1')
+    if (email) {
+      window.localStorage.setItem(STORAGE_KEY_EMAIL, email)
+    }
+    window.localStorage.setItem(STORAGE_KEY_CLOSED, String(Date.now()))
   }
 
   const openPopup = () => {
@@ -87,7 +99,7 @@ export function useWelcomePopup(): UseWelcomePopupResult {
       return
     }
 
-    if (isSubscribed()) {
+    if (isPopupCompleted()) {
       return
     }
 
@@ -136,6 +148,7 @@ export function useWelcomePopup(): UseWelcomePopupResult {
     isPopupOpen,
     openPopup,
     closePopup,
+    completePopup,
     resetPopup,
   }
 }
