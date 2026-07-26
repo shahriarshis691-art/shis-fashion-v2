@@ -1,7 +1,11 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /shis-admin
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /shis-admin
 
 Sitemap: https://www.shisfashion.com/sitemap.xml

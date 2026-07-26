@@ -108,8 +108,6 @@ export default function ProductDetailPage() {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponResult, setCouponResult] = useState<{ valid: boolean; message: string; discountPercent?: number; discountAmount?: number } | null>(null)
   const lastTrackedProductIdRef = useRef<string | null>(null)
-  const hasTrackedAddToCartRef = useRef(false)
-  const hasTrackedBuyNowRef = useRef(false)
   const hasTrackedRecentlyViewedRef = useRef(false)
 
   useEffect(() => {
@@ -315,11 +313,10 @@ export default function ProductDetailPage() {
   const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, effectiveQuantity) : getWhatsAppHref()
 
   const handleAddToBag = () => {
-    if (!product || availableStock <= 0 || hasTrackedAddToCartRef.current || !isSizeSelected) {
+    if (!product || availableStock <= 0 || !isSizeSelected) {
       return
     }
 
-    hasTrackedAddToCartRef.current = true
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
     metaPixel.addToCart({
       content_name: product.name,
@@ -344,11 +341,10 @@ export default function ProductDetailPage() {
   }
 
   const handleBuyNow = () => {
-    if (!product || availableStock <= 0 || hasTrackedBuyNowRef.current || !isSizeSelected) {
+    if (!product || availableStock <= 0 || !isSizeSelected) {
       return
     }
 
-    hasTrackedBuyNowRef.current = true
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
     metaPixel.initiateCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
