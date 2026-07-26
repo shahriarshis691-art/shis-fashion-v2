@@ -2648,10 +2648,15 @@ export interface NewsletterSubscriber {
 
 export async function subscribeNewsletter(email: string): Promise<void> {
   if (!firebaseDb) {
-    return
+    throw new Error('Newsletter service unavailable: database not configured.')
   }
 
   const trimmed = email.trim().toLowerCase()
+
+  if (!trimmed) {
+    throw new Error('Invalid email address.')
+  }
+
   const q = query(collection(firebaseDb, 'newsletterSubscribers'), where('email', '==', trimmed), limit(1))
   const snapshot = await getDocs(q)
 

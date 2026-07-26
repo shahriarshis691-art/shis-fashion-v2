@@ -102,10 +102,11 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage =
       googleAnalytics.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
       metaPixel.trackEvent('popup_conversion', { source: 'welcome_discount', coupon: COUPON_CODE })
     } catch (error) {
-      const message = error instanceof Error ? error.message : ''
-      if (message.toLowerCase().includes('already') || message.toLowerCase().includes('exists')) {
+      const message = error instanceof Error ? error.message : String(error)
+      const lower = message.toLowerCase()
+      if (lower.includes('already') || lower.includes('exists')) {
         setForm((current) => ({ ...current, error: 'This email is already subscribed.', submitting: false }))
-      } else if (message.toLowerCase().includes('network') || message.toLowerCase().includes('connect')) {
+      } else if (lower.includes('network') || lower.includes('connect') || lower.includes('unavailable')) {
         setForm((current) => ({ ...current, error: 'Unable to connect. Please try again later.', submitting: false }))
       } else {
         setForm((current) => ({ ...current, error: 'Something went wrong. Please try again.', submitting: false }))
