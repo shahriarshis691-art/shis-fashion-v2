@@ -199,6 +199,24 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
               className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
               placeholder="Logo URL"
             />
+            <input
+              value={form.bannerImage}
+              onChange={(e) => setForm({ ...form, bannerImage: e.target.value })}
+              className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+              placeholder="Banner image URL"
+            />
+            <textarea
+              value={form.images.join('\n')}
+              onChange={(e) => {
+                const nextImages = e.target.value
+                  .split(/[\n,]/)
+                  .map((item) => item.trim())
+                  .filter(Boolean)
+                setForm({ ...form, images: Array.from(new Set(nextImages)) })
+              }}
+              className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
+              placeholder="Gallery image URLs (comma or new line separated)"
+            />
             <div className="flex gap-3">
               <Button type="submit" disabled={loading} className="flex-1 justify-center">
                 {loading ? 'Saving…' : isEditing ? 'Update Brand' : 'Create Brand'}

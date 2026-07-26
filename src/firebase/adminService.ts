@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
+import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages } from '../utils/media'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
@@ -1436,6 +1437,10 @@ function ensureSeedData() {
     writeStored(CATEGORIES_KEY, defaultCategories)
   }
 
+  if (!window.localStorage.getItem(BRANDS_KEY)) {
+    writeStored(BRANDS_KEY, defaultBrands)
+  }
+
   const storedProducts = readStored<AdminProduct[]>(PRODUCTS_KEY, defaultProducts)
   const normalizedStoredProducts = storedProducts.map(normalizeProduct)
   const isLegacySingleSeed =
@@ -1810,7 +1815,21 @@ export async function restoreProduct(id: string) {
 
 // Brand Management Functions
 const BRANDS_KEY = 'admin_brands'
-const defaultBrands: AdminBrand[] = []
+const defaultBrands: AdminBrand[] = brandEntries.map((entry, index) => ({
+  id: `seed-${entry.id}`,
+  slug: entry.id,
+  name: entry.name,
+  tag: entry.tag,
+  summary: entry.summary,
+  description: entry.details,
+  website: entry.contacts.website,
+  contactEmail: 'hello@shisfashion.com',
+  contactPhone: '+8801887848304',
+  logo: entry.logo,
+  bannerImage: entry.logo,
+  images: [entry.logo],
+  createdAt: `2026-01-0${index + 1}`,
+}))
 
 export function subscribeToAdminBrands(callback: (brands: AdminBrand[]) => void) {
   const localBrands = () => readStored(BRANDS_KEY, defaultBrands).filter((brand) => !brand.archived)
