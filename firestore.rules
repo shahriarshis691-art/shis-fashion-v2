@@ -67,7 +67,8 @@ service cloud.firestore {
 
     match /newsletterSubscribers/{subscriberId} {
       allow create: if request.resource.data.email is string && request.resource.data.email.size() > 0;
-      allow read, update, delete: if isAdmin();
+      allow read: if true;
+      allow update, delete: if isAdmin();
     }
 
     match /{document=**} {

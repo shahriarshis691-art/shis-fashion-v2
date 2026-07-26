@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -13,6 +13,8 @@ import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
+import { subscribeToHomepageContent } from '../firebase/adminService'
+import { normalizeCatalogImageUrl } from '../utils/media'
 import { subscribeNewsletter } from '../firebase/adminService'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
@@ -39,8 +41,17 @@ export default function MainLayout() {
     () => evaluateSoftLaunchAccess(location.pathname, location.search),
     [location.pathname, location.search],
   )
+  const [heroImage, setHeroImage] = useState('')
 
   const { isPopupOpen, closePopup } = useWelcomePopup()
+
+  useEffect(() => {
+    const unsubscribe = subscribeToHomepageContent((content) => {
+      const normalized = normalizeCatalogImageUrl(content.heroImage ?? '', 1400, 900)
+      setHeroImage(normalized)
+    })
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     if (lastTrackedPathRef.current === location.pathname) {
@@ -147,7 +158,7 @@ export default function MainLayout() {
       </main>
       <MiniCartConfirmation />
       <Footer />
-      <WelcomePopup isOpen={isPopupOpen} onClose={closePopup} onSubscribe={subscribeNewsletter} />
+      <WelcomePopup isOpen={isPopupOpen} onClose={closePopup} onSubscribe={subscribeNewsletter} heroImage={heroImage} />
     </div>
   )
 }

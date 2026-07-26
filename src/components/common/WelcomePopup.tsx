@@ -7,6 +7,7 @@ interface WelcomePopupProps {
   isOpen: boolean
   onClose: () => void
   onSubscribe: (email: string) => Promise<void>
+  heroImage?: string
 }
 
 interface FormState {
@@ -18,7 +19,6 @@ interface FormState {
 }
 
 const COUPON_CODE = 'WELCOME5'
-const PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80'
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
@@ -35,12 +35,14 @@ function copyToClipboard(value: string) {
   )
 }
 
-export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePopupProps) {
+export default function WelcomePopup({ isOpen, onClose, onSubscribe, heroImage = '' }: WelcomePopupProps) {
   const [form, setForm] = useState<FormState>({ email: '', error: '', submitting: false, success: false, touched: false })
   const [copied, setCopied] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
+
+  const popupImage = heroImage || ''
 
   useEffect(() => {
     if (!isOpen) {
@@ -154,17 +156,19 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe }: WelcomePo
             transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
           >
             <div className="relative h-48 w-full sm:h-auto sm:w-[40%]">
-              <img
-                src={PRODUCT_IMAGE}
-                alt="SHIS Fashion collection"
-                loading="lazy"
-                decoding="async"
-                onError={(event) => {
-                  event.currentTarget.style.display = 'none'
-                }}
-                onLoad={() => setImageLoaded(true)}
-                className={`h-full w-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              />
+              {popupImage ? (
+                <img
+                  src={popupImage}
+                  alt="SHIS Fashion collection"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none'
+                  }}
+                  onLoad={() => setImageLoaded(true)}
+                  className={`h-full w-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
+              ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent sm:bg-gradient-to-r" />
             </div>
 
