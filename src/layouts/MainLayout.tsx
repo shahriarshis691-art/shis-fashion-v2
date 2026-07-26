@@ -6,11 +6,14 @@ import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
 import MiniCartConfirmation from '../components/common/MiniCartConfirmation'
+import WelcomePopup from '../components/common/WelcomePopup'
+import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
+import { subscribeNewsletter } from '../firebase/adminService'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
@@ -36,6 +39,8 @@ export default function MainLayout() {
     () => evaluateSoftLaunchAccess(location.pathname, location.search),
     [location.pathname, location.search],
   )
+
+  const { isPopupOpen, closePopup } = useWelcomePopup()
 
   useEffect(() => {
     if (lastTrackedPathRef.current === location.pathname) {
@@ -142,6 +147,7 @@ export default function MainLayout() {
       </main>
       <MiniCartConfirmation />
       <Footer />
+      <WelcomePopup isOpen={isPopupOpen} onClose={closePopup} onSubscribe={subscribeNewsletter} />
     </div>
   )
 }

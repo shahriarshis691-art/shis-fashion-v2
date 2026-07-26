@@ -40,6 +40,7 @@ import {
   updateOrderStatus,
   updateProduct,
   uploadAssets,
+  getNewsletterSubscribers,
   type AdminBrand,
   type AdminOrder,
   type AdminProduct,
@@ -51,6 +52,7 @@ import {
   type HomepageContentSnapshotMeta,
   type HomepageSaveResult,
   type HomepageSectionConfig,
+  type NewsletterSubscriber,
   onAdminAuthChanged,
 } from '../firebase/adminService'
 import {
@@ -174,6 +176,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [founderForm, setFounderForm] = useState<FounderProfile | null>(null)
   const [founderSaving, setFounderSaving] = useState(false)
   const [founderMessage, setFounderMessage] = useState('')
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([])
+  const [newsletterLoading, setNewsletterLoading] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
@@ -235,6 +239,49 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       unsubscribeArchivedBrands()
     }
   }, [authMode, user])
+
+  useEffect(() => {
+    if (!user || authMode !== 'dashboard') {
+      return () => undefined
+    }
+
+    const loadNewsletterSubscribers = async () => {
+      setNewsletterLoading(true)
+      try {
+        const subscribers = await getNewsletterSubscribers()
+        setNewsletterSubscribers(subscribers)
+      } catch {
+        // ignore
+      } finally {
+        setNewsletterLoading(false)
+      }
+    }
+
+    loadNewsletterSubscribers()
+  }, [authMode, user])
+
+  const exportNewsletterSubscribers = () => {
+    if (!newsletterSubscribers.length) {
+      setMessage('No subscribers to export.')
+      return
+    }
+
+    const header = 'Email,Signup Date,Source,Coupon Used\n'
+    const rows = newsletterSubscribers.map((subscriber) => {
+      const signupDate = subscriber.signupDate ? new Date(subscriber.signupDate).toISOString() : ''
+      return [subscriber.email, signupDate, subscriber.source, subscriber.couponUsed || ''].join(',')
+    }).join('\n')
+
+    const csv = header + rows
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    setMessage('Newsletter subscribers exported.')
+  }
 
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
@@ -2153,6 +2200,52 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         </div>
 
         {showBrandManagement && <BrandManagement onDone={() => setShowBrandManagement(false)} />}
+
+        <div id="newsletter-management" className="mt-8">
+          <Card className="rounded-[2rem] p-5 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Newsletter</p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Welcome discount subscribers</h2>
+              </div>
+              <Button variant="secondary" onClick={exportNewsletterSubscribers} disabled={newsletterLoading || !newsletterSubscribers.length}>
+                Export CSV
+              </Button>
+            </div>
+
+            {newsletterLoading ? (
+              <p className="mt-4 text-sm text-[var(--color-muted)]">Loading subscribers...</p>
+            ) : (
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-black/10">
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Email</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Signup Date</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Source</th>
+                      <th className="pb-2 font-semibold text-[var(--color-muted)]">Coupon Used</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {newsletterSubscribers.map((subscriber) => (
+                      <tr key={subscriber.id} className="border-b border-black/5">
+                        <td className="py-2 text-[var(--color-text)]">{subscriber.email}</td>
+                        <td className="py-2 text-[var(--color-muted)]">{subscriber.signupDate ? new Date(subscriber.signupDate).toLocaleString() : '-'}</td>
+                        <td className="py-2 text-[var(--color-muted)]">{subscriber.source}</td>
+                        <td className="py-2 text-[var(--color-muted)]">{subscriber.couponUsed || '-'}</td>
+                      </tr>
+                    ))}
+                    {!newsletterSubscribers.length ? (
+                      <tr>
+                        <td colSpan={4} className="py-6 text-center text-[var(--color-muted)]">No subscribers yet.</td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
       </Container>
     </section>
   )

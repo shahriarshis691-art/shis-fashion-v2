@@ -229,6 +229,18 @@ class MetaPixelService {
     }
   }
 
+  trackEvent(eventName: string, params: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return
+    if (!this.isInitialized || !this.pixelId) return
+    try {
+      ;(window as FacebookPixelWindow).fbq?.('track', eventName, params)
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('[MetaPixel] Event tracking failed:', error)
+      }
+    }
+  }
+
   /**
    * Check if pixel is initialized
    */

@@ -4,6 +4,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
@@ -2633,4 +2634,35 @@ export async function deleteAsset(url: string) {
 
   const authToken = await getCurrentAdminIdToken()
   await deleteCloudinaryAssetByUrl(url, authToken)
+}
+
+export interface NewsletterSubscriber {
+  id: string
+  email: string
+  signupDate: string
+  source: 'website_popup'
+  couponUsed?: string
+}
+
+export async function subscribeNewsletter(email: string): Promise<void> {
+  if (!firebaseDb) {
+    return
+  }
+
+  await addDoc(collection(firebaseDb, 'newsletterSubscribers'), {
+    email,
+    signupDate: serverTimestamp(),
+    source: 'website_popup',
+    couponUsed: '',
+  })
+}
+
+export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
+  if (!firebaseDb) {
+    return []
+  }
+
+  const q = query(collection(firebaseDb, 'newsletterSubscribers'), orderBy('signupDate', 'desc'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<NewsletterSubscriber, 'id'>) }))
 }
