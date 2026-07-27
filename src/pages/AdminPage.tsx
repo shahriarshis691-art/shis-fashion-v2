@@ -1328,6 +1328,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           </div>
         </div>
       ) : null}
+      <div className="fixed bottom-5 right-4 z-40">
+        <button
+          type="button"
+          onClick={() => handleSummaryCardClick('founder')}
+          className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/95 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text)] shadow-[0_10px_28px_rgba(0,0,0,0.12)] backdrop-blur"
+        >
+          Founder
+        </button>
+      </div>
       <Container>
         <div className="flex flex-col gap-4 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div>
