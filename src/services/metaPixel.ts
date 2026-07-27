@@ -8,11 +8,12 @@ interface PixelWindow extends Window {
 }
 
 type FbqPayload = Record<string, unknown>
+type FbqArg = FbqPayload | string | number | boolean
 
 type FbqFunction = {
-  (command: string, action: string, payload?: FbqPayload): void
-  callMethod?: (command: string, action: string, payload?: FbqPayload) => void
-  queue?: Array<[string, string, FbqPayload?]>
+  (command: string, action: string, payload?: FbqArg, extra?: string): void
+  callMethod?: (command: string, action: string, payload?: FbqArg, extra?: string) => void
+  queue?: Array<[string, string, FbqArg?, string?]>
   push?: FbqFunction
   loaded?: boolean
   version?: string
@@ -82,6 +83,7 @@ class MetaPixelService {
 
     if (!win.__shisPixelState.initializedIds.includes(this.pixelId)) {
       win.fbq?.('init', this.pixelId)
+      win.fbq?.('set', 'autoConfig', false, this.pixelId)
       win.__shisPixelState.initializedIds.push(this.pixelId)
     }
 
@@ -229,14 +231,14 @@ class MetaPixelService {
       return
     }
 
-    const stub: FbqFunction = ((command: string, action: string, payload?: FbqPayload) => {
+    const stub: FbqFunction = ((command: string, action: string, payload?: FbqArg, extra?: string) => {
       if (stub.callMethod) {
-        stub.callMethod(command, action, payload)
+        stub.callMethod(command, action, payload, extra)
         return
       }
 
       stub.queue = stub.queue ?? []
-      stub.queue.push([command, action, payload])
+      stub.queue.push([command, action, payload, extra])
     }) as FbqFunction
 
     stub.queue = []
