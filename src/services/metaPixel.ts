@@ -38,6 +38,14 @@ interface PixelPurchasePayload extends PixelBasePayload {
 
 const PIXEL_SCRIPT_ID = 'shis-meta-pixel-sdk'
 const PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
+const META_SUPPORTED_CURRENCIES = new Set([
+  'AED', 'ARS', 'AUD', 'BOB', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'COP',
+  'CRC', 'CZK', 'DKK', 'DOP', 'DZD', 'EGP', 'EUR', 'GBP', 'GTQ', 'HKD',
+  'HNL', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KES', 'KRW', 'MOP',
+  'MXN', 'MYR', 'NIO', 'NOK', 'NZD', 'PEN', 'PHP', 'PKR', 'PLN', 'PYG',
+  'QAR', 'RON', 'RUB', 'SAR', 'SEK', 'SGD', 'THB', 'TRY', 'TWD', 'UAH',
+  'USD', 'UYU', 'VES', 'VND', 'ZAR',
+])
 
 class MetaPixelService {
   private readonly pixelId: string
@@ -185,13 +193,19 @@ class MetaPixelService {
       const rawCurrency = sanitized.currency
       if (typeof rawCurrency === 'string') {
         const normalizedCurrency = rawCurrency.trim().toUpperCase()
-        if (/^[A-Z]{3}$/.test(normalizedCurrency)) {
+        if (/^[A-Z]{3}$/.test(normalizedCurrency) && META_SUPPORTED_CURRENCIES.has(normalizedCurrency)) {
           sanitized.currency = normalizedCurrency
         } else {
           delete sanitized.currency
+          if ('value' in sanitized) {
+            delete sanitized.value
+          }
         }
       } else {
         delete sanitized.currency
+        if ('value' in sanitized) {
+          delete sanitized.value
+        }
       }
     }
 
