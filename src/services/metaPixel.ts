@@ -162,14 +162,52 @@ class MetaPixelService {
     }
 
     try {
-      if (payload) {
-        fbq('track', eventName, payload)
+      const sanitizedPayload = this.sanitizePayload(payload)
+
+      if (sanitizedPayload) {
+        fbq('track', eventName, sanitizedPayload)
       } else {
         fbq('track', eventName)
       }
     } catch {
       // Ignore runtime errors to avoid blocking user flows.
     }
+  }
+
+  private sanitizePayload(payload?: FbqPayload): FbqPayload | undefined {
+    if (!payload) {
+      return undefined
+    }
+
+    const sanitized: FbqPayload = { ...payload }
+
+    if ('currency' in sanitized) {
+      const rawCurrency = sanitized.currency
+      if (typeof rawCurrency === 'string') {
+        const normalizedCurrency = rawCurrency.trim().toUpperCase()
+        if (/^[A-Z]{3}$/.test(normalizedCurrency)) {
+          sanitized.currency = normalizedCurrency
+        } else {
+          delete sanitized.currency
+        }
+      } else {
+        delete sanitized.currency
+      }
+    }
+
+    if ('value' in sanitized) {
+      const numericValue = Number(sanitized.value)
+      if (Number.isFinite(numericValue)) {
+        sanitized.value = numericValue
+      } else {
+        delete sanitized.value
+        if ('currency' in sanitized) {
+          delete sanitized.currency
+        }
+      }
+    }
+
+    return Object.keys(sanitized).length ? sanitized : undefined
   }
 
   private ensureFbqStub(win: PixelWindow): void {
