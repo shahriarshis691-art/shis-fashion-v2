@@ -1831,8 +1831,49 @@ const defaultBrands: AdminBrand[] = brandEntries.map((entry, index) => ({
   createdAt: `2026-01-0${index + 1}`,
 }))
 
+function getBrandKey(brand: Pick<AdminBrand, 'id' | 'slug' | 'name'>) {
+  return (brand.slug || brand.id || brand.name).trim().toLowerCase()
+}
+
+function mergeSeedBrands(brands: AdminBrand[]) {
+  const nextBrands = [...brands]
+  const existingKeys = new Set(nextBrands.map(getBrandKey))
+
+  for (const seedBrand of defaultBrands) {
+    const key = getBrandKey(seedBrand)
+    const existingIndex = nextBrands.findIndex((brand) => getBrandKey(brand) === key)
+
+    if (existingIndex >= 0) {
+      nextBrands[existingIndex] = {
+        ...seedBrand,
+        ...nextBrands[existingIndex],
+        archived: false,
+        archivedAt: undefined,
+      }
+      existingKeys.add(key)
+      continue
+    }
+
+    nextBrands.push(seedBrand)
+    existingKeys.add(key)
+  }
+
+  return nextBrands
+}
+
+function readBrandStoreWithSeeds() {
+  const storedBrands = readStored(BRANDS_KEY, defaultBrands)
+  const mergedBrands = mergeSeedBrands(storedBrands)
+
+  if (JSON.stringify(mergedBrands) !== JSON.stringify(storedBrands)) {
+    writeStored(BRANDS_KEY, mergedBrands)
+  }
+
+  return mergedBrands
+}
+
 export function subscribeToAdminBrands(callback: (brands: AdminBrand[]) => void) {
-  const localBrands = () => readStored(BRANDS_KEY, defaultBrands).filter((brand) => !brand.archived)
+  const localBrands = () => readBrandStoreWithSeeds().filter((brand) => !brand.archived)
   callback(localBrands())
 
   if (!firebaseDb || isLocalFirstDataMode()) {
@@ -1844,7 +1885,7 @@ export function subscribeToAdminBrands(callback: (brands: AdminBrand[]) => void)
     brandsRef,
     (snapshot) => {
       const brands = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<AdminBrand, 'id'>) }))
-      const visibleBrands = brands.filter((brand) => !brand.archived)
+      const visibleBrands = mergeSeedBrands(brands).filter((brand) => !brand.archived)
       callback(visibleBrands.length ? visibleBrands : localBrands())
     },
     (error) => {
@@ -1856,7 +1897,7 @@ export function subscribeToAdminBrands(callback: (brands: AdminBrand[]) => void)
 }
 
 export function subscribeToArchivedBrands(callback: (brands: AdminBrand[]) => void) {
-  const archivedLocalBrands = () => readStored(BRANDS_KEY, defaultBrands).filter((brand) => brand.archived)
+  const archivedLocalBrands = () => readBrandStoreWithSeeds().filter((brand) => brand.archived)
   callback(archivedLocalBrands())
 
   if (!firebaseDb || isLocalFirstDataMode()) {
@@ -1879,7 +1920,7 @@ export function subscribeToArchivedBrands(callback: (brands: AdminBrand[]) => vo
 }
 
 export async function createBrand(brand: Omit<AdminBrand, 'id' | 'createdAt'>) {
-  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const currentBrands = readBrandStoreWithSeeds()
   const nextBrand = {
     ...brand,
     id: `local-${Date.now()}`,
@@ -1924,7 +1965,7 @@ export async function createBrand(brand: Omit<AdminBrand, 'id' | 'createdAt'>) {
 }
 
 export async function updateBrand(id: string, brand: Partial<AdminBrand>) {
-  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id ? { ...item, ...brand } : item))
   writeStored(BRANDS_KEY, updatedBrands)
 
@@ -1958,7 +1999,7 @@ export async function updateBrand(id: string, brand: Partial<AdminBrand>) {
 }
 
 export async function deleteBrand(id: string) {
-  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id
     ? { ...item, archived: true, archivedAt: new Date().toISOString() }
     : item))
@@ -1985,7 +2026,7 @@ export async function deleteBrand(id: string) {
 }
 
 export async function restoreBrand(id: string) {
-  const currentBrands = readStored(BRANDS_KEY, defaultBrands)
+  const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id
     ? { ...item, archived: false, archivedAt: undefined }
     : item))
