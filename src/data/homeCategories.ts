@@ -1,5 +1,5 @@
 export interface HomeCategoryItem {
-  key: 'mens' | 'womens' | 'couples' | 'kids' | 'western' | 'denim'
+  key: 'mens' | 'womens' | 'couples' | 'kids' | 'western' | 'denim' | 'oversized-tee'
   name: string
   href: string
   image: string
@@ -41,5 +41,11 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     name: 'Denim',
     href: '/men?sub=denim',
     image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    key: 'oversized-tee',
+    name: 'Unisex Oversized Tee',
+    href: '/men?sub=oversized-tee',
+    image: 'https://res.cloudinary.com/oynk45cl/image/upload/f_auto,q_auto/733499845_122185741844748051_3566784808270551668_n_2_z9zzsr',
   },
 ]
