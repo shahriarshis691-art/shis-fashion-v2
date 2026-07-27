@@ -82,8 +82,8 @@ class MetaPixelService {
     this.ensureSingleScript()
 
     if (!win.__shisPixelState.initializedIds.includes(this.pixelId)) {
-      win.fbq?.('init', this.pixelId)
       win.fbq?.('set', 'autoConfig', false, this.pixelId)
+      win.fbq?.('init', this.pixelId)
       win.__shisPixelState.initializedIds.push(this.pixelId)
     }
 
