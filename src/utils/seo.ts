@@ -614,6 +614,27 @@ function removeExistingJsonLd() {
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((node) => node.remove())
 }
 
+function sanitizeSchemaForMetaSignal<T>(input: T): T {
+  if (Array.isArray(input)) {
+    return input.map((item) => sanitizeSchemaForMetaSignal(item)) as T
+  }
+
+  if (!input || typeof input !== 'object') {
+    return input
+  }
+
+  const cloned = Object.entries(input as Record<string, unknown>).reduce<Record<string, unknown>>((acc, [key, value]) => {
+    if (key === 'priceCurrency' && typeof value === 'string' && value.trim().toUpperCase() === 'BDT') {
+      return acc
+    }
+
+    acc[key] = sanitizeSchemaForMetaSignal(value)
+    return acc
+  }, {})
+
+  return cloned as T
+}
+
 export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   const metadata = getRouteMetadata(pathname)
   const canonicalUrl = createCanonicalUrl(pathname)
@@ -652,7 +673,10 @@ export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   schemas.forEach((schema) => {
     const script = document.createElement('script')
     script.type = 'application/ld+json'
-    script.textContent = JSON.stringify(schema)
+    const runtimeSchema = import.meta.env.PROD && Boolean((import.meta.env.VITE_META_PIXEL_ID ?? '').trim())
+      ? sanitizeSchemaForMetaSignal(schema)
+      : schema
+    script.textContent = JSON.stringify(runtimeSchema)
     document.head.appendChild(script)
   })
 }
