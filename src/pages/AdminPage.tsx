@@ -2432,29 +2432,53 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 Upload founder image
               </label>
               <input
-                value={founderForm?.socials.whatsapp ?? founderProfile?.socials.whatsapp ?? ''}
-                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, whatsapp: event.target.value } })}
+                value={founderForm?.socials?.whatsapp ?? founderProfile?.socials?.whatsapp ?? ''}
+                onChange={(event) => founderForm && setFounderForm({
+                  ...founderForm,
+                  socials: {
+                    ...(founderForm.socials ?? { whatsapp: '', facebook: '', instagram: '', email: '' }),
+                    whatsapp: event.target.value,
+                  },
+                })}
                 className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
                 placeholder="WhatsApp URL"
                 disabled={!founderForm}
               />
               <input
-                value={founderForm?.socials.facebook ?? founderProfile?.socials.facebook ?? ''}
-                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, facebook: event.target.value } })}
+                value={founderForm?.socials?.facebook ?? founderProfile?.socials?.facebook ?? ''}
+                onChange={(event) => founderForm && setFounderForm({
+                  ...founderForm,
+                  socials: {
+                    ...(founderForm.socials ?? { whatsapp: '', facebook: '', instagram: '', email: '' }),
+                    facebook: event.target.value,
+                  },
+                })}
                 className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
                 placeholder="Facebook URL"
                 disabled={!founderForm}
               />
               <input
-                value={founderForm?.socials.instagram ?? founderProfile?.socials.instagram ?? ''}
-                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, instagram: event.target.value } })}
+                value={founderForm?.socials?.instagram ?? founderProfile?.socials?.instagram ?? ''}
+                onChange={(event) => founderForm && setFounderForm({
+                  ...founderForm,
+                  socials: {
+                    ...(founderForm.socials ?? { whatsapp: '', facebook: '', instagram: '', email: '' }),
+                    instagram: event.target.value,
+                  },
+                })}
                 className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
                 placeholder="Instagram URL"
                 disabled={!founderForm}
               />
               <input
-                value={founderForm?.socials.email ?? founderProfile?.socials.email ?? ''}
-                onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, email: event.target.value } })}
+                value={founderForm?.socials?.email ?? founderProfile?.socials?.email ?? ''}
+                onChange={(event) => founderForm && setFounderForm({
+                  ...founderForm,
+                  socials: {
+                    ...(founderForm.socials ?? { whatsapp: '', facebook: '', instagram: '', email: '' }),
+                    email: event.target.value,
+                  },
+                })}
                 className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
                 placeholder="Email URL"
                 disabled={!founderForm}
