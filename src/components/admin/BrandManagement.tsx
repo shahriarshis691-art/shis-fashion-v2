@@ -9,6 +9,7 @@ import {
   subscribeToAdminBrands,
   subscribeToArchivedBrands,
   updateBrand,
+  uploadAssets,
   type AdminBrand,
 } from '../../firebase/adminService'
 
@@ -38,6 +39,7 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
   const [showArchived, setShowArchived] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     const unsubscribeBrands = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
@@ -121,6 +123,49 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
     }
   }
 
+  const handleBrandAssetUpload = async (
+    files: FileList | null,
+    target: 'logo' | 'banner' | 'gallery',
+  ) => {
+    if (!files?.length) {
+      return
+    }
+
+    const selectedFiles = Array.from(files).filter((file) => file.type.startsWith('image/'))
+    if (!selectedFiles.length) {
+      setMessage('Please select image files only.')
+      return
+    }
+
+    try {
+      setUploading(true)
+      setMessage('')
+
+      const uploaded = await uploadAssets(selectedFiles, 'brands', { retries: 2 })
+      if (!uploaded.length) {
+        return
+      }
+
+      if (target === 'logo') {
+        setForm((current) => ({ ...current, logo: uploaded[0] }))
+      } else if (target === 'banner') {
+        setForm((current) => ({ ...current, bannerImage: uploaded[0] }))
+      } else {
+        setForm((current) => ({
+          ...current,
+          images: Array.from(new Set([...(current.images ?? []), ...uploaded])).filter(Boolean),
+        }))
+      }
+
+      setMessage('Image uploaded. Save brand to publish.')
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Upload failed.'
+      setMessage(`Error: ${reason}`)
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const displayBrands = showArchived ? archivedBrands : brands
 
   return (
@@ -128,6 +173,7 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
       <SectionTitle eyebrow="Brand management" title="Manage premium brands" description="Add, edit, or archive brand partners and showcase." />
 
       {message && <p className="mt-4 text-sm text-[var(--color-accent)]">{message}</p>}
+      {uploading ? <p className="mt-2 text-sm text-[var(--color-muted)]">Uploading image...</p> : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
         <Card className="rounded-[2rem] p-5 sm:p-7">
@@ -199,12 +245,30 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
               className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
               placeholder="Logo URL"
             />
+            <label className="block cursor-pointer rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-muted)]">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleBrandAssetUpload(event.target.files, 'logo')}
+                className="hidden"
+              />
+              Upload logo image
+            </label>
             <input
               value={form.bannerImage}
               onChange={(e) => setForm({ ...form, bannerImage: e.target.value })}
               className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
               placeholder="Banner image URL"
             />
+            <label className="block cursor-pointer rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-muted)]">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleBrandAssetUpload(event.target.files, 'banner')}
+                className="hidden"
+              />
+              Upload banner image
+            </label>
             <textarea
               value={form.images.join('\n')}
               onChange={(e) => {
@@ -217,6 +281,16 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
               className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
               placeholder="Gallery image URLs (comma or new line separated)"
             />
+            <label className="block cursor-pointer rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-muted)]">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => handleBrandAssetUpload(event.target.files, 'gallery')}
+                className="hidden"
+              />
+              Upload gallery images
+            </label>
             <div className="flex gap-3">
               <Button type="submit" disabled={loading} className="flex-1 justify-center">
                 {loading ? 'Saving…' : isEditing ? 'Update Brand' : 'Create Brand'}

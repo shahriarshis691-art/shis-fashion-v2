@@ -1096,6 +1096,42 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
+  const handleFounderImageUpload = async (files: FileList | null) => {
+    if (!files?.length) {
+      return
+    }
+
+    try {
+      setUploading(true)
+      setUploadError('')
+      setUploadProgress(0)
+
+      const uploadedImages = await uploadAssets([files[0]], 'homepage', {
+        retries: 2,
+        onProgress: (progress) => setUploadProgress(progress),
+      })
+
+      if (!uploadedImages[0]) {
+        return
+      }
+
+      const nextFounder = founderForm ?? founderProfile
+      if (!nextFounder) {
+        return
+      }
+
+      setFounderForm({ ...nextFounder, image: uploadedImages[0] })
+      setFounderMessage('Founder image uploaded. Click Save to publish changes.')
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Founder image upload failed. Please retry.'
+      setUploadError(reason)
+      setFounderMessage(reason)
+    } finally {
+      setUploading(false)
+      setUploadProgress(0)
+    }
+  }
+
   const handleSaveFounder = async () => {
     if (!founderForm) return
     setFounderSaving(true)
@@ -1323,6 +1359,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Edit Homepage</Button>
               <Button variant="secondary" onClick={() => handleSummaryCardClick('orders', 'new')}>View New Orders</Button>
               <Button variant="secondary" onClick={() => scrollToSection('categories-management')}>Manage Categories</Button>
+              <Button variant="secondary" onClick={() => handleSummaryCardClick('founder')}>Edit Founder</Button>
               <Button variant="secondary" onClick={() => { setShowBrandManagement(!showBrandManagement); scrollToSection('brands-management') }}>Manage Brands</Button>
             </div>
           </div>
@@ -2375,6 +2412,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 placeholder="Image URL"
                 disabled={!founderForm}
               />
+              <label className={`flex items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-3 text-sm ${founderForm ? 'cursor-pointer text-[var(--color-text)]' : 'cursor-not-allowed text-[var(--color-muted)]'}`}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleFounderImageUpload(event.target.files)}
+                  className="hidden"
+                  disabled={!founderForm}
+                />
+                Upload founder image
+              </label>
               <input
                 value={founderForm?.socials.whatsapp ?? founderProfile?.socials.whatsapp ?? ''}
                 onChange={(event) => founderForm && setFounderForm({ ...founderForm, socials: { ...founderForm.socials, whatsapp: event.target.value } })}
