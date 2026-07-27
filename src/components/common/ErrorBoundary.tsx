@@ -1,6 +1,38 @@
 import { Component, type ReactNode } from 'react'
 import Button from '../ui/Button'
 
+const CHUNK_RECOVERY_KEY = 'shis:chunk-recovery-attempted'
+
+function isChunkLoadFailure(error: Error) {
+  const message = error?.message ?? ''
+  return (
+    message.includes('Failed to fetch dynamically imported module')
+    || message.includes('Importing a module script failed')
+    || message.includes('Loading chunk')
+    || message.includes('ChunkLoadError')
+  )
+}
+
+function triggerChunkRecoveryReload() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    if (window.sessionStorage.getItem(CHUNK_RECOVERY_KEY) === '1') {
+      return false
+    }
+
+    window.sessionStorage.setItem(CHUNK_RECOVERY_KEY, '1')
+    const url = new URL(window.location.href)
+    url.searchParams.set('__chunk_retry', Date.now().toString())
+    window.location.replace(url.toString())
+    return true
+  } catch {
+    return false
+  }
+}
+
 interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
@@ -23,11 +55,20 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
     console.error('[ErrorBoundary]', error, errorInfo.componentStack)
+
+    if (isChunkLoadFailure(error)) {
+      triggerChunkRecoveryReload()
+    }
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null })
     if (typeof window !== 'undefined') {
+      try {
+        window.sessionStorage.removeItem(CHUNK_RECOVERY_KEY)
+      } catch {
+        // Ignore sessionStorage failures.
+      }
       window.location.reload()
     }
   }
