@@ -59,14 +59,15 @@ export default function MainLayout() {
   }, [])
 
   useEffect(() => {
-    if (lastTrackedPathRef.current === location.pathname) {
+    const routeKey = `${location.pathname}${location.search}`
+    if (lastTrackedPathRef.current === routeKey) {
       return
     }
 
-    lastTrackedPathRef.current = location.pathname
-    metaPixel.pageView()
+    lastTrackedPathRef.current = routeKey
+    metaPixel.trackPageView(location.pathname, location.search)
     googleAnalytics.pageView()
-  }, [location.pathname])
+  }, [location.pathname, location.search])
 
   useEffect(() => {
     applySeoMetadata(location.pathname)

@@ -344,7 +344,7 @@ export default function Navbar() {
                       const query = searchTerm.trim()
                       if (query && lastSearchQueryRef.current !== query) {
                         lastSearchQueryRef.current = query
-                        metaPixel.search({ search_string: query })
+                        metaPixel.trackSearch({ search_string: query })
                         googleAnalytics.search(query)
                       }
                       navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')
@@ -361,7 +361,7 @@ export default function Navbar() {
                     const query = searchTerm.trim()
                     if (query && lastSearchQueryRef.current !== query) {
                       lastSearchQueryRef.current = query
-                      metaPixel.search({ search_string: query })
+                      metaPixel.trackSearch({ search_string: query })
                       googleAnalytics.search(query)
                     }
                     navigate(query ? `/shop?q=${encodeURIComponent(query)}` : '/shop')

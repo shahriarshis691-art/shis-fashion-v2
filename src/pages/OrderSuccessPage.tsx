@@ -71,7 +71,7 @@ export default function OrderSuccessPage() {
       return
     }
 
-    metaPixel.purchase(purchasePayload)
+    metaPixel.trackPurchase(purchasePayload)
     googleAnalytics.purchase({
       transaction_id: order.orderId,
       value: order.grandTotal,

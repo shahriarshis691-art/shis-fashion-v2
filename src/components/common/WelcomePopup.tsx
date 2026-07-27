@@ -57,7 +57,6 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
     }
 
     googleAnalytics.trackEvent('popup_view', { source: 'welcome_discount' })
-    metaPixel.trackEvent('popup_view', { source: 'welcome_discount' })
 
     previousActiveElement.current = document.activeElement as HTMLElement | null
     closeButtonRef.current?.focus()
@@ -81,7 +80,6 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
 
   const handleClose = useCallback(() => {
     googleAnalytics.trackEvent('popup_close', { source: 'welcome_discount' })
-    metaPixel.trackEvent('popup_close', { source: 'welcome_discount' })
     onClose()
   }, [onClose])
 
@@ -90,7 +88,8 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
       await onSubscribe(email)
       setPopupCompleted(email)
       googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email })
-      metaPixel.trackEvent('popup_signup', { source: 'welcome_discount', email })
+      metaPixel.trackLead({ content_name: 'welcome_discount_signup' })
+      metaPixel.trackCompleteRegistration({ content_name: 'welcome_discount_signup' })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const lower = message.toLowerCase()
@@ -145,7 +144,6 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
     if (success) {
       setCopied(true)
       googleAnalytics.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: 'WELCOME-5OFF' })
-      metaPixel.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: 'WELCOME-5OFF' })
     }
   }
 

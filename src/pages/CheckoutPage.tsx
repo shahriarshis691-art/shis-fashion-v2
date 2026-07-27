@@ -7,6 +7,7 @@ import { createOrder, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { googleAnalytics } from '../services/googleAnalytics'
+import { metaPixel } from '../services/metaPixel'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 const CHECKOUT_ANTI_BOT_COOLDOWN_KEY = 'shis-checkout-last-submit-at'
@@ -132,6 +133,13 @@ export default function CheckoutPage() {
     if (!items.length || hasTrackedCheckoutRef.current) {
       return
     }
+
+    metaPixel.trackInitiateCheckout({
+      value: grandTotal,
+      currency: 'BDT',
+      content_type: 'product',
+      content_ids: items.map((item) => String(item.id)),
+    })
 
     googleAnalytics.beginCheckout({
       value: grandTotal,

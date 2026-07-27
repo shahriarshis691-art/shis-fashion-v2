@@ -6,7 +6,6 @@ import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import type { ShopProduct } from '../data/shopData'
 import { formatBDT, parseBDT } from '../utils/currency'
-import { metaPixel } from '../services/metaPixel'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
@@ -20,12 +19,6 @@ export default function CartPage() {
   const supportWhatsAppHref = getWhatsAppHref()
 
   const handleBeginCheckout = () => {
-    metaPixel.initiateCheckout({
-      value: subtotal,
-      currency: 'BDT',
-      content_type: 'product',
-      content_ids: items.map((item) => String(item.id)),
-    })
     navigate('/checkout')
   }
 

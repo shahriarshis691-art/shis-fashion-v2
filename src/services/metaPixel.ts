@@ -1,15 +1,24 @@
-/**
- * Meta Pixel (Facebook Pixel) Analytics Service
- * Handles all pixel event tracking across the application
- * Requires VITE_META_PIXEL_ID environment variable
- */
-
-// Extend Window interface to include fbq
-interface FacebookPixelWindow extends Window {
-  fbq?: (command: string, ...args: Array<string | Record<string, unknown>>) => void
+interface PixelWindow extends Window {
+  fbq?: FbqFunction
+  _fbq?: FbqFunction
+  __shisPixelState?: {
+    initializedIds: string[]
+    scriptInjected: boolean
+  }
 }
 
-interface ViewContentData {
+type FbqPayload = Record<string, unknown>
+
+type FbqFunction = {
+  (command: string, action: string, payload?: FbqPayload): void
+  callMethod?: (command: string, action: string, payload?: FbqPayload) => void
+  queue?: Array<[string, string, FbqPayload?]>
+  push?: FbqFunction
+  loaded?: boolean
+  version?: string
+}
+
+interface PixelBasePayload {
   content_name?: string
   content_ids?: string[]
   content_type?: string
@@ -18,243 +27,196 @@ interface ViewContentData {
   brand?: string
 }
 
-interface AddToCartData {
-  content_name?: string
-  content_ids?: string[]
-  content_type?: string
-  value?: number
-  currency?: string
-  brand?: string
+interface PixelSearchPayload {
+  search_string: string
 }
 
-interface SearchData {
-  search_string?: string
-}
-
-interface InitiateCheckoutData {
-  value?: number
-  currency?: string
-  content_type?: string
-  content_ids?: string[]
-  brand?: string
-}
-
-interface PurchaseData {
+interface PixelPurchasePayload extends PixelBasePayload {
   value: number
   currency: string
-  content_type?: string
-  content_ids?: string[]
-  content_name?: string
 }
 
+const PIXEL_SCRIPT_ID = 'shis-meta-pixel-sdk'
+const PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
+
 class MetaPixelService {
-  private pixelId: string | null = null
-  private isInitialized = false
-  private hasWarnedMissingId = false
+  private readonly pixelId: string
+  private initialized = false
+  private lastPageViewKey = ''
 
   constructor() {
-    this.pixelId = import.meta.env.VITE_META_PIXEL_ID || null
+    this.pixelId = (import.meta.env.VITE_META_PIXEL_ID ?? '').trim()
   }
 
-  /**
-   * Initialize Meta Pixel on app startup
-   * Loads the Facebook Pixel SDK script and initializes tracking
-   */
   initialize(): void {
-    if (this.isInitialized) {
-      if (import.meta.env.DEV) {
-        console.warn('[MetaPixel] Pixel already initialized, skipping')
-      }
+    if (!import.meta.env.PROD || typeof window === 'undefined' || typeof document === 'undefined') {
       return
     }
 
     if (!this.pixelId) {
-      if (import.meta.env.DEV && !this.hasWarnedMissingId) {
-        console.warn('[MetaPixel] Meta Pixel ID not found in environment variables. Set VITE_META_PIXEL_ID.')
-        this.hasWarnedMissingId = true
-      }
+      throw new Error('[MetaPixel] Missing required VITE_META_PIXEL_ID in production.')
+    }
+
+    if (this.initialized) {
       return
     }
 
-    if (!import.meta.env.PROD) {
+    const win = window as PixelWindow
+    if (!win.__shisPixelState) {
+      win.__shisPixelState = {
+        initializedIds: [],
+        scriptInjected: false,
+      }
+    }
+
+    this.ensureFbqStub(win)
+    this.ensureSingleScript()
+
+    if (!win.__shisPixelState.initializedIds.includes(this.pixelId)) {
+      win.fbq?.('init', this.pixelId)
+      win.__shisPixelState.initializedIds.push(this.pixelId)
+    }
+
+    this.initialized = true
+  }
+
+  trackPageView(pathname: string, search = ''): void {
+    const pageKey = `${pathname}${search}`
+    if (this.lastPageViewKey === pageKey) {
       return
     }
 
-    try {
-      this.loadPixelScript()
-      this.isInitialized = true
-      if (import.meta.env.DEV) {
-        console.log('[MetaPixel] Initialized successfully with ID:', this.pixelId)
-      }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] Initialization failed:', error)
-      }
-    }
+    this.lastPageViewKey = pageKey
+    this.trackStandardEvent('PageView')
   }
 
-  /**
-   * Load Meta Pixel script from CDN
-   */
-  private loadPixelScript(): void {
-    // Create and inject pixel script
-    const script = document.createElement('script')
-    script.async = true
-    script.src = 'https://connect.facebook.net/en_US/fbevents.js'
-    document.head.appendChild(script)
-
-    // Initialize fbq function
-    const fbq = function fbq(command: string, ...args: Array<string | Record<string, unknown>>): void {
-      const q = ((fbq as unknown as Record<string, unknown>).q = (fbq as unknown as Record<string, unknown>).q || []) as Array<Array<string | Record<string, unknown>>>
-      q.push([command, ...args])
-    }
-    fbq.push = fbq
-
-    // Set up pixel
-    ;(window as FacebookPixelWindow).fbq = fbq
-    ;(window as FacebookPixelWindow).fbq?.('init', this.pixelId ?? '')
+  trackViewContent(payload: PixelBasePayload): void {
+    this.trackStandardEvent('ViewContent', {
+      content_name: payload.content_name ?? 'Product',
+      content_ids: payload.content_ids ?? [],
+      content_type: payload.content_type ?? 'product',
+      value: payload.value ?? 0,
+      currency: payload.currency ?? 'BDT',
+      brand: payload.brand,
+    })
   }
 
-  /**
-   * Fire PageView event (called on every page)
-   */
-  pageView(): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'PageView')
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] PageView tracking failed:', error)
-      }
-    }
+  trackAddToCart(payload: PixelBasePayload): void {
+    this.trackStandardEvent('AddToCart', {
+      content_name: payload.content_name ?? 'Product',
+      content_ids: payload.content_ids ?? [],
+      content_type: payload.content_type ?? 'product',
+      value: payload.value ?? 0,
+      currency: payload.currency ?? 'BDT',
+      brand: payload.brand,
+    })
   }
 
-  /**
-   * Fire ViewContent event (on product details page)
-   */
-  viewContent(data: ViewContentData): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'ViewContent', {
-        content_name: data.content_name || 'Product',
-        content_ids: data.content_ids || [],
-        content_type: data.content_type || 'product',
-        value: data.value || 0,
-        currency: data.currency || 'BDT',
-      })
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] ViewContent tracking failed:', error)
-      }
-    }
+  trackInitiateCheckout(payload: PixelBasePayload): void {
+    this.trackStandardEvent('InitiateCheckout', {
+      value: payload.value ?? 0,
+      currency: payload.currency ?? 'BDT',
+      content_type: payload.content_type ?? 'product',
+      content_ids: payload.content_ids ?? [],
+      brand: payload.brand,
+    })
   }
 
-  /**
-   * Fire Search event (when user performs search)
-   */
-  search(data: SearchData): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'Search', {
-        search_string: data.search_string || '',
-      })
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] Search tracking failed:', error)
-      }
-    }
+  trackPurchase(payload: PixelPurchasePayload): void {
+    this.trackStandardEvent('Purchase', {
+      value: payload.value,
+      currency: payload.currency,
+      content_type: payload.content_type ?? 'product',
+      content_ids: payload.content_ids ?? [],
+      content_name: payload.content_name ?? 'Order',
+      brand: payload.brand,
+    })
   }
 
-  /**
-   * Fire AddToCart event (when add to cart button clicked)
-   */
-  addToCart(data: AddToCartData): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'AddToCart', {
-        content_name: data.content_name || 'Product',
-        content_ids: data.content_ids || [],
-        content_type: data.content_type || 'product',
-        value: data.value || 0,
-        currency: data.currency || 'BDT',
-      })
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] AddToCart tracking failed:', error)
-      }
-    }
+  trackSearch(payload: PixelSearchPayload): void {
+    this.trackStandardEvent('Search', {
+      search_string: payload.search_string,
+    })
   }
 
-  /**
-   * Fire InitiateCheckout event (when checkout begins)
-   */
-  initiateCheckout(data: InitiateCheckoutData): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'InitiateCheckout', {
-        value: data.value || 0,
-        currency: data.currency || 'BDT',
-        content_type: data.content_type || 'product',
-      })
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] InitiateCheckout tracking failed:', error)
-      }
-    }
+  trackLead(payload: PixelBasePayload = {}): void {
+    this.trackStandardEvent('Lead', { ...payload })
   }
 
-  /**
-   * Fire Purchase event (only after successful order)
-   */
-  purchase(data: PurchaseData): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', 'Purchase', {
-        value: data.value,
-        currency: data.currency,
-        content_type: data.content_type || 'product',
-        content_ids: data.content_ids || [],
-        content_name: data.content_name || 'Order',
-      })
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] Purchase tracking failed:', error)
-      }
-    }
+  trackCompleteRegistration(payload: PixelBasePayload = {}): void {
+    this.trackStandardEvent('CompleteRegistration', { ...payload })
   }
 
-  trackEvent(eventName: string, params: Record<string, unknown>): void {
-    if (!import.meta.env.PROD) return
-    if (!this.isInitialized || !this.pixelId) return
-    try {
-      ;(window as FacebookPixelWindow).fbq?.('track', eventName, params)
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[MetaPixel] Event tracking failed:', error)
-      }
-    }
-  }
-
-  /**
-   * Check if pixel is initialized
-   */
-  isReady(): boolean {
-    return this.isInitialized && !!this.pixelId
-  }
-
-  /**
-   * Get current pixel ID (for debugging)
-   */
-  getPixelId(): string | null {
+  getPixelId(): string {
     return this.pixelId
+  }
+
+  private trackStandardEvent(eventName: string, payload?: FbqPayload): void {
+    if (!import.meta.env.PROD || typeof window === 'undefined') {
+      return
+    }
+
+    const fbq = (window as PixelWindow).fbq
+    if (!fbq) {
+      return
+    }
+
+    try {
+      if (payload) {
+        fbq('track', eventName, payload)
+      } else {
+        fbq('track', eventName)
+      }
+    } catch {
+      // Ignore runtime errors to avoid blocking user flows.
+    }
+  }
+
+  private ensureFbqStub(win: PixelWindow): void {
+    if (win.fbq && typeof win.fbq === 'function') {
+      return
+    }
+
+    const stub: FbqFunction = ((command: string, action: string, payload?: FbqPayload) => {
+      if (stub.callMethod) {
+        stub.callMethod(command, action, payload)
+        return
+      }
+
+      stub.queue = stub.queue ?? []
+      stub.queue.push([command, action, payload])
+    }) as FbqFunction
+
+    stub.queue = []
+    stub.loaded = true
+    stub.version = '2.0'
+    stub.push = stub
+    win.fbq = stub
+
+    if (!win._fbq) {
+      win._fbq = stub
+    }
+  }
+
+  private ensureSingleScript(): void {
+    const byId = document.getElementById(PIXEL_SCRIPT_ID) as HTMLScriptElement | null
+    const bySrc = document.querySelector(`script[src="${PIXEL_SCRIPT_SRC}"]`) as HTMLScriptElement | null
+    const byContainsSrc = document.querySelector('script[src*="connect.facebook.net/en_US/fbevents.js"]') as HTMLScriptElement | null
+    const existing = byId ?? bySrc ?? byContainsSrc
+
+    if (existing) {
+      if (!existing.id) {
+        existing.id = PIXEL_SCRIPT_ID
+      }
+      return
+    }
+
+    const script = document.createElement('script')
+    script.id = PIXEL_SCRIPT_ID
+    script.async = true
+    script.src = PIXEL_SCRIPT_SRC
+    document.head.appendChild(script)
   }
 }
 
-// Export singleton instance
 export const metaPixel = new MetaPixelService()

@@ -159,16 +159,7 @@ export default function CollectionListingPage() {
 
     lastTrackedCollectionProductIdRef.current = selectedProduct.id
 
-    metaPixel.viewContent({
-        content_name: activeCollection.title,
-        content_ids: [selectedProduct.id],
-        content_type: 'product',
-        value: parseBDT(selectedProduct.price),
-        currency: 'BDT',
-        brand: selectedProduct.brand,
-      })
-
-      googleAnalytics.viewItem({
+    googleAnalytics.viewItem({
         item_id: selectedProduct.id,
         item_name: selectedProduct.name,
         item_category: selectedProduct.category,
@@ -296,7 +287,7 @@ export default function CollectionListingPage() {
                     color: 'Default',
                     quantity: 1,
                   })
-                  metaPixel.addToCart({
+                  metaPixel.trackAddToCart({
                     content_name: selectedProduct.name,
                     content_ids: [selectedProduct.id],
                     content_type: 'product',
@@ -332,13 +323,6 @@ export default function CollectionListingPage() {
                     size: selectedProduct.sizes[0] ?? 'M',
                     color: 'Default',
                     quantity: 1,
-                  })
-                  metaPixel.initiateCheckout({
-                    value: parseBDT(selectedProduct.price),
-                    currency: 'BDT',
-                    content_type: 'product',
-                    content_ids: [selectedProduct.id],
-                    brand: selectedProduct.brand,
                   })
                   googleAnalytics.beginCheckout({
                     value: parseBDT(selectedProduct.price),

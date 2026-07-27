@@ -168,7 +168,7 @@ export default function ProductDetailPage() {
 
     lastTrackedProductIdRef.current = product.id
 
-    metaPixel.viewContent({
+    metaPixel.trackViewContent({
       content_name: product.name,
       content_ids: [String(product.id)],
       content_type: 'product',
@@ -318,7 +318,7 @@ export default function ProductDetailPage() {
     }
 
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
-    metaPixel.addToCart({
+    metaPixel.trackAddToCart({
       content_name: product.name,
       content_ids: [String(product.id)],
       content_type: 'product',
@@ -346,13 +346,6 @@ export default function ProductDetailPage() {
     }
 
     addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
-    metaPixel.initiateCheckout({
-      value: parseBDT(product.price) * effectiveQuantity,
-      currency: 'BDT',
-      content_type: 'product',
-      content_ids: [String(product.id)],
-      brand: product.brand,
-    })
     googleAnalytics.beginCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
