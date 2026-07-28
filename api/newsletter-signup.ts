@@ -1,4 +1,4 @@
-import { addDoc, collection, limit, query, serverTimestamp, updateDoc, where, getDocs } from 'firebase-admin/firestore'
+import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin'
 
 export const config = {
@@ -51,11 +51,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const db = getFirebaseAdminDb()
-  if (!db) {
+  const configuredDb = getFirebaseAdminDb()
+  if (!configuredDb) {
     res.status(500).json({ error: 'Firebase Admin is not configured' })
     return
   }
+  const db = getFirestore()
 
   const body = (req.body ?? {}) as NewsletterSignupBody
   const email = body.email?.trim().toLowerCase() ?? ''
@@ -65,8 +66,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const subscriberQuery = query(collection(db, 'newsletterSubscribers'), where('email', '==', email), limit(1))
-  const subscriberSnapshot = await getDocs(subscriberQuery)
+  const subscriberQuery = db.collection('newsletterSubscribers').where('email', '==', email).limit(1)
+  const subscriberSnapshot = await subscriberQuery.get()
 
   if (!subscriberSnapshot.empty) {
     const subscriberDoc = subscriberSnapshot.docs[0]
@@ -80,11 +81,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
     if (!couponCode || !couponId) {
       const generatedCouponCode = generateCouponCode()
-      const couponRef = await addDoc(collection(db, 'coupons'), {
+      const couponRef = db.collection('coupons').doc()
+      await couponRef.set({
         code: generatedCouponCode,
         discountPercent: COUPON_DEFAULT_PERCENT,
         customerEmail: email,
-        createdDate: serverTimestamp(),
+        createdDate: FieldValue.serverTimestamp(),
         expiryDate: computeCouponExpiry(),
         status: 'active',
         usageCount: 0,
@@ -94,7 +96,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       couponCode = generatedCouponCode
       couponId = couponRef.id
 
-      await updateDoc(subscriberDoc.ref, {
+      await subscriberDoc.ref.update({
         couponUsed: couponCode,
         couponId,
         popupStatus: 'completed',
@@ -111,20 +113,22 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   }
 
   const couponCode = generateCouponCode()
-  const couponRef = await addDoc(collection(db, 'coupons'), {
+  const couponRef = db.collection('coupons').doc()
+  await couponRef.set({
     code: couponCode,
     discountPercent: COUPON_DEFAULT_PERCENT,
     customerEmail: email,
-    createdDate: serverTimestamp(),
+    createdDate: FieldValue.serverTimestamp(),
     expiryDate: computeCouponExpiry(),
     status: 'active',
     usageCount: 0,
     maxUsage: COUPON_MAX_USAGE,
   })
 
-  const subscriberRef = await addDoc(collection(db, 'newsletterSubscribers'), {
+  const subscriberRef = db.collection('newsletterSubscribers').doc()
+  await subscriberRef.set({
     email,
-    signupDate: serverTimestamp(),
+    signupDate: FieldValue.serverTimestamp(),
     source: 'website_popup',
     couponUsed: couponCode,
     couponId: couponRef.id,
