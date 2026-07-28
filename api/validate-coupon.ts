@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase-admin/firestore'
+import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin'
 
 export const config = {
@@ -34,8 +34,8 @@ function isCouponExpired(expiryDate: string) {
 
 async function findCoupon(db: NonNullable<ReturnType<typeof getFirebaseAdminDb>>, code?: string, couponId?: string) {
   if (couponId?.trim()) {
-    const couponRef = doc(db, 'coupons', couponId.trim())
-    const snapshot = await getDoc(couponRef)
+    const couponRef = db.collection('coupons').doc(couponId.trim())
+    const snapshot = await couponRef.get()
     return snapshot.exists() ? snapshot : null
   }
 
@@ -44,8 +44,8 @@ async function findCoupon(db: NonNullable<ReturnType<typeof getFirebaseAdminDb>>
     return null
   }
 
-  const couponQuery = query(collection(db, 'coupons'), where('code', '==', normalizedCode), limit(1))
-  const couponSnapshot = await getDocs(couponQuery)
+  const couponQuery = db.collection('coupons').where('code', '==', normalizedCode).limit(1)
+  const couponSnapshot = await couponQuery.get()
   return couponSnapshot.empty ? null : couponSnapshot.docs[0]
 }
 
@@ -55,11 +55,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const db = getFirebaseAdminDb()
-  if (!db) {
+  const configuredDb = getFirebaseAdminDb()
+  if (!configuredDb) {
     res.status(500).json({ error: 'Firebase Admin is not configured' })
     return
   }
+  const db = getFirestore()
 
   const body = (req.body ?? {}) as ValidateCouponBody
   const action = body.action ?? 'validate'
@@ -158,12 +159,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       return
     }
 
-    await updateDoc(couponSnapshot.ref, {
+    await couponSnapshot.ref.update({
       status: 'used',
       usageCount: 1,
       orderId,
       discountAmount: Number.isFinite(discountAmount) ? discountAmount : 0,
-      usedAt: serverTimestamp(),
+      usedAt: FieldValue.serverTimestamp(),
     })
 
     res.status(200).json({ redeemed: true, couponCode: coupon.code, couponId: couponSnapshot.id })
