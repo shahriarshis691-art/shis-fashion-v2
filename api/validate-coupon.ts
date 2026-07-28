@@ -1,133 +1,174 @@
-import { HttpsError, onCall } from 'firebase-functions/v2/https'
-import { getFirestore, doc, getDoc, query, collection, where, limit, getDocs, updateDoc, serverTimestamp } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
+import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase-admin/firestore'
+import { getFirebaseAdminDb } from './_firebaseAdmin'
 
-if (!getApps().length) {
-  initializeApp()
+export const config = {
+  runtime: 'nodejs',
 }
 
-const db = getFirestore()
+interface LooseRequest {
+  method?: string
+  body?: unknown
+}
 
-export const validateCoupon = onCall(async (request) => {
-  const { code, email } = request.data as { code?: string; email?: string } ?? {}
+interface LooseResponse {
+  status: (code: number) => LooseResponse
+  json: (payload: unknown) => void
+}
 
-  if (!code || typeof code !== 'string') {
-    throw new HttpsError('invalid-argument', 'Coupon code is required.')
+interface ValidateCouponBody {
+  action?: 'validate' | 'redeem'
+  code?: string
+  couponId?: string
+  orderId?: string
+  discountAmount?: number
+}
+
+function isCouponCodeValid(code: string) {
+  return /^[A-Z]{3,}-[A-Z0-9]{3,}$/i.test(code)
+}
+
+function isCouponExpired(expiryDate: string) {
+  const parsed = new Date(expiryDate)
+  return Number.isNaN(parsed.getTime()) || parsed <= new Date()
+}
+
+async function findCoupon(db: NonNullable<ReturnType<typeof getFirebaseAdminDb>>, code?: string, couponId?: string) {
+  if (couponId?.trim()) {
+    const couponRef = doc(db, 'coupons', couponId.trim())
+    const snapshot = await getDoc(couponRef)
+    return snapshot.exists() ? snapshot : null
   }
 
-  if (!email || typeof email !== 'string') {
-    throw new HttpsError('invalid-argument', 'Customer email is required.')
+  const normalizedCode = code?.trim().toUpperCase() ?? ''
+  if (!normalizedCode) {
+    return null
   }
 
-  const trimmedCode = code.trim().toUpperCase()
-  const trimmedEmail = email.trim().toLowerCase()
+  const couponQuery = query(collection(db, 'coupons'), where('code', '==', normalizedCode), limit(1))
+  const couponSnapshot = await getDocs(couponQuery)
+  return couponSnapshot.empty ? null : couponSnapshot.docs[0]
+}
 
-  if (!/^[A-Z]{3,}-\w{3,}$/.test(trimmedCode)) {
-    throw new HttpsError('invalid-argument', 'Invalid coupon code format.')
+export default async function handler(req: LooseRequest, res: LooseResponse) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' })
+    return
   }
 
-  const q = query(collection(db, 'coupons'), where('code', '==', trimmedCode), limit(1))
-  const snapshot = await getDocs(q)
-
-  if (snapshot.empty) {
-    throw new HttpsError('not-found', 'Invalid or expired coupon code.')
+  const db = getFirebaseAdminDb()
+  if (!db) {
+    res.status(500).json({ error: 'Firebase Admin is not configured' })
+    return
   }
 
-  const couponDoc = snapshot.docs[0]
-  const coupon = couponDoc.data() as {
-    code: string
-    discountPercent: number
-    customerEmail: string
-    status: string
-    expiryDate: string
-    usageCount: number
-    maxUsage: number
-    id?: string
+  const body = (req.body ?? {}) as ValidateCouponBody
+  const action = body.action ?? 'validate'
+
+  if (action === 'validate') {
+    const code = body.code?.trim().toUpperCase() ?? ''
+
+    if (!isCouponCodeValid(code)) {
+      res.status(400).json({ valid: false, error: 'Invalid coupon code format.' })
+      return
+    }
+
+    const couponSnapshot = await findCoupon(db, code)
+    if (!couponSnapshot) {
+      res.status(404).json({ valid: false, error: 'Invalid or expired coupon code.' })
+      return
+    }
+
+    const coupon = couponSnapshot.data() as {
+      code: string
+      discountPercent: number
+      expiryDate: string
+      status: 'active' | 'used' | 'disabled' | 'expired'
+      usageCount: number
+      maxUsage: number
+    }
+
+    if (coupon.status !== 'active') {
+      res.status(409).json({ valid: false, error: 'This coupon is no longer active.' })
+      return
+    }
+
+    if (isCouponExpired(coupon.expiryDate)) {
+      res.status(409).json({ valid: false, error: 'This coupon has expired.' })
+      return
+    }
+
+    if (coupon.usageCount >= coupon.maxUsage) {
+      res.status(409).json({ valid: false, error: 'This coupon has already been used.' })
+      return
+    }
+
+    res.status(200).json({
+      valid: true,
+      coupon: {
+        id: couponSnapshot.id,
+        code: coupon.code,
+        discountPercent: coupon.discountPercent,
+        expiryDate: coupon.expiryDate,
+        status: coupon.status,
+        usageCount: coupon.usageCount,
+        maxUsage: coupon.maxUsage,
+      },
+    })
+    return
   }
 
-  if (coupon.status !== 'active') {
-    throw new HttpsError('failed-precondition', 'This coupon is no longer active.')
+  if (action === 'redeem') {
+    const orderId = body.orderId?.trim() ?? ''
+    const discountAmount = Number(body.discountAmount ?? 0)
+    const code = body.code?.trim().toUpperCase() ?? ''
+    const couponId = body.couponId?.trim() ?? ''
+
+    if (!orderId || (!couponId && !isCouponCodeValid(code))) {
+      res.status(400).json({ redeemed: false, error: 'Coupon and order details are required.' })
+      return
+    }
+
+    const couponSnapshot = await findCoupon(db, code, couponId)
+    if (!couponSnapshot) {
+      res.status(404).json({ redeemed: false, error: 'Invalid coupon code.' })
+      return
+    }
+
+    const coupon = couponSnapshot.data() as {
+      expiryDate: string
+      status: 'active' | 'used' | 'disabled' | 'expired'
+      usageCount: number
+      maxUsage: number
+      orderId?: string
+      code: string
+    }
+
+    if (coupon.status !== 'active') {
+      res.status(409).json({ redeemed: false, error: 'This coupon is no longer active.' })
+      return
+    }
+
+    if (isCouponExpired(coupon.expiryDate)) {
+      res.status(409).json({ redeemed: false, error: 'This coupon has expired.' })
+      return
+    }
+
+    if (coupon.usageCount >= coupon.maxUsage) {
+      res.status(409).json({ redeemed: false, error: 'This coupon has already been used.' })
+      return
+    }
+
+    await updateDoc(couponSnapshot.ref, {
+      status: 'used',
+      usageCount: 1,
+      orderId,
+      discountAmount: Number.isFinite(discountAmount) ? discountAmount : 0,
+      usedAt: serverTimestamp(),
+    })
+
+    res.status(200).json({ redeemed: true, couponCode: coupon.code, couponId: couponSnapshot.id })
+    return
   }
 
-  const expiryDate = new Date(coupon.expiryDate)
-  if (expiryDate <= new Date()) {
-    throw new HttpsError('failed-precondition', 'This coupon has expired.')
-  }
-
-  if (coupon.usageCount >= coupon.maxUsage) {
-    throw new HttpsError('failed-precondition', 'This coupon has already been used.')
-  }
-
-  if (coupon.customerEmail !== trimmedEmail) {
-    throw new HttpsError('permission-denied', 'This coupon is not valid for this email.')
-  }
-
-  const discountAmount = Math.round(100 * coupon.discountPercent) / 100
-
-  return {
-    valid: true,
-    coupon: {
-      id: couponDoc.id,
-      code: coupon.code,
-      discountPercent: coupon.discountPercent,
-      customerEmail: coupon.customerEmail,
-      status: coupon.status,
-      expiryDate: coupon.expiryDate,
-      usageCount: coupon.usageCount,
-      maxUsage: coupon.maxUsage,
-    },
-    discountAmount,
-  }
-})
-
-export const redeemCoupon = onCall(async (request) => {
-  const { code, email, orderId } = request.data as { code?: string; email?: string; orderId?: string } ?? {}
-
-  if (!code || !email || !orderId) {
-    throw new HttpsError('invalid-argument', 'Code, email, and order ID are required.')
-  }
-
-  const trimmedCode = code.trim().toUpperCase()
-  const trimmedEmail = email.trim().toLowerCase()
-
-  const q = query(collection(db, 'coupons'), where('code', '==', trimmedCode), limit(1))
-  const snapshot = await getDocs(q)
-
-  if (snapshot.empty) {
-    throw new HttpsError('not-found', 'Invalid coupon code.')
-  }
-
-  const couponRef = doc(db, 'coupons', snapshot.docs[0].id)
-  const coupon = (await getDoc(couponRef)).data() as {
-    status: string
-    expiryDate: string
-    usageCount: number
-    maxUsage: number
-    customerEmail: string
-  }
-
-  if (coupon.status !== 'active') {
-    throw new HttpsError('failed-precondition', 'This coupon is no longer active.')
-  }
-
-  if (new Date(coupon.expiryDate) <= new Date()) {
-    throw new HttpsError('failed-precondition', 'This coupon has expired.')
-  }
-
-  if (coupon.usageCount >= coupon.maxUsage) {
-    throw new HttpsError('failed-precondition', 'This coupon has already been used.')
-  }
-
-  if (coupon.customerEmail !== trimmedEmail) {
-    throw new HttpsError('permission-denied', 'This coupon is not valid for this email.')
-  }
-
-  await updateDoc(couponRef, {
-    status: 'used',
-    usageCount: 1,
-    orderId,
-    usedAt: serverTimestamp(),
-  })
-
-  return { redeemed: true, couponCode: trimmedCode }
-})
+  res.status(400).json({ error: 'Invalid action.' })
+}

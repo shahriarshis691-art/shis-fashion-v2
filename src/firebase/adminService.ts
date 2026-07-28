@@ -2531,6 +2531,34 @@ export interface Coupon {
   usedAt?: string
 }
 
+interface PublicNewsletterSignupResult {
+  subscriberId: string
+  couponCode: string
+  couponId: string
+  alreadySubscribed?: boolean
+}
+
+interface PublicCouponValidationResult {
+  valid: boolean
+  coupon?: {
+    id: string
+    code: string
+    discountPercent: number
+    expiryDate: string
+    status: 'active' | 'used' | 'disabled' | 'expired'
+    usageCount: number
+    maxUsage: number
+  }
+  error?: string
+}
+
+interface PublicCouponRedemptionResult {
+  redeemed: boolean
+  couponCode?: string
+  couponId?: string
+  error?: string
+}
+
 const COUPON_PREFIX = 'SHIS-'
 const COUPON_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const COUPON_CODE_LENGTH = 6
@@ -2560,50 +2588,89 @@ function computeCouponMaxUsage(): number {
   return COUPON_MAX_USAGE
 }
 
-export async function subscribeNewsletter(email: string): Promise<{ subscriberId: string; couponCode: string; couponId: string }> {
-  if (!firebaseDb) {
-    throw new Error('Newsletter service unavailable: database not configured.')
+async function readApiError(response: Response) {
+  try {
+    const payload = await response.json() as { error?: string }
+    return payload.error || 'Request failed.'
+  } catch {
+    return 'Request failed.'
   }
+}
 
+export async function subscribeNewsletter(email: string): Promise<PublicNewsletterSignupResult> {
   const trimmed = email.trim().toLowerCase()
 
   if (!trimmed) {
     throw new Error('Invalid email address.')
   }
 
-  const q = query(collection(firebaseDb, 'newsletterSubscribers'), where('email', '==', trimmed), limit(1))
-  const snapshot = await getDocs(q)
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    const currentSubscribers = readStored<NewsletterSubscriber[]>(SUBSCRIBERS_KEY, [])
+    const existingSubscriber = currentSubscribers.find((subscriber) => subscriber.email === trimmed)
+    const currentCoupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
 
-  if (!snapshot.empty) {
-    throw new Error(`Welcome back! You're already a SHIS Fashion member.`)
+    if (existingSubscriber?.couponUsed && existingSubscriber.couponId) {
+      return {
+        subscriberId: existingSubscriber.id,
+        couponCode: existingSubscriber.couponUsed,
+        couponId: existingSubscriber.couponId,
+        alreadySubscribed: true,
+      }
+    }
+
+    const couponCode = generateCouponCodeInternal()
+    const couponId = existingSubscriber?.couponId || `local-coupon-${Date.now()}`
+    const newCoupon: Coupon = {
+      id: couponId,
+      code: couponCode,
+      discountPercent: computeCouponDiscountPercent(),
+      customerEmail: trimmed,
+      createdDate: new Date().toISOString(),
+      expiryDate: computeCouponExpiry(),
+      status: 'active',
+      usageCount: 0,
+      maxUsage: computeCouponMaxUsage(),
+    }
+
+    writeStored(COUPON_PREFIX + 'coupons', [newCoupon, ...currentCoupons.filter((coupon) => coupon.id !== couponId)])
+
+    const subscriberId = existingSubscriber?.id || `local-subscriber-${Date.now()}`
+    const nextSubscriber: NewsletterSubscriber = {
+      id: subscriberId,
+      email: trimmed,
+      signupDate: new Date().toISOString(),
+      source: 'website_popup',
+      couponUsed: couponCode,
+      couponId,
+      popupStatus: 'completed',
+    }
+
+    writeStored(
+      SUBSCRIBERS_KEY,
+      [nextSubscriber, ...currentSubscribers.filter((subscriber) => subscriber.id !== subscriberId)],
+    )
+
+    return {
+      subscriberId,
+      couponCode,
+      couponId,
+      alreadySubscribed: Boolean(existingSubscriber),
+    }
   }
 
-  const couponCode = generateCouponCodeInternal()
-  const couponExpiry = computeCouponExpiry()
-  const couponDiscount = computeCouponDiscountPercent()
-  const couponMaxUsage = computeCouponMaxUsage()
-
-  const couponRef = await addDoc(collection(firebaseDb, 'coupons'), {
-    code: couponCode,
-    discountPercent: couponDiscount,
-    customerEmail: trimmed,
-    createdDate: serverTimestamp(),
-    expiryDate: couponExpiry,
-    status: 'active',
-    usageCount: 0,
-    maxUsage: couponMaxUsage,
+  const response = await fetch('/api/newsletter-signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email: trimmed }),
   })
 
-  const subscriberRef = await addDoc(collection(firebaseDb, 'newsletterSubscribers'), {
-    email: trimmed,
-    signupDate: serverTimestamp(),
-    source: 'website_popup',
-    couponUsed: couponCode,
-    couponId: couponRef.id,
-    popupStatus: 'completed',
-  })
+  if (!response.ok) {
+    throw new Error(await readApiError(response))
+  }
 
-  return { subscriberId: subscriberRef.id, couponCode, couponId: couponRef.id }
+  return response.json() as Promise<PublicNewsletterSignupResult>
 }
 
 export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
@@ -2747,28 +2814,40 @@ export async function getCouponByCode(code: string): Promise<Coupon | null> {
     return null
   }
 
-  if (!firebaseDb) {
-    const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
-    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
-  }
-
-  if (isLocalFirstDataMode()) {
+  if (!firebaseDb || isLocalFirstDataMode()) {
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
     return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
   }
 
   try {
-    const q = query(collection(firebaseDb, 'coupons'), where('code', '==', trimmed), limit(1))
-    const snapshot = await getDocs(q)
-    if (snapshot.empty) {
+    const response = await fetch('/api/validate-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'validate', code: trimmed }),
+    })
+
+    if (!response.ok) {
       return null
     }
-    const doc = snapshot.docs[0]
-    const coupon = { id: doc.id, ...(doc.data() as Omit<Coupon, 'id'>) } as Coupon
-    if (coupon.status !== 'active' || isCouponExpired(coupon.expiryDate) || coupon.usageCount >= coupon.maxUsage) {
+
+    const payload = await response.json() as PublicCouponValidationResult
+    if (!payload.valid || !payload.coupon) {
       return null
     }
-    return coupon
+
+    return {
+      id: payload.coupon.id,
+      code: payload.coupon.code,
+      discountPercent: payload.coupon.discountPercent,
+      customerEmail: '',
+      createdDate: '',
+      expiryDate: payload.coupon.expiryDate,
+      status: payload.coupon.status,
+      usageCount: payload.coupon.usageCount,
+      maxUsage: payload.coupon.maxUsage,
+    }
   } catch {
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
     return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
@@ -2870,13 +2949,24 @@ export async function markCouponUsed(couponId: string, orderId: string, discount
   }
 
   try {
-    await updateDoc(doc(firebaseDb, 'coupons', couponId), {
-      status: 'used',
-      usageCount: 1,
-      orderId,
-      discountAmount,
-      usedAt: serverTimestamp(),
+    const response = await fetch('/api/validate-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'redeem',
+        couponId,
+        orderId,
+        discountAmount,
+      }),
     })
+
+    if (!response.ok) {
+      throw new Error(await readApiError(response))
+    }
+
+    await response.json() as PublicCouponRedemptionResult
     await recordAdminAudit('coupon.use', 'coupon', couponId, { orderId, mode: 'live' })
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {

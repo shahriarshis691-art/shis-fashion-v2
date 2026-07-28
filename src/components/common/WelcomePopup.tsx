@@ -7,7 +7,7 @@ import { setPopupCompleted } from '../../firebase/adminService'
 interface WelcomePopupProps {
   isOpen: boolean
   onClose: () => void
-  onSubscribe: (email: string) => Promise<{ subscriberId: string; couponCode: string; couponId: string }>
+  onSubscribe: (email: string) => Promise<{ subscriberId: string; couponCode: string; couponId: string; alreadySubscribed?: boolean }>
   onWelcomeBack: (email: string) => void
   heroImage?: string
 }
@@ -38,7 +38,7 @@ function copyToClipboard(value: string) {
 export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBack, heroImage = '' }: WelcomePopupProps) {
   const [form, setForm] = useState<FormState>({ email: '', error: '', submitting: false, success: false, touched: false })
   const [showWelcomeBack, setShowWelcomeBack] = useState(false)
-  const [welcomeBackEmail, setWelcomeBackEmail] = useState('')
+  const [resolvedCouponCode, setResolvedCouponCode] = useState('')
   const [copied, setCopied] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -85,22 +85,19 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
 
   const handleSubscribe = async (email: string) => {
     try {
-      await onSubscribe(email)
+      const result = await onSubscribe(email)
+      setResolvedCouponCode(result.couponCode)
       setPopupCompleted(email)
       googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email })
       metaPixel.trackLead({ content_name: 'welcome_discount_signup' })
       metaPixel.trackCompleteRegistration({ content_name: 'welcome_discount_signup' })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      const lower = message.toLowerCase()
-      if (lower.includes('already') || lower.includes('welcome back')) {
-        setWelcomeBackEmail(email)
+
+      if (result.alreadySubscribed) {
         setShowWelcomeBack(true)
         setForm((current) => ({ ...current, submitting: false }))
-        setPopupCompleted(email)
         onWelcomeBack(email)
-        return
       }
+    } catch (error) {
       throw error
     }
   }
@@ -130,20 +127,21 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
   }
 
   const handleWelcomeBackClaim = async () => {
-    setForm((current) => ({ ...current, submitting: true }))
-    try {
-      await onSubscribe(welcomeBackEmail)
-      setForm((current) => ({ ...current, success: true, submitting: false }))
-    } catch {
-      setForm((current) => ({ ...current, submitting: false, error: 'Something went wrong. Please try again.' }))
+    if (!resolvedCouponCode) {
+      setForm((current) => ({ ...current, error: 'Something went wrong. Please try again.' }))
+      return
     }
+
+    setShowWelcomeBack(false)
+    setForm((current) => ({ ...current, success: true, submitting: false }))
   }
 
   const handleCopyCode = async () => {
-    const success = await copyToClipboard('WELCOME-5OFF')
+    const couponCode = resolvedCouponCode || 'WELCOME-5OFF'
+    const success = await copyToClipboard(couponCode)
     if (success) {
       setCopied(true)
-      googleAnalytics.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: 'WELCOME-5OFF' })
+      googleAnalytics.trackEvent('coupon_copy', { source: 'welcome_discount', coupon: couponCode })
     }
   }
 
@@ -257,7 +255,7 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
                     <p className="text-xs uppercase tracking-[0.18em] text-white/60">Coupon Code</p>
                     <div className="mt-2 flex items-center justify-center gap-3">
                       <div className="flex-1 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-center">
-                        <p className="text-xl font-semibold text-[#D4AF37]">WELCOME-5OFF</p>
+                        <p className="text-xl font-semibold text-[#D4AF37]">{resolvedCouponCode || 'WELCOME-5OFF'}</p>
                       </div>
                     </div>
                   </div>
