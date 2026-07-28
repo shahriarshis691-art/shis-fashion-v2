@@ -39,6 +39,7 @@ interface PixelPurchasePayload extends PixelBasePayload {
 
 const PIXEL_SCRIPT_ID = 'shis-meta-pixel-sdk'
 const PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
+const META_FALLBACK_CURRENCY = 'USD'
 const META_SUPPORTED_CURRENCIES = new Set([
   'AED', 'ARS', 'AUD', 'BOB', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'COP',
   'CRC', 'CZK', 'DKK', 'DOP', 'DZD', 'EGP', 'EUR', 'GBP', 'GTQ', 'HKD',
@@ -52,6 +53,7 @@ class MetaPixelService {
   private readonly pixelId: string
   private initialized = false
   private lastPageViewKey = ''
+  private missingPixelIdWarned = false
 
   constructor() {
     this.pixelId = (import.meta.env.VITE_META_PIXEL_ID ?? '').trim()
@@ -63,7 +65,11 @@ class MetaPixelService {
     }
 
     if (!this.pixelId) {
-      throw new Error('[MetaPixel] Missing required VITE_META_PIXEL_ID in production.')
+      if (!this.missingPixelIdWarned) {
+        this.missingPixelIdWarned = true
+        console.warn('[MetaPixel] Missing VITE_META_PIXEL_ID in production. Pixel tracking disabled.')
+      }
+      return
     }
 
     if (this.initialized) {
@@ -198,16 +204,10 @@ class MetaPixelService {
         if (/^[A-Z]{3}$/.test(normalizedCurrency) && META_SUPPORTED_CURRENCIES.has(normalizedCurrency)) {
           sanitized.currency = normalizedCurrency
         } else {
-          delete sanitized.currency
-          if ('value' in sanitized) {
-            delete sanitized.value
-          }
+          sanitized.currency = META_FALLBACK_CURRENCY
         }
       } else {
-        delete sanitized.currency
-        if ('value' in sanitized) {
-          delete sanitized.value
-        }
+        sanitized.currency = META_FALLBACK_CURRENCY
       }
     }
 
@@ -215,6 +215,9 @@ class MetaPixelService {
       const numericValue = Number(sanitized.value)
       if (Number.isFinite(numericValue)) {
         sanitized.value = numericValue
+        if (!('currency' in sanitized)) {
+          sanitized.currency = META_FALLBACK_CURRENCY
+        }
       } else {
         delete sanitized.value
         if ('currency' in sanitized) {
