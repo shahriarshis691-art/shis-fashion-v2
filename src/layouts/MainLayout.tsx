@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/common/ScrollToTop'
@@ -20,6 +20,39 @@ import { subscribeNewsletter } from '../firebase/adminService'
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
 
+function getOversizedCampaignLandingPath(pathname: string, search: string) {
+  const params = new URLSearchParams(search)
+  const source = params.get('utm_source')?.trim().toLowerCase() ?? ''
+  const medium = params.get('utm_medium')?.trim().toLowerCase() ?? ''
+  const campaign = [
+    params.get('utm_campaign'),
+    params.get('campaign'),
+    params.get('meta_campaign'),
+    params.get('fb_campaign'),
+  ].filter(Boolean).join(' ').trim().toLowerCase()
+
+  const isMetaSignal = Boolean(
+    params.get('fbclid')
+    || source.includes('facebook')
+    || source.includes('meta')
+    || medium.includes('social')
+    || medium.includes('paid_social')
+    || campaign.includes('oversized')
+    || campaign.includes('tee')
+    || campaign.includes('meta')
+  )
+
+  if (!isMetaSignal) {
+    return null
+  }
+
+  if (pathname === '/shop/oversized-tee' || pathname === '/shop/oversized-tee/') {
+    return null
+  }
+
+  return { pathname: '/shop/oversized-tee', search }
+}
+
 function shouldSendStabilizationHeartbeat() {
   if (typeof window === 'undefined') {
     return false
@@ -35,6 +68,7 @@ function shouldSendStabilizationHeartbeat() {
 
 export default function MainLayout() {
   const location = useLocation()
+  const navigate = useNavigate()
   const lastSoftLaunchEventRef = useRef('')
   const lastTrackedPathRef = useRef('')
   const softLaunchDecision = useMemo(
@@ -44,6 +78,18 @@ export default function MainLayout() {
   const [heroImage, setHeroImage] = useState('')
 
   const { isPopupOpen, closePopup, completePopup } = useWelcomePopup()
+  const oversizedCampaignLanding = useMemo(
+    () => getOversizedCampaignLandingPath(location.pathname, location.search),
+    [location.pathname, location.search],
+  )
+
+  useEffect(() => {
+    if (!oversizedCampaignLanding) {
+      return
+    }
+
+    navigate(oversizedCampaignLanding, { replace: true })
+  }, [navigate, oversizedCampaignLanding])
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => {

@@ -351,7 +351,18 @@ export default function HomePage() {
       <section className="border-b border-black/10">
         <div className="relative overflow-hidden bg-black">
           <div className="relative aspect-[4/5] min-h-[23rem] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
-            {heroImage ? (
+            {homepageContent.heroVideo ? (
+              <video
+                src={homepageContent.heroVideo}
+                poster={heroImage}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : heroImage ? (
               <img
                 src={heroImage}
                 alt={homepageContent.heroImageTitle || 'SHIS Fashion campaign image'}

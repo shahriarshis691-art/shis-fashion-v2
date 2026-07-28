@@ -7,6 +7,7 @@ import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
+import { metaPixel } from '../services/metaPixel'
 import {
   subscribeToProducts,
   type AdminProduct,
@@ -393,6 +394,26 @@ export default function ShopPage() {
     )
     return sorted
   })()
+
+  useEffect(() => {
+    if (!ready) {
+      return
+    }
+
+    const isOversizedListing = effectiveSubcategory === 'oversized-tee' || location.pathname === '/shop/oversized-tee'
+    if (!isOversizedListing) {
+      return
+    }
+
+    metaPixel.trackViewContent({
+      content_name: 'Oversized Tee Listing',
+      content_ids: visibleProducts.slice(0, 8).map((product) => String(product.id)),
+      content_type: 'product_group',
+      value: visibleProducts[0] ? parseBDT(visibleProducts[0].price) : 0,
+      currency: 'BDT',
+      brand: 'SHIS Fashion',
+    })
+  }, [effectiveSubcategory, location.pathname, ready, visibleProducts])
 
   useEffect(() => {
     if (!ready || !visibleProducts.length) {
