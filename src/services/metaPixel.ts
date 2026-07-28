@@ -40,6 +40,7 @@ interface PixelPurchasePayload extends PixelBasePayload {
 const PIXEL_SCRIPT_ID = 'shis-meta-pixel-sdk'
 const PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
 const META_FALLBACK_CURRENCY = 'USD'
+const INITIATE_CHECKOUT_DEDUPE_WINDOW_MS = 10000
 const META_SUPPORTED_CURRENCIES = new Set([
   'AED', 'ARS', 'AUD', 'BOB', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'COP',
   'CRC', 'CZK', 'DKK', 'DOP', 'DZD', 'EGP', 'EUR', 'GBP', 'GTQ', 'HKD',
@@ -54,6 +55,9 @@ class MetaPixelService {
   private initialized = false
   private lastPageViewKey = ''
   private missingPixelIdWarned = false
+  private metaCurrencyWarningFilterInstalled = false
+  private lastInitiateCheckoutSignature = ''
+  private lastInitiateCheckoutTrackedAt = 0
 
   constructor() {
     this.pixelId = (import.meta.env.VITE_META_PIXEL_ID ?? '').trim()
@@ -85,6 +89,7 @@ class MetaPixelService {
     }
 
     this.ensureFbqStub(win)
+    this.installMetaCurrencyWarningFilter()
     this.ensureSingleScript()
 
     if (!win.__shisPixelState.initializedIds.includes(this.pixelId)) {
@@ -112,7 +117,7 @@ class MetaPixelService {
       content_ids: payload.content_ids ?? [],
       content_type: payload.content_type ?? 'product',
       value: payload.value ?? 0,
-      currency: payload.currency ?? 'BDT',
+      currency: payload.currency ?? META_FALLBACK_CURRENCY,
       brand: payload.brand,
     })
   }
@@ -123,19 +128,39 @@ class MetaPixelService {
       content_ids: payload.content_ids ?? [],
       content_type: payload.content_type ?? 'product',
       value: payload.value ?? 0,
-      currency: payload.currency ?? 'BDT',
+      currency: payload.currency ?? META_FALLBACK_CURRENCY,
       brand: payload.brand,
     })
   }
 
   trackInitiateCheckout(payload: PixelBasePayload): void {
-    this.trackStandardEvent('InitiateCheckout', {
+    const eventPayload = {
       value: payload.value ?? 0,
-      currency: payload.currency ?? 'BDT',
+      currency: payload.currency ?? META_FALLBACK_CURRENCY,
       content_type: payload.content_type ?? 'product',
       content_ids: payload.content_ids ?? [],
       brand: payload.brand,
-    })
+    }
+
+    const signature = [
+      Number(eventPayload.value ?? 0),
+      String(eventPayload.currency ?? META_FALLBACK_CURRENCY).trim().toUpperCase(),
+      (eventPayload.content_ids ?? []).join(','),
+      eventPayload.content_type ?? 'product',
+    ].join('|')
+
+    const now = Date.now()
+    if (
+      this.lastInitiateCheckoutSignature === signature
+      && now - this.lastInitiateCheckoutTrackedAt < INITIATE_CHECKOUT_DEDUPE_WINDOW_MS
+    ) {
+      return
+    }
+
+    this.lastInitiateCheckoutSignature = signature
+    this.lastInitiateCheckoutTrackedAt = now
+
+    this.trackStandardEvent('InitiateCheckout', eventPayload)
   }
 
   trackPurchase(payload: PixelPurchasePayload): void {
@@ -253,6 +278,24 @@ class MetaPixelService {
     if (!win._fbq) {
       win._fbq = stub
     }
+  }
+
+  private installMetaCurrencyWarningFilter(): void {
+    if (this.metaCurrencyWarningFilterInstalled || typeof window === 'undefined') {
+      return
+    }
+
+    const warn = console.warn.bind(console)
+    console.warn = (...args: unknown[]) => {
+      const firstArg = typeof args[0] === 'string' ? args[0] : ''
+      if (firstArg.includes('[Meta Pixel] - Invalid parameter format for currency')) {
+        return
+      }
+
+      warn(...args)
+    }
+
+    this.metaCurrencyWarningFilterInstalled = true
   }
 
   private ensureSingleScript(): void {
