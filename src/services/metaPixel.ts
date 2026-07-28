@@ -42,7 +42,7 @@ const PIXEL_SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
 const META_FALLBACK_CURRENCY = 'USD'
 const INITIATE_CHECKOUT_DEDUPE_WINDOW_MS = 10000
 const META_SUPPORTED_CURRENCIES = new Set([
-  'AED', 'ARS', 'AUD', 'BOB', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'COP',
+  'AED', 'ARS', 'AUD', 'BOB', 'BDT', 'BRL', 'CAD', 'CHF', 'CLP', 'CNY', 'COP',
   'CRC', 'CZK', 'DKK', 'DOP', 'DZD', 'EGP', 'EUR', 'GBP', 'GTQ', 'HKD',
   'HNL', 'HUF', 'IDR', 'ILS', 'INR', 'ISK', 'JPY', 'KES', 'KRW', 'MOP',
   'MXN', 'MYR', 'NIO', 'NOK', 'NZD', 'PEN', 'PHP', 'PKR', 'PLN', 'PYG',

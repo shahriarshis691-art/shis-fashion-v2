@@ -2674,8 +2674,8 @@ export async function subscribeNewsletter(email: string): Promise<PublicNewslett
 }
 
 export async function getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
-  if (!firebaseDb) {
-    return []
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return readStored<NewsletterSubscriber[]>(SUBSCRIBERS_KEY, [])
   }
 
   const q = query(collection(firebaseDb, 'newsletterSubscribers'), orderBy('signupDate', 'desc'))
