@@ -15,7 +15,7 @@ export default function HeroVideo({ src, poster, children }: Props) {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={poster}
         />
       ) : poster ? (
