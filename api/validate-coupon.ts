@@ -1,5 +1,5 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
-import { getFirebaseAdminDb } from './_firebaseAdmin'
+import { getFirebaseAdminDb } from './_firebaseAdmin.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -36,7 +36,7 @@ async function findCoupon(db: NonNullable<ReturnType<typeof getFirebaseAdminDb>>
   if (couponId?.trim()) {
     const couponRef = db.collection('coupons').doc(couponId.trim())
     const snapshot = await couponRef.get()
-    return snapshot.exists() ? snapshot : null
+    return snapshot.exists ? snapshot : null
   }
 
   const normalizedCode = code?.trim().toUpperCase() ?? ''

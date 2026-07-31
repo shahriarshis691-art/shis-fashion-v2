@@ -1,5 +1,5 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
-import { getFirebaseAdminDb } from './_firebaseAdmin'
+import { getFirebaseAdminDb } from './_firebaseAdmin.js'
 
 export const config = {
   runtime: 'nodejs',
