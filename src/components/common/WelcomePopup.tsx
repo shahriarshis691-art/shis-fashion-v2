@@ -84,21 +84,17 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
   }, [onClose])
 
   const handleSubscribe = async (email: string) => {
-    try {
-      const result = await onSubscribe(email)
-      setResolvedCouponCode(result.couponCode)
-      setPopupCompleted(email)
-      googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email })
-      metaPixel.trackLead({ content_name: 'welcome_discount_signup' })
-      metaPixel.trackCompleteRegistration({ content_name: 'welcome_discount_signup' })
+    const result = await onSubscribe(email)
+    setResolvedCouponCode(result.couponCode)
+    setPopupCompleted(email)
+    googleAnalytics.trackEvent('popup_signup', { source: 'welcome_discount', email })
+    metaPixel.trackLead({ content_name: 'welcome_discount_signup' })
+    metaPixel.trackCompleteRegistration({ content_name: 'welcome_discount_signup' })
 
-      if (result.alreadySubscribed) {
-        setShowWelcomeBack(true)
-        setForm((current) => ({ ...current, submitting: false }))
-        onWelcomeBack(email)
-      }
-    } catch (error) {
-      throw error
+    if (result.alreadySubscribed) {
+      setShowWelcomeBack(true)
+      setForm((current) => ({ ...current, submitting: false }))
+      onWelcomeBack(email)
     }
   }
 
