@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
+import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
 import { homeCategoryItems } from '../data/homeCategories'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -215,7 +216,24 @@ export default function HomePage() {
     return unsubscribe
   }, [])
 
-  const heroImage = normalizeCatalogImageUrl(homepageContent.heroImage ?? '', 1400, 900)
+  const heroMedia = useMemo(() => {
+    const items: HeroMediaItem[] = []
+    if (homepageContent.heroVideo) {
+      items.push({
+        type: 'video',
+        src: homepageContent.heroVideo,
+        alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign video',
+      })
+    }
+    if (homepageContent.heroImage) {
+      items.push({
+        type: 'image',
+        src: homepageContent.heroImage,
+        alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign image',
+      })
+    }
+    return items
+  }, [homepageContent.heroVideo, homepageContent.heroImage, homepageContent.heroImageTitle])
 
   const categoryStrips = useMemo(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})
@@ -348,86 +366,15 @@ export default function HomePage() {
 
   return (
     <div className="bg-white pb-12">
-      <section className="border-b border-black/10">
-        <div className="relative overflow-hidden bg-black">
-          <div className="relative aspect-[4/5] min-h-[23rem] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
-            {homepageContent.heroVideo ? (
-              <video
-                src={homepageContent.heroVideo}
-                poster={heroImage}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : heroImage ? (
-              <img
-                src={heroImage}
-                alt={homepageContent.heroImageTitle || 'SHIS Fashion campaign image'}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                width="1400"
-                height="900"
-                sizes="100vw"
-                onError={handleImageError}
-                className={`absolute inset-0 h-full w-full object-cover ${
-                  isDemoImageUrl(heroImage) ? 'shis-media-tone' : ''
-                }`}
-              />
-            ) : (
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,#1b1b1b,#454545)]" />
-            )}
-
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.4)_52%,rgba(0,0,0,0.05)_100%)]" />
-
-            <Container className="relative z-10 flex h-full items-end pb-8 pt-14 sm:items-center sm:py-0">
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="max-w-[17rem] sm:max-w-[25rem]"
-              >
-                <p
-                  className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80"
-                  style={{ textShadow: '0 1px 8px rgba(0, 0, 0, 0.4)' }}
-                >
-                  {homepageContent.heroEyebrow || 'SHIS FASHION'}
-                </p>
-                <h1
-                  className="mt-2 text-h1 text-white"
-                  style={{ color: '#ffffff', textShadow: '0 2px 14px rgba(0, 0, 0, 0.45)' }}
-                >
-                  {homepageContent.heroTitle}
-                </h1>
-                <p
-                  className="mt-3 text-sm leading-6 text-white/85 sm:text-base sm:leading-7"
-                  style={{ textShadow: '0 1px 10px rgba(0, 0, 0, 0.42)' }}
-                >
-                  {homepageContent.heroSubtitle}
-                </p>
-                <div className="mt-5 flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
-                  <Link
-                    to={homepageContent.heroPrimaryLink ?? '/shop'}
-                    className="ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
-                  >
-                    {homepageContent.heroCta || 'Shop now'}
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setIsBrandPanelOpen(true)}
-                    className="ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
-                  >
-                    Explore Our Brands
-                  </button>
-                </div>
-              </motion.div>
-            </Container>
-          </div>
-        </div>
-      </section>
+      <HeroBanner
+        media={heroMedia}
+        eyebrow={homepageContent.heroEyebrow}
+        title={homepageContent.heroTitle}
+        subtitle={homepageContent.heroSubtitle}
+        cta={homepageContent.heroCta}
+        primaryLink={homepageContent.heroPrimaryLink}
+        onSecondaryClick={() => setIsBrandPanelOpen(true)}
+      />
 
       <section className="py-7 sm:py-9">
         <Container>
