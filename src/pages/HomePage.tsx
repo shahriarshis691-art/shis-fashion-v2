@@ -41,9 +41,13 @@ const defaultHomepage: HomepageContent = {
   heroPrimaryLink: '/shop',
   heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
+    heroImage: '',
   heroImageTitle: 'Homepage hero image',
   heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
+  heroVideo: '',
+  bannerImage: '',
   bannerImageTitle: 'Featured banner image',
+
   bannerImageDescription: 'Editorial banner image used in the brand promise section.',
   categories: [
     { title: 'Winter', caption: 'Winter.', href: '/collections/winter' },

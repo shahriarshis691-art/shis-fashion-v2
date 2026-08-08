@@ -78,14 +78,21 @@ export default function HeroBanner({
   }, [currentIndex, media, hasMedia])
 
   useEffect(() => {
-    videoRefs.current.forEach((video, index) => {
-      if (index === currentIndex) {
-        video.play().catch(() => {})
-      } else {
-        video.pause()
+    const video = videoRefs.current.get(currentIndex)
+    if (video) {
+      video.play().catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn('[HeroBanner] Autoplay blocked or failed:', err)
+        }
+      })
+    }
+
+    videoRefs.current.forEach((v, index) => {
+      if (index !== currentIndex) {
+        v.pause()
       }
     })
-  }, [currentIndex])
+  }, [currentIndex, media])
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index)
@@ -114,9 +121,13 @@ export default function HeroBanner({
                 >
                   {item.type === 'video' ? (
                     <video
+                      key={mediaSrc}
                       ref={(el) => {
                         if (el) {
                           videoRefs.current.set(index, el)
+                          if (isActive) {
+                            el.play().catch(() => {})
+                          }
                         } else {
                           videoRefs.current.delete(index)
                         }
@@ -124,9 +135,14 @@ export default function HeroBanner({
                       src={mediaSrc}
                       autoPlay
                       muted
-                      loop={false}
+                      loop={media.length === 1}
                       playsInline
                       preload="auto"
+                      onCanPlay={(e) => {
+                        if (isActive) {
+                          e.currentTarget.play().catch(() => {})
+                        }
+                      }}
                       onEnded={() => {
                         if (media.length > 1) {
                           setCurrentIndex((prev) => (prev + 1) % media.length)
