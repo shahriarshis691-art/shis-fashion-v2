@@ -1,0 +1,1264 @@
+[debug] [2026-07-28T23:51:20.782Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.788Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.789Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.793Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.794Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.820Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.821Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.821Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.821Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.821Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.825Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.825Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.826Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.826Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.826Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.828Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.828Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.828Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.828Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.829Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.830Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.831Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.831Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.831Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.831Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.911Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.912Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.912Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.912Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.912Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.915Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.915Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.915Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.916Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.916Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.918Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.919Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.919Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.919Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.919Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.921Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.921Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.921Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.922Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.922Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:20.924Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.924Z] Checked if tokens are valid: false, expires at: 1785162884163
+[debug] [2026-07-28T23:51:20.924Z] > refreshing access token with scopes: []
+[debug] [2026-07-28T23:51:20.924Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-28T23:51:20.925Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.097Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.097Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.111Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-28T23:51:21.111Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.114Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.114Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.125Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-28T23:51:21.125Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.128Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.128Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.139Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.140Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.149Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.149Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.159Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.159Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.164Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.164Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.176Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.176Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.178Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.178Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.188Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-28T23:51:21.188Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.190Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.190Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.203Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-28T23:51:21.203Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.206Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.206Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.218Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.218Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.223Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.223Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.241Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.241Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:21.243Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-28T23:51:21.244Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-28T23:51:21.260Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-28T23:51:21.260Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-28T23:51:22.716Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-28T23:51:22.716Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-28T23:51:22.755Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-28T23:51:22.755Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-28T23:51:22.768Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-28T23:51:22.768Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:22.769Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-28T23:51:22.770Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:22.774Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-28T23:51:22.774Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:22.787Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-28T23:51:22.787Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:22.798Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-28T23:51:22.799Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:22.799Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-28T23:51:22.799Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-28T23:51:23.054Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-28T23:51:23.054Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-28T23:51:23.149Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-28T23:51:23.150Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-28T23:51:23.156Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-28T23:51:23.157Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-28T23:51:23.266Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-28T23:51:23.266Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-28T23:51:23.357Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-28T23:51:23.358Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T01:26:47.300Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.307Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.308Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.312Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.312Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.347Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.347Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.348Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.348Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.349Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.356Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.356Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.356Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.357Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.357Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.360Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.360Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.360Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.360Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.360Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.363Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.363Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.363Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.364Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.364Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.499Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.500Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.500Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.500Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.501Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.505Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.505Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.505Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.505Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.505Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.511Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.511Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.511Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.511Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.511Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.514Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.514Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.514Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.515Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.515Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.517Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.517Z] Checked if tokens are valid: false, expires at: 1785286280244
+[debug] [2026-07-29T01:26:47.518Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T01:26:47.518Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T01:26:47.518Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.710Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.711Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.746Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T01:26:47.746Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.749Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.749Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.780Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T01:26:47.780Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.783Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.783Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.814Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T01:26:47.815Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.817Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.817Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.842Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T01:26:47.843Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.857Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.858Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.907Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T01:26:47.908Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.910Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.911Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:47.970Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T01:26:47.970Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:47.977Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:47.977Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:48.015Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T01:26:48.015Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:48.019Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:48.019Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:48.084Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T01:26:48.085Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:48.088Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:48.088Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:48.111Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T01:26:48.111Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:48.130Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T01:26:48.130Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T01:26:48.160Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T01:26:48.160Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T01:26:49.537Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T01:26:49.538Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T01:26:49.547Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T01:26:49.548Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T01:26:49.593Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T01:26:49.593Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T01:26:49.595Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T01:26:49.595Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T01:26:49.613Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T01:26:49.614Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T01:26:49.678Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T01:26:49.678Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T01:26:49.712Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T01:26:49.713Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T01:26:49.937Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T01:26:49.937Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T01:26:49.994Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T01:26:49.994Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T01:26:50.524Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T01:26:50.524Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T01:26:50.578Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T01:26:50.578Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T01:26:50.638Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T01:26:50.638Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T01:26:50.980Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T01:26:50.981Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T01:33:06.038Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T01:33:06.060Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:05:24.589Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.592Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.592Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.594Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.594Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.607Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.607Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.608Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.608Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.608Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.610Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.610Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.610Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.610Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.610Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.611Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.611Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.612Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.612Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.612Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.613Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.613Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.613Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.613Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.613Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.641Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.642Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.642Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.642Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.642Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.644Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.644Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.644Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.644Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.644Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.646Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.646Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.646Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.646Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.646Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.648Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.648Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.648Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.648Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.648Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.649Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.649Z] Checked if tokens are valid: false, expires at: 1785292007130
+[debug] [2026-07-29T03:05:24.649Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T03:05:24.650Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T03:05:24.650Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.928Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.928Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.937Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T03:05:24.937Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.938Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.938Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.945Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T03:05:24.946Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.947Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.947Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.954Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T03:05:24.954Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.955Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.955Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.961Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T03:05:24.961Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.962Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.962Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.969Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T03:05:24.970Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.976Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.976Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.982Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T03:05:24.982Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.983Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.983Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:24.991Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T03:05:24.991Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:24.992Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:24.993Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:25.001Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T03:05:25.001Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:25.003Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:25.003Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:25.010Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T03:05:25.010Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:25.012Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T03:05:25.012Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T03:05:25.019Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T03:05:25.019Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:05:26.565Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T03:05:26.565Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T03:05:26.634Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T03:05:26.634Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T03:05:26.636Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T03:05:26.636Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:26.636Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T03:05:26.636Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:26.642Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T03:05:26.642Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:26.645Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T03:05:26.645Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:26.646Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T03:05:26.646Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:26.681Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T03:05:26.681Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T03:05:27.005Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T03:05:27.005Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T03:05:27.654Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:05:27.655Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:05:27.686Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:05:27.686Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:05:27.717Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:05:27.717Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:05:28.766Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T03:05:28.767Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T03:06:25.798Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.801Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.801Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.801Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.802Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.802Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.803Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.803Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.803Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.803Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.804Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T03:06:25.805Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.817Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.818Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.819Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.819Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.820Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.820Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.821Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T03:06:25.821Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.854Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.855Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.855Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.855Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.856Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.856Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.856Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.856Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.857Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.857Z] Checked if tokens are valid: true, expires at: 1785297924012
+[debug] [2026-07-29T03:06:25.857Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T03:06:25.857Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.858Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.858Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.859Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.859Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.860Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T03:06:25.860Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:25.861Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T03:06:25.861Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T03:06:27.360Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T03:06:27.360Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T03:06:27.383Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T03:06:27.383Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T03:06:27.384Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T03:06:27.384Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.402Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T03:06:27.402Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.403Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T03:06:27.404Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.446Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T03:06:27.446Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.451Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T03:06:27.452Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.635Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T03:06:27.635Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T03:06:27.765Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T03:06:27.765Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T03:06:27.782Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T03:06:27.782Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T03:06:27.785Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:06:27.785Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:06:27.808Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:06:27.809Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:06:27.822Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:06:27.822Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T03:14:05.414Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T03:14:05.429Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T11:54:46.130Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.134Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.135Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.136Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.137Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.150Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.151Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.151Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.151Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.151Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.153Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.153Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.153Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.153Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.153Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.154Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.154Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.154Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.155Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.155Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.156Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.156Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.156Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.156Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.156Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.192Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.192Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.192Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.192Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.192Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.194Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.194Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.194Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.194Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.194Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.196Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.196Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.196Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.196Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.196Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.197Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.197Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.197Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.197Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.197Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.198Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.198Z] Checked if tokens are valid: false, expires at: 1785297924012
+[debug] [2026-07-29T11:54:46.198Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T11:54:46.199Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T11:54:46.199Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.480Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.481Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.533Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T11:54:46.533Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.535Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.535Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.561Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.561Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.563Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.563Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.589Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.589Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.591Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.591Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.605Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T11:54:46.605Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.607Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.607Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.622Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T11:54:46.622Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.623Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.623Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.636Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T11:54:46.636Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.638Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.638Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.655Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.655Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.663Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.663Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.690Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.690Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.692Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.692Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.706Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.706Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:46.709Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T11:54:46.709Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T11:54:46.718Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T11:54:46.718Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T11:54:48.122Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T11:54:48.122Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.134Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T11:54:48.134Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T11:54:48.196Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T11:54:48.196Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T11:54:48.206Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T11:54:48.206Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.214Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T11:54:48.214Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.219Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T11:54:48.219Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.266Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T11:54:48.266Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.266Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T11:54:48.266Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T11:54:48.652Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T11:54:48.653Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T11:54:48.657Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T11:54:48.657Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T11:54:48.685Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T11:54:48.685Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T11:54:48.721Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T11:54:48.722Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T11:54:48.732Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T11:54:48.732Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T16:35:07.096Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.099Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.100Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.102Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.102Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.119Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.120Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.120Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.121Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.121Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.124Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.124Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.125Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.125Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.125Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.127Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.127Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.127Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.128Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.128Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.130Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.130Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.130Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.130Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.130Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.206Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.207Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.207Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.207Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.207Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.210Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.211Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.211Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.211Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.211Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.214Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.214Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.214Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.215Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.215Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.217Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.217Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.217Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.218Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.218Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.220Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.220Z] Checked if tokens are valid: false, expires at: 1785329685709
+[debug] [2026-07-29T16:35:07.220Z] > refreshing access token with scopes: []
+[debug] [2026-07-29T16:35:07.221Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-29T16:35:07.221Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.431Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.431Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.448Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.448Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.451Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.451Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.464Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.464Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.466Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.466Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.476Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.476Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.478Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.478Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.488Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T16:35:07.488Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.496Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.496Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.507Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T16:35:07.508Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.509Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.510Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.519Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.519Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.521Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.521Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.532Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-29T16:35:07.532Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.536Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.536Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.546Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.547Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.549Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.549Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.557Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-29T16:35:07.557Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:07.559Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-29T16:35:07.560Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-29T16:35:07.570Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-29T16:35:07.570Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-29T16:35:08.800Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T16:35:08.800Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T16:35:09.082Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T16:35:09.082Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T16:35:09.108Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T16:35:09.108Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T16:35:09.120Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-29T16:35:09.120Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-29T16:35:09.127Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T16:35:09.127Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-29T16:35:09.137Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T16:35:09.138Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T16:35:09.173Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-29T16:35:09.173Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-29T16:35:09.791Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-29T16:35:09.791Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-29T16:35:10.238Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T16:35:10.239Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T16:35:10.254Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T16:35:10.254Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T16:35:10.285Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-29T16:35:10.285Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-29T16:35:10.423Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-29T16:35:10.423Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-29T16:35:10.774Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-29T16:35:10.774Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:30.762Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.766Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.766Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.769Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.769Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.787Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.787Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.787Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.787Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.787Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.790Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.790Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.790Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.790Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.790Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.792Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.792Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.792Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.792Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.793Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.794Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.794Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.794Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.794Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.795Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.902Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.902Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.902Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.902Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.903Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.905Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.906Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.906Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.906Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.906Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.908Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.908Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.908Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.908Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.909Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.910Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.910Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.910Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.911Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.911Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:30.913Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.913Z] Checked if tokens are valid: false, expires at: 1785346506560
+[debug] [2026-07-30T21:01:30.913Z] > refreshing access token with scopes: []
+[debug] [2026-07-30T21:01:30.913Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-30T21:01:30.914Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.076Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.076Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.097Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-30T21:01:31.097Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.102Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.103Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.118Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-30T21:01:31.119Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.124Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.124Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.155Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-30T21:01:31.155Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.179Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.179Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.456Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-30T21:01:31.456Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.463Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.463Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.484Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-30T21:01:31.485Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.487Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.487Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.529Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-30T21:01:31.529Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.531Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.531Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.548Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-30T21:01:31.549Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.556Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.556Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.567Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-30T21:01:31.567Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:31.570Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:31.570Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:31.581Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-30T21:01:31.582Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:32.153Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-30T21:01:32.153Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-30T21:01:32.196Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-30T21:01:32.196Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-30T21:01:32.932Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-30T21:01:32.933Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-30T21:01:33.069Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-30T21:01:33.069Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.077Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-30T21:01:33.078Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-30T21:01:33.093Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-30T21:01:33.093Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.117Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-30T21:01:33.117Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.118Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-30T21:01:33.118Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.241Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-30T21:01:33.241Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.355Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-30T21:01:33.355Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-30T21:01:33.453Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-30T21:01:33.453Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-30T21:01:33.739Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-30T21:01:33.739Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-30T21:01:33.745Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-30T21:01:33.746Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-30T21:01:33.947Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-30T21:01:33.948Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-30T21:01:34.196Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-30T21:01:34.196Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:33.449Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.455Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.456Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.459Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.459Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.480Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.480Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.481Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.481Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.481Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.485Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.485Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.485Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.485Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.485Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.487Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.487Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.487Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.487Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.487Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.489Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.489Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.489Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.489Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.489Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.538Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.539Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.539Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.539Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.539Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.541Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.541Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.541Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.542Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.542Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.544Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.544Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.544Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.545Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.545Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.547Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.547Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.547Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.548Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.548Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.550Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.550Z] Checked if tokens are valid: false, expires at: 1785448891154
+[debug] [2026-07-31T02:26:33.550Z] > refreshing access token with scopes: []
+[debug] [2026-07-31T02:26:33.550Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-31T02:26:33.550Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.950Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:33.951Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.965Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-31T02:26:33.965Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:33.972Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:33.973Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.984Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-31T02:26:33.984Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:33.986Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:33.986Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:33.996Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-31T02:26:33.996Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:33.998Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:33.999Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.009Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-31T02:26:34.009Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.018Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.019Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.030Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-31T02:26:34.030Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.032Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.032Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.041Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-07-31T02:26:34.042Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.043Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.043Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.053Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-07-31T02:26:34.054Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.056Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.056Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.066Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-07-31T02:26:34.066Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.069Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.069Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.078Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-07-31T02:26:34.079Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:34.332Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-31T02:26:34.333Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-31T02:26:34.342Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-07-31T02:26:34.343Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-07-31T02:26:35.929Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-31T02:26:35.929Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-31T02:26:35.932Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-07-31T02:26:35.932Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-07-31T02:26:35.965Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-31T02:26:35.966Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:36.001Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-31T02:26:36.002Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:36.052Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-07-31T02:26:36.052Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:36.159Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-31T02:26:36.159Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:36.357Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-31T02:26:36.357Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-31T02:26:36.357Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-07-31T02:26:36.358Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-07-31T02:26:36.526Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-07-31T02:26:36.527Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:36.565Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:36.565Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:36.617Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:36.617Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:36.685Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:36.685Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:36.700Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:36.701Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:36.701Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:36.701Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:37.523Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-07-31T02:26:37.524Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-07-31T02:26:48.130Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:48.131Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:48.247Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:48.248Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:26:48.248Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:26:48.249Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:27:24.629Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:27:24.630Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:27:24.655Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:27:24.655Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:27:24.655Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:27:24.656Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:33:18.814Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-31T02:33:18.814Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-07-31T02:33:18.817Z] Checked if tokens are valid: true, expires at: 1785468393333
+[debug] [2026-07-31T02:33:18.817Z] Checked if tokens are valid: true, expires at: 1785468393333
+[debug] [2026-07-31T02:33:18.818Z] >>> [apiv2][query] POST https://firestore.googleapis.com/v1/projects/shis-fashion2/databases/(default)/documents:batchGet [none]
+[debug] [2026-07-31T02:33:18.818Z] >>> [apiv2][body] POST https://firestore.googleapis.com/v1/projects/shis-fashion2/databases/(default)/documents:batchGet {"documents":["projects/shis-fashion2/databases/(default)/documents/settings/homepage"]}
+[debug] [2026-07-31T02:33:19.377Z] <<< [apiv2][status] POST https://firestore.googleapis.com/v1/projects/shis-fashion2/databases/(default)/documents:batchGet 200
+[debug] [2026-07-31T02:33:19.378Z] <<< [apiv2][body] POST https://firestore.googleapis.com/v1/projects/shis-fashion2/databases/(default)/documents:batchGet [{"found":{"name":"projects/shis-fashion2/databases/(default)/documents/settings/homepage","fields":{"navbarBrandPrimary":{"stringValue":"SHIS"},"navbarBrandSecondary":{"stringValue":"Fashion"},"navbarSearchPlaceholder":{"stringValue":"Search products"},"heroEyebrow":{"stringValue":"SHIS FASHION"},"heroTitle":{"stringValue":"Style Meets Comfort."},"heroSubtitle":{"stringValue":"...."},"heroCta":{"stringValue":"Shop collection"},"heroPrimaryLink":{"stringValue":"/shop"},"heroSecondaryCta":{"stringValue":"New arrivals"},"heroSecondaryLink":{"stringValue":"/shop/new-arrivals"},"heroImage":{"stringValue":""},"heroImageTitle":{"stringValue":"Homepage hero image"},"heroImageDescription":{"stringValue":"Main hero visual used in the first fold of the homepage."},"heroVideo":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/video/upload/v1785460025/homepage/etdv5kd0dak9keitx2wu.mp4"},"bannerImage":{"stringValue":""},"bannerImageTitle":{"stringValue":"Brand promise banner image"},"bannerImageDescription":{"stringValue":"Editorial banner used beside the brand promise content."},"categories":{"arrayValue":{"values":[{"mapValue":{"fields":{"title":{"stringValue":"Winter"},"caption":{"stringValue":"Winter."},"href":{"stringValue":"/collections/winter"},"image":{"stringValue":"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Summer"},"caption":{"stringValue":"Summer."},"href":{"stringValue":"/collections/summer"},"image":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784905691/homepage/yegvgdabozjtrqkkqpjx.jpg"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Everyday Wear"},"caption":{"stringValue":"Everyday wear."},"href":{"stringValue":"/collections/everyday-wear"},"image":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784839882/homepage/vqfnet5tnuki09wx8fsy.jpg"}}}}]}},"featuredCollectionPages":{"arrayValue":{"values":[{"mapValue":{"fields":{"slug":{"stringValue":"winter"},"title":{"stringValue":"Winter Collection"},"subtitle":{"stringValue":"Layer-ready staples"},"description":{"stringValue":"Cold-season essentials with premium texture and clean tailoring."},"href":{"stringValue":"/collections/winter"},"images":{"arrayValue":{"values":[{"stringValue":"https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=1200&q=80"}]}},"relatedCategorySlugs":{"arrayValue":{"values":[{"stringValue":"denim"},{"stringValue":"mens-shirt"},{"stringValue":"western-outfits"}]}}}}},{"mapValue":{"fields":{"slug":{"stringValue":"summer"},"title":{"stringValue":"Summer Collection"},"subtitle":{"stringValue":"Breathable premium edits"},"description":{"stringValue":"Lightweight silhouettes designed for warm days and evening plans."},"href":{"stringValue":"/collections/summer"},"images":{"arrayValue":{"values":[{"stringValue":"https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80"},{"stringValue":"https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80"}]}},"relatedCategorySlugs":{"arrayValue":{"values":[{"stringValue":"unisex-tee"},{"stringValue":"womens-dresses"},{"stringValue":"oversized-tee"}]}}}}},{"mapValue":{"fields":{"slug":{"stringValue":"everyday-wear"},"title":{"stringValue":"Everyday Wear"},"subtitle":{"stringValue":"Daily go-to luxury"},"description":{"stringValue":"Reliable daily pieces balancing comfort, polish, and movement."},"href":{"stringValue":"/collections/everyday-wear"},"images":{"arrayValue":{"values":[{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840846/homepage/zkw6ynfcf0isnfbbkqqo.jpg"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840867/homepage/p09sjbnf6jklnrbh9jxf.jpg"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840883/homepage/zd61xg0tyswrr7iazdj2.jpg"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840894/homepage/tzxbpitpwgfgd8ucl8op.jpg"}]}},"relatedCategorySlugs":{"arrayValue":{"values":[{"stringValue":"oversized-tee"},{"stringValue":"couples"},{"stringValue":"kids"}]}}}}}]}},"shopByCategories":{"arrayValue":{"values":[{"mapValue":{"fields":{"title":{"stringValue":"Women's Collection"},"href":{"stringValue":"/women"},"image":{"stringValue":"https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Men's Collection"},"href":{"stringValue":"/men"},"image":{"stringValue":"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Couples Collection"},"href":{"stringValue":"/men?sub=accessories"},"image":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840688/homepage/irwiwcye2kxncpnl27hj.jpg"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Kids Collection"},"href":{"stringValue":"/kids"},"image":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840671/homepage/hjmjcrra7mn2lb3hpnwn.jpg"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Western Outfits"},"href":{"stringValue":"/women?sub=tunic"},"image":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840817/homepage/uiilfhrqqbjovv0ywbzw.jpg"}}}},{"mapValue":{"fields":{"title":{"stringValue":"Denim"},"href":{"stringValue":"/men?sub=denim"},"image":{"stringValue":"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=80"}}}}]}},"categorySections":{"mapValue":{"fields":{"women":{"mapValue":{"fields":{"key":{"stringValue":"women"},"label":{"stringValue":"Women's Collection"},"href":{"stringValue":"/women"},"enabled":{"booleanValue":true},"order":{"integerValue":"10"},"coverImage":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784916922/homepage/jscr9ptbeyzprzfflell.jpg"},"images":{"arrayValue":{"values":[{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784916922/homepage/jscr9ptbeyzprzfflell.jpg"}]}},"updatedAt":{"nullValue":null}}}},"men":{"mapValue":{"fields":{"key":{"stringValue":"men"},"label":{"stringValue":"Denim"},"href":{"stringValue":"/men?sub=denim"},"enabled":{"booleanValue":true},"order":{"integerValue":"20"},"coverImage":{"stringValue":"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=80"},"images":{"arrayValue":{}},"updatedAt":{"nullValue":null}}}},"kids":{"mapValue":{"fields":{"key":{"stringValue":"kids"},"label":{"stringValue":"Kids Collection"},"href":{"stringValue":"/kids"},"enabled":{"booleanValue":true},"order":{"integerValue":"30"},"coverImage":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784840671/homepage/hjmjcrra7mn2lb3hpnwn.jpg"},"images":{"arrayValue":{}},"updatedAt":{"nullValue":null}}}},"western":{"mapValue":{"fields":{"key":{"stringValue":"western"},"label":{"stringValue":"Western Outfits"},"href":{"stringValue":"/women?sub=tunic"},"enabled":{"booleanValue":true},"order":{"integerValue":"40"},"coverImage":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917311/homepage/higjoue4sa5z9t98tuak.jpg"},"images":{"arrayValue":{"values":[{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917311/homepage/higjoue4sa5z9t98tuak.jpg"}]}},"updatedAt":{"nullValue":null}}}},"sale":{"mapValue":{"fields":{"key":{"stringValue":"sale"},"label":{"stringValue":"Sale"},"href":{"stringValue":"/sale"},"enabled":{"booleanValue":true},"order":{"integerValue":"50"},"coverImage":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917333/homepage/uharzobg67qjszazhvke.jpg"},"images":{"arrayValue":{"values":[{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784916081/homepage/zchw9227l5awoknhwwm1.jpg"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917165/homepage/ztcnojw62tfbwt1ujjgq.png"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917248/homepage/aozdzqfrojoqezcdhlgw.png"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917333/homepage/uharzobg67qjszazhvke.jpg"}]}},"updatedAt":{"nullValue":null}}}},"new-arrivals":{"mapValue":{"fields":{"key":{"stringValue":"new-arrivals"},"label":{"stringValue":"New Arrivals"},"href":{"stringValue":"/shop/new-arrivals"},"enabled":{"booleanValue":true},"order":{"integerValue":"60"},"coverImage":{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917226/homepage/yyvjwi94zdhqg0cvmyjx.jpg"},"images":{"arrayValue":{"values":[{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784916190/homepage/rilmeogovyp8ssif2x7o.jpg"},{"stringValue":"https://res.cloudinary.com/nzr2ptp6/image/upload/v1784917226/homepage/yyvjwi94zdhqg0cvmyjx.jpg"}]}},"updatedAt":{"nullValue":null}}}}}}},"featuredCollectionEyebrow":{"stringValue":"Featured collection"},"featuredCollectionTitle":{"stringValue":"Premium categories for every moment"},"featuredCollectionSubtitle":{"stringValue":"A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look."},"newArrivalsEyebrow":{"stringValue":"New arrivals"},"newArrivalsTitle":{"stringValue":"Freshly composed for the season"},"newArrivalsSubtitle":{"stringValue":"Newly released pieces with an effortless, sculpted feel."},"bestSellerEyebrow":{"stringValue":"Best seller"},"featuredTitle":{"stringValue":"The pieces clients return for"},"featuredSubtitle":{"stringValue":"Soft structure, refined texture, and everyday ease in every silhouette."},"brandPromiseEyebrow":{"stringValue":"Brand promise"},"brandPromiseTitle":{"stringValue":"Luxury that feels personal."},"brandPromiseDescription":{"stringValue":"SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated."},"brandSignatureLabel":{"stringValue":"Signature"},"brandSignatureText":{"stringValue":"Quiet luxury, elevated comfort, and a wardrobe that moves effortlessly from morning to midnight."},"footerBrandTitle":{"stringValue":"Style Meets Comfort"},"footerDescription":{"stringValue":"A refined digital presence for modern luxury, designed with comfort, clarity, and effortless elegance in mind."},"footerContactEmail":{"stringValue":"shisfashion18@gmail.com"},"footerContactPhone":{"stringValue":"+88 01887848304"},"footerContactAddress":{"stringValue":"Mirpur, Dhaka"},"footerBottomText":{"stringValue":"Crafted for premium, calm, and timeless browsing."},"freeDeliveryThreshold":{"integerValue":"3000"},"seo":{"mapValue":{"fields":{"home":{"mapValue":{"fields":{"title":{"stringValue":"SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim"},"description":{"stringValue":"Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available."},"keywords":{"stringValue":"SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh"},"ogImage":{"stringValue":"https://www.shisfashion.com/og-image.svg"}}}},"shop":{"mapValue":{"fields":{"title":{"stringValue":"Shop SHIS Fashion Bangladesh | Premium T-Shirts, Polo Shirts & Denim"},"description":{"stringValue":"Browse premium oversized T-shirts, Polo Shirts, Shirts, Denim and women's and kids fashion at SHIS Fashion Bangladesh."},"keywords":{"stringValue":"SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh"},"ogImage":{"stringValue":"https://www.shisfashion.com/og-image.svg"}}}},"oversized":{"mapValue":{"fields":{"title":{"stringValue":"Oversized Tee | SHIS Fashion Bangladesh"},"description":{"stringValue":"Shop premium oversized T-shirts from SHIS Fashion Bangladesh with fast Dhaka delivery and cash on delivery support."},"keywords":{"stringValue":"Oversized T Shirt Bangladesh, SHIS oversized tee, baggy t shirt dhaka"},"ogImage":{"stringValue":"https://www.shisfashion.com/og-image.svg"}}}}}}},"sections":{"arrayValue":{"values":[{"mapValue":{"fields":{"key":{"stringValue":"hero"},"label":{"stringValue":"Hero"},"enabled":{"booleanValue":true},"order":{"integerValue":"0"}}}},{"mapValue":{"fields":{"key":{"stringValue":"featuredCollection"},"label":{"stringValue":"Featured collection"},"enabled":{"booleanValue":true},"order":{"integerValue":"1"}}}},{"mapValue":{"fields":{"key":{"stringValue":"newArrivals"},"label":{"stringValue":"New arrivals"},"enabled":{"booleanValue":true},"order":{"integerValue":"2"}}}},{"mapValue":{"fields":{"key":{"stringValue":"bestSellers"},"label":{"stringValue":"Best sellers"},"enabled":{"booleanValue":true},"order":{"integerValue":"3"}}}},{"mapValue":{"fields":{"key":{"stringValue":"brandPromise"},"label":{"stringValue":"Brand promise"},"enabled":{"booleanValue":true},"order":{"integerValue":"4"}}}}]}}},"createTime":"2026-07-23T20:49:13.975283Z","updateTime":"2026-07-31T01:07:18.336878Z"},"readTime":"2026-07-31T02:33:17.292573Z"}]
+[debug] [2026-08-04T15:30:24.835Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.841Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.841Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.844Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.844Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.864Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.865Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.865Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.865Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.865Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.868Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.868Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.869Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.869Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.869Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.872Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.872Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.872Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.872Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.872Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.874Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.874Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.874Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.874Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.874Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.909Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.909Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.909Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.910Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.910Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.912Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.912Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.912Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.913Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.913Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.915Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.915Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.916Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.916Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.916Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.917Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.918Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.918Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.918Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.918Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:24.920Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.920Z] Checked if tokens are valid: false, expires at: 1785468393333
+[debug] [2026-08-04T15:30:24.920Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T15:30:24.920Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T15:30:24.920Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.169Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.169Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.182Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.182Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.194Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.194Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.204Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.205Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.209Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.209Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.218Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.218Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.220Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.220Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.230Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.230Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.232Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.232Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.242Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-04T15:30:25.242Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.244Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.244Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.252Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-04T15:30:25.252Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.254Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.254Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.263Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-04T15:30:25.263Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.265Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.265Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.274Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-04T15:30:25.275Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.278Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.279Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.287Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.288Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:25.289Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T15:30:25.289Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T15:30:25.297Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-04T15:30:25.298Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-04T15:30:26.739Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-04T15:30:26.739Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-04T15:30:26.789Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-04T15:30:26.789Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-04T15:30:26.869Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-04T15:30:26.869Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:26.874Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-04T15:30:26.874Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:26.972Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-04T15:30:26.972Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:26.994Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-04T15:30:26.994Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:27.043Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-04T15:30:27.043Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:27.361Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-04T15:30:27.361Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-04T15:30:27.437Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-04T15:30:27.438Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-04T15:30:27.443Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T15:30:27.443Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-04T15:30:27.460Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T15:30:27.460Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-04T15:30:27.500Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T15:30:27.500Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-04T15:30:28.123Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-04T15:30:28.123Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-04T15:30:29.007Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T15:30:29.007Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-04T15:31:03.672Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T15:31:03.672Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-05T22:08:39.061Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.065Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.065Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.067Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.068Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.085Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.085Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.085Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.086Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.086Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.088Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.089Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.089Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.089Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.089Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.090Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.090Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.091Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.091Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.091Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.093Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.093Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.093Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.093Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.094Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.161Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.161Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.161Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.162Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.162Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.164Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.164Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.164Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.165Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.165Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.167Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.167Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.167Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.167Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.167Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.168Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.169Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.169Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.169Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.169Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.170Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.170Z] Checked if tokens are valid: false, expires at: 1785861024289
+[debug] [2026-08-05T22:08:39.171Z] > refreshing access token with scopes: []
+[debug] [2026-08-05T22:08:39.171Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-05T22:08:39.171Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.329Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.330Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.363Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-05T22:08:39.363Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.365Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.365Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.374Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-05T22:08:39.374Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.376Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.376Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.385Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.385Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.392Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.393Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.402Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.402Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.407Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.407Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.415Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.415Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.417Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.417Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.425Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-05T22:08:39.425Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.427Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.427Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.434Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.435Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.437Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.437Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.445Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.445Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.447Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.447Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.456Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-05T22:08:39.456Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:39.459Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-05T22:08:39.459Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-05T22:08:39.468Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-05T22:08:39.468Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-05T22:08:40.903Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-05T22:08:40.903Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-05T22:08:40.950Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-05T22:08:40.951Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:40.951Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-05T22:08:40.951Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:40.976Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-05T22:08:40.976Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:41.047Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-05T22:08:41.047Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:41.049Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-05T22:08:41.049Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:41.107Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-05T22:08:41.108Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-05T22:08:41.236Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-05T22:08:41.237Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-05T22:08:41.265Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-05T22:08:41.265Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-05T22:08:42.160Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-05T22:08:42.161Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-05T22:08:42.166Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-05T22:08:42.166Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-05T22:08:42.188Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-05T22:08:42.188Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-05T22:08:42.229Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-05T22:08:42.230Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-05T22:15:24.505Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-05T22:15:24.506Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-06T01:32:57.344Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-06T01:32:57.349Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-06T01:33:04.446Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-06T01:33:04.446Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-06T01:34:33.443Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.448Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.448Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.452Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.452Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.487Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.488Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.488Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.488Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.489Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.494Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.494Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.494Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.495Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.495Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.497Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.497Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.497Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.497Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.497Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.499Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.499Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.500Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.500Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.500Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.548Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.548Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.548Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.549Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.549Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.552Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.552Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.552Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.553Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.553Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.557Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.557Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.557Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.558Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.558Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.560Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.560Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.560Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.560Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.560Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.563Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.563Z] Checked if tokens are valid: false, expires at: 1785971318459
+[debug] [2026-08-06T01:34:33.563Z] > refreshing access token with scopes: []
+[debug] [2026-08-06T01:34:33.564Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-06T01:34:33.564Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.743Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.743Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.763Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-06T01:34:33.763Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.766Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.766Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.776Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.776Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.778Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.778Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.788Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-06T01:34:33.788Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.790Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.790Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.799Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.799Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.808Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.808Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.819Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.820Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.822Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.822Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.831Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [none]
+[debug] [2026-08-06T01:34:33.831Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.834Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.834Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.843Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [none]
+[debug] [2026-08-06T01:34:33.844Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.848Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.848Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.858Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.858Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.861Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.861Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.871Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.871Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:33.874Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-06T01:34:33.874Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-06T01:34:33.883Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2026-08-06T01:34:33.883Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/shis-fashion2
+[debug] [2026-08-06T01:34:35.274Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-06T01:34:35.274Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-06T01:34:35.298Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com 403
+[debug] [2026-08-06T01:34:35.298Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseio.com [omitted]
+[debug] [2026-08-06T01:34:35.337Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-06T01:34:35.337Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.345Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-06T01:34:35.345Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.360Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com 200
+[debug] [2026-08-06T01:34:35.361Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.365Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-06T01:34:35.365Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.411Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-08-06T01:34:35.411Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.419Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com 200
+[debug] [2026-08-06T01:34:35.419Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2026-08-06T01:34:35.578Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-06T01:34:35.579Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-06T01:34:35.584Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-06T01:34:35.585Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-06T01:34:35.601Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-06T01:34:35.601Z] > authorizing via signed-in user (shisfashion2@gmail.com)
+[debug] [2026-08-06T01:34:35.608Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ 200
+[debug] [2026-08-06T01:34:35.608Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/shis-fashion2/services/ [omitted]
+[debug] [2026-08-06T01:34:35.637Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-06T01:34:35.638Z] > authorizing via signed-in user (shisfashion2@gmail.com)
