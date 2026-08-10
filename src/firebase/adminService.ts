@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
+import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages } from '../utils/media'
 import { normalizeSizes } from '../utils/sizes'
@@ -685,12 +686,12 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
-  { key: 'sale', label: 'Sale', href: '/sale', order: 50, legacyImageKey: 'denim' },
+  { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, legacyImageKey: 'oversized-tee' },
   { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, legacyImageKey: 'couples' },
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
-  return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? ''
+  return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
 }
 
 const defaultCategorySections: HomepageCategorySections = {
@@ -736,11 +737,11 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   sale: {
     key: 'sale',
-    label: 'Sale',
-    href: '/sale',
+    label: 'Half Shirt',
+    href: '/men?sub=shirts',
     enabled: true,
     order: 50,
-    coverImage: getLegacyCategoryImage('denim'),
+    coverImage: getLegacyCategoryImage('oversized-tee'),
     images: [],
     updatedAt: null,
   },
@@ -779,6 +780,10 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
   }
 
   if (normalizedHref.startsWith('/sale')) {
+    return 'sale'
+  }
+
+  if (normalizedHref.startsWith('/men') && normalizedHref.includes('sub=shirts')) {
     return 'sale'
   }
 

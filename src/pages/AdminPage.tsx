@@ -112,7 +112,7 @@ const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string
   men: (href) => /^\/men(?:\?sub=[a-z0-9-]+)?$/i.test(href),
   kids: (href) => /^\/kids(?:\?sub=[a-z0-9-]+)?$/i.test(href),
   western: (href) => /^\/women\?sub=tunic$/i.test(href),
-  sale: (href) => /^\/sale$/i.test(href),
+  sale: (href) => /^\/(?:sale|men\?sub=shirts|shop\/mens-shirt)$/i.test(href),
   'new-arrivals': (href) => /^\/(?:shop\/new-arrivals|new-arrivals)$/i.test(href),
 }
 
@@ -121,7 +121,7 @@ const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
   men: 'Allowed: /men or /men?sub=shirts',
   kids: 'Allowed: /kids or /kids?sub=kids',
   western: 'Allowed: /women?sub=tunic',
-  sale: 'Allowed: /sale',
+  sale: 'Allowed: /men?sub=shirts or /shop/mens-shirt',
   'new-arrivals': 'Allowed: /shop/new-arrivals or /new-arrivals',
 }
 

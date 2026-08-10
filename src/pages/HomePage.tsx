@@ -25,7 +25,7 @@ const fallbackCategoryStrips = [
   { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '' },
-  { key: 'sale', label: 'Sale', href: '/sale', order: 50, image: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '' },
+  { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '' },
   { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '' },
 ] as const
 
@@ -103,11 +103,11 @@ const defaultHomepage: HomepageContent = {
     },
     sale: {
       key: 'sale',
-      label: 'Sale',
-      href: '/sale',
+      label: 'Half Shirt',
+      href: '/men?sub=shirts',
       enabled: true,
       order: 50,
-      coverImage: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '',
+      coverImage: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '',
       images: [],
       updatedAt: null,
     },
