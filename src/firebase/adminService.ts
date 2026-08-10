@@ -853,20 +853,31 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceImages = toUniqueImages(source?.images)
     const coverImage = source?.coverImage?.trim() || sourceImages[0] || fallback.coverImage
 
-    return [
-      layout.key,
-      {
-        ...fallback,
-        ...source,
-        key: layout.key,
-        label: source?.label?.trim() || fallback.label,
-        href: source?.href?.trim() || fallback.href,
-        enabled: source?.enabled ?? fallback.enabled,
-        order: typeof source?.order === 'number' ? source.order : fallback.order,
-        coverImage,
-        images: sourceImages.length ? sourceImages : fallback.images,
-      },
-    ] as const
+    const normalizedSection = {
+      ...fallback,
+      ...source,
+      key: layout.key,
+      label: source?.label?.trim() || fallback.label,
+      href: source?.href?.trim() || fallback.href,
+      enabled: source?.enabled ?? fallback.enabled,
+      order: typeof source?.order === 'number' ? source.order : fallback.order,
+      coverImage,
+      images: sourceImages.length ? sourceImages : fallback.images,
+    }
+
+    if (layout.key === 'sale') {
+      return [
+        layout.key,
+        {
+          ...normalizedSection,
+          label: 'Half Shirt',
+          href: '/men?sub=shirts',
+          coverImage: normalizedSection.coverImage || getLegacyCategoryImage('oversized-tee'),
+        },
+      ] as const
+    }
+
+    return [layout.key, normalizedSection] as const
   })
 
   return Object.fromEntries(sectionEntries) as HomepageCategorySections
