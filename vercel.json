@@ -5,19 +5,24 @@
   "redirects": [
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "shisfashion.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "shisfashion.com"
+        }
+      ],
       "destination": "https://www.shisfashion.com/",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "shisfashion.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "shisfashion.com"
+        }
+      ],
       "destination": "https://www.shisfashion.com/$1",
-      "permanent": true
-    },
-    {
-      "source": "http://www.shisfashion.com/:path*",
-      "destination": "https://www.shisfashion.com/:path*",
       "permanent": true
     }
   ],
@@ -25,10 +30,22 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        },
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
