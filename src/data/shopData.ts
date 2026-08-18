@@ -32,6 +32,7 @@ export const shopCategories: ShopCategory[] = [
   { slug: 'denim', title: 'Denim', description: 'Refined denim with a premium finish.', image: '/og-image.svg' },
   { slug: 'mens-shirt', title: "Men's Shirt", description: 'Polished structure in a relaxed fit.', image: '/og-image.svg' },
   { slug: 'womens-dresses', title: "Women's Dresses", description: 'Fluid forms with effortless movement.', image: '/og-image.svg' },
+  { slug: 'saree', title: 'Saree', description: 'Refined weaves and fluid drapes for considered elegance.', image: '/og-image.svg' },
   { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge.', image: '/og-image.svg' },
   { slug: 'couples', title: 'Couples Collection', description: 'Coordinated pieces for shared moments.', image: '/og-image.svg' },
   { slug: 'gift', title: 'Gift Collection', description: 'Thoughtful pieces with a premium finish.', image: '/og-image.svg' },

@@ -21,9 +21,13 @@ import {
   matchesSegmentByAlias,
   matchesSubcategoryByAlias,
   resolveCanonicalSubcategorySlug,
+  getDedicatedListingFromPath,
+  getDedicatedListingPath,
 } from '../data/categoryTaxonomy'
 
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
+
+const LISTING_PAGE_SIZE = 24
 
 interface ProductFilters {
   inStockOnly: boolean
@@ -184,6 +188,7 @@ export default function ShopPage() {
     inStockOnly: false,
     newOnly: false,
   })
+  const [loadedByKey, setLoadedByKey] = useState<Record<string, number>>({})
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
   const emptyStateKeysSeenRef = useRef<Set<string>>(new Set())
@@ -193,7 +198,8 @@ export default function ShopPage() {
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
-  const pathSegment = normalizeSegmentFromPath(location.pathname)
+  const dedicatedListing = getDedicatedListingFromPath(location.pathname)
+  const pathSegment = dedicatedListing?.segment ?? normalizeSegmentFromPath(location.pathname)
   const activeSegment = pathSegment !== 'all'
     ? pathSegment
     : querySegment
@@ -203,10 +209,11 @@ export default function ShopPage() {
     ? resolveCanonicalSubcategorySlug(legacyCategorySlug)
     : null
   const inferredLegacySegment = legacySubcategory ? getSegmentForCanonicalSubcategory(legacySubcategory) : null
-  const effectiveSegment = legacySegment ?? inferredLegacySegment ?? activeSegment
+  const effectiveSegment = dedicatedListing?.segment ?? legacySegment ?? inferredLegacySegment ?? activeSegment
   const segmentSubcategories = getSubcategoriesForSegment(effectiveSegment)
-  const activeSubcategory = normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
-  const effectiveSubcategory = legacySubcategory || activeSubcategory
+  const activeSubcategory = dedicatedListing?.subcategory ?? normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
+  const effectiveSubcategory = dedicatedListing?.subcategory ?? (legacySubcategory || activeSubcategory)
+  const listingKey = `${effectiveSegment}|${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${location.pathname}`
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -286,14 +293,42 @@ export default function ShopPage() {
       }
 
       if (legacySubcategory && inferredLegacySegment) {
+        const dedicatedPath = getDedicatedListingPath(inferredLegacySegment, legacySubcategory)
         params.set('sub', legacySubcategory)
         replaceWithCanonical(
-          `/${inferredLegacySegment}`,
-          `?${params.toString()}`,
-          'legacy-subcategory-route',
+          dedicatedPath ?? `/${inferredLegacySegment}`,
+          dedicatedPath ? '' : `?${params.toString()}`,
+          dedicatedPath ? 'dedicated-collection-route' : 'legacy-subcategory-route',
         )
         return
       }
+    }
+
+    const dedicatedPath = getDedicatedListingPath(effectiveSegment, effectiveSubcategory)
+    if (dedicatedPath && location.pathname !== dedicatedPath) {
+      replaceWithCanonical(dedicatedPath, '', 'dedicated-collection-route')
+      return
+    }
+
+    if (dedicatedListing) {
+      if (rawSegment) {
+        params.delete('segment')
+        shouldReplace = true
+      }
+      if (rawQuerySubcategory) {
+        params.delete('sub')
+        shouldReplace = true
+      }
+      if (!shouldReplace) {
+        return
+      }
+
+      replaceWithCanonical(
+        location.pathname,
+        params.toString() ? `?${params.toString()}` : '',
+        'dedicated-collection-canonical',
+      )
+      return
     }
 
     const rawSub = rawQuerySubcategory?.trim().toLowerCase() ?? ''
@@ -328,6 +363,7 @@ export default function ShopPage() {
     )
   }, [
     activeSubcategory,
+    dedicatedListing,
     effectiveSegment,
     effectiveSubcategory,
     inferredLegacySegment,
@@ -394,6 +430,10 @@ export default function ShopPage() {
     )
     return sorted
   })()
+
+  const visibleCount = loadedByKey[listingKey] ?? LISTING_PAGE_SIZE
+  const pagedProducts = visibleProducts.slice(0, visibleCount)
+  const hasMoreProducts = visibleCount < visibleProducts.length
 
   useEffect(() => {
     if (!ready) {
@@ -578,6 +618,12 @@ export default function ShopPage() {
   ])
 
   const navigateWithSubcategory = (subcategory: string) => {
+    const dedicatedPath = getDedicatedListingPath(effectiveSegment, subcategory)
+    if (dedicatedPath) {
+      navigate(dedicatedPath)
+      return
+    }
+
     const params = new URLSearchParams(location.search)
     if (subcategory === 'all') {
       params.delete('sub')
@@ -586,7 +632,7 @@ export default function ShopPage() {
     }
 
     navigate({
-      pathname: location.pathname,
+      pathname: dedicatedListing ? `/${effectiveSegment}` : location.pathname,
       search: params.toString() ? `?${params.toString()}` : '',
     })
   }
@@ -596,9 +642,9 @@ export default function ShopPage() {
       <Container>
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">SHIS Listing</p>
-            <h1 className="mt-1 text-h1 text-black">{legacyHeading?.title ?? heading.title}</h1>
-            <p className="mt-3 max-w-2xl text-body text-black/72">{legacyHeading?.description ?? heading.description}</p>
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">{dedicatedListing?.eyebrow ?? 'SHIS Listing'}</p>
+            <h1 className="mt-1 text-h1 text-black">{dedicatedListing?.title ?? legacyHeading?.title ?? heading.title}</h1>
+            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? legacyHeading?.description ?? heading.description}</p>
           </div>
 
           <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -697,20 +743,43 @@ export default function ShopPage() {
         </div>
 
         {!ready ? (
-          <div className="py-12 text-center text-sm text-black/55">Loading collection...</div>
-        ) : null}
+          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={`listing-skeleton-${index}`}>
+                <div className="aspect-[4/5] animate-pulse bg-black/5" />
+                <div className="mt-2 h-3 w-3/4 animate-pulse bg-black/5" />
+                <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid">
+            {pagedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
 
-        <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid">
-          {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {ready && hasMoreProducts ? (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setLoadedByKey((current) => ({
+                ...current,
+                [listingKey]: (current[listingKey] ?? LISTING_PAGE_SIZE) + LISTING_PAGE_SIZE,
+              }))}
+              className="ui-interactive border border-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+            >
+              Load more
+            </button>
+          </div>
+        ) : null}
 
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8">
             <div className="border border-dashed border-black/20 px-4 py-6 text-center">
               <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
-              <p className="mt-2 text-sm text-black/70">Try another filter combination.</p>
+              <p className="mt-2 text-sm text-black/70">{dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination.'}</p>
               <button
                 type="button"
                 onClick={() => {

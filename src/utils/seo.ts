@@ -2,7 +2,7 @@ const SITE_URL = 'https://www.shisfashion.com'
 const DEFAULT_TITLE = 'SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim'
 const DEFAULT_DESCRIPTION = 'Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available.'
 const DEFAULT_KEYWORDS = 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.svg`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`
 
 interface SeoMetadata {
   title: string
@@ -279,7 +279,7 @@ function buildBaseSchemas(pathname: string, canonicalUrl: string, metadata: SeoM
     })
   }
 
-  if (['/women', '/men', '/kids'].includes(pathname)) {
+  if (['/women', '/men', '/kids', '/sarees'].includes(pathname)) {
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
@@ -483,6 +483,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Shop women\'s fashion essentials from SHIS Fashion Bangladesh designed for modern comfort and premium daily styling.',
       keywords: 'Women fashion Bangladesh, SHIS women collection, premium women wear',
       canonicalPath: '/women',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/sarees') {
+    return {
+      title: 'Women\'s Sarees | SHIS Fashion Bangladesh',
+      description: 'Shop the SHIS Fashion women\'s saree collection — refined weaves, fluid drapes, and premium everyday luxury with fast delivery and cash on delivery.',
+      keywords: 'Saree Bangladesh, SHIS saree, women saree collection, premium saree Dhaka',
+      canonicalPath: '/sarees',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',

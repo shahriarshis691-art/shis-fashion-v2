@@ -14,7 +14,11 @@ export default function ContactPage() {
             <div className="rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] p-8">
               <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">Studio</p>
               <h3 className="mt-4 text-2xl font-semibold text-[var(--color-text)]">Visit our showroom</h3>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">shisfashion18@gmail.com<br />+88 01887848304</p>
+              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
+                <a href="mailto:shisfashion18@gmail.com" className="ui-interactive hover:text-[var(--color-text)]">shisfashion18@gmail.com</a>
+                <br />
+                <a href="tel:+8801887848304" className="ui-interactive hover:text-[var(--color-text)]">+88 01887848304</a>
+              </p>
             </div>
             <div className="space-y-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8">
               <p className="text-sm leading-7 text-[var(--color-muted)]">Tell us what you’re looking for and our team will respond with a tailored recommendation.</p>

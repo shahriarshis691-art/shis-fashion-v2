@@ -22,6 +22,7 @@ import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '' },
@@ -68,6 +69,16 @@ const defaultHomepage: HomepageContent = {
       enabled: true,
       order: 10,
       coverImage: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '',
+      images: [],
+      updatedAt: null,
+    },
+    saree: {
+      key: 'saree',
+      label: 'Saree',
+      href: '/sarees',
+      enabled: true,
+      order: 15,
+      coverImage: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '',
       images: [],
       updatedAt: null,
     },
@@ -306,6 +317,23 @@ export default function HomePage() {
       })
   }, [homepageContent.categorySections])
 
+  const sareeCollection = useMemo(() => {
+    const section = homepageContent.categorySections?.saree
+    if (section && !section.enabled) {
+      return null
+    }
+
+    return section ?? {
+      key: 'saree',
+      label: 'Saree',
+      href: '/sarees',
+      enabled: true,
+      order: 15,
+      coverImage: '',
+      images: [],
+    }
+  }, [homepageContent.categorySections])
+
   useEffect(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})
     if (!sectionEntries.length) {
@@ -490,6 +518,28 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
+
+      {sareeCollection ? (
+        <section className="pb-8 sm:pb-10">
+          <Container>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-caption uppercase tracking-[0.14em] text-black/55">Women's collection</p>
+                <h2 className="mt-1 text-h2 text-black">{sareeCollection.label || 'Saree'}</h2>
+                <p className="mt-3 max-w-2xl text-body text-black/72">
+                  Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.
+                </p>
+              </div>
+              <Link
+                to={sareeCollection.href || '/sarees'}
+                className="ui-interactive inline-flex w-fit shrink-0 border border-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              >
+                Explore Sarees
+              </Link>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       {contentSections.map((section) => {
         if (section.key === 'featuredCollection' && featuredCollections.length) {

@@ -1,5 +1,6 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
+import { createRateLimiter, getClientIp } from './_rateLimit.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -7,6 +8,7 @@ export const config = {
 
 interface LooseRequest {
   method?: string
+  headers?: Record<string, string | string[] | undefined>
   body?: unknown
 }
 
@@ -22,6 +24,9 @@ interface ValidateCouponBody {
   orderId?: string
   discountAmount?: number
 }
+
+const isValidateLimited = createRateLimiter(30)
+const isRedeemLimited = createRateLimiter(10)
 
 function isCouponCodeValid(code: string) {
   return /^[A-Z]{3,}-[A-Z0-9]{3,}$/i.test(code)
@@ -55,15 +60,26 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
+  const body = (req.body ?? {}) as ValidateCouponBody
+  const action = body.action ?? 'validate'
+  const clientIp = getClientIp(req.headers)
+
+  if (action === 'validate' && isValidateLimited(clientIp)) {
+    res.status(429).json({ valid: false, error: 'Too many requests.' })
+    return
+  }
+
+  if (action === 'redeem' && isRedeemLimited(clientIp)) {
+    res.status(429).json({ redeemed: false, error: 'Too many requests.' })
+    return
+  }
+
   const configuredDb = getFirebaseAdminDb()
   if (!configuredDb) {
     res.status(500).json({ error: 'Firebase Admin is not configured' })
     return
   }
   const db = getFirestore()
-
-  const body = (req.body ?? {}) as ValidateCouponBody
-  const action = body.action ?? 'validate'
 
   if (action === 'validate') {
     const code = body.code?.trim().toUpperCase() ?? ''
@@ -129,6 +145,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       return
     }
 
+    const orderSnapshot = await db.collection('orders').doc(orderId).get()
+    if (!orderSnapshot.exists) {
+      res.status(404).json({ redeemed: false, error: 'Order not found.' })
+      return
+    }
+
     const couponSnapshot = await findCoupon(db, code, couponId)
     if (!couponSnapshot) {
       res.status(404).json({ redeemed: false, error: 'Invalid coupon code.' })
@@ -142,6 +164,11 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       maxUsage: number
       orderId?: string
       code: string
+    }
+
+    if (coupon.orderId === orderId) {
+      res.status(200).json({ redeemed: true, couponCode: coupon.code, couponId: couponSnapshot.id })
+      return
     }
 
     if (coupon.status !== 'active') {

@@ -109,6 +109,7 @@ const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
 
 const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string) => boolean> = {
   women: (href) => /^\/women(?:\?sub=[a-z0-9-]+)?$/i.test(href),
+  saree: (href) => /^\/sarees?(?:\?sub=saree)?$/i.test(href) || /^\/women\?sub=sarees?$/i.test(href),
   men: (href) => /^\/men(?:\?sub=[a-z0-9-]+)?$/i.test(href),
   kids: (href) => /^\/kids(?:\?sub=[a-z0-9-]+)?$/i.test(href),
   western: (href) => /^\/women\?sub=tunic$/i.test(href),
@@ -118,6 +119,7 @@ const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string
 
 const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
   women: 'Allowed: /women or /women?sub=tunic',
+  saree: 'Allowed: /sarees or /women?sub=saree',
   men: 'Allowed: /men or /men?sub=shirts',
   kids: 'Allowed: /kids or /kids?sub=kids',
   western: 'Allowed: /women?sub=tunic',
@@ -386,8 +388,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return orderDate ? isSameLocalDay(orderDate, today) : false
     })
 
-    const revenue = orders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
-    const todayRevenue = todayOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
+    const billableOrders = orders.filter((order) => order.status !== 'cancelled')
+    const billableTodayOrders = todayOrders.filter((order) => order.status !== 'cancelled')
+    const revenue = billableOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
+    const todayRevenue = billableTodayOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
     const outOfStockProducts = products.filter((product) => product.stock <= 0).length
 
     return {

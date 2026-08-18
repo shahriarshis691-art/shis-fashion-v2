@@ -27,6 +27,8 @@ function getImagePositionClass(category: string) {
       return 'object-[center_14%]'
     case 'womens-dresses':
       return 'object-[center_16%]'
+    case 'saree':
+      return 'object-[center_18%]'
     case 'western-outfits':
       return 'object-[center_15%]'
     case 'denim':
@@ -61,7 +63,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             loading="lazy"
             decoding="async"
             onError={handleImageError}
-            className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.02] ${imageToneClass}`}
+            className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.02] ${imageToneClass} ${(product.stock ?? 0) <= 0 ? 'opacity-70' : ''}`}
             fetchPriority="low"
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
@@ -78,6 +80,11 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             >
               {isInWishlist ? '♥' : '♡'}
             </button>
+          ) : null}
+          {(product.stock ?? 0) <= 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/55">
+              <span className="border border-black/20 bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black">Sold out</span>
+            </div>
           ) : null}
         </div>
         <div className="pt-2 product-card-meta">

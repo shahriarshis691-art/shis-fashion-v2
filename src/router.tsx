@@ -85,6 +85,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<ShopPage />),
       },
       {
+        path: 'sarees',
+        element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'saree',
+        element: <Navigate to="/sarees" replace />,
+      },
+      {
         path: 'shop/new-arrivals',
         element: withSuspense(<NewArrivalsPage />),
       },

@@ -1,5 +1,6 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
+import { createRateLimiter, getClientIp } from './_rateLimit.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -7,6 +8,7 @@ export const config = {
 
 interface LooseRequest {
   method?: string
+  headers?: Record<string, string | string[] | undefined>
   body?: unknown
 }
 
@@ -19,6 +21,7 @@ interface NewsletterSignupBody {
   email?: string
 }
 
+const isRateLimited = createRateLimiter(8)
 const COUPON_PREFIX = 'SHIS-'
 const COUPON_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const COUPON_CODE_LENGTH = 6
@@ -48,6 +51,11 @@ function computeCouponExpiry() {
 export default async function handler(req: LooseRequest, res: LooseResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  if (isRateLimited(getClientIp(req.headers))) {
+    res.status(429).json({ error: 'Too many requests.' })
     return
   }
 

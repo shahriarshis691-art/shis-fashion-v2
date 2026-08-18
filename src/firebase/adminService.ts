@@ -80,6 +80,7 @@ export interface AdminOrder {
   couponDiscountPercent?: number
   couponDiscountAmount?: number
   couponId?: string
+  stockCommitted?: boolean
 }
 
 export interface AdminCategory {
@@ -140,6 +141,7 @@ export interface HomepageShopCategory {
 
 export type HomepageCategorySectionKey =
   | 'women'
+  | 'saree'
   | 'men'
   | 'kids'
   | 'western'
@@ -187,19 +189,19 @@ const defaultHomepageSeo: Required<HomepageSeoConfig> = {
     title: 'SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim',
     description: 'Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available.',
     keywords: 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh',
-    ogImage: 'https://www.shisfashion.com/og-image.svg',
+    ogImage: 'https://www.shisfashion.com/og-image.png',
   },
   shop: {
     title: 'Shop SHIS Fashion Bangladesh | Premium T-Shirts, Polo Shirts & Denim',
     description: 'Browse premium oversized T-shirts, Polo Shirts, Shirts, Denim and women\'s and kids fashion at SHIS Fashion Bangladesh.',
     keywords: 'SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh',
-    ogImage: 'https://www.shisfashion.com/og-image.svg',
+    ogImage: 'https://www.shisfashion.com/og-image.png',
   },
   oversized: {
     title: 'Oversized Tee | SHIS Fashion Bangladesh',
     description: 'Shop premium oversized T-shirts from SHIS Fashion Bangladesh with fast Dhaka delivery and cash on delivery support.',
     keywords: 'Oversized T Shirt Bangladesh, SHIS oversized tee, baggy t shirt dhaka',
-    ogImage: 'https://www.shisfashion.com/og-image.svg',
+    ogImage: 'https://www.shisfashion.com/og-image.png',
   },
 }
 
@@ -683,6 +685,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   legacyImageKey: string
 }> = [
   { key: 'women', label: 'Women', href: '/women', order: 10, legacyImageKey: 'womens' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, legacyImageKey: 'saree' },
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
@@ -702,6 +705,16 @@ const defaultCategorySections: HomepageCategorySections = {
     enabled: true,
     order: 10,
     coverImage: getLegacyCategoryImage('womens'),
+    images: [],
+    updatedAt: null,
+  },
+  saree: {
+    key: 'saree',
+    label: 'Saree',
+    href: '/sarees',
+    enabled: true,
+    order: 15,
+    coverImage: getLegacyCategoryImage('saree'),
     images: [],
     updatedAt: null,
   },
@@ -764,9 +777,16 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
     return null
   }
 
+  if (normalizedHref.startsWith('/saree')) {
+    return 'saree'
+  }
+
   if (normalizedHref.startsWith('/women')) {
     if (normalizedHref.includes('sub=tunic')) {
       return 'western'
+    }
+    if (normalizedHref.includes('sub=saree')) {
+      return 'saree'
     }
     return 'women'
   }
@@ -1121,6 +1141,7 @@ const defaultCategories: AdminCategory[] = [
   { id: 'cat-oversized-tee', name: 'Oversized Tee', slug: 'oversized-tee', createdAt: '2026-01-01' },
   { id: 'cat-unisex-tee', name: 'Unisex Tee', slug: 'unisex-tee', createdAt: '2026-01-01' },
   { id: 'cat-denim', name: 'Denim', slug: 'denim', createdAt: '2026-01-01' },
+  { id: 'cat-saree', name: 'Saree', slug: 'saree', createdAt: '2026-01-01' },
 ]
 
 function slugify(value: string) {
@@ -1919,6 +1940,42 @@ export async function restoreOrder(id: string) {
   }
 }
 
+function applyLocalStockDecrement(items: AdminOrder['items']) {
+  const products = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const next = products.map((product) => {
+    const used = items.reduce((sum, item) => {
+      const itemSlug = slugify(item.slug ?? item.name)
+      if (slugify(product.name) === itemSlug || product.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
+        return sum + Math.max(0, item.quantity)
+      }
+      return sum
+    }, 0)
+
+    if (!used) {
+      return product
+    }
+
+    return { ...product, stock: Math.max(0, product.stock - used) }
+  })
+  writeStored(PRODUCTS_KEY, next)
+}
+
+async function commitOrderStock(orderId: string) {
+  if (!orderId || orderId.startsWith('local-')) {
+    return
+  }
+
+  try {
+    await fetch('/api/commit-order-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    })
+  } catch {
+    // Order is already saved; stock sync is best-effort.
+  }
+}
+
 export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, couponData?: { code: string; discountPercent: number; discountAmount: number; couponId?: string } | null) {
   if (requiresLiveBackend() && !firebaseDb) {
     throw new Error('Live order backend is not configured. Add Firebase production credentials before accepting orders.')
@@ -1948,6 +2005,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
       await markCouponUsed(couponData.couponId ?? couponData.code, optimisticOrder.id, couponData.discountAmount)
     }
 
+    applyLocalStockDecrement(order.items)
     return optimisticOrder
   }
 
@@ -1972,6 +2030,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
       await markCouponUsed(couponData.couponId ?? couponData.code, syncedOrder.id, couponData.discountAmount)
     }
 
+    await commitOrderStock(syncedOrder.id)
     return syncedOrder
   } catch (error) {
     if (!shouldFallbackToLocal(error)) {
@@ -1990,6 +2049,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
       await markCouponUsed(couponData.couponId ?? couponData.code, optimisticOrder.id, couponData.discountAmount)
     }
 
+    applyLocalStockDecrement(order.items)
     return optimisticOrder
   }
 }

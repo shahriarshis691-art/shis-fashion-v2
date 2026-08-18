@@ -1,5 +1,5 @@
 export interface HomeCategoryItem {
-  key: 'mens' | 'womens' | 'couples' | 'kids' | 'western' | 'denim' | 'oversized-tee'
+  key: 'mens' | 'womens' | 'couples' | 'kids' | 'western' | 'denim' | 'oversized-tee' | 'saree'
   name: string
   href: string
   image: string
@@ -16,6 +16,12 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'womens',
     name: "Women's Collection",
     href: '/women',
+    image: '/og-image.svg',
+  },
+  {
+    key: 'saree',
+    name: 'Saree',
+    href: '/sarees',
     image: '/og-image.svg',
   },
   {

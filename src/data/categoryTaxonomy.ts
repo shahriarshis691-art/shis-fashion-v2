@@ -4,6 +4,7 @@ export interface SubcategoryConfig {
   slug: string
   label: string
   aliases: string[]
+  path?: string
 }
 
 export interface TaxonomyCategoryOption {
@@ -37,7 +38,7 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'tops', label: 'Tops', aliases: ['tops'] },
   { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts', 'western-outfits', 'tunic'] },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
-  { slug: 'saree', label: 'Saree', aliases: ['saree'] },
+  { slug: 'saree', label: 'Saree', aliases: ['saree', 'sarees', 'sari', 'saris', 'womens-saree', 'women-saree', 'womens-sarees'], path: '/sarees' },
   { slug: 'tunic', label: 'Tunic', aliases: ['western'] },
   { slug: 'accessories', label: 'Accessories', aliases: ['accessories', 'gift'] },
 ]
@@ -113,8 +114,31 @@ export function getSubcategoryLinksForSegment(segment: Exclude<ShopSegment, 'all
 
   return config.subcategories.map((subcategory) => ({
     label: subcategory.label,
-    href: `${config.path}?sub=${subcategory.slug}`,
+    href: subcategory.path ?? `${config.path}?sub=${subcategory.slug}`,
   }))
+}
+
+export function getDedicatedListingFromPath(pathname: string) {
+  const normalized = pathname.replace(/\/$/, '') || '/'
+  if (normalized === '/sarees' || normalized === '/saree') {
+    return {
+      segment: 'women' as const,
+      subcategory: 'saree',
+      eyebrow: "Women's Saree Collection",
+      title: 'Sarees',
+      description: 'Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.',
+    }
+  }
+
+  return null
+}
+
+export function getDedicatedListingPath(segment: ShopSegment, subcategory: string) {
+  if (segment === 'women' && subcategory === 'saree') {
+    return '/sarees'
+  }
+
+  return null
 }
 
 function normalizeCategoryValue(category: string) {
