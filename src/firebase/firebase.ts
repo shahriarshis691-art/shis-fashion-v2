@@ -37,3 +37,7 @@ if (import.meta.env.DEV) {
     firestoreInitialized: Boolean(db),
   })
 }
+
+if (import.meta.env.PROD && !hasFirebaseConfig) {
+  console.error('[firebase] Missing Firebase configuration in production. Set VITE_FIREBASE_* env vars in Vercel.')
+}

@@ -39,7 +39,7 @@ interface CartContextValue {
   itemCount: number
   subtotal: number
   appliedCoupon: CouponApplied | null
-  applyCoupon: (couponCode: string, couponId?: string) => boolean
+  applyCoupon: (couponCode: string, couponId?: string, discountPercent?: number) => boolean
   removeCoupon: () => void
   discountAmount: number
   grandTotal: number
@@ -49,6 +49,41 @@ interface CartContextValue {
 
 const STORAGE_KEY = 'shis-fashion-cart'
 const COUPON_STORAGE_KEY = 'shis-fashion-coupon'
+const BUY_NOW_KEY = 'shis-fashion-buy-now'
+
+export function readBuyNowCheckout(): CartItem[] | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(BUY_NOW_KEY)
+    if (!raw) {
+      return null
+    }
+
+    const parsed = JSON.parse(raw) as CartItem[]
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function writeBuyNowCheckout(items: CartItem[]) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.setItem(BUY_NOW_KEY, JSON.stringify(items))
+}
+
+export function clearBuyNowCheckout() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.sessionStorage.removeItem(BUY_NOW_KEY)
+}
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
 
@@ -261,15 +296,17 @@ function CartProvider({ children }: { children: ReactNode }) {
     setRecentAddition(null)
   }
 
-  const applyCoupon = useCallback((code: string, couponId?: string): boolean => {
+  const applyCoupon = useCallback((code: string, couponId?: string, discountPercent?: number): boolean => {
     const trimmedCode = code.trim().toUpperCase()
     if (!trimmedCode) {
       return false
     }
 
+    const safePercent = Number.isFinite(discountPercent) ? Math.min(100, Math.max(0, Number(discountPercent))) : 5
+
     const newCoupon: CouponApplied = {
       code: trimmedCode,
-      discountPercent: 5,
+      discountPercent: safePercent,
       discountAmount: 0,
       couponId,
     }

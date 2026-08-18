@@ -24,13 +24,10 @@ export default function NewArrivalsPage() {
     return unsubscribe
   }, [])
 
-  const newArrivals = useMemo(() => {
-    const prioritized = [
-      ...products.filter((product) => product.newArrival),
-      ...products.filter((product) => !product.newArrival),
-    ]
-    return prioritized.slice(0, 18)
-  }, [products])
+  const newArrivals = useMemo(
+    () => products.filter((product) => product.newArrival).slice(0, 18),
+    [products],
+  )
 
   return (
     <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -45,6 +42,12 @@ export default function NewArrivalsPage() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+        {newArrivals.length === 0 ? (
+          <div className="mt-8 border border-dashed border-black/20 px-4 py-8 text-center">
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No new arrivals yet</p>
+            <p className="mt-2 text-sm text-black/70">Browse the full collection while the next drop is prepared.</p>
+          </div>
+        ) : null}
       </Container>
     </section>
   )

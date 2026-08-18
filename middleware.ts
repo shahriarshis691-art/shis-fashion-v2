@@ -137,6 +137,10 @@ export default function middleware(request: Request) {
     return
   }
 
+  if (process.env.VERCEL_ENV === 'production') {
+    console.warn(`[middleware] Soft launch active in production: ${mode}`)
+  }
+
   const url = new URL(request.url)
   if (isBypassedPath(url.pathname)) {
     return

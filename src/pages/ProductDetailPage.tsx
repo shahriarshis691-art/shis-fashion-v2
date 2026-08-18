@@ -3,13 +3,13 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
-import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
-import { subscribeToProducts, getCouponByCode, type AdminProduct } from '../firebase/adminService'
+import { useCart, writeBuyNowCheckout } from '../context/CartContext'
+import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
-import { normalizeSizes } from '../utils/sizes'
+import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
@@ -40,6 +40,7 @@ function toProduct(product: AdminProduct) {
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
     galleryImageTitles: imageEntries.map((entry) => entry.title),
     sizes: normalizeSizes(product.sizes),
+    colors: Array.isArray(product.colors) ? product.colors.map((color) => color.trim()).filter(Boolean) : [],
     stock: product.stock,
     featured: product.featured,
     newArrival: product.newArrival,
@@ -52,9 +53,10 @@ function getWhatsAppHref(phone?: string) {
   return `https://wa.me/${normalized}`
 }
 
-function getWhatsAppOrderHref(productName: string, size: string, quantity: number) {
+function getWhatsAppOrderHref(productName: string, size: string, color: string, quantity: number) {
   const baseHref = getWhatsAppHref()
-  const message = encodeURIComponent(`Hi SHIS, I want to order ${productName}. Size: ${size}. Quantity: ${quantity}.`)
+  const colorLine = color && color !== 'Default' ? ` Color: ${color}.` : ''
+  const message = encodeURIComponent(`Hi SHIS, I want to order ${productName}. Size: ${size}.${colorLine} Quantity: ${quantity}.`)
   return `${baseHref}?text=${message}`
 }
 
@@ -92,21 +94,19 @@ export default function ProductDetailPage() {
   const decodedSlug = decodeURIComponent(productSlug ?? '')
   const location = useLocation()
   const navigate = useNavigate()
-  const { addToCart, applyCoupon } = useCart()
+  const { addToCart } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
+  const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
-  const [couponCode, setCouponCode] = useState('')
-  const [couponLoading, setCouponLoading] = useState(false)
-  const [couponResult, setCouponResult] = useState<{ valid: boolean; message: string; discountPercent?: number; discountAmount?: number } | null>(null)
   const lastTrackedProductIdRef = useRef<string | null>(null)
   const hasTrackedRecentlyViewedRef = useRef(false)
 
@@ -306,18 +306,31 @@ export default function ProductDetailPage() {
     setTouchStartX(null)
   }
 
-  const safeSize = selectedSize && product?.sizes.includes(selectedSize) ? selectedSize : product?.sizes[0] ?? 'M'
-  const isSizeSelected = selectedSize && product?.sizes.includes(selectedSize)
-  const canAddToBag = product != null && availableStock > 0 && isSizeSelected
-  const canBuyNow = product != null && availableStock > 0 && isSizeSelected
-  const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, effectiveQuantity) : getWhatsAppHref()
+  const resolvedSize = selectedSize && product?.sizes.includes(selectedSize)
+    ? selectedSize
+    : product?.sizes.length === 1
+      ? product.sizes[0]
+      : ''
+  const resolvedColor = selectedColor && product?.colors.includes(selectedColor)
+    ? selectedColor
+    : product?.colors.length === 1
+      ? product.colors[0]
+      : ''
+  const safeSize = resolvedSize || product?.sizes[0] || 'M'
+  const isSizeSelected = Boolean(resolvedSize)
+  const hasColorOptions = Boolean(product?.colors.length)
+  const safeColor = resolvedColor || 'Default'
+  const isColorSelected = !hasColorOptions || Boolean(resolvedColor)
+  const canAddToBag = product != null && availableStock > 0 && isSizeSelected && isColorSelected
+  const canBuyNow = canAddToBag
+  const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, safeColor, effectiveQuantity) : getWhatsAppHref()
 
   const handleAddToBag = () => {
-    if (!product || availableStock <= 0 || !isSizeSelected) {
+    if (!product || !canAddToBag) {
       return
     }
 
-    addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
+    addToCart(product, { size: safeSize, color: safeColor, quantity: effectiveQuantity })
     metaPixel.trackAddToCart({
       content_name: product.name,
       content_ids: [String(product.id)],
@@ -341,11 +354,19 @@ export default function ProductDetailPage() {
   }
 
   const handleBuyNow = () => {
-    if (!product || availableStock <= 0 || !isSizeSelected) {
+    if (!product || !canBuyNow) {
       return
     }
 
-    addToCart(product, { size: safeSize, color: 'Default', quantity: effectiveQuantity })
+    writeBuyNowCheckout([
+      {
+        ...product,
+        id: `${product.slug}-${safeSize}-${safeColor}`,
+        size: safeSize,
+        color: safeColor,
+        quantity: effectiveQuantity,
+      },
+    ])
     googleAnalytics.beginCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
@@ -361,50 +382,6 @@ export default function ProductDetailPage() {
       ],
     })
     navigate('/checkout')
-  }
-
-  const handleApplyCoupon = async () => {
-    const trimmed = couponCode.trim()
-    if (!trimmed) {
-      setCouponResult({ valid: false, message: 'Please enter a coupon code.' })
-      return
-    }
-
-    setCouponLoading(true)
-
-    try {
-      const result = await getCouponByCode(trimmed)
-
-      if (!result) {
-        setCouponResult({ valid: false, message: 'Invalid or expired coupon code.' })
-        setCouponLoading(false)
-        return
-      }
-
-      if (result.status !== 'active') {
-        setCouponResult({ valid: false, message: 'This coupon is no longer active.' })
-        setCouponLoading(false)
-        return
-      }
-
-      if (!result.code) {
-        setCouponResult({ valid: false, message: 'Invalid coupon code.' })
-        setCouponLoading(false)
-        return
-      }
-
-      applyCoupon(result.code, result.id)
-      setCouponResult({
-        valid: true,
-        message: `Coupon applied! You save ${result.discountPercent}%`,
-        discountPercent: result.discountPercent,
-        discountAmount: product ? Math.round(parseBDT(product.price) * effectiveQuantity * result.discountPercent / 100) : 0,
-      })
-    } catch {
-      setCouponResult({ valid: false, message: 'Unable to validate coupon. Please try again.' })
-    }
-
-    setCouponLoading(false)
   }
 
   if (!ready) {
@@ -540,12 +517,36 @@ export default function ProductDetailPage() {
                     key={option}
                     type="button"
                     onClick={() => setSelectedSize(option)}
-                    className={`ui-interactive border px-3 py-2 text-sm ${safeSize === option ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
+                    className={`ui-interactive border px-3 py-2 text-sm ${resolvedSize === option ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
                   >
                     {option}
                   </button>
                 ))}
               </div>
+              {!isSizeSelected ? (
+                <p className="mt-2 text-xs text-black/55">Select a size to continue.</p>
+              ) : null}
+
+              {hasColorOptions ? (
+                <>
+                  <p className="mt-4 text-caption uppercase tracking-[0.12em] text-black/55">Color</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {product.colors.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setSelectedColor(option)}
+                        className={`ui-interactive border px-3 py-2 text-sm ${resolvedColor === option ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                  {!isColorSelected ? (
+                    <p className="mt-2 text-xs text-black/55">Select a color to continue.</p>
+                  ) : null}
+                </>
+              ) : null}
 
               <p className="mt-4 text-caption uppercase tracking-[0.12em] text-black/55">Quantity</p>
               <div className="mt-2 flex items-center gap-2">
@@ -596,33 +597,6 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            <div className="mt-3 flex gap-2 sm:hidden">
-              <button
-                type="button"
-                onClick={handleAddToBag}
-                disabled={!canAddToBag}
-                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
-              >
-                {didAddToBag ? 'Added' : 'Add to Bag'}
-              </button>
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                disabled={!canBuyNow}
-                className="ui-interactive flex-1 border border-black px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
-              >
-                Buy Now
-              </button>
-              <button
-                type="button"
-                onClick={handleToggleWishlist}
-                className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
-                aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
-              >
-                {isInWishlist(String(product.id)) ? '♥' : '♡'}
-              </button>
-            </div>
-
             <a
               href={quickOrderHref}
               target="_blank"
@@ -636,30 +610,8 @@ export default function ProductDetailPage() {
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">
           <div className="border border-black/15 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Promo Code</h2>
-            <div className="mt-3 flex gap-2">
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(event) => { setCouponCode(event.target.value.toUpperCase()) }}
-                placeholder="Enter coupon code"
-                className="flex-1 rounded-[1rem] border border-black/15 bg-[var(--color-bg)] px-4 py-3 text-sm text-black outline-none transition placeholder:text-black/40 focus:border-black focus:ring-2 focus:ring-black/5"
-                maxLength={12}
-              />
-              <button
-                type="button"
-                onClick={handleApplyCoupon}
-                disabled={couponLoading || !couponCode.trim()}
-                className="ui-interactive rounded-[1rem] border border-black bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35"
-              >
-                {couponLoading ? 'Applying…' : 'Apply'}
-              </button>
-            </div>
-            {couponResult ? (
-              <p className={`mt-2 text-sm ${couponResult.valid ? 'text-emerald-600' : 'text-red-600'}`} role={couponResult.valid ? 'status' : 'alert'}>
-                {couponResult.message}
-              </p>
-            ) : null}
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Description</h2>
+            <p className="mt-3 text-sm leading-7 text-black/75">{product.description || 'Premium SHIS Fashion piece designed for everyday wear.'}</p>
           </div>
 
           <div className="border border-black/15 p-4">
@@ -673,6 +625,40 @@ export default function ProductDetailPage() {
               ))}
             </ul>
           </div>
+
+          <details className="border border-black/15 p-4">
+            <summary className="cursor-pointer text-sm font-semibold uppercase tracking-[0.12em] text-black">Size Guide</summary>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[240px] text-left text-sm text-black/75">
+                <thead>
+                  <tr className="border-b border-black/10 text-caption uppercase tracking-[0.12em] text-black/55">
+                    <th className="py-2 font-medium">Size</th>
+                    <th className="py-2 font-medium">Chest</th>
+                    <th className="py-2 font-medium">Length</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {STANDARD_SIZE_GUIDE.map((row) => (
+                    <tr key={row.size} className="border-b border-black/5">
+                      <td className="py-2 font-semibold text-black">{row.size}</td>
+                      <td className="py-2">{row.chest}</td>
+                      <td className="py-2">{row.length}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-3 text-xs leading-6 text-black/55">Measurements are approximate. For a relaxed oversized fit, choose your usual size. Need help? Chat on WhatsApp.</p>
+            </div>
+          </details>
+
+          <details className="border border-black/15 p-4">
+            <summary className="cursor-pointer text-sm font-semibold uppercase tracking-[0.12em] text-black">Fabric & Care</summary>
+            <ul className="mt-3 space-y-2 text-sm text-black/75">
+              <li>Premium quality fabric with a soft, breathable finish for all-day wear.</li>
+              <li>Wash in cold water. Do not bleach. Dry in shade.</li>
+              <li>Iron on low heat. Avoid direct heat on prints.</li>
+            </ul>
+          </details>
 
           <div className="border border-black/15 p-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Delivery & Return</h2>
@@ -744,11 +730,11 @@ export default function ProductDetailPage() {
       </Container>
 
       <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
-        <div className="grid grid-cols-2 gap-2 border border-black/20 bg-white p-2 shadow-[0_10px_24px_rgba(0,0,0,0.14)]">
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 border border-black/20 bg-white p-2 shadow-[0_10px_24px_rgba(0,0,0,0.14)]">
           <button
             type="button"
             onClick={handleAddToBag}
-            disabled={availableStock <= 0}
+            disabled={!canAddToBag}
             className="ui-interactive rounded-[2px] border border-black bg-black px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
           >
             {didAddToBag ? 'Added' : 'Add to Bag'}
@@ -756,10 +742,18 @@ export default function ProductDetailPage() {
           <button
             type="button"
             onClick={handleBuyNow}
-            disabled={availableStock <= 0}
+            disabled={!canBuyNow}
             className="ui-interactive border border-black px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
           >
             Buy Now
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleWishlist}
+            className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black'}`}
+            aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            {isInWishlist(String(product.id)) ? '♥' : '♡'}
           </button>
         </div>
       </div>

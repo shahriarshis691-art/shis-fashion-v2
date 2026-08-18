@@ -165,7 +165,7 @@ const defaultProducts: AdminProduct[] = [
     colors: ['Ivory', 'Black'],
     description: 'Relaxed fit with a premium ribbed finish.',
     category: 'oversized-tee',
-    images: ['https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80'],
+    images: ['/og-image.svg'],
     videos: [],
     featured: true,
     newArrival: true,
@@ -195,6 +195,45 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
 
 function hasValidSectionHref(section: HomepageCategorySection) {
   return section.href.trim().startsWith('/')
+}
+
+function HomepageProductGrid({ products }: { products: AdminProduct[] }) {
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
+      {products.map((item, index) => {
+        const productImage = normalizeCatalogImageUrl(getProductImage(item), 900, 1125)
+        const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
+
+        return (
+          <motion.article
+            key={item.id}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.22, delay: index * 0.03 }}
+          >
+            <Link to={productHref(item)} className="group block">
+              <div className="aspect-[4/5] overflow-hidden bg-black/5">
+                <img
+                  src={productImage || IMAGE_PLACEHOLDER}
+                  alt={item.name}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                  onError={handleImageError}
+                  className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
+                />
+              </div>
+              <div className="pt-2.5">
+                <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
+                <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
+              </div>
+            </Link>
+          </motion.article>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function HomePage() {
@@ -314,13 +353,40 @@ export default function HomePage() {
     })
   }, [homepageContent.categorySections])
 
-  const newArrivals = useMemo(() => {
-    const prioritized = [
-      ...products.filter((product) => product.newArrival),
-      ...products.filter((product) => !product.newArrival),
-    ]
-    return prioritized
-  }, [products])
+  const newArrivals = useMemo(
+    () => products.filter((product) => product.newArrival).slice(0, 8),
+    [products],
+  )
+
+  const bestSellers = useMemo(
+    () => products.filter((product) => product.featured).slice(0, 8),
+    [products],
+  )
+
+  const featuredCollections = useMemo(() => {
+    if (homepageContent.featuredCollectionPages.length) {
+      return homepageContent.featuredCollectionPages.map((page) => ({
+        key: page.slug,
+        title: page.title,
+        href: page.href || `/collections/${page.slug}`,
+        image: normalizeCatalogImageUrl(page.images[0] ?? '', 1200, 900),
+      }))
+    }
+
+    return homepageContent.categories.map((category) => ({
+      key: category.title,
+      title: category.title,
+      href: category.href || `/collections/${slugify(category.title)}`,
+      image: normalizeCatalogImageUrl(category.image ?? '', 1200, 900),
+    }))
+  }, [homepageContent.categories, homepageContent.featuredCollectionPages])
+
+  const contentSections = useMemo(
+    () => [...homepageContent.sections]
+      .filter((section) => section.enabled && section.key !== 'hero')
+      .sort((left, right) => left.order - right.order),
+    [homepageContent.sections],
+  )
 
   const featuredBrands = useMemo(
     () => ['xeroxii', 'ceravo', 'rangkutir']
@@ -425,59 +491,142 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="pb-8 sm:pb-10">
-        <Container>
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
-              </p>
-              <h2 className="mt-1 text-h2 text-black">{homepageContent.newArrivalsTitle ?? 'New Arrivals'}</h2>
-            </div>
-            <Link
-              to="/shop/new-arrivals"
-              className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black"
-            >
-              Shop now
-            </Link>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
-            {newArrivals.map((item, index) => {
-              const productImage = normalizeCatalogImageUrl(getProductImage(item), 900, 1125)
-              const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
-
-              return (
-                <motion.article
-                  key={item.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.22, delay: index * 0.03 }}
-                >
-                  <Link to={productHref(item)} className="group block">
-                    <div className="aspect-[4/5] overflow-hidden bg-black/5">
-                      <img
-                        src={productImage || IMAGE_PLACEHOLDER}
-                        alt={item.name}
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                        onError={handleImageError}
-                        className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
-                      />
-                    </div>
-                    <div className="pt-2.5">
-                      <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
-                      <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
-                    </div>
+      {contentSections.map((section) => {
+        if (section.key === 'featuredCollection' && featuredCollections.length) {
+          return (
+            <section key={section.key} className="pb-8 sm:pb-10">
+              <Container>
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                      {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
+                    </p>
+                    <h2 className="mt-1 text-h2 text-black">{homepageContent.featuredCollectionTitle ?? 'Featured collections'}</h2>
+                  </div>
+                  <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
+                    View all
                   </Link>
-                </motion.article>
-              )
-            })}
-          </div>
-        </Container>
-      </section>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {featuredCollections.map((item, index) => (
+                    <motion.article
+                      key={item.key}
+                      initial={{ opacity: 0, y: 12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: 0.22, delay: index * 0.04 }}
+                    >
+                      <Link to={item.href} className="group block">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
+                          <img
+                            src={item.image || IMAGE_PLACEHOLDER}
+                            alt={item.title}
+                            loading="lazy"
+                            decoding="async"
+                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw"
+                            onError={handleImageError}
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
+                            <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.title}</span>
+                            <span aria-hidden className="text-base leading-none">→</span>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.article>
+                  ))}
+                </div>
+              </Container>
+            </section>
+          )
+        }
+
+        if (section.key === 'newArrivals' && newArrivals.length) {
+          return (
+            <section key={section.key} className="pb-8 sm:pb-10">
+              <Container>
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                      {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
+                    </p>
+                    <h2 className="mt-1 text-h2 text-black">{homepageContent.newArrivalsTitle ?? 'New Arrivals'}</h2>
+                  </div>
+                  <Link
+                    to="/shop/new-arrivals"
+                    className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black"
+                  >
+                    Shop now
+                  </Link>
+                </div>
+
+                <HomepageProductGrid products={newArrivals} />
+              </Container>
+            </section>
+          )
+        }
+
+        if (section.key === 'bestSellers' && bestSellers.length) {
+          return (
+            <section key={section.key} className="pb-8 sm:pb-10">
+              <Container>
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                      {homepageContent.bestSellerEyebrow ?? 'Best sellers'}
+                    </p>
+                    <h2 className="mt-1 text-h2 text-black">{homepageContent.featuredTitle ?? 'Best sellers'}</h2>
+                  </div>
+                  <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
+                    Shop now
+                  </Link>
+                </div>
+
+                <HomepageProductGrid products={bestSellers} />
+              </Container>
+            </section>
+          )
+        }
+
+        if (section.key === 'brandPromise') {
+          const bannerImage = normalizeCatalogImageUrl(homepageContent.bannerImage ?? '', 1400, 800)
+
+          return (
+            <section key={section.key} className="pb-8 sm:pb-10">
+              <Container>
+                <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                  {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
+                </p>
+                <h2 className="mt-1 text-h2 text-black">{homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}</h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
+                  {homepageContent.brandPromiseDescription}
+                </p>
+                {bannerImage ? (
+                  <div className="mt-5 overflow-hidden bg-black/5">
+                    <img
+                      src={bannerImage}
+                      alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
+                      loading="lazy"
+                      decoding="async"
+                      sizes="(max-width: 639px) 100vw, 1100px"
+                      onError={handleImageError}
+                      className="h-full max-h-[420px] w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+                <p className="mt-4 text-sm text-black/70">
+                  <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
+                  {homepageContent.brandSignatureText}
+                </p>
+              </Container>
+            </section>
+          )
+        }
+
+        return null
+      })}
 
       {recentlyViewedItems.length > 0 ? (
         <section className="px-3.5 pb-16 pt-6 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-10">

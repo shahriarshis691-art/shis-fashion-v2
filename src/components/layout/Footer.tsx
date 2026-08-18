@@ -8,12 +8,13 @@ const essentialLinks = [
   { label: 'Sale', href: '/sale' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
 ]
 
 const socialLinks = [
-  { label: 'Instagram', href: 'https://www.instagram.com' },
-  { label: 'Facebook', href: 'https://www.facebook.com' },
-  { label: 'YouTube', href: 'https://www.youtube.com' },
+  { label: 'Instagram', href: 'https://www.instagram.com/shisfashion' },
+  { label: 'Facebook', href: 'https://www.facebook.com/shisfashion' },
 ]
 
 function getWhatsAppHref(phone?: string) {

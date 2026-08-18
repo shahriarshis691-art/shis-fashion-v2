@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
-import { useCart } from '../context/CartContext'
-import { createOrder, isOrderBackendReady } from '../firebase/adminService'
+import { useCart, clearBuyNowCheckout, readBuyNowCheckout } from '../context/CartContext'
+import { createOrder, getCouponByCode, isOrderBackendReady } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -88,7 +88,10 @@ function currentTimeMs() {
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, subtotal, clearCart, appliedCoupon, discountAmount, grandTotal } = useCart()
+  const { items: cartItems, clearCart, appliedCoupon, applyCoupon, removeCoupon } = useCart()
+  const [buyNowItems] = useState(() => readBuyNowCheckout())
+  const items = buyNowItems ?? cartItems
+  const isBuyNowCheckout = Boolean(buyNowItems?.length)
   const initialDivision = bangladeshDivisions[0]
   const initialDistrict = getDistrictsForDivision(initialDivision)[0]
   const initialUpazila = getUpazilasForDistrict(initialDistrict)[0]
@@ -105,11 +108,16 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [websiteField, setWebsiteField] = useState('')
+  const [couponCode, setCouponCode] = useState(appliedCoupon?.code ?? '')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponMessage, setCouponMessage] = useState('')
   const submissionLockRef = useRef(false)
   const hasTrackedCheckoutRef = useRef(false)
   const enteredAtRef = useRef(0)
+  const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
+  const discountAmount = appliedCoupon ? Math.round(subtotal * appliedCoupon.discountPercent / 100 * 100) / 100 : 0
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
-  const effectiveGrandTotal = appliedCoupon ? (subtotal + deliveryCharge - discountAmount) : grandTotal
+  const effectiveGrandTotal = subtotal + deliveryCharge - discountAmount
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const upazilaOptions = getUpazilasForDistrict(form.district)
   const backendReady = isOrderBackendReady()
@@ -123,6 +131,7 @@ export default function CheckoutPage() {
   const canSubmit = Boolean(
     form.name.trim() &&
     isPhoneValid &&
+    form.streetAddress.trim().length >= 5 &&
     form.division &&
     form.district &&
     form.upazila &&
@@ -135,14 +144,14 @@ export default function CheckoutPage() {
     }
 
     metaPixel.trackInitiateCheckout({
-      value: grandTotal,
+      value: subtotal - discountAmount,
       currency: 'BDT',
       content_type: 'product',
       content_ids: items.map((item) => String(item.id)),
     })
 
     googleAnalytics.beginCheckout({
-      value: grandTotal,
+      value: subtotal - discountAmount,
       currency: 'BDT',
       items: items.map((item) => ({
         item_id: item.id,
@@ -155,7 +164,7 @@ export default function CheckoutPage() {
     })
 
     hasTrackedCheckoutRef.current = true
-  }, [grandTotal, items])
+  }, [discountAmount, items, subtotal])
 
   useEffect(() => {
     enteredAtRef.current = currentTimeMs()
@@ -176,6 +185,34 @@ export default function CheckoutPage() {
         </Container>
       </section>
     )
+  }
+
+  const handleApplyCoupon = async () => {
+    const trimmed = couponCode.trim()
+    if (!trimmed) {
+      setCouponMessage('Please enter a coupon code.')
+      return
+    }
+
+    setCouponLoading(true)
+    setCouponMessage('')
+
+    try {
+      const result = await getCouponByCode(trimmed)
+
+      if (!result || result.status !== 'active' || !result.code) {
+        setCouponMessage('Invalid or expired coupon code.')
+        setCouponLoading(false)
+        return
+      }
+
+      applyCoupon(result.code, result.id, result.discountPercent)
+      setCouponMessage(`Coupon applied. You save ${result.discountPercent}%.`)
+    } catch {
+      setCouponMessage('Unable to validate coupon. Please try again.')
+    }
+
+    setCouponLoading(false)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -222,6 +259,13 @@ export default function CheckoutPage() {
       return
     }
 
+    if (form.streetAddress.trim().length < 5) {
+      setSubmitError('Please enter your full address (house, road, or area).')
+      setIsSubmitting(false)
+      submissionLockRef.current = false
+      return
+    }
+
     const composedAddress = [form.streetAddress.trim(), form.upazila, form.district, form.division]
       .filter(Boolean)
       .join(', ')
@@ -234,14 +278,21 @@ export default function CheckoutPage() {
         address: composedAddress,
         deliveryCharge,
         notes: form.deliveryNote.trim(),
-        items: items.map((item) => ({ name: item.name, price: item.price, quantity: item.quantity, size: item.size })),
+        items: items.map((item) => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+          slug: item.slug,
+        })),
         total: effectiveGrandTotal,
         status: 'new',
         trackingNumber: '',
       }, appliedCoupon ? {
         code: appliedCoupon.code,
         discountPercent: appliedCoupon.discountPercent,
-        discountAmount: appliedCoupon.discountAmount,
+        discountAmount,
         couponId: appliedCoupon.couponId,
       } : null)
 
@@ -265,7 +316,7 @@ export default function CheckoutPage() {
         })),
         couponCode: appliedCoupon?.code ?? '',
         couponDiscountPercent: appliedCoupon?.discountPercent ?? 0,
-        couponDiscountAmount: appliedCoupon?.discountAmount ?? 0,
+        couponDiscountAmount: discountAmount,
         createdAt: new Date().toISOString(),
       }
 
@@ -274,7 +325,10 @@ export default function CheckoutPage() {
         window.localStorage.setItem(CHECKOUT_ANTI_BOT_COOLDOWN_KEY, String(currentTimeMs()))
       }
 
-      clearCart()
+      clearBuyNowCheckout()
+      if (!isBuyNowCheckout) {
+        clearCart()
+      }
       shouldReleaseLock = false
       navigate('/order-success', { state: { orderId: createdOrder.id } })
     } catch (error) {
@@ -404,14 +458,16 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="checkout-address" className="text-sm font-medium text-[var(--color-text)]">Full Address (Optional)</label>
+                <label htmlFor="checkout-address" className="text-sm font-medium text-[var(--color-text)]">Full Address *</label>
                 <textarea
                   id="checkout-address"
+                  required
+                  minLength={5}
                   autoComplete="street-address"
                   value={form.streetAddress}
                   onChange={(event) => setForm({ ...form, streetAddress: event.target.value })}
                   className="min-h-24 w-full rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-black focus:bg-white focus:ring-2 focus:ring-black/5"
-                  placeholder="House/Road/Village/Area (optional)"
+                  placeholder="House, road, village, or area"
                 />
               </div>
 
@@ -439,6 +495,38 @@ export default function CheckoutPage() {
                   placeholder="Email Address"
                 />
               </div>
+            </div>
+
+            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+              <p className="text-sm font-medium text-[var(--color-text)]">Promo Code</p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  className="flex-1 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-black focus:ring-2 focus:ring-black/5"
+                  maxLength={12}
+                />
+                <button
+                  type="button"
+                  onClick={() => { void handleApplyCoupon() }}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="ui-interactive rounded-[1rem] border border-black bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35"
+                >
+                  {couponLoading ? 'Applying…' : 'Apply'}
+                </button>
+              </div>
+              {appliedCoupon ? (
+                <div className="mt-2 flex items-center justify-between gap-3 text-sm text-emerald-600">
+                  <p role="status">{couponMessage || `${appliedCoupon.code} applied`}</p>
+                  <button type="button" onClick={removeCoupon} className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)] hover:text-black">
+                    Remove
+                  </button>
+                </div>
+              ) : couponMessage ? (
+                <p className="mt-2 text-sm text-red-600" role="alert">{couponMessage}</p>
+              ) : null}
             </div>
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">

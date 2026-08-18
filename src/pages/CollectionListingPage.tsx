@@ -53,12 +53,7 @@ const fallbackCollections: FeaturedCollectionPage[] = [
     subtitle: 'Layer-ready staples',
     description: 'Cold-season essentials with premium texture and clean tailoring.',
     href: '/collections/winter',
-    images: [
-      'https://images.unsplash.com/photo-1516822003754-cca485356ecb?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?auto=format&fit=crop&w=1200&q=80',
-    ],
+    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
     relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
   },
   {
@@ -67,12 +62,7 @@ const fallbackCollections: FeaturedCollectionPage[] = [
     subtitle: 'Breathable premium edits',
     description: 'Lightweight silhouettes designed for warm days and evening plans.',
     href: '/collections/summer',
-    images: [
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1503342452485-86ff0a5a2f6f?auto=format&fit=crop&w=1200&q=80',
-    ],
+    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
     relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
   },
   {
@@ -81,12 +71,7 @@ const fallbackCollections: FeaturedCollectionPage[] = [
     subtitle: 'Daily go-to luxury',
     description: 'Reliable daily pieces balancing comfort, polish, and movement.',
     href: '/collections/everyday-wear',
-    images: [
-      'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1200&q=80',
-    ],
+    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
     relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
   },
 ]

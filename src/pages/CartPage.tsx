@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
-import { useCart } from '../context/CartContext'
+import { useCart, clearBuyNowCheckout } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import type { ShopProduct } from '../data/shopData'
 import { formatBDT, parseBDT } from '../utils/currency'
@@ -19,6 +19,7 @@ export default function CartPage() {
   const supportWhatsAppHref = getWhatsAppHref()
 
   const handleBeginCheckout = () => {
+    clearBuyNowCheckout()
     navigate('/checkout')
   }
 
