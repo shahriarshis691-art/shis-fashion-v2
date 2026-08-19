@@ -16,7 +16,6 @@ const primaryLinks = [
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'XEROXII', href: '/brands/xeroxii' },
   { label: 'CERAVO', href: '/brands/ceravo' },
-  { label: 'RANGKUTIR', href: '/brands/rangkutir' },
   { label: 'FOUNDER', href: '/founder' },
 ]
 
