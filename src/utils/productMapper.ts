@@ -1,7 +1,8 @@
 import type { AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
 import { getManagedImageEntries, getProductImage } from './media'
-import { slugify } from './slugify'
+import { getProductSlug } from './productIdentity'
+import { getProductStockTotal } from './variantStock'
 import { normalizeSizes } from './sizes'
 
 export function mapAdminProductToShopProduct(
@@ -13,7 +14,7 @@ export function mapAdminProductToShopProduct(
 
   return {
     id: product.id,
-    slug: slugify(product.name),
+    slug: getProductSlug(product),
     name: product.name,
     price: product.price,
     comparePrice: product.comparePrice,
@@ -22,7 +23,7 @@ export function mapAdminProductToShopProduct(
     image: primaryImage || imageEntries[0]?.url || '',
     description: product.description,
     galleryImages: imageEntries.map((entry) => entry.url).filter(Boolean),
-    stock: product.stock,
+    stock: getProductStockTotal(product),
     featured: product.featured,
     newArrival: product.newArrival,
     sizes: normalizeSizes(product.sizes),

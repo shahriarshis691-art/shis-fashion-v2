@@ -1,6 +1,10 @@
 import { FieldValue, getFirestore, type DocumentReference } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
 import { createRateLimiter, getClientIp } from './_rateLimit.js'
+import { sendOpsWebhook } from './_opsWebhook.js'
+import { getAvailableStock, getProductSlug, productMatchesSlug } from './_catalog.js'
+import { notifyCustomer } from './_notifyCustomer.js'
+import { getConfiguredPrepaidProvider, startPrepaidCheckout } from './_prepaidProvider.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -43,15 +47,18 @@ interface CreateOrderBody {
   items?: OrderItemInput[]
   couponCode?: string
   deliveryAddress?: DeliveryAddressInput
+  paymentMethod?: string
 }
 
 interface ProductRecord {
   name?: string
+  slug?: string
   price?: string
   stock?: number
   archived?: boolean
   sizes?: string[]
   colors?: string[]
+  variants?: unknown
 }
 
 interface CouponRecord {
@@ -73,16 +80,8 @@ const isRateLimited = createRateLimiter(8)
 const DHAKA_DELIVERY_CHARGE = 80
 const OUTSIDE_DHAKA_DELIVERY_CHARGE = 130
 const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
+const LOW_STOCK_THRESHOLD = 5
 const VALID_DIVISIONS = ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'] as const
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
 
 function parseBDT(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -146,6 +145,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     || [streetAddress, upazila, district, division].filter(Boolean).join(', ')
   const items = Array.isArray(body.items) ? body.items : []
   const couponCode = String(body.couponCode ?? '').trim().toUpperCase()
+  const requestedPayment = String(body.paymentMethod ?? 'Cash on Delivery').trim()
+  const isPrepaid = /bkash|sslcommerz|ssl/i.test(requestedPayment)
 
   if (customerName.length < 2 || customerName.length > 100) {
     res.status(400).json({ error: 'Please enter a valid full name.' })
@@ -172,18 +173,24 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
+  if (isPrepaid && !getConfiguredPrepaidProvider()) {
+    res.status(503).json({ error: 'Online payment is not configured. Please choose Cash on Delivery.', skipped: true })
+    return
+  }
+
   const productsSnapshot = await db.collection('products').get()
   const liveProducts = productsSnapshot.docs.filter((doc) => !(doc.data() as ProductRecord).archived)
 
   const matchedItems = items.map((item) => {
     const quantity = Math.max(0, Math.floor(Number(item.quantity ?? 0)))
     const name = String(item.name ?? '').trim()
-    const itemSlug = slugify(item.slug ?? name)
+    const itemSlug = String(item.slug ?? name).trim()
     const size = String(item.size ?? '').trim()
     const color = String(item.color ?? '').trim()
     const match = liveProducts.find((doc) => {
-      const productName = String((doc.data() as ProductRecord).name ?? '').trim()
-      return slugify(productName) === itemSlug || productName.toLowerCase() === name.toLowerCase()
+      const data = doc.data() as ProductRecord
+      const productName = String(data.name ?? '').trim()
+      return productMatchesSlug(data, itemSlug) || productName.toLowerCase() === name.toLowerCase()
     })
 
     return { item, quantity, name, size, color, match }
@@ -247,11 +254,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       const pricedItems = productSnaps.map((snap, index) => {
         const entry = matchedItems[index]
         const data = (snap.data() ?? {}) as ProductRecord
-        const stock = Number(data.stock ?? 0)
         const sizes = Array.isArray(data.sizes) ? data.sizes.map((value) => String(value).trim()).filter(Boolean) : []
         const colors = Array.isArray(data.colors) ? data.colors.map((value) => String(value).trim()).filter(Boolean) : []
+        const available = getAvailableStock(data, entry?.size ?? '', entry?.color ?? '')
+        const variantsConfigured = available.variants.length > 0
 
-        if (!snap.exists || data.archived || stock < (entry?.quantity ?? 0)) {
+        if (!snap.exists || data.archived) {
           throw new Error('INSUFFICIENT_STOCK')
         }
 
@@ -263,16 +271,26 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           throw new Error('INVALID_VARIANT')
         }
 
+        if (variantsConfigured && available.variantIndex < 0) {
+          throw new Error('INVALID_VARIANT')
+        }
+
+        if (available.stock < (entry?.quantity ?? 0)) {
+          throw new Error('INSUFFICIENT_STOCK')
+        }
+
         return {
           name: String(data.name ?? entry?.name ?? ''),
           price: String(data.price ?? ''),
           quantity: entry?.quantity ?? 0,
           size: entry?.size || undefined,
           color: entry?.color || undefined,
-          slug: slugify(String(data.name ?? entry?.name ?? '')),
+          slug: getProductSlug(data),
           unitPrice: parseBDT(data.price),
           productRef: snap.ref,
-          stock,
+          stock: available.stock,
+          variants: available.variants,
+          variantIndex: available.variantIndex,
         }
       })
 
@@ -328,9 +346,10 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         total,
         status: 'new',
         trackingNumber: '',
-        paymentMethod: 'Cash on Delivery',
+        paymentMethod: isPrepaid ? (getConfiguredPrepaidProvider() === 'sslcommerz' ? 'SSLCOMMERZ' : 'bKash') : 'Cash on Delivery',
+        paymentStatus: isPrepaid ? 'pending' : 'unpaid',
         createdAt: FieldValue.serverTimestamp(),
-        stockCommitted: true,
+        stockCommitted: !isPrepaid,
         ...(couponCode && couponId ? {
           couponCode,
           couponDiscountPercent: discountPercent,
@@ -341,11 +360,24 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
       transaction.set(orderRef, orderPayload)
 
-      pricedItems.forEach((item) => {
-        transaction.update(item.productRef, { stock: Math.max(0, item.stock - item.quantity) })
-      })
+      if (!isPrepaid) {
+        pricedItems.forEach((item) => {
+          if (item.variantIndex >= 0) {
+            const nextVariants = item.variants.map((variant, index) => (
+              index === item.variantIndex
+                ? { ...variant, stock: Math.max(0, variant.stock - item.quantity) }
+                : variant
+            ))
+            const totalStock = nextVariants.reduce((sum, variant) => sum + variant.stock, 0)
+            transaction.update(item.productRef, { variants: nextVariants, stock: totalStock })
+            return
+          }
 
-      if (couponSnap?.exists && couponRef) {
+          transaction.update(item.productRef, { stock: Math.max(0, item.stock - item.quantity) })
+        })
+      }
+
+      if (!isPrepaid && couponSnap?.exists && couponRef) {
         transaction.update(couponRef, {
           status: 'used',
           usageCount: 1,
@@ -359,10 +391,68 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         id: orderRef.id,
         ...orderPayload,
         createdAt: new Date().toISOString(),
+        lowStockAlerts: pricedItems
+          .map((item) => ({
+            name: item.name,
+            remaining: Math.max(0, item.stock - item.quantity),
+          }))
+          .filter((item) => item.remaining <= LOW_STOCK_THRESHOLD),
       }
     })
 
-    res.status(200).json({ order: created })
+    const { lowStockAlerts = [], ...order } = created as typeof created & {
+      lowStockAlerts?: Array<{ name: string; remaining: number }>
+    }
+
+    if (!isPrepaid && lowStockAlerts.length) {
+      void sendOpsWebhook([
+        '*SHIS Low Stock*',
+        `Order ${order.id} reduced inventory.`,
+        ...lowStockAlerts.map((item) => `${item.name}: ${item.remaining} left`),
+      ].join('\n'))
+    }
+
+    if (isPrepaid) {
+      const prepaid = await startPrepaidCheckout({
+        orderId: order.id,
+        amount: Number(order.total ?? 0),
+        customerName,
+        customerPhone,
+        customerEmail,
+      })
+
+      if (!prepaid.configured || !prepaid.ok) {
+        await db.collection('orders').doc(order.id).update({
+          paymentStatus: 'failed',
+          status: 'cancelled',
+        })
+        res.status(502).json({ error: prepaid.configured ? prepaid.error : 'Online payment is not configured. Please choose Cash on Delivery.' })
+        return
+      }
+
+      await db.collection('orders').doc(order.id).update({
+        prepaidProvider: prepaid.provider,
+        prepaidPaymentId: prepaid.paymentId,
+      })
+
+      res.status(200).json({
+        order: { ...order, prepaidPaymentId: prepaid.paymentId },
+        redirectUrl: prepaid.redirectUrl,
+      })
+      return
+    }
+
+    void notifyCustomer({
+      channel: 'order-placed',
+      orderId: order.id,
+      customerName,
+      customerPhone,
+      customerEmail,
+      paymentMethod: 'Cash on Delivery',
+      total: Number(order.total ?? 0),
+    })
+
+    res.status(200).json({ order })
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
     if (message === 'INSUFFICIENT_STOCK') {

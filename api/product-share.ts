@@ -1,4 +1,5 @@
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
+import { getProductSlug, productMatchesSlug } from './_catalog.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -169,13 +170,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   try {
     const snapshot = await db.collection('products').get()
     const matched = snapshot.docs.find((doc) => {
-      const data = doc.data() as { name?: string; category?: string; archived?: boolean }
+      const data = doc.data() as { name?: string; slug?: string; category?: string; archived?: boolean }
       if (data.archived) {
         return false
       }
 
-      const slug = slugify(String(data.name ?? ''))
-      if (slug !== parsed.slug) {
+      if (!productMatchesSlug(data, parsed.slug)) {
         return false
       }
 
@@ -196,6 +196,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
     const data = matched.data() as {
       name?: string
+      slug?: string
       description?: string
       category?: string
       images?: unknown
@@ -206,7 +207,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     const description = String(data.description ?? 'Shop premium fashion essentials from SHIS Fashion Bangladesh.').trim()
       || 'Shop premium fashion essentials from SHIS Fashion Bangladesh.'
     const category = slugify(String(data.category ?? 'shop')) || 'shop'
-    const slug = slugify(name)
+    const slug = getProductSlug(data)
     const url = `${SITE_URL}/shop/${category}/${slug}`
 
     res.status(200)

@@ -9,6 +9,7 @@ import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 import { PAYMENT_METHOD_COD } from '../utils/orderComms'
+import { isPrepaidCheckoutEnabled, PAYMENT_METHOD_BKASH } from '../utils/prepaid'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 
@@ -61,7 +62,20 @@ export default function CheckoutPage() {
     deliveryNote: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState('')
+  const [submitError, setSubmitError] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    const prepaid = new URLSearchParams(window.location.search).get('prepaid')
+    if (prepaid === 'cancelled' || prepaid === 'failed' || prepaid === 'missing' || prepaid === 'unavailable') {
+      return 'Online payment did not complete. You can try Cash on Delivery or pay again.'
+    }
+
+    return ''
+  })
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD_COD)
+  const prepaidEnabled = isPrepaidCheckoutEnabled()
   const [websiteField, setWebsiteField] = useState('')
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
   const submissionLockRef = useRef(false)
@@ -228,7 +242,7 @@ export default function CheckoutPage() {
         total: effectiveGrandTotal,
         status: 'new',
         trackingNumber: '',
-        paymentMethod: PAYMENT_METHOD_COD,
+        paymentMethod,
       }, appliedCoupon ? {
         code: appliedCoupon.code,
         discountPercent: appliedCoupon.discountPercent,
@@ -241,7 +255,7 @@ export default function CheckoutPage() {
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
         address: composedAddress,
-        paymentMethod: PAYMENT_METHOD_COD,
+        paymentMethod,
         deliveryCharge: createdOrder.deliveryCharge ?? deliveryCharge,
         subtotal,
         grandTotal: createdOrder.total,
@@ -263,6 +277,12 @@ export default function CheckoutPage() {
       if (typeof window !== 'undefined') {
         window.sessionStorage.setItem(ORDER_CONFIRMATION_KEY, JSON.stringify(orderSnapshot))
         window.localStorage.setItem(CHECKOUT_ANTI_BOT_COOLDOWN_KEY, String(currentTimeMs()))
+      }
+
+      if (createdOrder.redirectUrl) {
+        shouldReleaseLock = false
+        window.location.assign(createdOrder.redirectUrl)
+        return
       }
 
       clearBuyNowCheckout()
@@ -486,9 +506,31 @@ export default function CheckoutPage() {
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
               <p className="text-sm font-medium text-[var(--color-text)]">Payment</p>
-              <div className="mt-3 border border-black px-4 py-3">
-                <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_COD}</p>
-                <p className="mt-1 text-sm text-[var(--color-muted)]">Pay the courier when your order arrives. {STORE_POLICY.phoneConfirm}</p>
+              <div className="mt-3 space-y-2">
+                <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_COD ? 'border-black' : 'border-black/15'}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    className="sr-only"
+                    checked={paymentMethod === PAYMENT_METHOD_COD}
+                    onChange={() => setPaymentMethod(PAYMENT_METHOD_COD)}
+                  />
+                  <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_COD}</p>
+                  <p className="mt-1 text-sm text-[var(--color-muted)]">Pay the courier when your order arrives. {STORE_POLICY.phoneConfirm}</p>
+                </label>
+                {prepaidEnabled ? (
+                  <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH ? 'border-black' : 'border-black/15'}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="sr-only"
+                      checked={paymentMethod === PAYMENT_METHOD_BKASH}
+                      onChange={() => setPaymentMethod(PAYMENT_METHOD_BKASH)}
+                    />
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH}</p>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">Pay now with bKash. Your order is confirmed after payment succeeds.</p>
+                  </label>
+                ) : null}
               </div>
             </div>
 

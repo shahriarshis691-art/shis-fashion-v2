@@ -1,4 +1,5 @@
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
+import { getProductSlug } from './_catalog.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -66,12 +67,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     try {
       const snapshot = await db.collection('products').get()
       snapshot.docs.forEach((doc) => {
-        const data = doc.data() as { name?: string; category?: string; archived?: boolean }
+        const data = doc.data() as { name?: string; slug?: string; category?: string; archived?: boolean }
         if (data.archived) {
           return
         }
 
-        const slug = slugify(String(data.name ?? ''))
+        const slug = getProductSlug(data)
         const category = slugify(String(data.category ?? 'shop')) || 'shop'
         if (!slug) {
           return

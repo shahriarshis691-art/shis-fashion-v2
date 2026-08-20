@@ -183,41 +183,8 @@
   }
 }
 
-/* Hero background video styles */
-.hero-video-wrapper {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hero-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.hero-video-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 22%;
-  display: block;
-}
-
-.hero-video-overlay {
-  /* keeps the normal document flow for content */
-}
-
-/* Mobile: disable background video to save data & improve performance */
+/* Mobile: keep homepage hero title legible on small screens */
 @media (max-width: 768px) {
-  .hero-video-wrapper {
-    display: none;
-  }
-
-  /* Ensure homepage hero title remains legible on small screens */
   .home-hero-title {
     font-size: 1.75rem; /* ~28px */
     line-height: 1.05;

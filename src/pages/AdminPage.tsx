@@ -8,6 +8,7 @@ import BrandManagement from '../components/admin/BrandManagement'
 import { compactManagedImages, getManagedImageEntries } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
+import { buildOpsReport, LOW_STOCK_THRESHOLD } from '../utils/opsReports'
 import {
   consumeAdminAccessDeniedFlag,
   createCategory,
@@ -47,6 +48,12 @@ import {
   updateOrderStatus,
   updateProduct,
   uploadAssets,
+  subscribeToAdminReviews,
+  subscribeToAdminAccounts,
+  updateReviewStatus,
+  updateAdminAccountRole,
+  requestOrderStatusNotify,
+  type AdminAccount,
   type AdminBrand,
   type AdminOrder,
   type AdminProduct,
@@ -60,6 +67,8 @@ import {
   type HomepageSaveResult,
   type HomepageSectionConfig,
   type NewsletterSubscriber,
+  type ProductReview,
+  type AdminSessionUser,
   onAdminAuthChanged,
 } from '../firebase/adminService'
 import {
@@ -68,6 +77,8 @@ import {
 } from '../data/categoryTaxonomy'
 import { normalizeSizes } from '../utils/sizes'
 import { downloadCsv } from '../utils/adminCsv'
+import { ADMIN_ACCESS_ROLE_OPTIONS, canAccessAdminSection, type AdminAccessRole } from '../utils/adminAccess'
+import { rebuildVariantMatrix, variantsForSave, type ProductVariantStock } from '../utils/variantStock'
 
 const emptyProductForm = {
   name: '',
@@ -85,10 +96,10 @@ const emptyProductForm = {
   featured: false,
   newArrival: false,
   hero: false,
+  variants: [] as ProductVariantStock[],
 }
 
 const MAX_PRODUCT_IMAGES = 6
-const LOW_STOCK_THRESHOLD = 5
 
 function galleryLabel(index: number) {
   if (index === 0) {
@@ -165,7 +176,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const firebaseReady = isFirebaseConfigured()
   const launchModeEnabled = isLaunchModeEnabled()
   const canSignIn = firebaseReady || launchModeEnabled
-  const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
+  const [user, setUser] = useState<AdminSessionUser | null>(null)
   const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
@@ -225,6 +236,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
    const [couponLoading, setCouponLoading] = useState(false)
    const [couponSearch, setCouponSearch] = useState('')
    const [couponStats, setCouponStats] = useState({ total: 0, active: 0, used: 0, expired: 0, disabled: 0 })
+   const [reviews, setReviews] = useState<ProductReview[]>([])
+   const [adminAccounts, setAdminAccounts] = useState<AdminAccount[]>([])
    const [showCouponForm, setShowCouponForm] = useState(false)
    const [newCouponForm, setNewCouponForm] = useState({
      code: '',
@@ -280,6 +293,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeArchivedOrders = subscribeToArchivedOrders((nextOrders) => setArchivedOrders(nextOrders))
     const unsubscribeArchivedCategories = subscribeToArchivedCategories((nextCategories) => setArchivedCategories(nextCategories))
     const unsubscribeArchivedBrands = subscribeToArchivedBrands((nextArchivedBrands) => setArchivedBrands(nextArchivedBrands))
+    const unsubscribeReviews = subscribeToAdminReviews(setReviews)
+    const unsubscribeAdmins = subscribeToAdminAccounts(setAdminAccounts)
 
     return () => {
       unsubscribeProducts()
@@ -292,6 +307,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       unsubscribeArchivedOrders()
       unsubscribeArchivedCategories()
       unsubscribeArchivedBrands()
+      unsubscribeReviews()
+      unsubscribeAdmins()
     }
   }, [authMode, user])
 
@@ -447,6 +464,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }, [archivedBrands.length, brands.length, customers.length, orders, products])
 
+  const opsReport = useMemo(() => buildOpsReport(orders), [orders])
+
   const filteredOrders = useMemo(() => {
     const query = orderSearch.toLowerCase()
     const matched = orders.filter((order) => {
@@ -538,6 +557,23 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       ]),
     )
     setMessage(`${filteredOrders.length} order${filteredOrders.length === 1 ? '' : 's'} exported.`)
+  }
+
+  const exportOpsReport = () => {
+    downloadCsv(
+      `ops-report-${new Date().toISOString().slice(0, 10)}.csv`,
+      ['Type', 'Name', 'Quantity', 'Amount'],
+      [
+        ['KPI', 'Billable orders', opsReport.billableOrders, ''],
+        ['KPI', 'Average order value', '', opsReport.aov],
+        ['KPI', 'Last 7 days orders', opsReport.last7Orders, ''],
+        ['KPI', 'Last 7 days revenue', '', opsReport.last7Revenue],
+        ['KPI', 'Pending COD value', '', opsReport.pendingValue],
+        ['KPI', 'Cancel rate %', opsReport.cancelledRate, ''],
+        ...opsReport.bestSellers.map((item) => ['Best seller', item.name, item.quantity, Math.round(item.revenue)] as Array<string | number>),
+      ],
+    )
+    setMessage('Operations report exported.')
   }
 
   const filteredProducts = useMemo(() => {
@@ -682,7 +718,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleUpload = async (
     files: FileList | null,
-    target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null,
+    target: 'product-images' | 'product-videos' | 'hero-image' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null,
     categoryIndex?: number,
     slotIndex?: number,
     sectionKey?: HomepageCategorySectionKey,
@@ -712,7 +748,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         })
         : []
       const uploadedVideos = videoFiles.length
-        ? await uploadAssets(videoFiles, target === 'hero-video' ? 'homepage' : 'products', {
+        ? await uploadAssets(videoFiles, 'products', {
           retries: 2,
           onProgress: (progress) => setUploadProgress(progress),
         })
@@ -720,16 +756,6 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
       if (target === 'hero-image') {
         const nextContent = homepageContent ? { ...homepageContent, heroImage: uploadedImages[0] ?? homepageContent.heroImage } : homepageContent
-        if (nextContent) {
-          setHomepageContent(nextContent)
-          try {
-            await updateHomepageContent(nextContent)
-          } catch {
-            // Upload succeeded; auto-save to Firestore is best-effort
-          }
-        }
-      } else if (target === 'hero-video') {
-        const nextContent = homepageContent ? { ...homepageContent, heroVideo: uploadedVideos[0] ?? homepageContent.heroVideo } : homepageContent
         if (nextContent) {
           setHomepageContent(nextContent)
           try {
@@ -840,7 +866,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'hero-video' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null) => {
+  const handleDrop = async (event: DragEvent<HTMLDivElement>, target: 'product-images' | 'product-videos' | 'hero-image' | 'banner-image' | 'category-image' | 'shop-category-image' | 'category-section-image' | 'featured-page-image' | null = null) => {
     event.preventDefault()
     setDragActive(false)
     await handleUpload(event.dataTransfer.files, target)
@@ -931,6 +957,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setLoading(true)
     try {
       const normalizedForm = normalizeProductForm(form)
+      const variantPayload = variantsForSave(normalizedForm.sizes, normalizedForm.colors, normalizedForm.variants, normalizedForm.stock)
       const normalizedMedia = compactManagedImages({
         images: normalizedForm.images.slice(0, MAX_PRODUCT_IMAGES),
         imageTitles: normalizedForm.imageTitles.slice(0, MAX_PRODUCT_IMAGES),
@@ -940,6 +967,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         await updateProduct(isEditing, {
           ...normalizedForm,
           ...normalizedMedia,
+          ...variantPayload,
           sizes: normalizedForm.sizes,
           colors: normalizedForm.colors,
         })
@@ -948,6 +976,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         await createProduct({
           ...normalizedForm,
           ...normalizedMedia,
+          ...variantPayload,
           sizes: normalizedForm.sizes,
           colors: normalizedForm.colors,
         })
@@ -977,6 +1006,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       featured: product.featured,
       newArrival: product.newArrival,
       hero: product.hero,
+      variants: rebuildVariantMatrix(product.sizes, product.colors, product.variants),
     })
     setIsEditing(product.id)
   }
@@ -1176,6 +1206,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     try {
       await updateOrderStatus(orderId, status)
       setMessage('Order status updated.')
+      if (status === 'shipped' || status === 'confirmed') {
+        void requestOrderStatusNotify(orderId, status === 'shipped' ? 'order-shipped' : 'order-placed')
+      }
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error
         ? String((error as { code?: unknown }).code ?? '')
@@ -1461,6 +1494,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return 'extra image'
   }
 
+  const accessRole: AdminAccessRole = user?.role ?? 'owner'
+  const canSee = (section: Parameters<typeof canAccessAdminSection>[1]) => canAccessAdminSection(accessRole, section)
+
   if (authMode === 'login' && !user) {
     return (
       <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -1507,7 +1543,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           </div>
         </div>
       ) : null}
-      <div className="fixed bottom-5 right-4 z-40">
+      <div className={`fixed bottom-5 right-4 z-40 ${canSee('founder') ? '' : 'hidden'}`}>
         <button
           type="button"
           onClick={() => handleSummaryCardClick('founder')}
@@ -1521,7 +1557,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Admin dashboard</p>
             <h1 className="mt-2 text-3xl font-semibold text-[var(--color-text)]">Luxury operations at a glance</h1>
-            <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">Keep products, orders, and homepage content moving with calm precision.</p>
+            <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
+              Signed in as {user?.email ?? 'admin'} · {accessRole}
+            </p>
           </div>
           <div className="flex gap-3">
             <Button to="/" variant="secondary">View store</Button>
@@ -1541,14 +1579,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               description="Tap a card to jump directly to the matching management area."
             />
             <div className="flex flex-wrap gap-3">
-              <Button variant="secondary" onClick={() => { setForm(emptyProductForm); setIsEditing(null); scrollToSection('products-management') }}>Add New Product</Button>
-              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Upload Hero Image</Button>
-              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Upload Hero Video</Button>
-              <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Edit Homepage</Button>
-              <Button variant="secondary" onClick={() => handleSummaryCardClick('orders', 'new')}>View New Orders</Button>
-              <Button variant="secondary" onClick={() => scrollToSection('categories-management')}>Manage Categories</Button>
-              <Button variant="secondary" onClick={() => handleSummaryCardClick('founder')}>Edit Founder</Button>
-              <Button variant="secondary" onClick={() => { setShowBrandManagement(!showBrandManagement); scrollToSection('brands-management') }}>Manage Brands</Button>
+              {canSee('products') ? <Button variant="secondary" onClick={() => { setForm(emptyProductForm); setIsEditing(null); scrollToSection('products-management') }}>Add New Product</Button> : null}
+              {canSee('homepage') ? <Button variant="secondary" onClick={() => scrollToSection('homepage-management')}>Edit Homepage</Button> : null}
+              {canSee('orders') ? <Button variant="secondary" onClick={() => handleSummaryCardClick('orders', 'new')}>View New Orders</Button> : null}
+              {canSee('categories') ? <Button variant="secondary" onClick={() => scrollToSection('categories-management')}>Manage Categories</Button> : null}
+              {canSee('founder') ? <Button variant="secondary" onClick={() => handleSummaryCardClick('founder')}>Edit Founder</Button> : null}
+              {canSee('brands') ? <Button variant="secondary" onClick={() => { setShowBrandManagement(!showBrandManagement); scrollToSection('brands-management') }}>Manage Brands</Button> : null}
             </div>
           </div>
 
@@ -1564,23 +1600,26 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {[
-              { label: "Today's Orders", value: dashboardSummary.todayOrders, target: () => handleSummaryCardClick('orders') },
-              { label: 'Pending Orders', value: dashboardSummary.pendingOrders, target: () => handleSummaryCardClick('orders', 'new' as const) },
-              { label: 'Confirmed Orders', value: dashboardSummary.confirmedOrders, target: () => handleSummaryCardClick('orders', 'confirmed') },
-              { label: 'Processing Orders', value: dashboardSummary.processingOrders, target: () => handleSummaryCardClick('orders', 'processing') },
-              { label: 'Delivered Orders', value: dashboardSummary.deliveredOrders, target: () => handleSummaryCardClick('orders', 'delivered') },
-              { label: 'Cancelled Orders', value: dashboardSummary.cancelledOrders, target: () => handleSummaryCardClick('orders', 'cancelled') },
-              { label: 'Total Revenue', value: formatBDT(dashboardSummary.totalRevenue), target: () => handleSummaryCardClick('orders') },
-              { label: "Today's Revenue", value: formatBDT(dashboardSummary.todayRevenue), target: () => handleSummaryCardClick('orders') },
-              { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products') },
-              { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products') },
-              { label: 'Low Stock Products', value: dashboardSummary.lowStockProducts, target: () => handleSummaryCardClick('products') },
-              { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers') },
-              { label: 'Total Brands', value: dashboardSummary.totalBrands, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
-              { label: 'Archived Brands', value: dashboardSummary.archivedBrandsCount, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
-              { label: 'Live Mode', value: firebaseReady ? 'Firebase' : launchModeEnabled ? 'Launch Mode' : 'Unavailable', target: () => handleSummaryCardClick('homepage') },
-              { label: 'Founder Profile', value: founderProfile?.name ?? '-', target: () => handleSummaryCardClick('founder') },
-            ].map((card) => (
+              { label: "Today's Orders", value: dashboardSummary.todayOrders, target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
+              { label: 'Pending Orders', value: dashboardSummary.pendingOrders, target: () => handleSummaryCardClick('orders', 'new' as const), section: 'orders' as const },
+              { label: 'Confirmed Orders', value: dashboardSummary.confirmedOrders, target: () => handleSummaryCardClick('orders', 'confirmed'), section: 'orders' as const },
+              { label: 'Processing Orders', value: dashboardSummary.processingOrders, target: () => handleSummaryCardClick('orders', 'processing'), section: 'orders' as const },
+              { label: 'Delivered Orders', value: dashboardSummary.deliveredOrders, target: () => handleSummaryCardClick('orders', 'delivered'), section: 'orders' as const },
+              { label: 'Cancelled Orders', value: dashboardSummary.cancelledOrders, target: () => handleSummaryCardClick('orders', 'cancelled'), section: 'orders' as const },
+              { label: 'Total Revenue', value: formatBDT(dashboardSummary.totalRevenue), target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
+              { label: "Today's Revenue", value: formatBDT(dashboardSummary.todayRevenue), target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
+              { label: 'Average Order Value', value: formatBDT(opsReport.aov), target: () => handleSummaryCardClick('orders'), section: 'dashboard' as const },
+              { label: '7-Day Revenue', value: formatBDT(opsReport.last7Revenue), target: () => handleSummaryCardClick('orders'), section: 'dashboard' as const },
+              { label: 'Pending COD Value', value: formatBDT(opsReport.pendingValue), target: () => handleSummaryCardClick('orders', 'new' as const), section: 'orders' as const },
+              { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products'), section: 'products' as const },
+              { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products'), section: 'products' as const },
+              { label: 'Low Stock Products', value: dashboardSummary.lowStockProducts, target: () => handleSummaryCardClick('products'), section: 'products' as const },
+              { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers'), section: 'customers' as const },
+              { label: 'Total Brands', value: dashboardSummary.totalBrands, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') }, section: 'brands' as const },
+              { label: 'Archived Brands', value: dashboardSummary.archivedBrandsCount, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') }, section: 'brands' as const },
+              { label: 'Live Mode', value: firebaseReady ? 'Firebase' : launchModeEnabled ? 'Launch Mode' : 'Unavailable', target: () => handleSummaryCardClick('homepage'), section: 'homepage' as const },
+              { label: 'Founder Profile', value: founderProfile?.name ?? '-', target: () => handleSummaryCardClick('founder'), section: 'founder' as const },
+            ].filter((card) => canSee(card.section)).map((card) => (
               <button key={card.label} type="button" onClick={card.target} className="text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent">
                 <Card className="h-full rounded-[1.6rem] p-4">
                   <p className="text-sm uppercase tracking-[0.25em] text-[var(--color-accent)]">{card.label}</p>
@@ -1589,9 +1628,37 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               </button>
             ))}
           </div>
+
+          <div className={`mt-6 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4 ${canSee('dashboard') ? '' : 'hidden'}`}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[var(--color-text)]">Operations report</p>
+                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                  From loaded orders. Cancel rate {opsReport.cancelledRate}% · Coupons used {couponStats.used}/{couponStats.total || 0}.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={exportOpsReport}
+                className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+              >
+                Export report
+              </button>
+            </div>
+            <div className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
+              {opsReport.bestSellers.length ? opsReport.bestSellers.map((item) => (
+                <div key={item.name} className="flex items-center justify-between gap-3">
+                  <span className="truncate text-[var(--color-text)]">{item.name}</span>
+                  <span className="shrink-0">{item.quantity} sold · {formatBDT(item.revenue)}</span>
+                </div>
+              )) : (
+                <p>Best sellers appear after the first billable orders.</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className={`mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] ${canSee('products') ? '' : 'hidden'}`}>
           <div id="products-management">
             <Card className="rounded-[2rem] p-5 sm:p-7">
               <div className="flex items-center justify-between gap-3">
@@ -1606,7 +1673,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Product name" />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <input required value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
-                  <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
+                  <input required type="number" min="0" value={form.stock} onChange={(event) => setForm({ ...form, stock: Number(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Total stock" />
                 </div>
                 <input value={form.comparePrice} onChange={(event) => setForm({ ...form, comparePrice: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Compare at price (optional)" />
                   <input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Category slug (example: shirts, polos, kurti)" />
@@ -1642,8 +1709,61 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                   ) : null}
                 <textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-24 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Description" />
-                <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: normalizeSizes(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma or space separated)" />
-                <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
+                <input value={form.sizes.join(',')} onChange={(event) => {
+                  const sizes = normalizeSizes(event.target.value)
+                  setForm((current) => ({ ...current, sizes, variants: rebuildVariantMatrix(sizes, current.colors, current.variants) }))
+                }} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma or space separated)" />
+                <input value={form.colors.join(',')} onChange={(event) => {
+                  const colors = event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean)
+                  setForm((current) => ({ ...current, colors, variants: rebuildVariantMatrix(current.sizes, colors, current.variants) }))
+                }} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
+                {form.sizes.length && form.colors.length ? (
+                  <div className="overflow-x-auto rounded-[1.2rem] border border-[var(--color-border)] p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">Size × color stock</p>
+                    <p className="mt-1 text-xs text-[var(--color-muted)]">Leave at 0 to keep a single product-level stock count.</p>
+                    <table className="mt-3 min-w-full text-left text-xs">
+                      <thead>
+                        <tr>
+                          <th className="pb-2 pr-2 font-semibold text-[var(--color-muted)]">Size</th>
+                          {form.colors.map((color) => (
+                            <th key={color} className="pb-2 pr-2 font-semibold text-[var(--color-muted)]">{color}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {form.sizes.map((size) => (
+                          <tr key={size}>
+                            <td className="py-1 pr-2 font-semibold text-[var(--color-text)]">{size}</td>
+                            {form.colors.map((color) => {
+                              const current = form.variants.find((entry) => entry.size === size && entry.color === color)?.stock ?? 0
+                              return (
+                                <td key={`${size}-${color}`} className="py-1 pr-2">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={current}
+                                    onChange={(event) => {
+                                      const stock = Math.max(0, Number(event.target.value) || 0)
+                                      setForm((formState) => {
+                                        const variants = rebuildVariantMatrix(formState.sizes, formState.colors, formState.variants).map((entry) => (
+                                          entry.size === size && entry.color === color ? { ...entry, stock } : entry
+                                        ))
+                                        const total = variants.reduce((sum, entry) => sum + entry.stock, 0)
+                                        return { ...formState, variants, stock: total > 0 ? total : formState.stock }
+                                      })
+                                    }}
+                                    className="w-16 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-[var(--color-text)] outline-none"
+                                    aria-label={`${size} ${color} stock`}
+                                  />
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
                 <div className="space-y-3">
                   {form.images.map((image, index) => {
                     const label = galleryLabel(index)
@@ -1799,7 +1919,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <div id="orders-management">
+          <div id="orders-management" className={canSee('orders') ? '' : 'hidden'}>
             <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -1914,7 +2034,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                     <div className="space-y-2">
                       <p><span className="font-semibold text-[var(--color-text)]">Delivery Charge:</span> {formatBDT(order.deliveryCharge ?? 0)}</p>
-                      <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}</p>
+                      <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}{order.paymentStatus ? ` · ${order.paymentStatus}` : ''}</p>
                       <p><span className="font-semibold text-[var(--color-text)]">Grand Total:</span> {formatBDT(order.total)}</p>
                       <div>
                         <p className="font-semibold text-[var(--color-text)]">Ordered Products</p>
@@ -1934,7 +2054,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </Card>
           </div>
 
-          <div id="homepage-management">
+          <div id="homepage-management" className={canSee('homepage') ? '' : 'hidden'}>
             <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -2262,26 +2382,6 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
                   </div>
                 ) : null}
-                <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'hero-video')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
-                  <label className="cursor-pointer">
-                    <input type="file" accept="video/*" onChange={(event) => handleUpload(event.target.files, 'hero-video')} className="hidden" />
-                    Drop hero video or tap to replace.
-                  </label>
-                </div>
-                {homepageContent.heroVideo ? (
-                  <div className="relative">
-                    <video src={homepageContent.heroVideo} controls className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
-                    <button type="button" onClick={async () => {
-                      try {
-                        await deleteAsset(homepageContent.heroVideo!)
-                        setHomepageContent((current) => current ? { ...current, heroVideo: '' } : current)
-                        setMessage('Hero video removed.')
-                      } catch {
-                        setMessage('Unable to remove hero video.')
-                      }
-                    }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
-                  </div>
-                ) : null}
                 <div onDragOver={(event) => { event.preventDefault(); setDragActive(true) }} onDragLeave={() => setDragActive(false)} onDrop={(event) => handleDrop(event, 'banner-image')} className={`rounded-[1.5rem] border border-dashed p-4 text-center text-sm ${dragActive ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-muted)]'}`}>
                   <label className="cursor-pointer">
                     <input type="file" accept="image/*" onChange={(event) => handleUpload(event.target.files, 'banner-image')} className="hidden" />
@@ -2546,7 +2646,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <div id="categories-management">
+          <div id="categories-management" className={canSee('categories') ? '' : 'hidden'}>
             <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -2620,7 +2720,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </Card>
           </div>
 
-          <div id="customers-management">
+          <div id="customers-management" className={canSee('customers') ? '' : 'hidden'}>
             <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -2646,7 +2746,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           </div>
         </div>
 
-        <div id="founder-management" className="mt-8">
+        <div id="founder-management" className={`mt-8 ${canSee('founder') ? '' : 'hidden'}`}>
           <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -2769,9 +2869,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
          </Card>
          </div>
 
-        {showBrandManagement && <BrandManagement onDone={() => setShowBrandManagement(false)} />}
+        {canSee('brands') && showBrandManagement ? <div id="brands-management">{<BrandManagement onDone={() => setShowBrandManagement(false)} />}</div> : null}
 
-        <div id="coupon-management" className="mt-8">
+        <div id="coupon-management" className={`mt-8 ${canSee('coupons') ? '' : 'hidden'}`}>
           <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -2994,7 +3094,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           </Card>
         </div>
 
-        <div id="newsletter-management" className="mt-8">
+        <div id="newsletter-management" className={`mt-8 ${canSee('newsletter') ? '' : 'hidden'}`}>
           <Card className="rounded-[2rem] p-5 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -3037,6 +3137,57 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </table>
               </div>
             )}
+          </Card>
+        </div>
+
+        <div id="reviews-management" className={`mt-8 ${canSee('reviews') ? '' : 'hidden'}`}>
+          <Card className="rounded-[2rem] p-5 sm:p-7">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Reviews</p>
+            <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Moderate customer reviews</h2>
+            <div className="mt-5 space-y-3">
+              {reviews.map((review) => (
+                <div key={review.id} className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">{review.authorName} · {review.rating}/5 · {review.status}</p>
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">{review.productSlug || review.productId}</p>
+                  <p className="mt-2 text-sm text-[var(--color-text)]">{review.body}</p>
+                  {review.status === 'pending' ? (
+                    <div className="mt-3 flex gap-2">
+                      <button type="button" onClick={() => { void updateReviewStatus(review.id, 'approved') }} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold">Approve</button>
+                      <button type="button" onClick={() => { void updateReviewStatus(review.id, 'rejected') }} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Reject</button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {!reviews.length ? <p className="text-sm text-[var(--color-muted)]">No reviews yet.</p> : null}
+            </div>
+          </Card>
+        </div>
+
+        <div id="roles-management" className={`mt-8 ${canSee('roles') ? '' : 'hidden'}`}>
+          <Card className="rounded-[2rem] p-5 sm:p-7">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Team access</p>
+            <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Admin roles</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">Existing `admins` documents. Owner sees everything; packer sees orders; merchandiser sees catalog; ops sees orders and customers.</p>
+            <div className="mt-5 space-y-3">
+              {adminAccounts.map((account) => (
+                <div key={account.uid} className="flex flex-col gap-2 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{account.email || account.uid}</p>
+                    <p className="text-xs text-[var(--color-muted)]">{account.active ? 'Active' : 'Inactive'}</p>
+                  </div>
+                  <select
+                    value={account.role}
+                    onChange={(event) => { void updateAdminAccountRole(account.uid, event.target.value as AdminAccessRole) }}
+                    className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm outline-none"
+                  >
+                    {ADMIN_ACCESS_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+              {!adminAccounts.length ? <p className="text-sm text-[var(--color-muted)]">No admin documents found. Create admins/UID with role and active=true.</p> : null}
+            </div>
           </Card>
         </div>
       </Container>

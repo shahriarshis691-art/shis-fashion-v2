@@ -64,6 +64,12 @@ service cloud.firestore {
       allow read, create, update, delete: if isAdmin();
     }
 
+    match /reviews/{reviewId} {
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow create: if false;
+      allow update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

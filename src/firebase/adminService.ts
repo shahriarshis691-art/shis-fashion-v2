@@ -23,6 +23,9 @@ import { compactManagedImages } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
+import { allocateProductSlug, getProductSlug, productMatchesSlug } from '../utils/productIdentity'
+import { decrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
+import { hasAnyAdminAccessRole, resolveAdminAccessRole, type AdminAccessRole } from '../utils/adminAccess'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
 
@@ -38,12 +41,14 @@ export interface HomepageSectionConfig {
 export interface AdminProduct {
   id: string
   name: string
+  slug?: string
   price: string
   comparePrice?: string
   brand?: string
   stock: number
   sizes: string[]
   colors: string[]
+  variants?: ProductVariantStock[]
   description: string
   category: string
   featuredImage?: string
@@ -75,6 +80,7 @@ export interface AdminOrder {
   status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   trackingNumber?: string
   paymentMethod?: string
+  paymentStatus?: 'unpaid' | 'pending' | 'paid' | 'failed'
   createdAt?: string | { seconds: number }
   archived?: boolean
   archivedAt?: string | { seconds: number }
@@ -83,6 +89,32 @@ export interface AdminOrder {
   couponDiscountAmount?: number
   couponId?: string
   stockCommitted?: boolean
+}
+
+export interface AdminSessionUser {
+  uid: string
+  email: string | null
+  role: AdminAccessRole
+}
+
+export interface AdminAccount {
+  uid: string
+  email?: string
+  role: AdminAccessRole
+  active: boolean
+}
+
+export type ReviewStatus = 'pending' | 'approved' | 'rejected'
+
+export interface ProductReview {
+  id: string
+  productId: string
+  productSlug?: string
+  authorName: string
+  rating: number
+  body: string
+  status: ReviewStatus
+  createdAt?: string | { seconds: number }
 }
 
 export interface AdminCategory {
@@ -288,7 +320,7 @@ const ACCESS_DENIED_KEY = 'shis-admin-access-denied'
 const LAUNCH_MODE_USER_KEY = 'shis-launch-mode-user'
 const AUDIT_LOGS_KEY = 'shis-admin-audit-logs'
 
-type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage' | 'brand' | 'coupon'
+type AdminAuditTarget = 'product' | 'order' | 'category' | 'homepage' | 'brand' | 'coupon' | 'admin'
 
 interface AdminAuditLogEntry {
   id: string
@@ -338,14 +370,19 @@ export function isLaunchModeEnabled() {
   return (import.meta.env.VITE_LAUNCH_MODE ?? 'false') === 'true' && !isProductionBuild()
 }
 
-function getLaunchModeUser(): { uid: string; email: string } | null {
+function getLaunchModeUser(): AdminSessionUser | null {
   if (typeof window === 'undefined') {
     return null
   }
 
   try {
     const stored = window.sessionStorage.getItem(LAUNCH_MODE_USER_KEY)
-    return stored ? (JSON.parse(stored) as { uid: string; email: string }) : null
+    if (!stored) {
+      return null
+    }
+
+    const parsed = JSON.parse(stored) as { uid: string; email: string; role?: AdminAccessRole }
+    return { uid: parsed.uid, email: parsed.email, role: parsed.role ?? 'owner' }
   } catch {
     return null
   }
@@ -358,7 +395,7 @@ function setLaunchModeUser(email: string) {
 
   // Generate a pseudo-uid from email for launch mode
   const pseudoUid = `launch-mode-${email.replace(/[^a-z0-9]/gi, '')}`
-  const user = { uid: pseudoUid, email }
+  const user: AdminSessionUser = { uid: pseudoUid, email, role: 'owner' }
   window.sessionStorage.setItem(LAUNCH_MODE_USER_KEY, JSON.stringify(user))
 }
 
@@ -442,7 +479,7 @@ function getCurrentAdminActor() {
   if (launchUser) {
     return {
       uid: launchUser.uid,
-      email: launchUser.email.trim().toLowerCase(),
+      email: launchUser.email?.trim().toLowerCase() ?? 'unknown',
     }
   }
 
@@ -505,22 +542,26 @@ async function getCurrentAdminIdToken() {
   }
 }
 
-function normalizeRoleValues(value: unknown) {
-  if (!Array.isArray(value)) {
-    return [] as string[]
-  }
-
-  return value
-    .filter((entry): entry is string => typeof entry === 'string')
-    .map((entry) => entry.toLowerCase())
+function includesAdminRole(role: unknown, roles: unknown) {
+  return hasAnyAdminAccessRole(role, roles)
 }
 
-function includesAdminRole(role: unknown, roles: unknown) {
-  if (typeof role === 'string' && role.toLowerCase() === 'admin') {
-    return true
+async function resolveSessionRole(uid: string): Promise<AdminAccessRole> {
+  if (!firebaseDb) {
+    return 'owner'
   }
 
-  return normalizeRoleValues(roles).includes('admin')
+  try {
+    const snapshot = await getDoc(doc(firebaseDb, 'admins', uid))
+    if (!snapshot.exists()) {
+      return 'owner'
+    }
+
+    const data = snapshot.data() as { role?: unknown; roles?: unknown }
+    return resolveAdminAccessRole(data.role, data.roles)
+  } catch {
+    return 'owner'
+  }
 }
 
 function listIncludesIdentifier(value: unknown, identifier: string) {
@@ -1042,9 +1083,14 @@ const defaultFounderProfile: FounderProfile = {
 
 function normalizeProduct(product: AdminProduct): AdminProduct {
   const normalizedImages = compactManagedImages(product)
+  const variants = normalizeVariants(product.variants)
+  const slug = getProductSlug(product)
 
   return {
     ...product,
+    slug,
+    variants: variants.length ? variants : undefined,
+    stock: getProductStockTotal({ stock: product.stock, variants }),
     images: normalizedImages.images,
     imageTitles: normalizedImages.imageTitles,
     imageDescriptions: normalizedImages.imageDescriptions,
@@ -1145,6 +1191,7 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     heroSecondaryLink: content?.heroSecondaryLink ?? defaultHomepage.heroSecondaryLink,
     heroImageTitle: content?.heroImageTitle ?? defaultHomepage.heroImageTitle,
     heroImageDescription: content?.heroImageDescription ?? defaultHomepage.heroImageDescription,
+    heroVideo: '',
     bannerImageTitle: content?.bannerImageTitle ?? defaultHomepage.bannerImageTitle,
     bannerImageDescription: content?.bannerImageDescription ?? defaultHomepage.bannerImageDescription,
     categories: mergedCategories,
@@ -1240,7 +1287,7 @@ function ensureSeedData() {
   }
 }
 
-export function onAdminAuthChanged(callback: (user: { uid: string; email: string | null } | null) => void) {
+export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => void) {
   ensureSeedData()
   clearLegacyAdminBypassState()
 
@@ -1292,7 +1339,11 @@ export function onAdminAuthChanged(callback: (user: { uid: string; email: string
           return
         }
 
-        callback({ uid: user.uid, email: user.email })
+        callback({
+          uid: user.uid,
+          email: user.email,
+          role: await resolveSessionRole(user.uid),
+        })
       } catch {
         if (!isActive) {
           return
@@ -1315,7 +1366,7 @@ export async function signInAdmin(email: string, password: string) {
   if (isLaunchModeEnabled()) {
     if (configuredAdminEmails.has(normalizedEmail)) {
       setLaunchModeUser(normalizedEmail)
-      return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail }
+      return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail, role: 'owner' as const }
     } else {
       markAccessDenied()
       const error = new Error('Access Denied')
@@ -1408,9 +1459,13 @@ export function subscribeToArchivedProducts(callback: (products: AdminProduct[])
 
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
-  const normalizedProduct = normalizeProduct({ ...product, id: 'draft-product' } as AdminProduct)
+  const slug = allocateProductSlug(product.name, currentProducts.map((entry) => getProductSlug(entry)))
+  const normalizedProduct = normalizeProduct({ ...product, slug, id: 'draft-product' } as AdminProduct)
   const productPayload = {
     ...product,
+    slug: normalizedProduct.slug,
+    stock: normalizedProduct.stock,
+    variants: normalizedProduct.variants ?? [],
     images: normalizedProduct.images,
     imageTitles: normalizedProduct.imageTitles,
     imageDescriptions: normalizedProduct.imageDescriptions,
@@ -1463,11 +1518,15 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
 
 export async function updateProduct(id: string, product: Partial<AdminProduct>) {
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
-  const updatedProducts = currentProducts.map((item) => (item.id === id ? normalizeProduct({ ...item, ...product }) : item))
+  const existing = currentProducts.find((item) => item.id === id)
+  const nextName = product.name ?? existing?.name ?? ''
+  const slug = existing?.slug || allocateProductSlug(nextName, currentProducts.filter((item) => item.id !== id).map((item) => getProductSlug(item)))
+  const mergedUpdate = { ...product, slug }
+  const updatedProducts = currentProducts.map((item) => (item.id === id ? normalizeProduct({ ...item, ...mergedUpdate }) : item))
   writeStored(PRODUCTS_KEY, updatedProducts)
 
-  const normalizedUpdate = currentProducts.find((item) => item.id === id)
-    ? normalizeProduct({ ...currentProducts.find((item) => item.id === id)!, ...product })
+  const normalizedUpdate = existing
+    ? normalizeProduct({ ...existing, ...mergedUpdate })
     : undefined
 
   if (!firebaseDb || isLocalFirstDataMode()) {
@@ -1483,6 +1542,9 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
     if (normalizedUpdate) {
       await updateDoc(ref, {
         ...product,
+        slug: normalizedUpdate.slug,
+        stock: normalizedUpdate.stock,
+        variants: normalizedUpdate.variants ?? [],
         images: normalizedUpdate.images,
         imageTitles: normalizedUpdate.imageTitles,
         imageDescriptions: normalizedUpdate.imageDescriptions,
@@ -1958,24 +2020,38 @@ export async function restoreOrder(id: string) {
 function applyLocalStockDecrement(items: AdminOrder['items']) {
   const products = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const next = products.map((product) => {
-    const used = items.reduce((sum, item) => {
-      const itemSlug = slugify(item.slug ?? item.name)
-      if (slugify(product.name) === itemSlug || product.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
-        return sum + Math.max(0, item.quantity)
-      }
-      return sum
-    }, 0)
+    const matchingItems = items.filter((item) => (
+      productMatchesSlug(product, item.slug ?? item.name)
+      || product.name.trim().toLowerCase() === item.name.trim().toLowerCase()
+    ))
 
-    if (!used) {
+    if (!matchingItems.length) {
       return product
     }
 
-    return { ...product, stock: Math.max(0, product.stock - used) }
+    let variants = normalizeVariants(product.variants)
+    let stock = product.stock
+
+    matchingItems.forEach((item) => {
+      const qty = Math.max(0, item.quantity)
+      if (variants.length) {
+        const decremented = decrementMatchingVariant(variants, item.size ?? '', item.color ?? '', qty)
+        if (decremented) {
+          variants = decremented
+          stock = variants.reduce((sum, entry) => sum + entry.stock, 0)
+          return
+        }
+      }
+
+      stock = Math.max(0, stock - qty)
+    })
+
+    return { ...product, stock, variants: variants.length ? variants : product.variants }
   })
   writeStored(PRODUCTS_KEY, next)
 }
 
-export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, couponData?: { code: string; discountPercent: number; discountAmount: number; couponId?: string } | null) {
+export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, couponData?: { code: string; discountPercent: number; discountAmount: number; couponId?: string } | null): Promise<AdminOrder & { redirectUrl?: string }> {
   if (requiresLiveBackend() && !firebaseDb) {
     throw new Error('Live order backend is not configured. Add Firebase production credentials before accepting orders.')
   }
@@ -2023,6 +2099,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
         items: order.items,
         couponCode: couponData?.code,
         deliveryAddress: order.deliveryAddress,
+        paymentMethod: order.paymentMethod,
       }),
     })
 
@@ -2030,15 +2107,16 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
       throw new Error(await readApiError(response))
     }
 
-    const payload = await response.json() as { order?: AdminOrder }
+    const payload = await response.json() as { order?: AdminOrder; redirectUrl?: string }
     if (!payload.order?.id) {
       throw new Error('Order service returned an incomplete response.')
     }
 
     writeStored(ORDERS_KEY, [payload.order, ...currentOrders])
-    return payload.order
+    return { ...payload.order, redirectUrl: payload.redirectUrl }
   } catch (error) {
-    if (requiresLiveBackend()) {
+    const isPrepaid = /bkash|ssl/i.test(order.paymentMethod ?? '')
+    if (requiresLiveBackend() || isPrepaid) {
       throw error instanceof Error ? error : new Error('Order submission failed. Please try again.')
     }
 
@@ -3138,3 +3216,126 @@ export async function validateCouponServer(code: string, customerEmail: string):
     return { valid: false, error: error instanceof Error ? error.message : 'Invalid or expired coupon code.' }
   }
 }
+
+const REVIEWS_KEY = 'shis-fashion-reviews'
+
+function serializeReview(id: string, data: Partial<ProductReview>): ProductReview {
+  const createdAt = data.createdAt
+  const createdAtValue = typeof createdAt === 'string'
+    ? createdAt
+    : createdAt && typeof createdAt === 'object' && 'seconds' in createdAt
+      ? new Date(createdAt.seconds * 1000).toISOString()
+      : new Date().toISOString()
+
+  return {
+    id,
+    productId: String(data.productId ?? ''),
+    productSlug: data.productSlug,
+    authorName: String(data.authorName ?? ''),
+    rating: Math.min(5, Math.max(1, Math.round(Number(data.rating ?? 0)))),
+    body: String(data.body ?? ''),
+    status: data.status === 'approved' || data.status === 'rejected' ? data.status : 'pending',
+    createdAt: createdAtValue,
+  }
+}
+
+export function subscribeToApprovedProductReviews(productId: string, callback: (reviews: ProductReview[]) => void) {
+  const emitApproved = (reviews: ProductReview[]) => {
+    callback(reviews.filter((review) => review.status === 'approved' && review.productId === productId))
+  }
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    emitApproved(readStored(REVIEWS_KEY, [] as ProductReview[]))
+    return subscribeToStored(REVIEWS_KEY, [] as ProductReview[], emitApproved)
+  }
+
+  const reviewsQuery = query(
+    collection(firebaseDb, 'reviews'),
+    where('productId', '==', productId),
+    where('status', '==', 'approved'),
+  )
+
+  return onSnapshot(reviewsQuery, (snapshot) => {
+    callback(snapshot.docs.map((entry) => serializeReview(entry.id, entry.data() as Partial<ProductReview>)))
+  }, () => {
+    emitApproved(readStored(REVIEWS_KEY, [] as ProductReview[]))
+  })
+}
+
+export function subscribeToAdminReviews(callback: (reviews: ProductReview[]) => void) {
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    callback(readStored(REVIEWS_KEY, [] as ProductReview[]))
+    return subscribeToStored(REVIEWS_KEY, [] as ProductReview[], callback)
+  }
+
+  return onSnapshot(collection(firebaseDb, 'reviews'), (snapshot) => {
+    callback(snapshot.docs.map((entry) => serializeReview(entry.id, entry.data() as Partial<ProductReview>)))
+  }, () => {
+    callback(readStored(REVIEWS_KEY, [] as ProductReview[]))
+  })
+}
+
+export async function updateReviewStatus(id: string, status: ReviewStatus) {
+  const current = readStored(REVIEWS_KEY, [] as ProductReview[])
+  writeStored(REVIEWS_KEY, current.map((review) => (review.id === id ? { ...review, status } : review)))
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    return
+  }
+
+  await updateDoc(doc(firebaseDb, 'reviews', id), { status })
+}
+
+export function subscribeToAdminAccounts(callback: (admins: AdminAccount[]) => void) {
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    callback([])
+    return () => undefined
+  }
+
+  return onSnapshot(collection(firebaseDb, 'admins'), (snapshot) => {
+    callback(snapshot.docs.map((entry) => {
+      const data = entry.data() as { email?: unknown; role?: unknown; roles?: unknown; active?: unknown }
+      return {
+        uid: entry.id,
+        email: typeof data.email === 'string' ? data.email : '',
+        role: resolveAdminAccessRole(data.role, data.roles),
+        active: data.active !== false,
+      }
+    }))
+  }, () => {
+    callback([])
+  })
+}
+
+export async function updateAdminAccountRole(uid: string, role: AdminAccessRole) {
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    throw new Error('Admin roles require live Firebase.')
+  }
+
+  await updateDoc(doc(firebaseDb, 'admins', uid), {
+    role,
+    roles: [role === 'owner' ? 'admin' : role],
+  })
+  await recordAdminAudit('admin.role', 'admin', uid, { role })
+}
+
+export async function requestOrderStatusNotify(orderId: string, channel: 'order-placed' | 'order-shipped' = 'order-shipped') {
+  const token = await getCurrentAdminIdToken()
+  if (!token) {
+    return
+  }
+
+  try {
+    await fetch('/api/notify-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ orderId, channel }),
+    })
+  } catch {
+    // Optional transactional notify must never block admin status updates.
+  }
+}
+

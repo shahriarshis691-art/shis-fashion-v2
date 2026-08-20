@@ -52,6 +52,13 @@ Primary campaign-day runbook:
 - Set `VITE_GA_MEASUREMENT_ID` to the live Google Analytics 4 Measurement ID.
 - Set `VITE_META_PIXEL_ID` to the live Meta Pixel ID.
 
+Optional (fail closed if unset; COD and WhatsApp still work):
+- `VITE_PREPAID_ENABLED=true` to show bKash on checkout.
+- Server: `BKASH_USERNAME`, `BKASH_PASSWORD`, `BKASH_APP_KEY`, `BKASH_APP_SECRET`, optional `BKASH_BASE_URL`, `PREPAID_CALLBACK_URL`.
+- Or SSLCOMMERZ: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD`.
+- Email: `RESEND_API_KEY` or `SENDGRID_API_KEY`, optional `ORDER_NOTIFY_FROM_EMAIL`.
+- SMS: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, or `SMS_WEBHOOK_URL`.
+
 2. Firebase project checks
 - Firebase Authentication must be enabled for Email/Password sign-in.
 - Firestore must be enabled in production mode.

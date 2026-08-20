@@ -226,23 +226,16 @@ export default function HomePage() {
   }, [])
 
   const heroMedia = useMemo(() => {
-    const items: HeroMediaItem[] = []
-    if (homepageContent.heroVideo) {
-      items.push({
-        type: 'video',
-        src: homepageContent.heroVideo,
-        alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign video',
-      })
+    if (!homepageContent.heroImage) {
+      return [] as HeroMediaItem[]
     }
-    if (homepageContent.heroImage) {
-      items.push({
-        type: 'image',
-        src: homepageContent.heroImage,
-        alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign image',
-      })
-    }
-    return items
-  }, [homepageContent.heroVideo, homepageContent.heroImage, homepageContent.heroImageTitle])
+
+    return [{
+      type: 'image' as const,
+      src: homepageContent.heroImage,
+      alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign image',
+    }]
+  }, [homepageContent.heroImage, homepageContent.heroImageTitle])
 
   const categoryStrips = useMemo(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})

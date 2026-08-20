@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -6,7 +6,7 @@ import ProductCard from '../components/shop/ProductCard'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
-import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
+import { subscribeToApprovedProductReviews, subscribeToProducts, type AdminProduct, type ProductReview } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
@@ -14,7 +14,8 @@ import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 import { DELIVERY_RETURN_BULLETS, EXCHANGE_WINDOW_DAYS } from '../data/storePolicy'
-import { slugify } from '../utils/slugify'
+import { getProductSlug } from '../utils/productIdentity'
+import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 
 function toProduct(product: AdminProduct) {
   const imageEntries = getManagedImageEntries(product, 1)
@@ -22,7 +23,7 @@ function toProduct(product: AdminProduct) {
 
   return {
     id: product.id,
-    slug: slugify(product.name),
+    slug: getProductSlug(product),
     name: product.name,
     price: product.price,
     comparePrice: product.comparePrice,
@@ -34,7 +35,8 @@ function toProduct(product: AdminProduct) {
     galleryImageTitles: imageEntries.map((entry) => entry.title),
     sizes: normalizeSizes(product.sizes),
     colors: Array.isArray(product.colors) ? product.colors.map((color) => color.trim()).filter(Boolean) : [],
-    stock: product.stock,
+    variants: product.variants ?? [] as ProductVariantStock[],
+    stock: getProductStockTotal(product),
     featured: product.featured,
     newArrival: product.newArrival,
   }
@@ -100,6 +102,12 @@ export default function ProductDetailPage() {
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [reviewName, setReviewName] = useState('')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewBody, setReviewBody] = useState('')
+  const [reviewMessage, setReviewMessage] = useState('')
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const lastTrackedProductIdRef = useRef<string | null>(null)
   const hasTrackedRecentlyViewedRef = useRef(false)
 
@@ -113,6 +121,15 @@ export default function ProductDetailPage() {
   }, [])
 
   const product = products.find((entry) => entry.slug === decodedSlug)
+
+  useEffect(() => {
+    if (!product?.id) {
+      return () => undefined
+    }
+
+    return subscribeToApprovedProductReviews(String(product.id), setReviews)
+  }, [product?.id])
+
   const fallbackImages = product?.image ? [product.image] : []
   const sourceImages = product?.galleryImages?.length ? product.galleryImages : fallbackImages
   const galleryImages = sourceImages
@@ -121,10 +138,6 @@ export default function ProductDetailPage() {
   const resolvedGalleryImages = galleryImages.length ? galleryImages : [getPlaceholderDataUri()]
 
   const activeImage = resolvedGalleryImages[Math.min(activeImageIndex, resolvedGalleryImages.length - 1)] ?? resolvedGalleryImages[0]
-  const availableStock = Math.max(0, product?.stock ?? 0)
-  const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
-  const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
-  const stockLabel = getStockLabel(availableStock)
 
   const relatedProducts = (() => {
     if (!product) {
@@ -292,6 +305,12 @@ export default function ProductDetailPage() {
   const hasColorOptions = Boolean(product?.colors.length)
   const safeColor = resolvedColor || 'Default'
   const isColorSelected = !hasColorOptions || Boolean(resolvedColor)
+  const availableStock = product
+    ? Math.max(0, getVariantStock(product, safeSize, safeColor))
+    : 0
+  const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
+  const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
+  const stockLabel = getStockLabel(availableStock)
   const canAddToBag = product != null && availableStock > 0 && isSizeSelected && isColorSelected
   const canBuyNow = canAddToBag
   const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, safeColor, effectiveQuantity) : getWhatsAppHref()
@@ -353,6 +372,43 @@ export default function ProductDetailPage() {
       ],
     })
     navigate('/checkout')
+  }
+
+  const handleSubmitReview = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!product) {
+      return
+    }
+
+    setReviewSubmitting(true)
+    setReviewMessage('')
+    try {
+      const response = await fetch('/api/create-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          productSlug: product.slug,
+          authorName: reviewName.trim(),
+          rating: reviewRating,
+          body: reviewBody.trim(),
+        }),
+      })
+      const payload = await response.json() as { error?: string }
+      if (!response.ok) {
+        setReviewMessage(payload.error || 'Unable to submit this review right now.')
+        return
+      }
+
+      setReviewName('')
+      setReviewBody('')
+      setReviewRating(5)
+      setReviewMessage('Thank you. Your review is pending approval.')
+    } catch {
+      setReviewMessage('Unable to submit this review right now.')
+    } finally {
+      setReviewSubmitting(false)
+    }
   }
 
   if (!ready) {
@@ -477,7 +533,9 @@ export default function ProductDetailPage() {
                   <p className="text-base text-black/50 line-through">{product.comparePrice}</p>
                 ) : null}
               </div>
-              <p className={`mt-2 text-sm font-medium ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>{stockLabel}</p>
+              <p className={`mt-2 text-sm font-medium ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>
+                {stockLabel}{isSizeSelected && isColorSelected && availableStock > 0 && availableStock <= 5 ? ` · ${availableStock} left in this size` : ''}
+              </p>
             </div>
 
             <div className="mt-4 border border-black/15 p-4">
@@ -664,6 +722,52 @@ export default function ProductDetailPage() {
               </li>
             </ul>
           </div>
+        </div>
+
+        <div className="mt-10 border border-black/15 p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Customer reviews</h2>
+          <div className="mt-4 space-y-3">
+            {reviews.map((review) => (
+              <article key={review.id} className="border-b border-black/10 pb-3 last:border-b-0 last:pb-0">
+                <p className="text-sm font-semibold text-black">{review.authorName} · {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                <p className="mt-1 text-sm text-black/70">{review.body}</p>
+              </article>
+            ))}
+            {!reviews.length ? <p className="text-sm text-black/55">No reviews yet. Be the first to share a fit note.</p> : null}
+          </div>
+          <form className="mt-5 space-y-3" onSubmit={handleSubmitReview}>
+            <input
+              required
+              value={reviewName}
+              onChange={(event) => setReviewName(event.target.value)}
+              className="w-full border border-black/15 px-3 py-2 text-sm outline-none"
+              placeholder="Your name"
+              maxLength={60}
+            />
+            <select
+              value={reviewRating}
+              onChange={(event) => setReviewRating(Number(event.target.value))}
+              className="w-full border border-black/15 px-3 py-2 text-sm outline-none"
+              aria-label="Rating"
+            >
+              {[5, 4, 3, 2, 1].map((value) => (
+                <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>
+              ))}
+            </select>
+            <textarea
+              required
+              minLength={10}
+              maxLength={800}
+              value={reviewBody}
+              onChange={(event) => setReviewBody(event.target.value)}
+              className="min-h-24 w-full border border-black/15 px-3 py-2 text-sm outline-none"
+              placeholder="How was the fit and fabric?"
+            />
+            <button type="submit" disabled={reviewSubmitting} className="border border-black bg-black px-4 py-2 text-sm font-semibold text-white disabled:bg-black/35">
+              {reviewSubmitting ? 'Sending…' : 'Submit review'}
+            </button>
+            {reviewMessage ? <p className="text-sm text-black/70">{reviewMessage}</p> : null}
+          </form>
         </div>
 
         {relatedProducts.length ? (
