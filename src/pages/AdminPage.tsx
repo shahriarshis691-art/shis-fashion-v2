@@ -66,6 +66,7 @@ import {
   resolveCanonicalSubcategorySlug,
 } from '../data/categoryTaxonomy'
 import { normalizeSizes } from '../utils/sizes'
+import { downloadCsv } from '../utils/adminCsv'
 
 const emptyProductForm = {
   name: '',
@@ -85,7 +86,21 @@ const emptyProductForm = {
   hero: false,
 }
 
-const galleryLabels = ['Main image', 'Detail image', 'Close-up image']
+const MAX_PRODUCT_IMAGES = 6
+const LOW_STOCK_THRESHOLD = 5
+
+function galleryLabel(index: number) {
+  if (index === 0) {
+    return 'Main image'
+  }
+  if (index === 1) {
+    return 'Detail image'
+  }
+  if (index === 2) {
+    return 'Close-up image'
+  }
+  return `Image ${index + 1}`
+}
 
 const ORDER_LIFECYCLE: AdminOrder['status'][] = ['new', 'confirmed', 'processing', 'shipped', 'delivered']
 
@@ -152,7 +167,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [form, setForm] = useState(emptyProductForm)
   const [isEditing, setIsEditing] = useState<string | null>(null)
   const [message, setMessage] = useState('')
-  const [search, setSearch] = useState('')
+  const [productSearch, setProductSearch] = useState('')
+  const [orderSearch, setOrderSearch] = useState('')
+  const [orderDateFrom, setOrderDateFrom] = useState('')
+  const [orderDateTo, setOrderDateTo] = useState('')
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  const [bulkStock, setBulkStock] = useState('')
+  const [bulkPrice, setBulkPrice] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [categoryName, setCategoryName] = useState('')
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
@@ -290,7 +311,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       try {
         const allCoupons = await getCoupons()
         setCoupons(allCoupons)
-        setCouponStats(getCouponStats())
+        setCouponStats(getCouponStats(allCoupons))
       } catch {
         // ignore
       } finally {
@@ -307,20 +328,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
        return
      }
 
-     const header = 'Email,Signup Date,Source,Coupon Used\n'
-     const rows = newsletterSubscribers.map((subscriber) => {
-       const signupDate = subscriber.signupDate ? new Date(subscriber.signupDate).toISOString() : ''
-       return [subscriber.email, signupDate, subscriber.source, subscriber.couponUsed || ''].join(',')
-     }).join('\n')
-
-     const csv = header + rows
-     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-     const url = URL.createObjectURL(blob)
-     const link = document.createElement('a')
-     link.href = url
-     link.download = `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`
-     link.click()
-     URL.revokeObjectURL(url)
+     downloadCsv(
+       `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`,
+       ['Email', 'Signup Date', 'Source', 'Coupon Used'],
+       newsletterSubscribers.map((subscriber) => [
+         subscriber.email,
+         subscriber.signupDate ? new Date(subscriber.signupDate).toISOString() : '',
+         subscriber.source,
+         subscriber.couponUsed || '',
+       ]),
+     )
      setMessage('Newsletter subscribers exported.')
    }
 
@@ -330,21 +347,24 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
        return
      }
 
-     const header = 'Code,Customer Email,Discount %,Status,Usage Count,Max Usage,Expiry Date,Created At\n'
-     const rows = coupons.map((coupon) => {
-       return [coupon.code, coupon.customerEmail, `${coupon.discountPercent}%`, coupon.status, `${coupon.usageCount}/${coupon.maxUsage}`, coupon.expiryDate ? new Date(coupon.expiryDate).toISOString() : '', coupon.createdDate].join(',')
-     }).join('\n')
-
-     const csv = header + rows
-     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-     const url = URL.createObjectURL(blob)
-     const link = document.createElement('a')
-     link.href = url
-     link.download = `coupons-${new Date().toISOString().slice(0, 10)}.csv`
-     link.click()
-     URL.revokeObjectURL(url)
+     downloadCsv(
+       `coupons-${new Date().toISOString().slice(0, 10)}.csv`,
+       ['Code', 'Customer Email', 'Discount %', 'Status', 'Usage Count', 'Max Usage', 'Expiry Date', 'Created At'],
+       coupons.map((coupon) => [
+         coupon.code ?? '',
+         coupon.customerEmail ?? '',
+         `${coupon.discountPercent}%`,
+         coupon.status,
+         `${coupon.usageCount}/${coupon.maxUsage}`,
+         coupon.expiryDate ? new Date(coupon.expiryDate).toISOString() : '',
+         coupon.createdDate ?? '',
+       ]),
+     )
      setMessage('Coupons exported.')
    }
+
+  const toDayKey = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
@@ -393,6 +413,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const revenue = billableOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
     const todayRevenue = billableTodayOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
     const outOfStockProducts = products.filter((product) => product.stock <= 0).length
+    const lowStockProducts = products.filter((product) => product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD).length
 
     return {
       todayOrders: todayOrders.length,
@@ -405,6 +426,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       todayRevenue,
       totalProducts: products.length,
       outOfStockProducts,
+      lowStockProducts,
       totalCustomers: customers.length,
       totalBrands: brands.length,
       archivedBrandsCount: archivedBrands.length,
@@ -412,20 +434,58 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }, [archivedBrands.length, brands.length, customers.length, orders, products])
 
   const filteredOrders = useMemo(() => {
-    const query = search.toLowerCase()
-    return orders.filter((order) => [
-      order.customerName,
-      order.customerPhone,
-      order.customerEmail,
-      order.address,
-      order.deliveryAddress?.division,
-      order.deliveryAddress?.district,
-      order.deliveryAddress?.streetAddress,
-      order.deliveryAddress?.deliveryNote,
-      order.notes,
-      order.status,
-    ].some((value) => (value ?? '').toLowerCase().includes(query)) && (orderStatusFilter === 'all' || order.status === orderStatusFilter))
-  }, [orders, orderStatusFilter, search])
+    const query = orderSearch.toLowerCase()
+    const matched = orders.filter((order) => {
+      const textMatch = [
+        order.customerName,
+        order.customerPhone,
+        order.customerEmail,
+        order.address,
+        order.deliveryAddress?.division,
+        order.deliveryAddress?.district,
+        order.deliveryAddress?.streetAddress,
+        order.deliveryAddress?.deliveryNote,
+        order.notes,
+        order.status,
+        order.id,
+      ].some((value) => (value ?? '').toLowerCase().includes(query))
+      if (!textMatch || (orderStatusFilter !== 'all' && order.status !== orderStatusFilter)) {
+        return false
+      }
+
+      const orderDate = getOrderDate(order.createdAt)
+      if (!orderDate) {
+        return !orderDateFrom && !orderDateTo
+      }
+
+      const dayKey = toDayKey(orderDate)
+      if (orderDateFrom && dayKey < orderDateFrom) {
+        return false
+      }
+      if (orderDateTo && dayKey > orderDateTo) {
+        return false
+      }
+
+      return true
+    })
+
+    return matched.sort((left, right) => {
+      if (left.status === 'new' && right.status !== 'new') {
+        return -1
+      }
+      if (right.status === 'new' && left.status !== 'new') {
+        return 1
+      }
+      const leftTime = getOrderDate(left.createdAt)?.getTime() ?? 0
+      const rightTime = getOrderDate(right.createdAt)?.getTime() ?? 0
+      return rightTime - leftTime
+    })
+  }, [orderDateFrom, orderDateTo, orderSearch, orderStatusFilter, orders])
+
+  const pendingQueueOrders = useMemo(
+    () => filteredOrders.filter((order) => order.status === 'new'),
+    [filteredOrders],
+  )
 
   const formatOrderDateTime = (createdAt?: string | { seconds: number }) => {
     if (!createdAt) {
@@ -439,10 +499,41 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('en-BD', { dateStyle: 'medium', timeStyle: 'short' })
   }
 
+  const exportOrdersCSV = () => {
+    if (!filteredOrders.length) {
+      setMessage('No orders to export for the current filters.')
+      return
+    }
+
+    downloadCsv(
+      `orders-${new Date().toISOString().slice(0, 10)}.csv`,
+      ['Order ID', 'Date', 'Status', 'Customer', 'Phone', 'Email', 'Address', 'Items', 'Delivery', 'Total', 'Tracking'],
+      filteredOrders.map((order) => [
+        order.id,
+        formatOrderDateTime(order.createdAt),
+        order.status,
+        order.customerName,
+        order.customerPhone ?? '',
+        order.customerEmail ?? '',
+        order.deliveryAddress?.streetAddress ?? order.address ?? '',
+        order.items.map((item) => `${item.name} x${item.quantity}`).join('; '),
+        String(order.deliveryCharge ?? 0),
+        String(order.total),
+        order.trackingNumber ?? '',
+      ]),
+    )
+    setMessage(`${filteredOrders.length} order${filteredOrders.length === 1 ? '' : 's'} exported.`)
+  }
+
   const filteredProducts = useMemo(() => {
-    const query = search.toLowerCase()
+    const query = productSearch.toLowerCase()
     return products.filter((product) => [product.name, product.category, product.description].some((value) => value.toLowerCase().includes(query)))
-  }, [products, search])
+  }, [products, productSearch])
+
+  const lowStockCatalog = useMemo(
+    () => products.filter((product) => product.stock <= LOW_STOCK_THRESHOLD).sort((left, right) => left.stock - right.stock),
+    [products],
+  )
 
   const availableCategoryNames = useMemo(() => {
     const names = categories.map((category) => category.name).filter(Boolean)
@@ -549,7 +640,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           }
           return { ...current, images: nextImages, imageTitles: nextImageTitles }
         })
-        setMessage(`${galleryLabels[slotIndex]} uploaded.`)
+        setMessage(`${galleryLabel(slotIndex)} uploaded.`)
       }
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Image upload failed. Please retry.'
@@ -571,7 +662,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       nextImageDescriptions[slotIndex] = ''
       return { ...current, images: nextImages, imageTitles: nextImageTitles, imageDescriptions: nextImageDescriptions }
     })
-    setMessage(`${galleryLabels[slotIndex]} removed.`)
+    setMessage(`${galleryLabel(slotIndex)} removed.`)
   }
 
   const handleUpload = async (
@@ -715,7 +806,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           return { ...current, featuredCollectionPages: nextPages }
         })
       } else {
-        setForm((current) => ({ ...current, images: [...current.images, ...uploadedImages], videos: [...current.videos, ...uploadedVideos] }))
+        setForm((current) => ({
+          ...current,
+          images: [...current.images, ...uploadedImages].slice(0, MAX_PRODUCT_IMAGES),
+          imageTitles: current.imageTitles,
+          videos: [...current.videos, ...uploadedVideos],
+        }))
       }
 
       setMessage('Assets uploaded successfully.')
@@ -821,9 +917,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     try {
       const normalizedForm = normalizeProductForm(form)
       const normalizedMedia = compactManagedImages({
-        images: normalizedForm.images.slice(0, 3),
-        imageTitles: normalizedForm.imageTitles.slice(0, 3),
-        imageDescriptions: normalizedForm.imageDescriptions.slice(0, 3),
+        images: normalizedForm.images.slice(0, MAX_PRODUCT_IMAGES),
+        imageTitles: normalizedForm.imageTitles.slice(0, MAX_PRODUCT_IMAGES),
+        imageDescriptions: normalizedForm.imageDescriptions.slice(0, MAX_PRODUCT_IMAGES),
       })
       if (isEditing) {
         await updateProduct(isEditing, {
@@ -849,7 +945,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleEditProduct = (product: AdminProduct) => {
-    const imageEntries = getManagedImageEntries(product, 3)
+    const imageEntries = getManagedImageEntries(product, 3).slice(0, MAX_PRODUCT_IMAGES)
     setForm({
       name: product.name,
       price: product.price,
@@ -881,6 +977,46 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       resetForm()
     }
     setMessage('Product archived.')
+  }
+
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProductIds((current) =>
+      current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId],
+    )
+  }
+
+  const handleBulkProductUpdate = async () => {
+    if (!selectedProductIds.length) {
+      setMessage('Select products to update.')
+      return
+    }
+
+    const stockValue = bulkStock.trim()
+    const priceValue = bulkPrice.trim()
+    if (!stockValue && !priceValue) {
+      setMessage('Enter a stock count and/or price to apply.')
+      return
+    }
+
+    const stockNumber = stockValue === '' ? undefined : Number(stockValue)
+    if (stockNumber !== undefined && (!Number.isFinite(stockNumber) || stockNumber < 0)) {
+      setMessage('Stock must be a number 0 or greater.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await Promise.all(selectedProductIds.map((id) => updateProduct(id, {
+        ...(stockNumber !== undefined ? { stock: stockNumber } : {}),
+        ...(priceValue ? { price: priceValue } : {}),
+      })))
+      setMessage(`Updated ${selectedProductIds.length} product${selectedProductIds.length === 1 ? '' : 's'}.`)
+      setSelectedProductIds([])
+      setBulkStock('')
+      setBulkPrice('')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleHomepageSave = async () => {
@@ -1423,6 +1559,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               { label: "Today's Revenue", value: formatBDT(dashboardSummary.todayRevenue), target: () => handleSummaryCardClick('orders') },
               { label: 'Total Products', value: dashboardSummary.totalProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Out of Stock Products', value: dashboardSummary.outOfStockProducts, target: () => handleSummaryCardClick('products') },
+              { label: 'Low Stock Products', value: dashboardSummary.lowStockProducts, target: () => handleSummaryCardClick('products') },
               { label: 'Total Customers', value: dashboardSummary.totalCustomers, target: () => handleSummaryCardClick('customers') },
               { label: 'Total Brands', value: dashboardSummary.totalBrands, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
               { label: 'Archived Brands', value: dashboardSummary.archivedBrandsCount, target: () => { setShowBrandManagement(true); scrollToSection('brands-management') } },
@@ -1493,14 +1630,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <input value={form.sizes.join(',')} onChange={(event) => setForm({ ...form, sizes: normalizeSizes(event.target.value) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Sizes (comma or space separated)" />
                 <input value={form.colors.join(',')} onChange={(event) => setForm({ ...form, colors: event.target.value.split(',').map((entry) => entry.trim()).filter(Boolean) })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Colors (comma separated)" />
                 <div className="space-y-3">
-                  {galleryLabels.map((label, index) => (
-                    <div key={label} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                  {form.images.map((image, index) => {
+                    const label = galleryLabel(index)
+                    return (
+                    <div key={`gallery-slot-${index}`} className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-[var(--color-text)]">{label}</p>
                           <p className="mt-1 text-xs text-[var(--color-muted)]">Upload, replace, or remove this image.</p>
                         </div>
-                        {form.images[index] ? (
+                        {image ? (
                           <button type="button" onClick={() => handleRemoveGalleryImage(index)} className="text-sm font-semibold text-[var(--color-accent)]">
                             Remove
                           </button>
@@ -1508,8 +1647,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       </div>
                       <label className="mt-3 flex cursor-pointer items-center justify-center overflow-hidden rounded-[1.2rem] border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/80 p-2">
                         <input type="file" accept="image/*" onChange={(event) => handleGalleryUpload(event.target.files, index)} className="hidden" />
-                        {form.images[index] ? (
-                          <img src={form.images[index]} alt={label} className="h-28 w-full rounded-[1rem] object-cover object-center" />
+                        {image ? (
+                          <img src={image} alt={label} className="h-28 w-full rounded-[1rem] object-cover object-center" />
                         ) : (
                           <span className="py-8 text-sm text-[var(--color-muted)]">Tap to upload {label.toLowerCase()}</span>
                         )}
@@ -1527,7 +1666,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                         })} className="min-h-20 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none sm:col-span-2" placeholder="Image description" />
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
+                  {form.images.length < MAX_PRODUCT_IMAGES ? (
+                    <button
+                      type="button"
+                      onClick={() => setForm((current) => ({
+                        ...current,
+                        images: [...current.images, ''],
+                        imageTitles: [...current.imageTitles, ''],
+                        imageDescriptions: [...current.imageDescriptions, ''],
+                      }))}
+                      className="rounded-full border border-[var(--color-border)] px-3 py-2 text-xs font-semibold text-[var(--color-text)]"
+                    >
+                      Add image slot
+                    </button>
+                  ) : null}
                 </div>
                 <div className="space-y-3 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -1567,18 +1721,55 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Catalog</p>
                 <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Fast inventory control</h2>
               </div>
-              <input value={search} onChange={(event) => setSearch(event.target.value)} className="w-32 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none sm:w-44" placeholder="Search" />
+              <input value={productSearch} onChange={(event) => setProductSearch(event.target.value)} className="w-32 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none sm:w-44" placeholder="Search products" />
+            </div>
+            {lowStockCatalog.length ? (
+              <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Low stock</p>
+                <div className="mt-2 space-y-1.5">
+                  {lowStockCatalog.map((product) => (
+                    <button
+                      key={`low-stock-${product.id}`}
+                      type="button"
+                      onClick={() => handleEditProduct(product)}
+                      className="flex w-full items-center justify-between gap-2 text-left text-sm text-[var(--color-text)]"
+                    >
+                      <span className="truncate">{product.name}</span>
+                      <span className="shrink-0 font-semibold">{product.stock <= 0 ? 'Out' : product.stock}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Bulk stock / price</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                <input value={bulkStock} onChange={(event) => setBulkStock(event.target.value)} type="number" min="0" className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Stock" />
+                <input value={bulkPrice} onChange={(event) => setBulkPrice(event.target.value)} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Price" />
+                <button type="button" onClick={() => { void handleBulkProductUpdate() }} disabled={loading || !selectedProductIds.length} className="rounded-full border border-black bg-black px-3 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-black/35">
+                  Apply ({selectedProductIds.length})
+                </button>
+              </div>
             </div>
             <div className="mt-5 space-y-3">
               {filteredProducts.map((product) => (
                 <div key={product.id} className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
                   <div className="flex items-start justify-between gap-3">
-                     <div>
+                     <div className="flex min-w-0 items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.includes(product.id)}
+                        onChange={() => toggleProductSelection(product.id)}
+                        className="mt-1"
+                        aria-label={`Select ${product.name}`}
+                      />
+                      <div className="min-w-0">
                       <h3 className="text-base font-semibold text-[var(--color-text)]">{product.name}</h3>
                       <p className="mt-1 text-sm text-[var(--color-muted)]">{product.category} • {product.stock} in stock</p>
                       {product.comparePrice ? (
                         <p className="mt-1 text-xs text-black/50 line-through">{product.comparePrice}</p>
                       ) : null}
+                      </div>
                     </div>
                     <p className="text-sm font-semibold text-[var(--color-accent)]">{product.price}</p>
                   </div>
@@ -1595,18 +1786,32 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1fr]">
           <div id="orders-management">
             <Card className="rounded-[2rem] p-5 sm:p-7">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Orders</p>
                 <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Manage the full order lifecycle</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setOrderStatusFilter('all')}
-                className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
-              >
-                Show all
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter('all')}
+                  className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+                >
+                  Show all
+                </button>
+                <button
+                  type="button"
+                  onClick={exportOrdersCSV}
+                  className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+                >
+                  Export CSV
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <input value={orderSearch} onChange={(event) => setOrderSearch(event.target.value)} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Search orders" />
+              <input type="date" value={orderDateFrom} onChange={(event) => setOrderDateFrom(event.target.value)} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" aria-label="Orders from date" />
+              <input type="date" value={orderDateTo} onChange={(event) => setOrderDateTo(event.target.value)} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" aria-label="Orders to date" />
             </div>
             <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Status pipeline</p>
@@ -1632,9 +1837,18 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </button>
               </div>
             </div>
+            {pendingQueueOrders.length && (orderStatusFilter === 'all' || orderStatusFilter === 'new') ? (
+              <div className="mt-4 rounded-[1.2rem] border border-black bg-black px-4 py-3 text-sm text-white">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Pending queue</p>
+                <p className="mt-1">{pendingQueueOrders.length} new order{pendingQueueOrders.length === 1 ? '' : 's'} waiting to be confirmed.</p>
+              </div>
+            ) : null}
             <div className="mt-5 space-y-3">
               {filteredOrders.map((order) => (
-                <div key={order.id} className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
+                <div key={order.id} className={`rounded-[1.4rem] border bg-[var(--color-bg)]/70 p-4 ${order.status === 'new' ? 'border-black' : 'border-[var(--color-border)]'}`}>
+                  {order.status === 'new' ? (
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-black">Pending</p>
+                  ) : null}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <input value={orderEdits[order.id]?.customerName ?? order.customerName} onChange={(event) => setOrderEdits((current) => ({ ...current, [order.id]: { ...current[order.id], customerName: event.target.value } }))} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-[var(--color-text)] outline-none" placeholder="Customer name" />
@@ -2631,7 +2845,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                         setShowCouponForm(false)
                         const allCoupons = await getCoupons()
                         setCoupons(allCoupons)
-                        setCouponStats(getCouponStats())
+                        setCouponStats(getCouponStats(allCoupons))
                         setToast({ kind: 'success', message: 'Coupon generated successfully.' })
                       } catch {
                         setToast({ kind: 'error', message: 'Failed to generate coupon.' })
@@ -2706,7 +2920,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                     await updateCoupon(coupon.id, { status: 'disabled' })
                                     const allCoupons = await getCoupons()
                                     setCoupons(allCoupons)
-                                    setCouponStats(getCouponStats())
+                                    setCouponStats(getCouponStats(allCoupons))
                                   }}
                                   className="text-xs text-rose-600 hover:underline"
                                 >
@@ -2719,7 +2933,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                     await updateCoupon(coupon.id, { status: 'active' })
                                     const allCoupons = await getCoupons()
                                     setCoupons(allCoupons)
-                                    setCouponStats(getCouponStats())
+                                    setCouponStats(getCouponStats(allCoupons))
                                   }}
                                   className="text-xs text-emerald-600 hover:underline"
                                 >
@@ -2732,7 +2946,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                   await deleteCoupon(coupon.id)
                                   const allCoupons = await getCoupons()
                                   setCoupons(allCoupons)
-                                  setCouponStats(getCouponStats())
+                                  setCouponStats(getCouponStats(allCoupons))
                                 }}
                                 className="text-xs text-rose-600 hover:underline"
                               >

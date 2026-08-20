@@ -2960,14 +2960,14 @@ export async function deleteCoupon(id: string): Promise<void> {
   }
 }
 
-export function getCouponStats() {
-  const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
+export function getCouponStats(coupons?: Coupon[]) {
+  const list = coupons ?? readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
   return {
-    total: coupons.length,
-    active: coupons.filter((c) => c.status === 'active').length,
-    used: coupons.filter((c) => c.status === 'used').length,
-    expired: coupons.filter((c) => c.status === 'expired' || isCouponExpired(c.expiryDate)).length,
-    disabled: coupons.filter((c) => c.status === 'disabled').length,
+    total: list.length,
+    active: list.filter((c) => c.status === 'active').length,
+    used: list.filter((c) => c.status === 'used').length,
+    expired: list.filter((c) => c.status === 'expired' || isCouponExpired(c.expiryDate)).length,
+    disabled: list.filter((c) => c.status === 'disabled').length,
   }
 }
 
