@@ -5,7 +5,8 @@ import Container from '../components/ui/Container'
 import { parseBDT, formatBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
-import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
+import { STORE_POLICY } from '../data/storePolicy'
+import { getCustomerOrderSupportHref, PAYMENT_METHOD_COD } from '../utils/orderComms'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -84,7 +85,7 @@ export default function OrderSuccessPage() {
     hasTrackedPurchaseRef.current = true
   }, [order, purchasePayload])
 
-  const supportWhatsAppHref = SUPPORT_WHATSAPP_HREF
+  const supportWhatsAppHref = getCustomerOrderSupportHref(order?.orderId ?? '')
   const trackHref = order ? `/track-order?id=${encodeURIComponent(order.orderId)}` : '/track-order'
 
   return (
@@ -130,7 +131,7 @@ export default function OrderSuccessPage() {
                   <p><span className="text-black/55">Order ID:</span> {order.orderId}</p>
                   <p><span className="text-black/55">Name:</span> {order.customerName}</p>
                   <p><span className="text-black/55">Phone:</span> {order.customerPhone}</p>
-                  <p><span className="text-black/55">Payment:</span> {order.paymentMethod}</p>
+                  <p><span className="text-black/55">Payment:</span> {order.paymentMethod || PAYMENT_METHOD_COD}</p>
                   <p><span className="text-black/55">Address:</span> {order.address}</p>
                 </div>
 

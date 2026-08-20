@@ -328,6 +328,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         total,
         status: 'new',
         trackingNumber: '',
+        paymentMethod: 'Cash on Delivery',
         createdAt: FieldValue.serverTimestamp(),
         stockCommitted: true,
         ...(couponCode && couponId ? {

@@ -8,6 +8,7 @@ import { createOrder, isOrderBackendReady, subscribeToHomepageContent } from '..
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
+import { PAYMENT_METHOD_COD } from '../utils/orderComms'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 
@@ -227,6 +228,7 @@ export default function CheckoutPage() {
         total: effectiveGrandTotal,
         status: 'new',
         trackingNumber: '',
+        paymentMethod: PAYMENT_METHOD_COD,
       }, appliedCoupon ? {
         code: appliedCoupon.code,
         discountPercent: appliedCoupon.discountPercent,
@@ -239,7 +241,7 @@ export default function CheckoutPage() {
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
         address: composedAddress,
-        paymentMethod: 'Cash on Delivery',
+        paymentMethod: PAYMENT_METHOD_COD,
         deliveryCharge: createdOrder.deliveryCharge ?? deliveryCharge,
         subtotal,
         grandTotal: createdOrder.total,
@@ -479,6 +481,14 @@ export default function CheckoutPage() {
                   <span>Grand Total</span>
                   <span>{summaryLabel}</span>
                 </div>
+              </div>
+            </div>
+
+            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+              <p className="text-sm font-medium text-[var(--color-text)]">Payment</p>
+              <div className="mt-3 border border-black px-4 py-3">
+                <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_COD}</p>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">Pay the courier when your order arrives. {STORE_POLICY.phoneConfirm}</p>
               </div>
             </div>
 

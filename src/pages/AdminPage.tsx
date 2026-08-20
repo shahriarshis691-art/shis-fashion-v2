@@ -7,6 +7,7 @@ import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
 import { compactManagedImages, getManagedImageEntries } from '../utils/media'
 import { formatBDT } from '../utils/currency'
+import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import {
   consumeAdminAccessDeniedFlag,
   createCategory,
@@ -120,6 +121,19 @@ const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
   shipped: 'Shipped',
   delivered: 'Delivered',
   cancelled: 'Cancelled',
+}
+
+function getOrderWhatsAppHref(
+  order: AdminOrder,
+  edits?: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'trackingNumber'>>,
+) {
+  return getAdminCustomerNotifyHref({
+    phone: edits?.customerPhone ?? order.customerPhone,
+    customerName: edits?.customerName ?? order.customerName,
+    orderId: order.id,
+    status: order.status,
+    trackingNumber: edits?.trackingNumber ?? order.trackingNumber,
+  })
 }
 
 const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string) => boolean> = {
@@ -507,11 +521,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
     downloadCsv(
       `orders-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Order ID', 'Date', 'Status', 'Customer', 'Phone', 'Email', 'Address', 'Items', 'Delivery', 'Total', 'Tracking'],
+      ['Order ID', 'Date', 'Status', 'Payment', 'Customer', 'Phone', 'Email', 'Address', 'Items', 'Delivery', 'Total', 'Tracking'],
       filteredOrders.map((order) => [
         order.id,
         formatOrderDateTime(order.createdAt),
         order.status,
+        order.paymentMethod ?? 'Cash on Delivery',
         order.customerName,
         order.customerPhone ?? '',
         order.customerEmail ?? '',
@@ -1875,6 +1890,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                           </button>
                         ))}
                         <button type="button" onClick={() => handleSaveOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]">Save</button>
+                        {getOrderWhatsAppHref(order, orderEdits[order.id]) ? (
+                          <a
+                            href={getOrderWhatsAppHref(order, orderEdits[order.id])}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+                          >
+                            WhatsApp customer
+                          </a>
+                        ) : null}
                         <button type="button" onClick={() => handleDeleteOrder(order.id)} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Delete</button>
                       </div>
                     </div>
@@ -1889,6 +1914,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                     <div className="space-y-2">
                       <p><span className="font-semibold text-[var(--color-text)]">Delivery Charge:</span> {formatBDT(order.deliveryCharge ?? 0)}</p>
+                      <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}</p>
                       <p><span className="font-semibold text-[var(--color-text)]">Grand Total:</span> {formatBDT(order.total)}</p>
                       <div>
                         <p className="font-semibold text-[var(--color-text)]">Ordered Products</p>

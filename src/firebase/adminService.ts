@@ -74,6 +74,7 @@ export interface AdminOrder {
   total: number
   status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   trackingNumber?: string
+  paymentMethod?: string
   createdAt?: string | { seconds: number }
   archived?: boolean
   archivedAt?: string | { seconds: number }

@@ -4,7 +4,12 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { formatBDT } from '../utils/currency'
 import { formatBangladeshPhoneInput, normalizeBangladeshPhone } from '../utils/bangladeshAddress'
-import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
+import { STORE_POLICY } from '../data/storePolicy'
+import {
+  getCustomerOrderSupportHref,
+  getPublicTrackingHref,
+  PAYMENT_METHOD_COD,
+} from '../utils/orderComms'
 
 const STATUS_LABELS: Record<string, string> = {
   new: 'Received — we will call to confirm',
@@ -19,6 +24,7 @@ interface LookupOrder {
   orderId: string
   status: string
   trackingNumber: string
+  paymentMethod?: string
   customerName: string
   area: string
   total: number
@@ -34,8 +40,11 @@ export default function OrderLookupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [order, setOrder] = useState<LookupOrder | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const isPhoneValid = useMemo(() => normalizeBangladeshPhone(phone) !== null, [phone])
+  const trackingHref = order ? getPublicTrackingHref(order.trackingNumber) : ''
+  const supportHref = getCustomerOrderSupportHref(order?.orderId ?? orderId)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -50,6 +59,7 @@ export default function OrderLookupPage() {
     setLoading(true)
     setError('')
     setOrder(null)
+    setCopied(false)
 
     try {
       const response = await fetch('/api/lookup-order', {
@@ -69,6 +79,19 @@ export default function OrderLookupPage() {
       setError('Unable to look up this order right now. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCopyTracking = async () => {
+    if (!order?.trackingNumber) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(order.trackingNumber)
+      setCopied(true)
+    } catch {
+      setCopied(false)
     }
   }
 
@@ -115,11 +138,32 @@ export default function OrderLookupPage() {
           <div className="mt-8 max-w-lg border border-black/15 p-5">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order {order.orderId}</p>
             <h2 className="mt-2 text-h2 text-black">{STATUS_LABELS[order.status] ?? order.status}</h2>
+            {order.trackingNumber ? (
+              <div className="mt-4 border border-black/10 bg-black/[0.02] px-3 py-3">
+                <p className="text-caption uppercase tracking-[0.14em] text-black/55">Courier tracking</p>
+                {trackingHref ? (
+                  <a href={trackingHref} target="_blank" rel="noreferrer" className="mt-1 block break-all text-sm font-semibold text-black underline">
+                    {order.trackingNumber}
+                  </a>
+                ) : (
+                  <p className="mt-1 break-all text-sm font-semibold text-black">{order.trackingNumber}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { void handleCopyTracking() }}
+                  className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/60 hover:text-black"
+                >
+                  {copied ? 'Copied' : 'Copy tracking'}
+                </button>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-black/65">Tracking appears here after the order is shipped.</p>
+            )}
             <div className="mt-4 space-y-2 text-sm text-black/75">
               <p><span className="text-black/55">Name:</span> {order.customerName}</p>
               {order.area ? <p><span className="text-black/55">Area:</span> {order.area}</p> : null}
               {order.createdAt ? <p><span className="text-black/55">Placed:</span> {order.createdAt.slice(0, 10)}</p> : null}
-              {order.trackingNumber ? <p><span className="text-black/55">Tracking:</span> {order.trackingNumber}</p> : null}
+              <p><span className="text-black/55">Payment:</span> {order.paymentMethod || PAYMENT_METHOD_COD}</p>
               <p><span className="text-black/55">Delivery:</span> {formatBDT(order.deliveryCharge)}</p>
               <p><span className="text-black/55">Total:</span> {formatBDT(order.total)}</p>
             </div>
@@ -131,11 +175,14 @@ export default function OrderLookupPage() {
               ))}
             </div>
             <p className="mt-4 text-sm leading-6 text-black/65">{STORE_POLICY.exchangeWindow} {STORE_POLICY.phoneConfirm}</p>
+            <a href={supportHref} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-sm font-semibold underline">
+              WhatsApp about this order
+            </a>
           </div>
         ) : null}
 
         <p className="mt-8 text-sm text-black/65">
-          Need help? <a href={SUPPORT_WHATSAPP_HREF} target="_blank" rel="noreferrer" className="underline">Chat on WhatsApp</a>
+          Need help? <a href={supportHref} target="_blank" rel="noreferrer" className="underline">Chat on WhatsApp</a>
           {' · '}
           <Link to="/terms" className="underline">Returns & exchange</Link>
         </p>

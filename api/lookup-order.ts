@@ -121,6 +121,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       customerName?: string
       status?: string
       trackingNumber?: string
+      paymentMethod?: string
       total?: unknown
       deliveryCharge?: unknown
       createdAt?: unknown
@@ -145,6 +146,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         orderId: snapshot.id,
         status: data.status ?? 'new',
         trackingNumber: data.trackingNumber ?? '',
+        paymentMethod: data.paymentMethod ?? 'Cash on Delivery',
         customerName: data.customerName ?? '',
         area: [data.deliveryAddress?.district, data.deliveryAddress?.division].filter(Boolean).join(', '),
         total: toMoney(data.total),
