@@ -20,6 +20,7 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
 const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInWishlist, onProductClick }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
+  const isSoldOut = (product.stock ?? 0) <= 0
 
   return (
     <motion.article
@@ -37,7 +38,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             loading="lazy"
             decoding="async"
             onError={handleImageError}
-            className={`h-full w-full object-cover object-center ${imageToneClass} ${(product.stock ?? 0) <= 0 ? 'opacity-70' : ''}`}
+            className={`h-full w-full object-cover object-center ${imageToneClass}`}
             fetchPriority="low"
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
@@ -55,13 +56,13 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
               {isInWishlist ? '♥' : '♡'}
             </button>
           ) : null}
-          {(product.stock ?? 0) <= 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/55">
-              <span className="border border-black/20 bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black">Sold out</span>
-            </div>
-          ) : null}
         </div>
-        <div className="pt-2 product-card-meta">
+        {isSoldOut ? (
+          <p className="mt-2 text-center text-caption font-semibold uppercase tracking-[0.12em] text-black">
+            Sold out
+          </p>
+        ) : null}
+        <div className={`product-card-meta ${isSoldOut ? 'pt-1.5' : 'pt-2'}`}>
           <h3 className="line-clamp-1 text-sm font-medium text-black">{product.name}</h3>
           <div className="mt-0.5 flex items-center gap-2">
             <p className="text-sm font-semibold text-black">{product.price}</p>
