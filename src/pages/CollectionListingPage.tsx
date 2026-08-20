@@ -117,9 +117,9 @@ export default function CollectionListingPage() {
     const relatedCategories = activeCollection.relatedCategorySlugs.map((item) => item.trim().toLowerCase())
     const filtered = relatedCategories.length
       ? products.filter((item) => relatedCategories.includes(item.category.trim().toLowerCase()))
-      : products
+      : []
 
-    return filtered.length ? filtered : products
+    return filtered
   }, [activeCollection.relatedCategorySlugs, products])
 
   const featuredProducts = useMemo(() => collectionProducts.slice(0, 8), [collectionProducts])

@@ -22,8 +22,6 @@ const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
 
 function getOversizedCampaignLandingPath(pathname: string, search: string) {
   const params = new URLSearchParams(search)
-  const source = params.get('utm_source')?.trim().toLowerCase() ?? ''
-  const medium = params.get('utm_medium')?.trim().toLowerCase() ?? ''
   const campaign = [
     params.get('utm_campaign'),
     params.get('campaign'),
@@ -31,18 +29,10 @@ function getOversizedCampaignLandingPath(pathname: string, search: string) {
     params.get('fb_campaign'),
   ].filter(Boolean).join(' ').trim().toLowerCase()
 
-  const isMetaSignal = Boolean(
-    params.get('fbclid')
-    || source.includes('facebook')
-    || source.includes('meta')
-    || medium.includes('social')
-    || medium.includes('paid_social')
-    || campaign.includes('oversized')
-    || campaign.includes('tee')
-    || campaign.includes('meta')
-  )
+  const isOversizedCampaign = campaign.includes('oversized')
+    || (campaign.includes('tee') && !campaign.includes('saree') && !campaign.includes('kids'))
 
-  if (!isMetaSignal) {
+  if (!isOversizedCampaign) {
     return null
   }
 

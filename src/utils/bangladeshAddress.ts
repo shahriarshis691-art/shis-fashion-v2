@@ -96,6 +96,44 @@ export function getUpazilasForDistrict(district: string) {
   return bangladeshUpazilasByDistrict[district] ?? [`${district} Sadar`]
 }
 
-export function getDeliveryCharge(division: BangladeshDivision) {
-  return division === 'Dhaka' ? 80 : 130
+export const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
+export const DHAKA_DELIVERY_CHARGE = 80
+export const OUTSIDE_DHAKA_DELIVERY_CHARGE = 130
+
+export function normalizeFreeDeliveryThreshold(value: unknown) {
+  const numericValue = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(numericValue)) {
+    return DEFAULT_FREE_DELIVERY_THRESHOLD
+  }
+
+  return Math.max(0, Math.round(numericValue))
+}
+
+export function getBaseDeliveryCharge(division: BangladeshDivision) {
+  return division === 'Dhaka' ? DHAKA_DELIVERY_CHARGE : OUTSIDE_DHAKA_DELIVERY_CHARGE
+}
+
+export function getDeliveryCharge(
+  division: BangladeshDivision,
+  subtotal = 0,
+  freeDeliveryThreshold: unknown = DEFAULT_FREE_DELIVERY_THRESHOLD,
+) {
+  const threshold = normalizeFreeDeliveryThreshold(freeDeliveryThreshold)
+  if (threshold > 0 && subtotal >= threshold) {
+    return 0
+  }
+
+  return getBaseDeliveryCharge(division)
+}
+
+export function getAmountToFreeDelivery(
+  subtotal: number,
+  freeDeliveryThreshold: unknown = DEFAULT_FREE_DELIVERY_THRESHOLD,
+) {
+  const threshold = normalizeFreeDeliveryThreshold(freeDeliveryThreshold)
+  if (threshold <= 0) {
+    return 0
+  }
+
+  return Math.max(0, threshold - subtotal)
 }

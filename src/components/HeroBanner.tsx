@@ -137,7 +137,7 @@ export default function HeroBanner({
                       muted
                       loop={media.length === 1}
                       playsInline
-                      preload="auto"
+                      preload="metadata"
                       onCanPlay={(e) => {
                         if (isActive) {
                           e.currentTarget.play().catch(() => {})

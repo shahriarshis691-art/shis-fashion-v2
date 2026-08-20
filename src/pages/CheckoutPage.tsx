@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { useCart, clearBuyNowCheckout, readBuyNowCheckout } from '../context/CartContext'
-import { createOrder, getCouponByCode, isOrderBackendReady } from '../firebase/adminService'
+import { createOrder, getCouponByCode, isOrderBackendReady, subscribeToHomepageContent } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
-import { bangladeshDivisions, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
+import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 
@@ -111,12 +111,13 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState(appliedCoupon?.code ?? '')
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponMessage, setCouponMessage] = useState('')
+  const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
   const submissionLockRef = useRef(false)
   const hasTrackedCheckoutRef = useRef(false)
   const enteredAtRef = useRef(0)
   const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
   const discountAmount = appliedCoupon ? Math.round(subtotal * appliedCoupon.discountPercent / 100 * 100) / 100 : 0
-  const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision)
+  const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision, subtotal, freeDeliveryThreshold)
   const effectiveGrandTotal = subtotal + deliveryCharge - discountAmount
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
   const upazilaOptions = getUpazilasForDistrict(form.district)
@@ -137,6 +138,13 @@ export default function CheckoutPage() {
     form.upazila &&
     !isSubmitting,
   )
+
+  useEffect(() => {
+    const unsubscribe = subscribeToHomepageContent((content) => {
+      setFreeDeliveryThreshold(content.freeDeliveryThreshold ?? DEFAULT_FREE_DELIVERY_THRESHOLD)
+    })
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     if (!items.length || hasTrackedCheckoutRef.current) {
@@ -198,7 +206,7 @@ export default function CheckoutPage() {
     setCouponMessage('')
 
     try {
-      const result = await getCouponByCode(trimmed)
+      const result = await getCouponByCode(trimmed, form.email)
 
       if (!result || result.status !== 'active' || !result.code) {
         setCouponMessage('Invalid or expired coupon code.')
@@ -208,8 +216,8 @@ export default function CheckoutPage() {
 
       applyCoupon(result.code, result.id, result.discountPercent)
       setCouponMessage(`Coupon applied. You save ${result.discountPercent}%.`)
-    } catch {
-      setCouponMessage('Unable to validate coupon. Please try again.')
+    } catch (error) {
+      setCouponMessage(error instanceof Error ? error.message : 'Unable to validate coupon. Please try again.')
     }
 
     setCouponLoading(false)
@@ -276,6 +284,13 @@ export default function CheckoutPage() {
         customerPhone: phoneNumber,
         customerEmail: form.email.trim(),
         address: composedAddress,
+        deliveryAddress: {
+          division: form.division,
+          district: form.district,
+          upazila: form.upazila,
+          streetAddress: form.streetAddress.trim(),
+          deliveryNote: form.deliveryNote.trim(),
+        },
         deliveryCharge,
         notes: form.deliveryNote.trim(),
         items: items.map((item) => ({
@@ -302,9 +317,9 @@ export default function CheckoutPage() {
         customerPhone: phoneNumber,
         address: composedAddress,
         paymentMethod: 'Cash on Delivery',
-        deliveryCharge,
+        deliveryCharge: createdOrder.deliveryCharge ?? deliveryCharge,
         subtotal,
-        grandTotal: effectiveGrandTotal,
+        grandTotal: createdOrder.total,
         items: items.map((item) => ({
           id: item.id,
           name: item.name,
@@ -314,9 +329,9 @@ export default function CheckoutPage() {
           size: item.size,
           color: item.color,
         })),
-        couponCode: appliedCoupon?.code ?? '',
-        couponDiscountPercent: appliedCoupon?.discountPercent ?? 0,
-        couponDiscountAmount: discountAmount,
+        couponCode: appliedCoupon?.code ?? createdOrder.couponCode ?? '',
+        couponDiscountPercent: appliedCoupon?.discountPercent ?? createdOrder.couponDiscountPercent ?? 0,
+        couponDiscountAmount: createdOrder.couponDiscountAmount ?? discountAmount,
         createdAt: new Date().toISOString(),
       }
 
@@ -563,7 +578,7 @@ export default function CheckoutPage() {
                 ) : null}
                 <div className="flex items-center justify-between text-[var(--color-muted)]">
                   <span>Delivery</span>
-                  <span className="text-[var(--color-text)]">{formatBDT(deliveryCharge)}</span>
+                  <span className="text-[var(--color-text)]">{deliveryCharge === 0 ? 'Free' : formatBDT(deliveryCharge)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-base font-semibold text-[var(--color-text)]">
                   <span>Grand Total</span>

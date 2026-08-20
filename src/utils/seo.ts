@@ -533,7 +533,7 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       canonicalPath: '/cart',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'index,follow',
+      robots: 'noindex,nofollow',
     }
   }
 
@@ -545,7 +545,7 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       canonicalPath: '/checkout',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'index,follow',
+      robots: 'noindex,nofollow',
     }
   }
 
@@ -557,7 +557,7 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       canonicalPath: '/order-success',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
-      robots: 'index,follow',
+      robots: 'noindex,nofollow',
     }
   }
 

@@ -1346,9 +1346,9 @@ export async function signOutAdmin() {
 export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
   ensureSeedData()
   const localProducts = () => readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived)
-  callback(localProducts())
 
   if (!firebaseDb || isLocalFirstDataMode()) {
+    callback(localProducts())
     return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => !product.archived)))
   }
 
@@ -1357,13 +1357,15 @@ export function subscribeToProducts(callback: (products: AdminProduct[]) => void
     productsRef,
     (snapshot) => {
       const products = snapshot.docs.map((doc) => normalizeProduct({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
-      const visibleProducts = products.filter((product) => !product.archived)
-      callback(visibleProducts.length ? visibleProducts : localProducts())
+      callback(products.filter((product) => !product.archived))
     },
     (error) => {
-      if (shouldFallbackToLocal(error)) {
+      if (shouldFallbackToLocal(error) && !requiresLiveBackend()) {
         callback(localProducts())
+        return
       }
+
+      callback([])
     },
   )
 }
@@ -1960,22 +1962,6 @@ function applyLocalStockDecrement(items: AdminOrder['items']) {
   writeStored(PRODUCTS_KEY, next)
 }
 
-async function commitOrderStock(orderId: string) {
-  if (!orderId || orderId.startsWith('local-')) {
-    return
-  }
-
-  try {
-    await fetch('/api/commit-order-stock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
-    })
-  } catch {
-    // Order is already saved; stock sync is best-effort.
-  }
-}
-
 export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, couponData?: { code: string; discountPercent: number; discountAmount: number; couponId?: string } | null) {
   if (requiresLiveBackend() && !firebaseDb) {
     throw new Error('Live order backend is not configured. Add Firebase production credentials before accepting orders.')
@@ -1993,13 +1979,13 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
       couponId: couponData.couponId,
     } : {}),
   } as AdminOrder
-  writeStored(ORDERS_KEY, [optimisticOrder, ...currentOrders])
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     if (requiresLiveBackend()) {
-      writeStored(ORDERS_KEY, currentOrders)
       throw new Error('Live order backend is unavailable. Order was not submitted.')
     }
+
+    writeStored(ORDERS_KEY, [optimisticOrder, ...currentOrders])
 
     if (couponData) {
       await markCouponUsed(couponData.couponId ?? couponData.code, optimisticOrder.id, couponData.discountAmount)
@@ -2010,39 +1996,37 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
   }
 
   try {
-    const payload = {
-      ...order,
-      createdAt: serverTimestamp(),
-      ...(couponData ? {
-        couponCode: couponData.code,
-        couponDiscountPercent: couponData.discountPercent,
-        couponDiscountAmount: couponData.discountAmount,
-        couponId: couponData.couponId,
-      } : {}),
+    const response = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        customerEmail: order.customerEmail,
+        address: order.address,
+        notes: order.notes,
+        items: order.items,
+        couponCode: couponData?.code,
+        deliveryAddress: order.deliveryAddress,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(await readApiError(response))
     }
 
-    const ref = await addDoc(collection(firebaseDb, 'orders'), payload)
-    const syncedOrder: AdminOrder = { ...optimisticOrder, id: ref.id }
-    const syncedOrders = readStored(ORDERS_KEY, defaultOrders).map((entry) => (entry.id === optimisticOrder.id ? syncedOrder : entry))
-    writeStored(ORDERS_KEY, syncedOrders)
-
-    if (couponData) {
-      await markCouponUsed(couponData.couponId ?? couponData.code, syncedOrder.id, couponData.discountAmount)
+    const payload = await response.json() as { order?: AdminOrder }
+    if (!payload.order?.id) {
+      throw new Error('Order service returned an incomplete response.')
     }
 
-    await commitOrderStock(syncedOrder.id)
-    return syncedOrder
+    writeStored(ORDERS_KEY, [payload.order, ...currentOrders])
+    return payload.order
   } catch (error) {
-    if (!shouldFallbackToLocal(error)) {
-      writeStored(ORDERS_KEY, currentOrders)
-      throw error
-    }
-
     if (requiresLiveBackend()) {
-      writeStored(ORDERS_KEY, currentOrders)
-      throw new Error('Live order backend is unavailable. Order was not submitted.', {
-        cause: error,
-      })
+      throw error instanceof Error ? error : new Error('Order submission failed. Please try again.')
     }
 
     if (couponData) {
@@ -2050,6 +2034,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
     }
 
     applyLocalStockDecrement(order.items)
+    writeStored(ORDERS_KEY, [optimisticOrder, ...currentOrders])
     return optimisticOrder
   }
 }
@@ -2868,8 +2853,9 @@ export async function getCoupons(): Promise<Coupon[]> {
   }
 }
 
-export async function getCouponByCode(code: string): Promise<Coupon | null> {
+export async function getCouponByCode(code: string, customerEmail = ''): Promise<Coupon | null> {
   const trimmed = code.trim().toUpperCase()
+  const trimmedEmail = customerEmail.trim().toLowerCase()
 
   if (!isValidCouponCode(trimmed)) {
     return null
@@ -2877,7 +2863,21 @@ export async function getCouponByCode(code: string): Promise<Coupon | null> {
 
   if (!firebaseDb || isLocalFirstDataMode()) {
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
-    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+    const coupon = coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+    if (!coupon) {
+      return null
+    }
+
+    if (isCouponExpired(coupon.expiryDate) || coupon.usageCount >= coupon.maxUsage) {
+      return null
+    }
+
+    const boundEmail = coupon.customerEmail.trim().toLowerCase()
+    if (boundEmail && boundEmail !== trimmedEmail) {
+      throw new Error(trimmedEmail ? 'This coupon is not valid for this email.' : 'Enter the email this coupon was issued to.')
+    }
+
+    return coupon
   }
 
   try {
@@ -2886,14 +2886,14 @@ export async function getCouponByCode(code: string): Promise<Coupon | null> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ action: 'validate', code: trimmed }),
+      body: JSON.stringify({ action: 'validate', code: trimmed, email: trimmedEmail || undefined }),
     })
 
+    const payload = await response.json() as PublicCouponValidationResult
     if (!response.ok) {
-      return null
+      throw new Error(payload.error || 'Unable to validate coupon. Please try again.')
     }
 
-    const payload = await response.json() as PublicCouponValidationResult
     if (!payload.valid || !payload.coupon) {
       return null
     }
@@ -2909,7 +2909,11 @@ export async function getCouponByCode(code: string): Promise<Coupon | null> {
       usageCount: payload.coupon.usageCount,
       maxUsage: payload.coupon.maxUsage,
     }
-  } catch {
+  } catch (error) {
+    if (requiresLiveBackend()) {
+      throw error instanceof Error ? error : new Error('Unable to validate coupon. Please try again.')
+    }
+
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
     return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
   }
@@ -3078,27 +3082,27 @@ export async function validateCouponServer(code: string, customerEmail: string):
     return { valid: false, error: 'Invalid coupon code format.' }
   }
 
-  const coupon = await getCouponByCode(trimmedCode)
+  try {
+    const coupon = await getCouponByCode(trimmedCode, trimmedEmail)
 
-  if (!coupon) {
-    return { valid: false, error: 'Invalid or expired coupon code.' }
+    if (!coupon) {
+      return { valid: false, error: 'Invalid or expired coupon code.' }
+    }
+
+    if (coupon.status !== 'active') {
+      return { valid: false, error: 'This coupon is no longer active.' }
+    }
+
+    if (isCouponExpired(coupon.expiryDate)) {
+      return { valid: false, error: 'This coupon has expired.' }
+    }
+
+    if (coupon.usageCount >= coupon.maxUsage) {
+      return { valid: false, error: 'This coupon has already been used.' }
+    }
+
+    return { valid: true, coupon }
+  } catch (error) {
+    return { valid: false, error: error instanceof Error ? error.message : 'Invalid or expired coupon code.' }
   }
-
-  if (coupon.status !== 'active') {
-    return { valid: false, error: 'This coupon is no longer active.' }
-  }
-
-  if (isCouponExpired(coupon.expiryDate)) {
-    return { valid: false, error: 'This coupon has expired.' }
-  }
-
-  if (coupon.usageCount >= coupon.maxUsage) {
-    return { valid: false, error: 'This coupon has already been used.' }
-  }
-
-  if (coupon.customerEmail !== trimmedEmail) {
-    return { valid: false, error: 'This coupon is not valid for this email.' }
-  }
-
-  return { valid: true, coupon }
 }

@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent } from '../../firebase/adminService'
 import { formatBDT } from '../../utils/currency'
+import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../../utils/bangladeshAddress'
 
-const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
 const IMAGE_PLACEHOLDER =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f4f4f4"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="%23777777"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
@@ -91,7 +91,7 @@ export default function MiniCartConfirmation() {
   }, [dismissRecentAddition, recentAddition])
 
   const threshold = Math.max(0, freeDeliveryThreshold)
-  const remainingForFreeDelivery = Math.max(0, threshold - (recentAddition?.cartSubtotal ?? 0))
+  const remainingForFreeDelivery = getAmountToFreeDelivery(recentAddition?.cartSubtotal ?? 0, threshold)
   const progressPercent = threshold > 0
     ? Math.max(0, Math.min(100, Math.round(((recentAddition?.cartSubtotal ?? 0) / threshold) * 100)))
     : 100

@@ -8,6 +8,7 @@ import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
+import { useWishlist } from '../context/WishlistContext'
 import {
   subscribeToProducts,
   type AdminProduct,
@@ -179,6 +180,7 @@ export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const searchParams = new URLSearchParams(location.search)
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
 
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [ready, setReady] = useState(false)
@@ -198,6 +200,7 @@ export default function ShopPage() {
 
   const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
   const rawQuerySubcategory = searchParams.get('sub')
+  const searchQuery = searchParams.get('q')?.trim() ?? ''
   const dedicatedListing = getDedicatedListingFromPath(location.pathname)
   const pathSegment = dedicatedListing?.segment ?? normalizeSegmentFromPath(location.pathname)
   const activeSegment = pathSegment !== 'all'
@@ -213,7 +216,7 @@ export default function ShopPage() {
   const segmentSubcategories = getSubcategoriesForSegment(effectiveSegment)
   const activeSubcategory = dedicatedListing?.subcategory ?? normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
   const effectiveSubcategory = dedicatedListing?.subcategory ?? (legacySubcategory || activeSubcategory)
-  const listingKey = `${effectiveSegment}|${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${location.pathname}`
+  const listingKey = `${effectiveSegment}|${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery.toLowerCase()}|${location.pathname}`
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -406,8 +409,16 @@ export default function ShopPage() {
     return true
   })
 
+  const normalizedSearch = searchQuery.trim().toLowerCase()
+  const bySearch = normalizedSearch
+    ? byFilter.filter((product) => (
+      [product.name, product.category, product.brand, product.description]
+        .some((value) => (value ?? '').toLowerCase().includes(normalizedSearch))
+    ))
+    : byFilter
+
   const visibleProducts = (() => {
-    const sorted = [...byFilter]
+    const sorted = [...bySearch]
     if (sortBy === 'new') {
       sorted.sort((left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)))
       return sorted
@@ -637,6 +648,40 @@ export default function ShopPage() {
     })
   }
 
+  const clearSearch = () => {
+    const params = new URLSearchParams(location.search)
+    params.delete('q')
+    navigate({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : '',
+    })
+  }
+
+  const handleToggleWishlist = (product: ShopProduct) => {
+    if (isInWishlist(String(product.id))) {
+      removeFromWishlist(String(product.id))
+      googleAnalytics.trackEvent('wishlist_removed', {
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category,
+        value: parseBDT(product.price),
+        currency: 'BDT',
+        brand: product.brand,
+      })
+      return
+    }
+
+    addToWishlist(product)
+    googleAnalytics.trackEvent('wishlist_added', {
+      item_id: String(product.id),
+      item_name: product.name,
+      item_category: product.category,
+      value: parseBDT(product.price),
+      currency: 'BDT',
+      brand: product.brand,
+    })
+  }
+
   return (
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
       <Container>
@@ -645,6 +690,18 @@ export default function ShopPage() {
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">{dedicatedListing?.eyebrow ?? 'SHIS Listing'}</p>
             <h1 className="mt-1 text-h1 text-black">{dedicatedListing?.title ?? legacyHeading?.title ?? heading.title}</h1>
             <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? legacyHeading?.description ?? heading.description}</p>
+            {searchQuery ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
           </div>
 
           <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -755,7 +812,12 @@ export default function ShopPage() {
         ) : (
           <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid">
             {pagedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                onToggleWishlist={handleToggleWishlist}
+                isInWishlist={isInWishlist(String(product.id))}
+              />
             ))}
           </div>
         )}
@@ -778,18 +840,33 @@ export default function ShopPage() {
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8">
             <div className="border border-dashed border-black/20 px-4 py-6 text-center">
-              <p className="text-caption uppercase tracking-[0.14em] text-black/55">No products found</p>
-              <p className="mt-2 text-sm text-black/70">{dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination.'}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({ inStockOnly: false, newOnly: false })
-                  setSortBy('popular')
-                }}
-                className="ui-interactive mt-4 border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
-              >
-                Reset filters
-              </button>
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">{searchQuery ? 'No matching products' : 'No products found'}</p>
+              <p className="mt-2 text-sm text-black/70">
+                {searchQuery
+                  ? `Nothing matched “${searchQuery}”. Try another search or browse the full collection.`
+                  : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination.'}
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-3">
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+                  >
+                    Clear search
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilters({ inStockOnly: false, newOnly: false })
+                    setSortBy('popular')
+                  }}
+                  className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+                >
+                  Reset filters
+                </button>
+              </div>
             </div>
           </div>
         ) : null}

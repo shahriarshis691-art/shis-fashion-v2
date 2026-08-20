@@ -1,4 +1,4 @@
-import { FieldValue, getFirestore } from 'firebase-admin/firestore'
+import { getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from './_firebaseAdmin.js'
 import { createRateLimiter, getClientIp } from './_rateLimit.js'
 
@@ -20,13 +20,13 @@ interface LooseResponse {
 interface ValidateCouponBody {
   action?: 'validate' | 'redeem'
   code?: string
+  email?: string
   couponId?: string
   orderId?: string
   discountAmount?: number
 }
 
 const isValidateLimited = createRateLimiter(30)
-const isRedeemLimited = createRateLimiter(10)
 
 function isCouponCodeValid(code: string) {
   return /^[A-Z]{3,}-[A-Z0-9]{3,}$/i.test(code)
@@ -64,13 +64,13 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   const action = body.action ?? 'validate'
   const clientIp = getClientIp(req.headers)
 
-  if (action === 'validate' && isValidateLimited(clientIp)) {
-    res.status(429).json({ valid: false, error: 'Too many requests.' })
+  if (action === 'redeem') {
+    res.status(401).json({ redeemed: false, error: 'Unauthorized' })
     return
   }
 
-  if (action === 'redeem' && isRedeemLimited(clientIp)) {
-    res.status(429).json({ redeemed: false, error: 'Too many requests.' })
+  if (action === 'validate' && isValidateLimited(clientIp)) {
+    res.status(429).json({ valid: false, error: 'Too many requests.' })
     return
   }
 
@@ -102,6 +102,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       status: 'active' | 'used' | 'disabled' | 'expired'
       usageCount: number
       maxUsage: number
+      customerEmail?: string
     }
 
     if (coupon.status !== 'active') {
@@ -119,6 +120,20 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       return
     }
 
+    const boundEmail = String(coupon.customerEmail ?? '').trim().toLowerCase()
+    const providedEmail = String(body.email ?? '').trim().toLowerCase()
+    if (boundEmail) {
+      if (!providedEmail) {
+        res.status(409).json({ valid: false, error: 'Enter the email this coupon was issued to.', emailRequired: true })
+        return
+      }
+
+      if (boundEmail !== providedEmail) {
+        res.status(409).json({ valid: false, error: 'This coupon is not valid for this email.' })
+        return
+      }
+    }
+
     res.status(200).json({
       valid: true,
       coupon: {
@@ -131,70 +146,6 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         maxUsage: coupon.maxUsage,
       },
     })
-    return
-  }
-
-  if (action === 'redeem') {
-    const orderId = body.orderId?.trim() ?? ''
-    const discountAmount = Number(body.discountAmount ?? 0)
-    const code = body.code?.trim().toUpperCase() ?? ''
-    const couponId = body.couponId?.trim() ?? ''
-
-    if (!orderId || (!couponId && !isCouponCodeValid(code))) {
-      res.status(400).json({ redeemed: false, error: 'Coupon and order details are required.' })
-      return
-    }
-
-    const orderSnapshot = await db.collection('orders').doc(orderId).get()
-    if (!orderSnapshot.exists) {
-      res.status(404).json({ redeemed: false, error: 'Order not found.' })
-      return
-    }
-
-    const couponSnapshot = await findCoupon(db, code, couponId)
-    if (!couponSnapshot) {
-      res.status(404).json({ redeemed: false, error: 'Invalid coupon code.' })
-      return
-    }
-
-    const coupon = couponSnapshot.data() as {
-      expiryDate: string
-      status: 'active' | 'used' | 'disabled' | 'expired'
-      usageCount: number
-      maxUsage: number
-      orderId?: string
-      code: string
-    }
-
-    if (coupon.orderId === orderId) {
-      res.status(200).json({ redeemed: true, couponCode: coupon.code, couponId: couponSnapshot.id })
-      return
-    }
-
-    if (coupon.status !== 'active') {
-      res.status(409).json({ redeemed: false, error: 'This coupon is no longer active.' })
-      return
-    }
-
-    if (isCouponExpired(coupon.expiryDate)) {
-      res.status(409).json({ redeemed: false, error: 'This coupon has expired.' })
-      return
-    }
-
-    if (coupon.usageCount >= coupon.maxUsage) {
-      res.status(409).json({ redeemed: false, error: 'This coupon has already been used.' })
-      return
-    }
-
-    await couponSnapshot.ref.update({
-      status: 'used',
-      usageCount: 1,
-      orderId,
-      discountAmount: Number.isFinite(discountAmount) ? discountAmount : 0,
-      usedAt: FieldValue.serverTimestamp(),
-    })
-
-    res.status(200).json({ redeemed: true, couponCode: coupon.code, couponId: couponSnapshot.id })
     return
   }
 

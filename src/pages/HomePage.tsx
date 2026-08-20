@@ -166,24 +166,6 @@ const defaultHomepage: HomepageContent = {
   ],
 }
 
-const defaultProducts: AdminProduct[] = [
-  {
-    id: 'seed-atelier-oversized-tee',
-    name: 'Atelier Oversized Tee',
-    price: '৳ 9,800',
-    stock: 12,
-    sizes: ['S', 'M', 'L'],
-    colors: ['Ivory', 'Black'],
-    description: 'Relaxed fit with a premium ribbed finish.',
-    category: 'oversized-tee',
-    images: ['/og-image.svg'],
-    videos: [],
-    featured: true,
-    newArrival: true,
-    hero: false,
-  },
-]
-
 const IMAGE_PLACEHOLDER =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
@@ -249,7 +231,7 @@ function HomepageProductGrid({ products }: { products: AdminProduct[] }) {
 
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
-  const [products, setProducts] = useState<AdminProduct[]>(defaultProducts)
+  const [products, setProducts] = useState<AdminProduct[]>([])
   const [brands, setBrands] = useState<AdminBrand[]>([])
   const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
@@ -261,7 +243,7 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = subscribeToProducts((nextProducts) => setProducts(nextProducts.length ? nextProducts : defaultProducts))
+    const unsubscribe = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     return unsubscribe
   }, [])
 
