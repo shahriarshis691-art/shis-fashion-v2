@@ -9,7 +9,7 @@ import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
-import { useWishlist } from '../context/WishlistContext'
+import { useListingWishlist } from '../hooks/useListingWishlist'
 import {
   subscribeToProducts,
   type AdminProduct,
@@ -181,7 +181,7 @@ export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const searchParams = new URLSearchParams(location.search)
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [ready, setReady] = useState(false)
@@ -655,31 +655,6 @@ export default function ShopPage() {
     navigate({
       pathname: location.pathname,
       search: params.toString() ? `?${params.toString()}` : '',
-    })
-  }
-
-  const handleToggleWishlist = (product: ShopProduct) => {
-    if (isInWishlist(String(product.id))) {
-      removeFromWishlist(String(product.id))
-      googleAnalytics.trackEvent('wishlist_removed', {
-        item_id: String(product.id),
-        item_name: product.name,
-        item_category: product.category,
-        value: parseBDT(product.price),
-        currency: 'BDT',
-        brand: product.brand,
-      })
-      return
-    }
-
-    addToWishlist(product)
-    googleAnalytics.trackEvent('wishlist_added', {
-      item_id: String(product.id),
-      item_name: product.name,
-      item_category: product.category,
-      value: parseBDT(product.price),
-      currency: 'BDT',
-      brand: product.brand,
     })
   }
 

@@ -7,8 +7,7 @@ import { subscribeToProducts, type AdminProduct } from '../firebase/adminService
 import type { ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { parseBDT } from '../utils/currency'
-import { useWishlist } from '../context/WishlistContext'
-import { googleAnalytics } from '../services/googleAnalytics'
+import { useListingWishlist } from '../hooks/useListingWishlist'
 
 function mapProduct(product: AdminProduct): ShopProduct {
   return mapAdminProductToShopProduct(product)
@@ -23,7 +22,7 @@ function isSaleProduct(product: ShopProduct) {
 export default function SalePage() {
   const [products, setProducts] = useState<ShopProduct[]>([])
   const [ready, setReady] = useState(false)
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -38,22 +37,6 @@ export default function SalePage() {
     () => products.filter(isSaleProduct),
     [products],
   )
-
-  const handleToggleWishlist = (product: ShopProduct) => {
-    if (isInWishlist(String(product.id))) {
-      removeFromWishlist(String(product.id))
-      return
-    }
-
-    addToWishlist(product)
-    googleAnalytics.trackEvent('wishlist_added', {
-      item_id: String(product.id),
-      item_name: product.name,
-      item_category: product.category,
-      value: parseBDT(product.price),
-      currency: 'BDT',
-    })
-  }
 
   return (
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">

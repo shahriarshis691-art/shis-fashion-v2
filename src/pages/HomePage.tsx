@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
 import { homeCategoryItems } from '../data/homeCategories'
 import { brandEntries } from '../data/brandShowcase'
@@ -17,8 +18,10 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { normalizeCatalogImageUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { useListingWishlist } from '../hooks/useListingWishlist'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
@@ -178,10 +181,6 @@ function slugify(value: string) {
     .replace(/-+/g, '-')
 }
 
-function productHref(product: AdminProduct) {
-  return `/shop/${product.category}/${slugify(product.name)}`
-}
-
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
@@ -191,41 +190,22 @@ function hasValidSectionHref(section: HomepageCategorySection) {
 }
 
 function HomepageProductGrid({ products }: { products: AdminProduct[] }) {
-  return (
-    <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
-      {products.map((item, index) => {
-        const productImage = normalizeCatalogImageUrl(getProductImage(item), 900, 1125)
-        const toneClass = isDemoImageUrl(productImage) ? 'shis-media-tone' : ''
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
+  return (
+    <ProductListingGrid className="mt-4 sm:mt-5">
+      {products.map((item) => {
+        const product = mapAdminProductToShopProduct(item)
         return (
-          <motion.article
+          <ProductCard
             key={item.id}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.22, delay: index * 0.03 }}
-          >
-            <Link to={productHref(item)} className="group block">
-              <div className="aspect-[4/5] overflow-hidden bg-black/5">
-                <img
-                  src={productImage || IMAGE_PLACEHOLDER}
-                  alt={item.name}
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                  onError={handleImageError}
-                  className={`h-full w-full object-cover transition duration-300 group-hover:scale-[1.02] ${toneClass}`}
-                />
-              </div>
-              <div className="pt-2.5">
-                <h3 className="line-clamp-1 text-body font-medium text-black">{item.name}</h3>
-                <p className="mt-1 text-body font-semibold text-black">{item.price}</p>
-              </div>
-            </Link>
-          </motion.article>
+            product={product}
+            onToggleWishlist={handleToggleWishlist}
+            isInWishlist={isInWishlist(String(product.id))}
+          />
         )
       })}
-    </div>
+    </ProductListingGrid>
   )
 }
 
@@ -236,6 +216,7 @@ export default function HomePage() {
   const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
   const { items: recentlyViewedItems } = useRecentlyViewed()
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
@@ -667,26 +648,16 @@ export default function HomePage() {
               <h2 className="text-h2 text-black">Recently Viewed</h2>
               <span className="text-caption uppercase tracking-[0.12em] text-black/55">Continue where you left off</span>
             </div>
-            <div className="mt-5 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 product-grid">
+            <ProductListingGrid className="mt-5">
               {recentlyViewedItems.slice(0, 4).map((item) => (
                 <ProductCard
                   key={item.id}
-                  product={{
-                    id: item.product.id,
-                    slug: item.product.slug,
-                    name: item.product.name,
-                    price: item.product.price,
-                    category: item.product.category,
-                    image: item.product.image,
-                    description: item.product.description,
-                    galleryImages: item.product.galleryImages,
-                    stock: item.product.stock,
-                    featured: item.product.featured,
-                    newArrival: item.product.newArrival,
-                  }}
+                  product={item.product}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(item.product.id))}
                 />
               ))}
-            </div>
+            </ProductListingGrid>
           </Container>
         </section>
       ) : null}

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
-import { useWishlist } from '../context/WishlistContext'
+import { useListingWishlist } from '../hooks/useListingWishlist'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
@@ -84,7 +84,7 @@ function buildHighlights(description: string, sizes: string[], stock: number) {
     .slice(0, 2)
 
   const sizeLine = sizes.length ? `Available sizes: ${sizes.join(', ')}.` : 'Standard sizing available.'
-  const stockLine = stock <= 0 ? 'Temporarily unavailable for dispatch.' : stock <= 5 ? 'Limited stock in selected sizes.' : 'Ready for quick nationwide dispatch.'
+  const stockLine = stock <= 0 ? 'Temporarily unavailable for dispatch.' : stock <= 5 ? 'Limited stock remaining.' : 'Ready for quick nationwide dispatch.'
 
   return [...snippets, sizeLine, stockLine].slice(0, 4)
 }
@@ -95,7 +95,7 @@ export default function ProductDetailPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { addToCart } = useCart()
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
@@ -240,31 +240,9 @@ export default function ProductDetailPage() {
     })
   }, [product, ready, addToRecentlyViewed])
 
-  const handleToggleWishlist = () => {
-    if (!product) {
-      return
-    }
-
-    if (isInWishlist(String(product.id))) {
-      removeFromWishlist(String(product.id))
-      googleAnalytics.trackEvent('wishlist_removed', {
-        item_id: String(product.id),
-        item_name: product.name,
-        item_category: product.category,
-        value: parseBDT(product.price),
-        currency: 'BDT',
-        brand: product.brand,
-      })
-    } else {
-      addToWishlist(product)
-      googleAnalytics.trackEvent('wishlist_added', {
-        item_id: String(product.id),
-        item_name: product.name,
-        item_category: product.category,
-        value: parseBDT(product.price),
-        currency: 'BDT',
-        brand: product.brand,
-      })
+  const toggleProductWishlist = () => {
+    if (product) {
+      handleToggleWishlist(product)
     }
   }
 
@@ -589,7 +567,7 @@ export default function ProductDetailPage() {
               </button>
               <button
                 type="button"
-                onClick={handleToggleWishlist}
+                onClick={toggleProductWishlist}
                 className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
                 aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
               >
@@ -749,7 +727,7 @@ export default function ProductDetailPage() {
           </button>
           <button
             type="button"
-            onClick={handleToggleWishlist}
+            onClick={toggleProductWishlist}
             className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black'}`}
             aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
           >

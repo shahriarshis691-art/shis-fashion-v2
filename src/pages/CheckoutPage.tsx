@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import CouponApplyField from '../components/shop/CouponApplyField'
 import { useCart, clearBuyNowCheckout, readBuyNowCheckout } from '../context/CartContext'
-import { createOrder, getCouponByCode, isOrderBackendReady, subscribeToHomepageContent } from '../firebase/adminService'
+import { createOrder, isOrderBackendReady, subscribeToHomepageContent } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -88,7 +89,7 @@ function currentTimeMs() {
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items: cartItems, clearCart, appliedCoupon, applyCoupon, removeCoupon } = useCart()
+  const { items: cartItems, clearCart, appliedCoupon } = useCart()
   const [buyNowItems] = useState(() => readBuyNowCheckout())
   const items = buyNowItems ?? cartItems
   const isBuyNowCheckout = Boolean(buyNowItems?.length)
@@ -108,9 +109,6 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [websiteField, setWebsiteField] = useState('')
-  const [couponCode, setCouponCode] = useState(appliedCoupon?.code ?? '')
-  const [couponLoading, setCouponLoading] = useState(false)
-  const [couponMessage, setCouponMessage] = useState('')
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
   const submissionLockRef = useRef(false)
   const hasTrackedCheckoutRef = useRef(false)
@@ -193,34 +191,6 @@ export default function CheckoutPage() {
         </Container>
       </section>
     )
-  }
-
-  const handleApplyCoupon = async () => {
-    const trimmed = couponCode.trim()
-    if (!trimmed) {
-      setCouponMessage('Please enter a coupon code.')
-      return
-    }
-
-    setCouponLoading(true)
-    setCouponMessage('')
-
-    try {
-      const result = await getCouponByCode(trimmed, form.email)
-
-      if (!result || result.status !== 'active' || !result.code) {
-        setCouponMessage('Invalid or expired coupon code.')
-        setCouponLoading(false)
-        return
-      }
-
-      applyCoupon(result.code, result.id, result.discountPercent)
-      setCouponMessage(`Coupon applied. You save ${result.discountPercent}%.`)
-    } catch (error) {
-      setCouponMessage(error instanceof Error ? error.message : 'Unable to validate coupon. Please try again.')
-    }
-
-    setCouponLoading(false)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -513,35 +483,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
-              <p className="text-sm font-medium text-[var(--color-text)]">Promo Code</p>
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
-                  placeholder="Enter coupon code"
-                  className="flex-1 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-black focus:ring-2 focus:ring-black/5"
-                  maxLength={12}
-                />
-                <button
-                  type="button"
-                  onClick={() => { void handleApplyCoupon() }}
-                  disabled={couponLoading || !couponCode.trim()}
-                  className="ui-interactive rounded-[1rem] border border-black bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35"
-                >
-                  {couponLoading ? 'Applying…' : 'Apply'}
-                </button>
-              </div>
-              {appliedCoupon ? (
-                <div className="mt-2 flex items-center justify-between gap-3 text-sm text-emerald-600">
-                  <p role="status">{couponMessage || `${appliedCoupon.code} applied`}</p>
-                  <button type="button" onClick={removeCoupon} className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)] hover:text-black">
-                    Remove
-                  </button>
-                </div>
-              ) : couponMessage ? (
-                <p className="mt-2 text-sm text-red-600" role="alert">{couponMessage}</p>
-              ) : null}
+              <CouponApplyField customerEmail={form.email} />
             </div>
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">

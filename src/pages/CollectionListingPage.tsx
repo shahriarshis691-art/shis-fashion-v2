@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
+import { useListingWishlist } from '../hooks/useListingWishlist'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { normalizeSizes } from '../utils/sizes'
@@ -85,6 +86,7 @@ export default function CollectionListingPage() {
   const [products, setProducts] = useState<ListingProduct[]>([])
   const [ready, setReady] = useState(false)
   const lastTrackedCollectionRef = useRef('')
+  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   useEffect(() => {
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => {
@@ -198,7 +200,12 @@ export default function CollectionListingPage() {
           {collectionProducts.length ? (
             <ProductListingGrid>
               {collectionProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(product.id))}
+                />
               ))}
             </ProductListingGrid>
           ) : (

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import shisLogo from '../../assets/logo/shis-logo.svg'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
@@ -153,6 +154,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { itemCount } = useCart()
+  const { itemCount: wishlistCount } = useWishlist()
   const navigate = useNavigate()
 
   const closeOverlays = () => {
@@ -298,6 +300,23 @@ export default function Navbar() {
                 <path d="M15.5 15.5 20 20" />
               </svg>
             </IconButton>
+
+            <Link
+              to="/cart#wishlist"
+              onClick={closeOverlays}
+              title="Wishlist"
+              className="ui-interactive relative flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text)] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:h-9 sm:w-9"
+              aria-label="Wishlist"
+            >
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 19.5 5.6 13.4a4.2 4.2 0 0 1 5.9-6l.5.5.5-.5a4.2 4.2 0 0 1 5.9 6L12 19.5Z" />
+              </svg>
+              {wishlistCount > 0 ? (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-0.5 text-[8px] font-bold text-white">
+                  {wishlistCount}
+                </span>
+              ) : null}
+            </Link>
 
             <Link
               to="/cart"

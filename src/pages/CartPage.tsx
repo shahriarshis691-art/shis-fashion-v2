@@ -9,6 +9,7 @@ import type { ShopProduct } from '../data/shopData'
 import { formatBDT, parseBDT } from '../utils/currency'
 import { subscribeToHomepageContent } from '../firebase/adminService'
 import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../utils/bangladeshAddress'
+import CouponApplyField from '../components/shop/CouponApplyField'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
@@ -16,10 +17,10 @@ function getWhatsAppHref() {
 
 export default function CartPage() {
   const navigate = useNavigate()
-  const { items, updateQuantity, removeFromCart, addToCart, subtotal, itemCount } = useCart()
+  const { items, updateQuantity, removeFromCart, addToCart, subtotal, itemCount, appliedCoupon, discountAmount, grandTotal } = useCart()
   const { items: wishlistItems, removeFromWishlist } = useWishlist()
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
-  const totalLabel = formatBDT(subtotal)
+  const totalLabel = formatBDT(grandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
   const remainingForFreeDelivery = getAmountToFreeDelivery(subtotal, freeDeliveryThreshold)
 
@@ -36,8 +37,15 @@ export default function CartPage() {
   }
 
   const handleMoveToCart = (wishlistItem: { product: ShopProduct }) => {
-    const size = wishlistItem.product.sizes?.[0] || 'M'
-    const color = wishlistItem.product.colors?.[0] || 'Default'
+    const sizes = wishlistItem.product.sizes ?? []
+    const colors = wishlistItem.product.colors ?? []
+    if (sizes.length > 1 || colors.length > 1) {
+      navigate(`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`)
+      return
+    }
+
+    const size = sizes[0] || 'M'
+    const color = colors[0] || 'Default'
     addToCart(wishlistItem.product, { size, color, quantity: 1 })
     removeFromWishlist(String(wishlistItem.product.id))
   }
@@ -56,7 +64,7 @@ export default function CartPage() {
           </div>
 
           {wishlistItems.length > 0 ? (
-            <div className="mt-4 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+            <div id="wishlist" className="mt-4 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Wishlist</p>
               <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">Saved for later</h2>
               <div className="mt-4 space-y-3">
@@ -137,8 +145,12 @@ export default function CartPage() {
               </motion.div>
             ))}
 
+            <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+              <CouponApplyField />
+            </div>
+
             {wishlistItems.length > 0 ? (
-              <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+              <div id="wishlist" className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Wishlist</p>
@@ -167,8 +179,14 @@ export default function CartPage() {
             <div className="mt-5 space-y-3 text-sm text-[var(--color-muted)]">
               <div className="flex items-center justify-between">
                 <span>Subtotal</span>
-                <span className="text-[var(--color-text)]">{totalLabel}</span>
+                <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
               </div>
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between text-emerald-600">
+                  <span>Discount ({appliedCoupon.code})</span>
+                  <span>-{formatBDT(discountAmount)}</span>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between">
                 <span>Shipping</span>
                 <span className="text-right text-[var(--color-text)]">
