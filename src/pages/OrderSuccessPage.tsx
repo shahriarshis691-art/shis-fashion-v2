@@ -5,6 +5,7 @@ import Container from '../components/ui/Container'
 import { parseBDT, formatBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
+import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -27,10 +28,6 @@ interface LastOrderSnapshot {
     size: string
     color: string
   }>
-}
-
-function getWhatsAppHref() {
-  return 'https://wa.me/8801887848304'
 }
 
 export default function OrderSuccessPage() {
@@ -87,7 +84,8 @@ export default function OrderSuccessPage() {
     hasTrackedPurchaseRef.current = true
   }, [order, purchasePayload])
 
-  const supportWhatsAppHref = getWhatsAppHref()
+  const supportWhatsAppHref = SUPPORT_WHATSAPP_HREF
+  const trackHref = order ? `/track-order?id=${encodeURIComponent(order.orderId)}` : '/track-order'
 
   return (
     <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -97,7 +95,7 @@ export default function OrderSuccessPage() {
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order Confirmed</p>
             <h1 className="mt-2 text-h2 text-black">Thank you. Your order has been placed.</h1>
             <p className="mt-3 text-sm leading-7 text-black/70">
-              Our team will call your phone number to confirm delivery details before dispatch.
+              Our team will call your phone number to confirm delivery details before dispatch. {STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.
             </p>
 
             <div className="mt-4 rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/70">
@@ -114,7 +112,10 @@ export default function OrderSuccessPage() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Button to="/shop">Continue shopping</Button>
-              <Link to="/" className="ui-interactive inline-flex items-center justify-center border border-black px-5 py-3 text-sm font-semibold text-black hover:bg-black hover:text-white">
+              <Link to={trackHref} className="ui-interactive inline-flex items-center justify-center border border-black px-5 py-3 text-sm font-semibold text-black hover:bg-black hover:text-white">
+                Track this order
+              </Link>
+              <Link to="/" className="ui-interactive inline-flex items-center justify-center border border-black/20 px-5 py-3 text-sm font-semibold text-black hover:bg-black/5">
                 Back home
               </Link>
             </div>

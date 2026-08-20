@@ -6,7 +6,8 @@ import CouponApplyField from '../components/shop/CouponApplyField'
 import { useCart, clearBuyNowCheckout, readBuyNowCheckout } from '../context/CartContext'
 import { createOrder, isOrderBackendReady, subscribeToHomepageContent } from '../firebase/adminService'
 import { formatBDT, parseBDT } from '../utils/currency'
-import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, type BangladeshDivision } from '../utils/bangladeshAddress'
+import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
+import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 
@@ -24,54 +25,6 @@ interface CheckoutFormState {
   upazila: string
   streetAddress: string
   deliveryNote: string
-}
-
-function getWhatsAppHref() {
-  return 'https://wa.me/8801887848304'
-}
-
-function normalizeBangladeshPhone(raw: string) {
-  const digits = raw.replace(/\D/g, '')
-
-  if (!digits) {
-    return null
-  }
-
-  if (digits.startsWith('8801') && digits.length === 13) {
-    return `0${digits.slice(3)}`
-  }
-
-  if (digits.startsWith('01') && digits.length === 11) {
-    return digits
-  }
-
-  return null
-}
-
-function formatBangladeshPhoneInput(raw: string) {
-  const digits = raw.replace(/\D/g, '')
-
-  if (!digits) {
-    return ''
-  }
-
-  if (digits.startsWith('8801')) {
-    return `0${digits.slice(3).slice(0, 10)}`
-  }
-
-  if (digits.startsWith('88')) {
-    return `0${digits.slice(2).slice(0, 10)}`
-  }
-
-  if (digits.startsWith('01')) {
-    return digits.slice(0, 11)
-  }
-
-  if (digits.length === 10) {
-    return `0${digits}`
-  }
-
-  return digits.slice(0, 11)
 }
 
 function isPermissionDeniedError(error: unknown) {
@@ -121,7 +74,7 @@ export default function CheckoutPage() {
   const upazilaOptions = getUpazilasForDistrict(form.district)
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(effectiveGrandTotal)
-  const supportWhatsAppHref = getWhatsAppHref()
+  const supportWhatsAppHref = SUPPORT_WHATSAPP_HREF
   const normalizedPhone = useMemo(() => normalizeBangladeshPhone(form.phone), [form.phone])
   const isPhoneValid = normalizedPhone !== null
   const phoneHasValue = form.phone.trim().length > 0
@@ -538,6 +491,7 @@ export default function CheckoutPage() {
             {submitError ? <p className="text-sm text-red-600" role="alert">{submitError}</p> : null}
 
             <div className="space-y-1 text-sm text-[var(--color-muted)]">
+              <p>{STORE_POLICY.phoneConfirm} {STORE_POLICY.exchangeWindow}</p>
               <p>Need help?</p>
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="inline-flex font-medium text-[var(--color-text)] underline underline-offset-4">Chat on WhatsApp</a>
             </div>

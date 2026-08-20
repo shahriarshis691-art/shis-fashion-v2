@@ -13,6 +13,7 @@ import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
+import { DELIVERY_RETURN_BULLETS, EXCHANGE_WINDOW_DAYS } from '../data/storePolicy'
 
 function slugify(value: string) {
   return value
@@ -641,9 +642,9 @@ export default function ProductDetailPage() {
           <div className="border border-black/15 p-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Delivery & Return</h2>
             <ul className="mt-3 space-y-2 text-sm text-black/75">
-              <li>Delivery within 24-72 hours in major cities.</li>
-              <li>Cash on Delivery available across Bangladesh.</li>
-              <li>Exchange requests accepted within 3 days of delivery.</li>
+              {DELIVERY_RETURN_BULLETS.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
               <li>
                 Need fit support? <a href={getWhatsAppHref()} target="_blank" rel="noreferrer" className="underline">Chat on WhatsApp</a>.
               </li>
@@ -659,7 +660,7 @@ export default function ProductDetailPage() {
               </li>
               <li className="flex gap-2">
                 <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                <span>Easy exchange within 3 days of delivery.</span>
+                <span>Easy exchange within {EXCHANGE_WINDOW_DAYS} days of delivery.</span>
               </li>
               <li className="flex gap-2">
                 <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />

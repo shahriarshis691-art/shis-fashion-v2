@@ -7,6 +7,7 @@ import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
 import MiniCartConfirmation from '../components/common/MiniCartConfirmation'
 import WelcomePopup from '../components/common/WelcomePopup'
+import AbandonedCartBanner from '../components/common/AbandonedCartBanner'
 import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -202,6 +203,7 @@ export default function MainLayout() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <ScrollToTop />
       <Navbar />
+      <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
       <main className="page-shell min-h-screen">
         <PageTransition>
           <Outlet />

@@ -137,3 +137,47 @@ export function getAmountToFreeDelivery(
 
   return Math.max(0, threshold - subtotal)
 }
+
+export function normalizeBangladeshPhone(raw: string) {
+  const digits = raw.replace(/\D/g, '')
+
+  if (!digits) {
+    return null
+  }
+
+  if (digits.startsWith('8801') && digits.length === 13) {
+    return `0${digits.slice(3)}`
+  }
+
+  if (digits.startsWith('01') && digits.length === 11) {
+    return digits
+  }
+
+  return null
+}
+
+export function formatBangladeshPhoneInput(raw: string) {
+  const digits = raw.replace(/\D/g, '')
+
+  if (!digits) {
+    return ''
+  }
+
+  if (digits.startsWith('8801')) {
+    return `0${digits.slice(3).slice(0, 10)}`
+  }
+
+  if (digits.startsWith('88')) {
+    return `0${digits.slice(2).slice(0, 10)}`
+  }
+
+  if (digits.startsWith('01')) {
+    return digits.slice(0, 11)
+  }
+
+  if (digits.length === 10) {
+    return `0${digits}`
+  }
+
+  return digits.slice(0, 11)
+}

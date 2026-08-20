@@ -8,6 +8,7 @@ const essentialLinks = [
   { label: 'Sale', href: '/sale' },
   { label: 'New Arrivals', href: '/shop/new-arrivals' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Track order', href: '/track-order' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
 ]

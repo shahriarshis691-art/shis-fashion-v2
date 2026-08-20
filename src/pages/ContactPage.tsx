@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import { SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 
 export default function ContactPage() {
   return (
@@ -22,8 +24,14 @@ export default function ContactPage() {
             </div>
             <div className="space-y-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8">
               <p className="text-sm leading-7 text-[var(--color-muted)]">Tell us what you’re looking for and our team will respond with a tailored recommendation.</p>
+              <Link
+                to="/track-order"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#1f1f1f] bg-white px-6 py-3 text-[15px] font-semibold leading-none text-black"
+              >
+                Track an order
+              </Link>
               <a
-                href="https://wa.me/8801887848304"
+                href={SUPPORT_WHATSAPP_HREF}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#1f1f1f] bg-[linear-gradient(180deg,#1a1a1a,#000000)] px-6 py-3 text-[15px] font-semibold leading-none !text-white shadow-[0_14px_34px_rgba(0,0,0,0.28)]"

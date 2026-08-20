@@ -32,6 +32,7 @@ const STATIC_PATHS = [
   '/sale',
   '/privacy',
   '/terms',
+  '/track-order',
 ]
 
 function slugify(value: string) {

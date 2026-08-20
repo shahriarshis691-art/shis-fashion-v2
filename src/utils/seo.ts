@@ -163,6 +163,11 @@ function buildBreadcrumbItems(pathname: string) {
     return items
   }
 
+  if (segments[0] === 'track-order') {
+    items.push({ name: 'Track Order', item: `${SITE_URL}/track-order` })
+    return items
+  }
+
   if (segments[0] === 'sale') {
     items.push({ name: 'Sale', item: `${SITE_URL}/sale` })
     return items
@@ -459,6 +464,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Review SHIS Fashion Bangladesh terms and conditions for orders, delivery and customer support.',
       keywords: 'SHIS Fashion terms and conditions',
       canonicalPath: '/terms',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: pageType,
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/track-order') {
+    return {
+      title: 'Track Your Order | SHIS Fashion Bangladesh',
+      description: 'Look up your SHIS Fashion order status with your order ID and checkout phone number. No account required.',
+      keywords: 'SHIS Fashion track order, Bangladesh order status',
+      canonicalPath: '/track-order',
       ogImage: DEFAULT_OG_IMAGE,
       type: pageType,
       robots: 'index,follow',
