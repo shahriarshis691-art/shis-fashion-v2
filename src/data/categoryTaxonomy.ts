@@ -76,6 +76,27 @@ export const SEGMENT_TABS: Array<{ key: ShopSegment; label: string; path: string
   { key: 'all', label: 'All', path: '/shop' },
 ]
 
+export function getTaxonomyLabelForSlug(slug: string) {
+  const normalized = slug.trim().toLowerCase()
+  if (!normalized) {
+    return ''
+  }
+
+  for (const segment of SEGMENTS) {
+    if (segment.key === normalized) {
+      return segment.label
+    }
+
+    for (const subcategory of segment.subcategories) {
+      if (subcategory.slug === normalized || subcategory.aliases.some((alias) => alias.toLowerCase() === normalized)) {
+        return subcategory.label
+      }
+    }
+  }
+
+  return ''
+}
+
 export function getSegmentDescription(segment: ShopSegment) {
   if (segment === 'all') {
     return {

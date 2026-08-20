@@ -20,6 +20,7 @@ import { homeCategoryItems } from '../data/homeCategories'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages } from '../utils/media'
+import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
@@ -628,6 +629,38 @@ function subscribeToStored<T>(key: string, fallback: T, callback: (value: T) => 
   return () => window.removeEventListener('storage', onStorage)
 }
 
+function createSharedListener<T>(connect: (emit: (value: T) => void) => () => void) {
+  const listeners = new Set<(value: T) => void>()
+  let disconnect: (() => void) | null = null
+  let latest: T | undefined
+  let hasLatest = false
+
+  return (callback: (value: T) => void) => {
+    listeners.add(callback)
+    if (hasLatest) {
+      callback(latest as T)
+    }
+
+    if (!disconnect) {
+      disconnect = connect((value) => {
+        latest = value
+        hasLatest = true
+        listeners.forEach((listener) => listener(value))
+      })
+    }
+
+    return () => {
+      listeners.delete(callback)
+      if (listeners.size === 0 && disconnect) {
+        disconnect()
+        disconnect = null
+        hasLatest = false
+        latest = undefined
+      }
+    }
+  }
+}
+
 function shouldFallbackToLocal(error: unknown) {
   const message = error instanceof Error ? error.message.toLowerCase() : ''
   const code = typeof error === 'object' && error !== null && 'code' in error
@@ -1144,15 +1177,6 @@ const defaultCategories: AdminCategory[] = [
   { id: 'cat-saree', name: 'Saree', slug: 'saree', createdAt: '2026-01-01' },
 ]
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
-
 function ensureSeedData() {
   if (typeof window === 'undefined') {
     return
@@ -1343,54 +1367,42 @@ export async function signOutAdmin() {
   await signOut(firebaseAuth)
 }
 
-export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
+const subscribeToAllProductsShared = createSharedListener<AdminProduct[]>((emit) => {
   ensureSeedData()
-  const localProducts = () => readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => !product.archived)
+  const readAll = () => readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    callback(localProducts())
-    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => !product.archived)))
+    emit(readAll())
+    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => emit(products.map(normalizeProduct)))
   }
 
   const productsRef = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'))
   return onSnapshot(
     productsRef,
     (snapshot) => {
-      const products = snapshot.docs.map((doc) => normalizeProduct({ id: doc.id, ...(doc.data() as Omit<AdminProduct, 'id'>) }))
-      callback(products.filter((product) => !product.archived))
+      emit(snapshot.docs.map((entry) => normalizeProduct({ id: entry.id, ...(entry.data() as Omit<AdminProduct, 'id'>) })))
     },
     (error) => {
       if (shouldFallbackToLocal(error) && !requiresLiveBackend()) {
-        callback(localProducts())
+        emit(readAll())
         return
       }
 
-      callback([])
+      emit([])
     },
   )
+})
+
+export function subscribeToProducts(callback: (products: AdminProduct[]) => void) {
+  return subscribeToAllProductsShared((products) => {
+    callback(products.filter((product) => !product.archived))
+  })
 }
 
 export function subscribeToArchivedProducts(callback: (products: AdminProduct[]) => void) {
-  ensureSeedData()
-  callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => product.archived))
-
-  if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(PRODUCTS_KEY, defaultProducts, (products) => callback(products.map(normalizeProduct).filter((product) => product.archived)))
-  }
-
-  const productsRef = query(collection(firebaseDb, 'products'), orderBy('createdAt', 'desc'))
-  return onSnapshot(
-    productsRef,
-    (snapshot) => {
-      const products = snapshot.docs.map((entry) => normalizeProduct({ id: entry.id, ...(entry.data() as Omit<AdminProduct, 'id'>) }))
-      callback(products.filter((product) => product.archived))
-    },
-    (error) => {
-      if (shouldFallbackToLocal(error)) {
-        callback(readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct).filter((product) => product.archived))
-      }
-    },
-  )
+  return subscribeToAllProductsShared((products) => {
+    callback(products.filter((product) => product.archived))
+  })
 }
 
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
@@ -2039,13 +2051,16 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
   }
 }
 
-export function subscribeToHomepageContent(callback: (content: HomepageContent, meta?: HomepageContentSnapshotMeta) => void) {
+const subscribeToHomepageShared = createSharedListener<{ content: HomepageContent; meta?: HomepageContentSnapshotMeta }>((emit) => {
   ensureSeedData()
   const storedHomepage = normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage))
-  callback(storedHomepage, {
-    source: 'local-seed',
-    path: 'settings/homepage',
-    receivedAt: new Date().toISOString(),
+  emit({
+    content: storedHomepage,
+    meta: {
+      source: 'local-seed',
+      path: 'settings/homepage',
+      receivedAt: new Date().toISOString(),
+    },
   })
 
   if (import.meta.env.DEV) {
@@ -2057,10 +2072,13 @@ export function subscribeToHomepageContent(callback: (content: HomepageContent, 
   }
 
   if (!firebaseDb || isLocalFirstDataMode()) {
-    return subscribeToStored(HOMEPAGE_KEY, defaultHomepage, (content) => callback(normalizeHomepageContent(content), {
-      source: 'local-storage-sync',
-      path: 'settings/homepage',
-      receivedAt: new Date().toISOString(),
+    return subscribeToStored(HOMEPAGE_KEY, defaultHomepage, (content) => emit({
+      content: normalizeHomepageContent(content),
+      meta: {
+        source: 'local-storage-sync',
+        path: 'settings/homepage',
+        receivedAt: new Date().toISOString(),
+      },
     }))
   }
 
@@ -2076,17 +2094,24 @@ export function subscribeToHomepageContent(callback: (content: HomepageContent, 
       }
 
       if (!snapshot.exists()) {
-        callback(defaultHomepage, {
-          source: 'firestore-missing-doc',
-          path: 'settings/homepage',
-          receivedAt: new Date().toISOString(),
+        emit({
+          content: defaultHomepage,
+          meta: {
+            source: 'firestore-missing-doc',
+            path: 'settings/homepage',
+            receivedAt: new Date().toISOString(),
+          },
         })
         return
       }
-      callback(normalizeHomepageContent(snapshot.data() as Partial<HomepageContent>), {
-        source: 'firestore',
-        path: 'settings/homepage',
-        receivedAt: new Date().toISOString(),
+
+      emit({
+        content: normalizeHomepageContent(snapshot.data() as Partial<HomepageContent>),
+        meta: {
+          source: 'firestore',
+          path: 'settings/homepage',
+          receivedAt: new Date().toISOString(),
+        },
       })
     },
     (error) => {
@@ -2102,6 +2127,12 @@ export function subscribeToHomepageContent(callback: (content: HomepageContent, 
       }
     },
   )
+})
+
+export function subscribeToHomepageContent(callback: (content: HomepageContent, meta?: HomepageContentSnapshotMeta) => void) {
+  return subscribeToHomepageShared(({ content, meta }) => {
+    callback(content, meta)
+  })
 }
 
 export function subscribeToFounderProfile(callback: (profile: FounderProfile, meta?: { source: string; path: string; receivedAt: string }) => void) {

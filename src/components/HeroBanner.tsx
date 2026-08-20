@@ -161,6 +161,7 @@ export default function HeroBanner({
                       src={mediaSrc || IMAGE_PLACEHOLDER}
                       alt={item.alt || ''}
                       loading={index === 0 ? 'eager' : 'lazy'}
+                      fetchPriority={index === 0 ? 'high' : 'low'}
                       decoding="async"
                       onError={(e) => {
                         e.currentTarget.src = IMAGE_PLACEHOLDER

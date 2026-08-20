@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../data/shopData'
@@ -11,7 +10,8 @@ interface ProductCardProps {
   onProductClick?: (product: ShopProduct) => void
 }
 
-const IMAGE_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f8f5ed"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23c9a227"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
+const IMAGE_PLACEHOLDER =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f8f5ed"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23c9a227"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
@@ -23,13 +23,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
   const isSoldOut = (product.stock ?? 0) <= 0
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.2 }}
-      className="product-card min-w-0"
-    >
+    <article className="product-card min-w-0">
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block" onClick={() => onProductClick?.(product)}>
         <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
           <img
@@ -39,7 +33,6 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             decoding="async"
             onError={handleImageError}
             className={`h-full w-full object-cover object-center ${imageToneClass}`}
-            fetchPriority="low"
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />
           {onToggleWishlist ? (
@@ -72,7 +65,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   )
 })
 

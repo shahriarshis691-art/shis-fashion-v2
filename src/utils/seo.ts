@@ -1,3 +1,5 @@
+import { getTaxonomyLabelForSlug } from '../data/categoryTaxonomy'
+
 const SITE_URL = 'https://www.shisfashion.com'
 const DEFAULT_TITLE = 'SHIS Fashion Bangladesh | Premium Oversized T-Shirts, Polo Shirts & Denim'
 const DEFAULT_DESCRIPTION = 'Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available.'
@@ -118,7 +120,7 @@ function buildBreadcrumbItems(pathname: string) {
   if (segments[0] === 'shop') {
     items.push({ name: 'Shop', item: `${SITE_URL}/shop` })
     if (segments[1] && segments[1] !== 'new-arrivals' && segments[1] !== 'best-sellers') {
-      items.push({ name: toTitleCase(segments[1]), item: `${SITE_URL}${normalizedPath}` })
+      items.push({ name: getTaxonomyLabelForSlug(segments[1]) || toTitleCase(segments[1]), item: `${SITE_URL}${normalizedPath}` })
     }
 
     if (segments[1] === 'new-arrivals') {
@@ -581,13 +583,27 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
   if (normalizedPath.startsWith('/shop/')) {
     const segments = normalizedPath.split('/').filter(Boolean)
     const lastSegment = segments[segments.length - 1] ?? 'shop'
+    const listingLabel = getTaxonomyLabelForSlug(lastSegment) || toTitleCase(lastSegment)
+
+    if (segments.length >= 3) {
+      return {
+        title: `${toTitleCase(lastSegment)} | SHIS Fashion Bangladesh`,
+        description: 'Explore premium fashion essentials from SHIS Fashion Bangladesh with quality craftsmanship and fast delivery.',
+        keywords: DEFAULT_KEYWORDS,
+        canonicalPath: normalizedPath,
+        ogImage: DEFAULT_OG_IMAGE,
+        type: 'product',
+        robots: 'index,follow',
+      }
+    }
+
     return {
-      title: `${toTitleCase(lastSegment)} | SHIS Fashion Bangladesh`,
-      description: 'Explore premium fashion essentials from SHIS Fashion Bangladesh with quality craftsmanship and fast delivery.',
+      title: `${listingLabel} | SHIS Fashion Bangladesh`,
+      description: `Shop ${listingLabel} from SHIS Fashion Bangladesh with quality craftsmanship, fast delivery, and cash on delivery.`,
       keywords: DEFAULT_KEYWORDS,
       canonicalPath: normalizedPath,
       ogImage: DEFAULT_OG_IMAGE,
-      type: 'product',
+      type: 'collection',
       robots: 'index,follow',
     }
   }

@@ -1,6 +1,7 @@
 import type { AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
 import { getManagedImageEntries, getProductImage } from './media'
+import { slugify } from './slugify'
 import { normalizeSizes } from './sizes'
 
 export function mapAdminProductToShopProduct(
@@ -28,13 +29,4 @@ export function mapAdminProductToShopProduct(
     colors: Array.isArray(product.colors) ? product.colors.map((color) => color.trim()).filter(Boolean) : [],
     ...overrides,
   }
-}
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
 }

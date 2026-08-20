@@ -30,6 +30,23 @@ function randomVisitorId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
+function isSocialCrawler(userAgent: string) {
+  return /(facebookexternalhit|facebot|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|pinterest|discordbot)/i.test(userAgent)
+}
+
+function isProductSharePath(pathname: string) {
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments[0] === 'shop' && segments.length === 3) {
+    return true
+  }
+
+  if (segments[0] === 'product' && segments.length === 2) {
+    return true
+  }
+
+  return false
+}
+
 function isBypassedPath(pathname: string) {
   if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
     return true
@@ -132,6 +149,14 @@ export default function middleware(request: Request) {
     return
   }
 
+  const url = new URL(request.url)
+  const userAgent = request.headers.get('user-agent') ?? ''
+  if (isSocialCrawler(userAgent) && isProductSharePath(url.pathname)) {
+    const dest = new URL('/api/product-share', url.origin)
+    dest.searchParams.set('path', url.pathname)
+    return fetch(dest)
+  }
+
   const mode = getMode()
   if (mode === 'off') {
     return
@@ -141,7 +166,6 @@ export default function middleware(request: Request) {
     console.warn(`[middleware] Soft launch active in production: ${mode}`)
   }
 
-  const url = new URL(request.url)
   if (isBypassedPath(url.pathname)) {
     return
   }
