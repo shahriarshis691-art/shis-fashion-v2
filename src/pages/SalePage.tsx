@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
@@ -66,7 +67,7 @@ export default function SalePage() {
         </div>
 
         {!ready ? (
-          <div className="mt-6 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 lg:grid-cols-4 tight-mobile-grid" aria-hidden="true">
+          <ProductListingGrid className="mt-6" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`sale-skeleton-${index}`}>
                 <div className="aspect-[4/5] animate-pulse bg-black/5" />
@@ -74,9 +75,9 @@ export default function SalePage() {
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>
             ))}
-          </div>
+          </ProductListingGrid>
         ) : saleProducts.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 lg:grid-cols-4 tight-mobile-grid">
+          <ProductListingGrid className="mt-6">
             {saleProducts.map((product) => (
               <ProductCard
                 key={product.id}
@@ -85,7 +86,7 @@ export default function SalePage() {
                 isInWishlist={isInWishlist(String(product.id))}
               />
             ))}
-          </div>
+          </ProductListingGrid>
         ) : (
           <div className="mt-8 border border-dashed border-black/20 px-4 py-8 text-center">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">No sale items right now</p>

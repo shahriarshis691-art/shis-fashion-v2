@@ -137,6 +137,10 @@ main {
   contain-intrinsic-size: 0 600px;
 }
 
+.product-grid > * {
+  min-width: 0;
+}
+
 /* Form Elements Premium */
 input, textarea, select {
   transition: border-color var(--transition-fast) var(--ease-standard), box-shadow var(--transition-fast) var(--ease-standard);

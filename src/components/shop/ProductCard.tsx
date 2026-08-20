@@ -17,35 +17,9 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
-function getImagePositionClass(category: string) {
-  switch (category) {
-    case 'oversized-tee':
-      return 'object-[center_10%]'
-    case 'unisex-tee':
-      return 'object-[center_12%]'
-    case 'mens-shirt':
-      return 'object-[center_14%]'
-    case 'womens-dresses':
-      return 'object-[center_16%]'
-    case 'saree':
-      return 'object-[center_18%]'
-    case 'western-outfits':
-      return 'object-[center_15%]'
-    case 'denim':
-      return 'object-[center_18%]'
-    case 'couples':
-      return 'object-[center_12%]'
-    case 'kids':
-      return 'object-[center_20%]'
-    default:
-      return 'object-[center_14%]'
-  }
-}
-
 const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInWishlist, onProductClick }: ProductCardProps) {
   const imageSrc = normalizeCatalogImageUrl(product.image, 960, 1200) || IMAGE_PLACEHOLDER
   const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
-  const imagePositionClass = getImagePositionClass(product.category)
 
   return (
     <motion.article
@@ -53,7 +27,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden product-card"
+      className="product-card min-w-0"
     >
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block" onClick={() => onProductClick?.(product)}>
         <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
@@ -63,7 +37,7 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             loading="lazy"
             decoding="async"
             onError={handleImageError}
-            className={`h-full w-full object-cover ${imagePositionClass} transition duration-300 group-hover:scale-[1.02] ${imageToneClass} ${(product.stock ?? 0) <= 0 ? 'opacity-70' : ''}`}
+            className={`h-full w-full object-cover object-center ${imageToneClass} ${(product.stock ?? 0) <= 0 ? 'opacity-70' : ''}`}
             fetchPriority="low"
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
           />

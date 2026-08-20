@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
-import { useCart } from '../context/CartContext'
-import { parseBDT } from '../utils/currency'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
-import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata } from '../utils/seo'
 
@@ -82,13 +80,11 @@ const fallbackHomepageContent: Pick<HomepageContent, 'featuredCollectionPages'> 
 
 export default function CollectionListingPage() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const location = useLocation()
-  const { addToCart } = useCart()
   const [homepageContent, setHomepageContent] = useState(fallbackHomepageContent)
   const [products, setProducts] = useState<ListingProduct[]>([])
   const [ready, setReady] = useState(false)
-  const [selectedProductId, setSelectedProductId] = useState<string>('')
+  const lastTrackedCollectionRef = useRef('')
 
   useEffect(() => {
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent) => {
@@ -115,249 +111,105 @@ export default function CollectionListingPage() {
 
   const collectionProducts = useMemo(() => {
     const relatedCategories = activeCollection.relatedCategorySlugs.map((item) => item.trim().toLowerCase())
-    const filtered = relatedCategories.length
+    return relatedCategories.length
       ? products.filter((item) => relatedCategories.includes(item.category.trim().toLowerCase()))
       : []
-
-    return filtered
   }, [activeCollection.relatedCategorySlugs, products])
 
-  const featuredProducts = useMemo(() => collectionProducts.slice(0, 8), [collectionProducts])
-
-  const selectedProduct = useMemo(() => {
-    if (selectedProductId) {
-      return featuredProducts.find((item) => item.id === selectedProductId) ?? featuredProducts[0]
-    }
-    return featuredProducts[0]
-  }, [featuredProducts, selectedProductId])
-
-  const lastTrackedCollectionProductIdRef = useRef<string | null>(null)
+  const collectionImages = useMemo(
+    () => activeCollection.images
+      .map((image) => image.trim())
+      .filter((image) => image && !/og-image\.svg/i.test(image))
+      .map((image) => normalizeCatalogImageUrl(image, 960, 1200)),
+    [activeCollection.images],
+  )
 
   useEffect(() => {
-    if (!selectedProduct) {
-      return
-    }
-
-    if (lastTrackedCollectionProductIdRef.current === selectedProduct.id) {
-      return
-    }
-
-    lastTrackedCollectionProductIdRef.current = selectedProduct.id
-
-    googleAnalytics.viewItem({
-        item_id: selectedProduct.id,
-        item_name: selectedProduct.name,
-        item_category: selectedProduct.category,
-        price: parseBDT(selectedProduct.price),
-        quantity: 1,
-        brand: selectedProduct.brand,
-      }, 'BDT')
-
     applySeoMetadata(location.pathname, {
       title: `${activeCollection.title} | SHIS Fashion Bangladesh`,
       description: `${activeCollection.description} Discover premium fashion collections from SHIS Fashion Bangladesh.`,
     })
-  }, [activeCollection.description, activeCollection.title, location.pathname, selectedProduct])
+  }, [activeCollection.description, activeCollection.title, location.pathname])
 
-  const collectionImages = activeCollection.images.map((image) => normalizeCatalogImageUrl(image, 1000, 1200))
+  useEffect(() => {
+    if (!ready) {
+      return
+    }
+
+    const trackingKey = `${activeCollection.slug}|${collectionProducts.length}|${location.pathname}`
+    if (lastTrackedCollectionRef.current === trackingKey) {
+      return
+    }
+
+    lastTrackedCollectionRef.current = trackingKey
+    googleAnalytics.trackEvent('listing_view', {
+      segment: 'collection',
+      subcategory: activeCollection.slug,
+      result_count: collectionProducts.length,
+      path: location.pathname,
+    })
+  }, [activeCollection.slug, collectionProducts.length, location.pathname, ready])
 
   if (!ready) {
     return (
-      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+      <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
         <Container>
-          <div className="rounded-[1.8rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 px-6 py-10 text-center text-sm text-[var(--color-muted)]">
-            Loading collection...
-          </div>
-        </Container>
-      </section>
-    )
-  }
-
-  if (!featuredProducts.length || !selectedProduct) {
-    return (
-      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
-        <Container>
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Collection unavailable</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">No products available yet.</h1>
-            <div className="mt-8 flex justify-center">
-              <Button to="/shop">Browse shop</Button>
-            </div>
-          </div>
+          <p className="text-sm text-black/55">Loading collection...</p>
         </Container>
       </section>
     )
   }
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
       <Container>
-        <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Featured collection</p>
-          <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)] sm:text-4xl">{activeCollection.title}</h1>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">{activeCollection.subtitle}</p>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">{activeCollection.description}</p>
-        </div>
+        <header>
+          <p className="text-caption uppercase tracking-[0.14em] text-black/55">Featured collection</p>
+          <h1 className="mt-1 text-h1 text-black">{activeCollection.title}</h1>
+          {activeCollection.subtitle ? (
+            <p className="mt-2 text-caption font-semibold uppercase tracking-[0.14em] text-black/55">{activeCollection.subtitle}</p>
+          ) : null}
+          <p className="mt-3 max-w-2xl text-body text-black/72">{activeCollection.description}</p>
+        </header>
 
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {collectionImages.map((image, index) => (
-            <div key={`${activeCollection.slug}-${index}`} className="overflow-hidden rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <div className="aspect-[4/5]">
+        {collectionImages.length ? (
+          <div className="mt-8 grid grid-cols-2 items-start gap-x-1.5 gap-y-4 sm:grid-cols-4 sm:gap-x-2.5 sm:gap-y-5">
+            {collectionImages.map((image, index) => (
+              <div key={`${activeCollection.slug}-look-${index}`} className="min-w-0 aspect-[4/5] overflow-hidden bg-black/5">
                 <img
                   src={image}
                   alt={`${activeCollection.title} look ${index + 1}`}
                   loading="lazy"
                   decoding="async"
-                  sizes="(max-width: 639px) 50vw, (max-width: 1023px) 25vw, 18vw"
-                  className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
+                  sizes="(max-width: 639px) 50vw, 25vw"
+                  className={`h-full w-full object-cover object-center ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                 />
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 grid gap-6 rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <h2 className="text-xl font-semibold text-[var(--color-text)]">Select product</h2>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {featuredProducts.slice(0, 6).map((product) => {
-                const cardImage = normalizeCatalogImageUrl(product.image, 640, 800)
-                const selected = selectedProduct.id === product.id
-
-                return (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => setSelectedProductId(product.id)}
-                    className={`overflow-hidden rounded-[1rem] border text-left transition ${selected ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'}`}
-                  >
-                    <div className="aspect-[4/5] bg-[var(--color-bg)]">
-                      <img
-                        src={cardImage}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(max-width: 639px) 45vw, (max-width: 1023px) 30vw, 20vw"
-                        className={`h-full w-full object-cover ${isDemoImageUrl(cardImage) ? 'shis-media-tone' : ''}`}
-                      />
-                    </div>
-                    <div className="px-2.5 py-2.5">
-                      <p className="line-clamp-1 text-xs font-semibold text-[var(--color-text)]">{product.name}</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-xs font-semibold text-[var(--color-accent)]">{product.price}</p>
-                        {product.comparePrice ? (
-                          <p className="text-[10px] text-black/50 line-through">{product.comparePrice}</p>
-                        ) : null}
-                      </div>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">Selected</p>
-            <h3 className="mt-2 text-xl font-semibold text-[var(--color-text)]">{selectedProduct.name}</h3>
-            <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{selectedProduct.description}</p>
-              <p className="mt-3 text-lg font-semibold text-[var(--color-text)]">{selectedProduct.price}</p>
-              {selectedProduct.comparePrice ? (
-                <p className="mt-1 text-sm text-black/50 line-through">{selectedProduct.comparePrice}</p>
-              ) : null}
-            <div className="mt-4 flex flex-col gap-3">
-              <Button
-                onClick={() => {
-                  addToCart(selectedProduct, {
-                    size: selectedProduct.sizes[0] ?? 'M',
-                    color: 'Default',
-                    quantity: 1,
-                  })
-                  metaPixel.trackAddToCart({
-                    content_name: selectedProduct.name,
-                    content_ids: [selectedProduct.id],
-                    content_type: 'product',
-                    value: parseBDT(selectedProduct.price),
-                    currency: 'BDT',
-                    brand: selectedProduct.brand,
-                  })
-                  googleAnalytics.addToBag({
-                    item_id: selectedProduct.id,
-                    item_name: selectedProduct.name,
-                    item_category: selectedProduct.category,
-                    price: parseBDT(selectedProduct.price),
-                    quantity: 1,
-                    brand: selectedProduct.brand,
-                  }, 'BDT')
-                }}
-                variant="cta"
-                className="min-h-[3.25rem] justify-center px-5 text-[1rem] font-semibold"
-                disabled={selectedProduct.stock <= 0}
-              >
-                Add to Bag
-              </Button>
-              <Button
-                onClick={() => navigate(`/shop/${selectedProduct.category}/${selectedProduct.slug}`)}
-                variant="secondary"
-                className="justify-center"
-              >
-                View details
-              </Button>
-              <Button
-                onClick={() => {
-                  addToCart(selectedProduct, {
-                    size: selectedProduct.sizes[0] ?? 'M',
-                    color: 'Default',
-                    quantity: 1,
-                  })
-                  googleAnalytics.beginCheckout({
-                    value: parseBDT(selectedProduct.price),
-                    currency: 'BDT',
-                    items: [
-                      {
-                        item_id: selectedProduct.id,
-                        item_name: selectedProduct.name,
-                        item_category: selectedProduct.category,
-                        price: parseBDT(selectedProduct.price),
-                        quantity: 1,
-                        brand: selectedProduct.brand,
-                      },
-                    ],
-                  })
-                  navigate('/checkout')
-                }}
-                variant="secondary"
-                className="justify-center"
-                disabled={selectedProduct.stock <= 0}
-              >
-                Buy now
-              </Button>
-            </div>
-          </div>
-        </div>
-
-          <div className="mt-8">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[var(--color-text)]">More from this collection</h2>
-            <p className="text-sm text-[var(--color-muted)]">{featuredProducts.length} items</p>
-          </div>
-          <div className="grid grid-cols-2 gap-x-1.5 gap-y-4 min-[420px]:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 lg:gap-y-5 tight-mobile-grid">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={{
-                  id: product.id,
-                  slug: product.slug,
-                  name: product.name,
-                  price: product.price,
-                  category: product.category,
-                  image: product.image,
-                  description: product.description,
-                  galleryImages: product.galleryImages,
-                  stock: product.stock,
-                }}
-              />
             ))}
           </div>
+        ) : null}
+
+        <div className="mt-10">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2 className="text-h2 text-black">The collection</h2>
+            <p className="text-caption uppercase tracking-[0.12em] text-black/55">{collectionProducts.length} items</p>
+          </div>
+
+          {collectionProducts.length ? (
+            <ProductListingGrid>
+              {collectionProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </ProductListingGrid>
+          ) : (
+            <div className="border-t border-black/10 pt-8 text-center">
+              <p className="text-caption uppercase tracking-[0.14em] text-black/55">Collection unavailable</p>
+              <h2 className="mt-3 text-h2 text-black">No products available yet.</h2>
+              <div className="mt-6 flex justify-center">
+                <Button to="/shop">Browse shop</Button>
+              </div>
+            </div>
+          )}
         </div>
       </Container>
     </section>

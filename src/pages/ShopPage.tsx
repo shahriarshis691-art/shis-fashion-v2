@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -800,7 +801,7 @@ export default function ShopPage() {
         </div>
 
         {!ready ? (
-          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid" aria-hidden="true">
+          <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`listing-skeleton-${index}`}>
                 <div className="aspect-[4/5] animate-pulse bg-black/5" />
@@ -808,9 +809,9 @@ export default function ShopPage() {
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>
             ))}
-          </div>
+          </ProductListingGrid>
         ) : (
-          <div className="mt-4 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:mt-5 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5 tight-mobile-grid product-grid">
+          <ProductListingGrid className="mt-4 sm:mt-5">
             {pagedProducts.map((product) => (
               <ProductCard
                 key={product.id}
@@ -819,7 +820,7 @@ export default function ShopPage() {
                 isInWishlist={isInWishlist(String(product.id))}
               />
             ))}
-          </div>
+          </ProductListingGrid>
         )}
 
         {ready && hasMoreProducts ? (
