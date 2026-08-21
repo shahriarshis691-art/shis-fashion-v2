@@ -6,7 +6,7 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
 import { homeCategoryItems } from '../data/homeCategories'
-import { featuredCollectionCover } from '../data/featuredCollectionCovers'
+import { categoryStripCover, featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
@@ -252,7 +252,7 @@ export default function HomePage() {
         key: section.key,
         label: section.label,
         href: section.href,
-        image: normalizeCatalogImageUrl(section.image, 1200, 900),
+        image: normalizeCatalogImageUrl(categoryStripCover(section.key, section.image), 1200, 900),
       }))
     }
 
@@ -261,7 +261,11 @@ export default function HomePage() {
       .sort((left, right) => left.order - right.order)
       .map((section) => {
         const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const sectionImage = normalizeCatalogImageUrl(section.coverImage || section.images[0] || fallback?.image || '', 1200, 900)
+        const sectionImage = normalizeCatalogImageUrl(
+          categoryStripCover(section.key, section.coverImage || section.images[0] || fallback?.image || ''),
+          1200,
+          900,
+        )
 
         return {
           key: section.key,

@@ -22,7 +22,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'saree',
     name: 'Saree',
     href: '/sarees',
-    image: '/og-image.svg',
+    image: '/collections/featured-saree-collection.jpg',
   },
   {
     key: 'denim',

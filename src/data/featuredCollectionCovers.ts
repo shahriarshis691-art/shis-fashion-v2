@@ -4,6 +4,14 @@ export const featuredCollectionCovers: Record<string, string> = {
   'everyday-wear': '/collections/featured-everyday-wear.jpg',
 }
 
+export const categoryStripCovers: Record<string, string> = {
+  saree: '/collections/featured-saree-collection.jpg',
+}
+
 export function featuredCollectionCover(slug: string, fallback = '') {
   return featuredCollectionCovers[slug] ?? fallback
+}
+
+export function categoryStripCover(key: string, fallback = '') {
+  return categoryStripCovers[key] ?? fallback
 }
