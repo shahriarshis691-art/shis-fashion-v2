@@ -5,6 +5,14 @@ import { sendOpsWebhook } from './_opsWebhook.js'
 import { getAvailableStock, getProductSlug, productMatchesSlug } from './_catalog.js'
 import { notifyCustomer } from './_notifyCustomer.js'
 import { getConfiguredPrepaidProvider, startPrepaidCheckout } from './_prepaidProvider.js'
+import { applyStockDecrement, applyStockRestore } from './_stock.js'
+import {
+  isApiPrepaidPayment,
+  isManualWalletPayment,
+  isValidWalletTransactionId,
+  normalizeWalletTransactionId,
+  resolvePaymentStatus,
+} from './_payment.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -48,6 +56,7 @@ interface CreateOrderBody {
   couponCode?: string
   deliveryAddress?: DeliveryAddressInput
   paymentMethod?: string
+  paymentTransactionId?: string
 }
 
 interface ProductRecord {
@@ -146,7 +155,9 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   const items = Array.isArray(body.items) ? body.items : []
   const couponCode = String(body.couponCode ?? '').trim().toUpperCase()
   const requestedPayment = String(body.paymentMethod ?? 'Cash on Delivery').trim()
-  const isPrepaid = /bkash|sslcommerz|ssl/i.test(requestedPayment)
+  const isManualWallet = isManualWalletPayment(requestedPayment)
+  const isApiPrepaid = isApiPrepaidPayment(requestedPayment)
+  const paymentTransactionId = normalizeWalletTransactionId(String(body.paymentTransactionId ?? ''))
 
   if (customerName.length < 2 || customerName.length > 100) {
     res.status(400).json({ error: 'Please enter a valid full name.' })
@@ -173,9 +184,26 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (isPrepaid && !getConfiguredPrepaidProvider()) {
-    res.status(503).json({ error: 'Online payment is not configured. Please choose Cash on Delivery.', skipped: true })
+  if (isApiPrepaid && !getConfiguredPrepaidProvider()) {
+    res.status(503).json({ error: 'Online payment is not configured. Please choose Cash on Delivery or Send Money.', skipped: true })
     return
+  }
+
+  if (isManualWallet) {
+    if (!isValidWalletTransactionId(paymentTransactionId)) {
+      res.status(400).json({ error: 'Enter the Transaction ID (TrxID) from your bKash or Nagad app.' })
+      return
+    }
+
+    const duplicateTrx = await db.collection('orders')
+      .where('paymentTransactionId', '==', paymentTransactionId)
+      .limit(1)
+      .get()
+
+    if (!duplicateTrx.empty) {
+      res.status(409).json({ error: 'This Transaction ID was already used on another order. Check the ID or contact support.' })
+      return
+    }
   }
 
   const productsSnapshot = await db.collection('products').get()
@@ -321,6 +349,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       }
 
       const orderRef = db.collection('orders').doc()
+      const paymentStatus = resolvePaymentStatus({ isApiPrepaid, isManualWallet })
       const orderPayload = {
         customerName,
         customerPhone,
@@ -346,10 +375,13 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         total,
         status: 'new',
         trackingNumber: '',
-        paymentMethod: isPrepaid ? (getConfiguredPrepaidProvider() === 'sslcommerz' ? 'SSLCOMMERZ' : 'bKash') : 'Cash on Delivery',
-        paymentStatus: isPrepaid ? 'pending' : 'unpaid',
+        paymentMethod: isApiPrepaid
+          ? (getConfiguredPrepaidProvider() === 'sslcommerz' ? 'SSLCOMMERZ' : 'bKash')
+          : requestedPayment,
+        paymentStatus,
         createdAt: FieldValue.serverTimestamp(),
-        stockCommitted: !isPrepaid,
+        stockCommitted: true,
+        ...(isManualWallet ? { paymentTransactionId } : {}),
         ...(couponCode && couponId ? {
           couponCode,
           couponDiscountPercent: discountPercent,
@@ -360,24 +392,11 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
       transaction.set(orderRef, orderPayload)
 
-      if (!isPrepaid) {
-        pricedItems.forEach((item) => {
-          if (item.variantIndex >= 0) {
-            const nextVariants = item.variants.map((variant, index) => (
-              index === item.variantIndex
-                ? { ...variant, stock: Math.max(0, variant.stock - item.quantity) }
-                : variant
-            ))
-            const totalStock = nextVariants.reduce((sum, variant) => sum + variant.stock, 0)
-            transaction.update(item.productRef, { variants: nextVariants, stock: totalStock })
-            return
-          }
+      pricedItems.forEach((item) => {
+        applyStockDecrement(transaction, item)
+      })
 
-          transaction.update(item.productRef, { stock: Math.max(0, item.stock - item.quantity) })
-        })
-      }
-
-      if (!isPrepaid && couponSnap?.exists && couponRef) {
+      if (!isApiPrepaid && couponSnap?.exists && couponRef) {
         transaction.update(couponRef, {
           status: 'used',
           usageCount: 1,
@@ -404,7 +423,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       lowStockAlerts?: Array<{ name: string; remaining: number }>
     }
 
-    if (!isPrepaid && lowStockAlerts.length) {
+    if (lowStockAlerts.length) {
       void sendOpsWebhook([
         '*SHIS Low Stock*',
         `Order ${order.id} reduced inventory.`,
@@ -412,7 +431,18 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       ].join('\n'))
     }
 
-    if (isPrepaid) {
+    if (isManualWallet) {
+      void sendOpsWebhook([
+        '*SHIS Wallet Payment — verify TrxID*',
+        `Order ${order.id}`,
+        `Method: ${requestedPayment}`,
+        `TrxID: ${paymentTransactionId}`,
+        `Amount: ৳ ${Number(order.total ?? 0).toLocaleString('en-BD')}`,
+        `Phone: ${customerPhone}`,
+      ].join('\n'))
+    }
+
+    if (isApiPrepaid) {
       const prepaid = await startPrepaidCheckout({
         orderId: order.id,
         amount: Number(order.total ?? 0),
@@ -422,11 +452,43 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       })
 
       if (!prepaid.configured || !prepaid.ok) {
-        await db.collection('orders').doc(order.id).update({
-          paymentStatus: 'failed',
-          status: 'cancelled',
+        await db.runTransaction(async (transaction) => {
+          const orderRef = db.collection('orders').doc(order.id)
+          const orderSnap = await transaction.get(orderRef)
+          const orderData = orderSnap.data() as { items?: Array<{ slug?: string; name?: string; quantity?: number; size?: string; color?: string }> } | undefined
+
+          for (const item of orderData?.items ?? []) {
+            const qty = Math.max(0, Math.floor(Number(item.quantity ?? 0)))
+            const match = liveProducts.find((doc) => {
+              const data = doc.data() as ProductRecord
+              return productMatchesSlug(data, String(item.slug || item.name || ''))
+                || String(data.name || '').trim().toLowerCase() === String(item.name || '').trim().toLowerCase()
+            })
+            if (!match) {
+              continue
+            }
+
+            const snap = await transaction.get(match.ref)
+            const product = (snap.data() ?? {}) as ProductRecord
+            const available = getAvailableStock(product, String(item.size ?? ''), String(item.color ?? ''))
+            applyStockRestore(transaction, {
+              productRef: match.ref,
+              quantity: qty,
+              size: item.size,
+              color: item.color,
+              variantIndex: available.variantIndex,
+              variants: available.variants,
+              stock: available.stock,
+            })
+          }
+
+          transaction.update(orderRef, {
+            paymentStatus: 'failed',
+            status: 'cancelled',
+            stockCommitted: false,
+          })
         })
-        res.status(502).json({ error: prepaid.configured ? prepaid.error : 'Online payment is not configured. Please choose Cash on Delivery.' })
+        res.status(502).json({ error: prepaid.configured ? prepaid.error : 'Online payment is not configured. Please choose Cash on Delivery or Send Money.' })
         return
       }
 
@@ -448,7 +510,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       customerName,
       customerPhone,
       customerEmail,
-      paymentMethod: 'Cash on Delivery',
+      paymentMethod: String(order.paymentMethod ?? requestedPayment),
       total: Number(order.total ?? 0),
     })
 

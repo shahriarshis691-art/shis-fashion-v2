@@ -2,6 +2,7 @@ import { getFirebaseAdminDb } from './_firebaseAdmin.js'
 import { completePrepaidCheckout } from './_prepaidProvider.js'
 import { notifyCustomer } from './_notifyCustomer.js'
 import { getAvailableStock, productMatchesSlug } from './_catalog.js'
+import { applyStockDecrement, applyStockRestore } from './_stock.js'
 import { FieldValue } from 'firebase-admin/firestore'
 
 export const config = {
@@ -94,9 +95,43 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     }
 
     if (!result.ok) {
-      await orderDoc.ref.update({
-        paymentStatus: 'failed',
-        status: 'cancelled',
+      const productsSnapshot = await db.collection('products').get()
+      await db.runTransaction(async (transaction) => {
+        if (data.stockCommitted) {
+          for (const item of data.items ?? []) {
+            const qty = Math.max(0, Math.floor(Number(item.quantity ?? 0)))
+            const match = productsSnapshot.docs.find((doc) => {
+              const product = doc.data() as { slug?: string; name?: string; archived?: boolean }
+              if (product.archived) {
+                return false
+              }
+              return productMatchesSlug(product, String(item.slug || item.name || ''))
+                || String(product.name || '').trim().toLowerCase() === String(item.name || '').trim().toLowerCase()
+            })
+            if (!match) {
+              continue
+            }
+
+            const snap = await transaction.get(match.ref)
+            const product = (snap.data() ?? {}) as { stock?: unknown; variants?: unknown }
+            const available = getAvailableStock(product, String(item.size ?? ''), String(item.color ?? ''))
+            applyStockRestore(transaction, {
+              productRef: match.ref,
+              quantity: qty,
+              size: item.size,
+              color: item.color,
+              variantIndex: available.variantIndex,
+              variants: available.variants,
+              stock: available.stock,
+            })
+          }
+        }
+
+        transaction.update(orderDoc.ref, {
+          paymentStatus: 'failed',
+          status: 'cancelled',
+          stockCommitted: false,
+        })
       })
       redirect(res, '/checkout?prepaid=failed')
       return
@@ -120,21 +155,21 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           }
 
           const snap = await transaction.get(match.ref)
-          const product = (snap.data() ?? {}) as { stock?: number; variants?: unknown }
+          const product = (snap.data() ?? {}) as { stock?: unknown; variants?: unknown }
           const available = getAvailableStock(product, String(item.size ?? ''), String(item.color ?? ''))
           if (available.stock < qty) {
             throw new Error('INSUFFICIENT_STOCK')
           }
 
-          if (available.variantIndex >= 0) {
-            const nextVariants = available.variants.map((entry, index) => (
-              index === available.variantIndex ? { ...entry, stock: entry.stock - qty } : entry
-            ))
-            const total = nextVariants.reduce((sum, entry) => sum + entry.stock, 0)
-            transaction.update(match.ref, { variants: nextVariants, stock: total })
-          } else {
-            transaction.update(match.ref, { stock: Math.max(0, available.stock - qty) })
-          }
+          applyStockDecrement(transaction, {
+            productRef: match.ref,
+            quantity: qty,
+            size: item.size,
+            color: item.color,
+            variantIndex: available.variantIndex,
+            variants: available.variants,
+            stock: available.stock,
+          })
         }
 
         transaction.update(orderDoc.ref, {
@@ -158,6 +193,16 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         paymentStatus: 'paid',
         prepaidCompletedAt: FieldValue.serverTimestamp(),
       })
+
+      if (data.couponId) {
+        await db.collection('coupons').doc(data.couponId).update({
+          status: 'used',
+          usageCount: 1,
+          orderId: orderDoc.id,
+          discountAmount: Number(data.couponDiscountAmount ?? 0),
+          usedAt: FieldValue.serverTimestamp(),
+        })
+      }
     }
 
     void notifyCustomer({

@@ -23,6 +23,7 @@ import { compactManagedImages } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
+import { isApiPrepaidPayment } from '../utils/paymentMethods'
 import { allocateProductSlug, getProductSlug, productMatchesSlug } from '../utils/productIdentity'
 import { decrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
 import { hasAnyAdminAccessRole, resolveAdminAccessRole, type AdminAccessRole } from '../utils/adminAccess'
@@ -80,7 +81,8 @@ export interface AdminOrder {
   status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   trackingNumber?: string
   paymentMethod?: string
-  paymentStatus?: 'unpaid' | 'pending' | 'paid' | 'failed'
+  paymentStatus?: 'unpaid' | 'pending' | 'pending_verification' | 'paid' | 'failed'
+  paymentTransactionId?: string
   createdAt?: string | { seconds: number }
   archived?: boolean
   archivedAt?: string | { seconds: number }
@@ -2272,6 +2274,7 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
         couponCode: couponData?.code,
         deliveryAddress: order.deliveryAddress,
         paymentMethod: order.paymentMethod,
+        paymentTransactionId: order.paymentTransactionId,
       }),
     })
 
@@ -2287,8 +2290,8 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
     writeStored(ORDERS_KEY, [payload.order, ...currentOrders])
     return { ...payload.order, redirectUrl: payload.redirectUrl }
   } catch (error) {
-    const isPrepaid = /bkash|ssl/i.test(order.paymentMethod ?? '')
-    if (requiresLiveBackend() || isPrepaid) {
+    const isApiPrepaid = isApiPrepaidPayment(order.paymentMethod ?? '')
+    if (requiresLiveBackend() || isApiPrepaid) {
       throw error instanceof Error ? error : new Error('Order submission failed. Please try again.')
     }
 

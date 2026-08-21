@@ -7,6 +7,7 @@ import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { STORE_POLICY } from '../data/storePolicy'
 import { getCustomerOrderSupportHref, PAYMENT_METHOD_COD } from '../utils/orderComms'
+import { isManualWalletPayment } from '../utils/paymentMethods'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -16,6 +17,7 @@ interface LastOrderSnapshot {
   customerPhone: string
   address: string
   paymentMethod: string
+  paymentTransactionId?: string
   deliveryCharge: number
   subtotal: number
   grandTotal: number
@@ -87,6 +89,7 @@ export default function OrderSuccessPage() {
 
   const supportWhatsAppHref = getCustomerOrderSupportHref(order?.orderId ?? '')
   const trackHref = order ? `/track-order?id=${encodeURIComponent(order.orderId)}` : '/track-order'
+  const isWalletOrder = order ? isManualWalletPayment(order.paymentMethod) : false
 
   return (
     <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -96,15 +99,19 @@ export default function OrderSuccessPage() {
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order Confirmed</p>
             <h1 className="mt-2 text-h2 text-black">Thank you. Your order has been placed.</h1>
             <p className="mt-3 text-sm leading-7 text-black/70">
-              Our team will call your phone number to confirm delivery details before dispatch. {STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.
+              {isWalletOrder
+                ? 'We received your order and wallet Transaction ID. Our team will verify payment, then call to confirm delivery details before dispatch.'
+                : `Our team will call your phone number to confirm delivery details before dispatch. ${STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.`}
             </p>
 
             <div className="mt-4 rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/70">
-              Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.
+              {isWalletOrder
+                ? <>Wallet payment verification is in progress for TrxID <span className="font-semibold text-black">{order?.paymentTransactionId ?? '—'}</span>. Phone confirmation follows after verification.</>
+                : <>Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.</>}
             </div>
 
             <div className="mt-5 grid gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60 sm:grid-cols-3">
-              <span className="border border-black/15 px-3 py-2 text-center">COD confirmed</span>
+              <span className="border border-black/15 px-3 py-2 text-center">{isWalletOrder ? 'Payment verifying' : 'COD confirmed'}</span>
               <span className="border border-black/15 px-3 py-2 text-center">Phone verification</span>
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="border border-black/15 px-3 py-2 text-center hover:bg-black/5">
                 WhatsApp support

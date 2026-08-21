@@ -2130,6 +2130,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     <div className="space-y-2">
                       <p><span className="font-semibold text-[var(--color-text)]">Delivery Charge:</span> {formatBDT(order.deliveryCharge ?? 0)}</p>
                       <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}{order.paymentStatus ? ` · ${order.paymentStatus}` : ''}</p>
+                      {order.paymentTransactionId ? (
+                        <p><span className="font-semibold text-[var(--color-text)]">TrxID:</span> <span className="font-mono tracking-[0.08em]">{order.paymentTransactionId}</span></p>
+                      ) : null}
                       <p><span className="font-semibold text-[var(--color-text)]">Grand Total:</span> {formatBDT(order.total)}</p>
                       <div>
                         <p className="font-semibold text-[var(--color-text)]">Ordered Products</p>

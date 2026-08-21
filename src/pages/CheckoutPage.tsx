@@ -9,7 +9,19 @@ import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 import { PAYMENT_METHOD_COD } from '../utils/orderComms'
-import { isPrepaidCheckoutEnabled, PAYMENT_METHOD_BKASH } from '../utils/prepaid'
+import {
+  formatWalletDialNumber,
+  getBkashMerchantNumber,
+  getMerchantNumberForMethod,
+  getNagadMerchantNumber,
+  isManualWalletPayment,
+  isMobileWalletPaymentsEnabled,
+  isPrepaidCheckoutEnabled,
+  isValidWalletTransactionId,
+  PAYMENT_METHOD_BKASH,
+  PAYMENT_METHOD_BKASH_MANUAL,
+  PAYMENT_METHOD_NAGAD_MANUAL,
+} from '../utils/prepaid'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 
@@ -75,7 +87,14 @@ export default function CheckoutPage() {
     return ''
   })
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD_COD)
+  const [paymentTransactionId, setPaymentTransactionId] = useState('')
   const prepaidEnabled = isPrepaidCheckoutEnabled()
+  const walletPaymentsEnabled = isMobileWalletPaymentsEnabled()
+  const walletMerchantNumber = useMemo(
+    () => getMerchantNumberForMethod(paymentMethod),
+    [paymentMethod],
+  )
+  const requiresWalletTrxId = isManualWalletPayment(paymentMethod)
   const [websiteField, setWebsiteField] = useState('')
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
   const submissionLockRef = useRef(false)
@@ -102,6 +121,7 @@ export default function CheckoutPage() {
     form.division &&
     form.district &&
     form.upazila &&
+    (!requiresWalletTrxId || isValidWalletTransactionId(paymentTransactionId)) &&
     !isSubmitting,
   )
 
@@ -212,6 +232,13 @@ export default function CheckoutPage() {
       return
     }
 
+    if (requiresWalletTrxId && !isValidWalletTransactionId(paymentTransactionId)) {
+      setSubmitError('Enter the Transaction ID (TrxID) from your bKash or Nagad app.')
+      setIsSubmitting(false)
+      submissionLockRef.current = false
+      return
+    }
+
     const composedAddress = [form.streetAddress.trim(), form.upazila, form.district, form.division]
       .filter(Boolean)
       .join(', ')
@@ -243,6 +270,7 @@ export default function CheckoutPage() {
         status: 'new',
         trackingNumber: '',
         paymentMethod,
+        paymentTransactionId: requiresWalletTrxId ? paymentTransactionId.trim().toUpperCase() : undefined,
       }, appliedCoupon ? {
         code: appliedCoupon.code,
         discountPercent: appliedCoupon.discountPercent,
@@ -256,6 +284,7 @@ export default function CheckoutPage() {
         customerPhone: phoneNumber,
         address: composedAddress,
         paymentMethod,
+        paymentTransactionId: requiresWalletTrxId ? paymentTransactionId.trim().toUpperCase() : '',
         deliveryCharge: createdOrder.deliveryCharge ?? deliveryCharge,
         subtotal,
         grandTotal: createdOrder.total,
@@ -518,6 +547,36 @@ export default function CheckoutPage() {
                   <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_COD}</p>
                   <p className="mt-1 text-sm text-[var(--color-muted)]">Pay the courier when your order arrives. {STORE_POLICY.phoneConfirm}</p>
                 </label>
+                {walletPaymentsEnabled ? (
+                  <>
+                    <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH_MANUAL ? 'border-black' : 'border-black/15'}`}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        className="sr-only"
+                        checked={paymentMethod === PAYMENT_METHOD_BKASH_MANUAL}
+                        onChange={() => setPaymentMethod(PAYMENT_METHOD_BKASH_MANUAL)}
+                      />
+                      <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH_MANUAL}</p>
+                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                        Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(getBkashMerchantNumber())}</span>, then enter your TrxID below.
+                      </p>
+                    </label>
+                    <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL ? 'border-black' : 'border-black/15'}`}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        className="sr-only"
+                        checked={paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL}
+                        onChange={() => setPaymentMethod(PAYMENT_METHOD_NAGAD_MANUAL)}
+                      />
+                      <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_NAGAD_MANUAL}</p>
+                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                        Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(getNagadMerchantNumber())}</span>, then enter your TrxID below.
+                      </p>
+                    </label>
+                  </>
+                ) : null}
                 {prepaidEnabled ? (
                   <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH ? 'border-black' : 'border-black/15'}`}>
                     <input
@@ -527,11 +586,37 @@ export default function CheckoutPage() {
                       checked={paymentMethod === PAYMENT_METHOD_BKASH}
                       onChange={() => setPaymentMethod(PAYMENT_METHOD_BKASH)}
                     />
-                    <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH}</p>
-                    <p className="mt-1 text-sm text-[var(--color-muted)]">Pay now with bKash. Your order is confirmed after payment succeeds.</p>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH} (Online)</p>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">Pay now with bKash checkout. Your order is confirmed after payment succeeds.</p>
                   </label>
                 ) : null}
               </div>
+
+              {requiresWalletTrxId ? (
+                <div className="mt-4 space-y-3 rounded-[1rem] border border-black/10 bg-black/[0.02] p-4">
+                  <p className="text-sm font-medium text-[var(--color-text)]">Pay {summaryLabel} to {formatWalletDialNumber(walletMerchantNumber)}</p>
+                  <ol className="list-decimal space-y-1 pl-5 text-sm text-[var(--color-muted)]">
+                    <li>Open your {paymentMethod.includes('bKash') ? 'bKash' : 'Nagad'} app</li>
+                    <li>Choose <span className="font-medium text-[var(--color-text)]">Send Money</span></li>
+                    <li>Enter merchant number <span className="font-medium text-[var(--color-text)]">{formatWalletDialNumber(walletMerchantNumber)}</span></li>
+                    <li>Send exactly <span className="font-medium text-[var(--color-text)]">{summaryLabel}</span></li>
+                    <li>Copy the Transaction ID (TrxID) and paste it below</li>
+                  </ol>
+                  <div className="space-y-2">
+                    <label htmlFor="checkout-trxid" className="text-sm font-medium text-[var(--color-text)]">Transaction ID (TrxID) *</label>
+                    <input
+                      id="checkout-trxid"
+                      required
+                      value={paymentTransactionId}
+                      onChange={(event) => setPaymentTransactionId(event.target.value.toUpperCase())}
+                      className="w-full rounded-[1rem] border border-[var(--color-border)] bg-white px-4 py-3 text-[16px] uppercase tracking-[0.08em] text-[var(--color-text)] outline-none transition-colors placeholder:normal-case placeholder:tracking-normal focus:border-black focus:ring-2 focus:ring-black/5"
+                      placeholder="e.g. 8N90ABCD12"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="sticky bottom-3 z-20 bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">

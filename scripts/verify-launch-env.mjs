@@ -110,6 +110,12 @@ if (productionMode) {
   if (!env('VITE_META_PIXEL_ID')) {
     warnings.push('Missing VITE_META_PIXEL_ID (recommended before Meta campaigns).')
   }
+
+  if (String(env('VITE_MOBILE_WALLET_PAYMENTS_ENABLED') || 'true').toLowerCase() === 'true') {
+    if (!env('VITE_BKASH_MERCHANT_NUMBER') && !env('VITE_NAGAD_MERCHANT_NUMBER')) {
+      warnings.push('Wallet payments enabled but merchant numbers use built-in defaults — confirm bKash/Nagad numbers in Vercel.')
+    }
+  }
 } else {
   console.log('Running dev checklist (use --production for launch gate).\n')
   if (!env('VITE_FIREBASE_PROJECT_ID')) {
