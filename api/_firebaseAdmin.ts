@@ -40,9 +40,9 @@ export function getFirebaseAdminDb() {
         }),
       })
     }
-
-    return getFirestore()
   } catch {
     return null
   }
+
+  return getFirestore()
 }
