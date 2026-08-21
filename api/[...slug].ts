@@ -45,33 +45,51 @@ function headerValue(headers: LooseRequest['headers'], name: string) {
   return Array.isArray(value) ? value[0] ?? '' : value ?? ''
 }
 
+function normalizeRouteKey(raw: string) {
+  const key = raw.trim().replace(/^\/+/, '').replace(/\/+$/, '')
+  if (!key) {
+    return ''
+  }
+
+  if (key === 'sitemap.xml' || key === 'sitemap') {
+    return 'sitemap'
+  }
+
+  return key
+}
+
 function resolveRouteKey(req: LooseRequest) {
   const slug = req.query?.slug
   if (Array.isArray(slug)) {
     const joined = slug.filter(Boolean).join('/')
     if (joined) {
-      return joined
+      return normalizeRouteKey(joined)
     }
   } else if (typeof slug === 'string' && slug.trim()) {
-    return slug.trim()
+    return normalizeRouteKey(slug)
   }
 
   const forwardedPath = headerValue(req.headers, 'x-vercel-path')
     || headerValue(req.headers, 'x-invoke-path')
     || headerValue(req.headers, 'x-forwarded-uri')
+    || headerValue(req.headers, 'x-matched-path')
+
+  if (forwardedPath.includes('sitemap.xml') || forwardedPath.endsWith('/sitemap')) {
+    return 'sitemap'
+  }
 
   if (forwardedPath.startsWith('/api/')) {
     const segments = forwardedPath.replace(/^\/api\/?/, '').split('/').filter(Boolean)
     if (segments.length) {
-      return segments.join('/')
+      return normalizeRouteKey(segments.join('/'))
     }
   }
 
   try {
     const url = new URL(req.url ?? '', 'https://www.shisfashion.com')
-    const segments = url.pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean)
-    if (segments.length) {
-      return segments.join('/')
+    const pathKey = normalizeRouteKey(url.pathname.replace(/^\/api\/?/, ''))
+    if (pathKey) {
+      return pathKey
     }
   } catch {
     // Fall through.

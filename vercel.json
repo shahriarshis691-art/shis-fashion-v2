@@ -56,7 +56,7 @@
   "routes": [
     {
       "src": "/sitemap.xml",
-      "dest": "/api/[...slug]?slug=sitemap"
+      "dest": "/api/sitemap"
     },
     {
       "src": "/api/(.*)",
