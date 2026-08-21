@@ -47,6 +47,7 @@ Use this before running paid traffic.
 
 Primary campaign-day runbook:
 - See `docs/campaign-day-qa-checklist.md` for the final go/no-go sequence (Meta + GA4 + checkout verification).
+- See `docs/phase1-launch-checklist.md` for Phase 1 COD soft-launch steps (env, rules deploy, test order).
 
 1. Environment variables
 - Copy `.env.example` values into your production environment.

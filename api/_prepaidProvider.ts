@@ -4,16 +4,42 @@ function env(name: string) {
   return process.env[name] ?? ''
 }
 
+function isProductionRuntime() {
+  return process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
+}
+
+function isSandboxPaymentEndpoint(provider: PrepaidProvider) {
+  if (provider === 'bkash') {
+    const base = env('BKASH_BASE_URL') || 'https://tokenized.sandbox.bka.sh/v1.2.0-beta'
+    return /sandbox|tokenized\.sandbox/i.test(base)
+  }
+
+  const sslBase = env('SSLCOMMERZ_BASE_URL') || 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'
+  const sslValidation = env('SSLCOMMERZ_VALIDATION_URL')
+    || 'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php'
+
+  return /sandbox/i.test(sslBase) || /sandbox/i.test(sslValidation)
+}
+
 export function getConfiguredPrepaidProvider(): PrepaidProvider | null {
+  let provider: PrepaidProvider | null = null
+
   if (env('BKASH_APP_KEY') && env('BKASH_APP_SECRET') && env('BKASH_USERNAME') && env('BKASH_PASSWORD')) {
-    return 'bkash'
+    provider = 'bkash'
+  } else if (env('SSLCOMMERZ_STORE_ID') && env('SSLCOMMERZ_STORE_PASSWORD')) {
+    provider = 'sslcommerz'
   }
 
-  if (env('SSLCOMMERZ_STORE_ID') && env('SSLCOMMERZ_STORE_PASSWORD')) {
-    return 'sslcommerz'
+  if (!provider) {
+    return null
   }
 
-  return null
+  if (isProductionRuntime() && isSandboxPaymentEndpoint(provider)) {
+    console.error(`[prepaid] Refusing ${provider} sandbox endpoints in production. Set live BKASH_BASE_URL / SSLCOMMERZ_BASE_URL.`)
+    return null
+  }
+
+  return provider
 }
 
 export function getPrepaidCallbackUrl() {

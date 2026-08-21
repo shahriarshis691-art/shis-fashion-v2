@@ -352,7 +352,11 @@ function isProductionBuild() {
 }
 
 function requiresLiveBackend() {
-  return (import.meta.env.VITE_ALLOW_LOCAL_FALLBACK ?? (isProductionBuild() ? 'false' : 'true')) !== 'true'
+  if (isProductionBuild()) {
+    return true
+  }
+
+  return (import.meta.env.VITE_ALLOW_LOCAL_FALLBACK ?? 'true') !== 'true'
 }
 
 /**
