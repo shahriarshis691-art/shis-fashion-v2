@@ -95,6 +95,8 @@ export interface AdminSessionUser {
   uid: string
   email: string | null
   role: AdminAccessRole
+  canWrite: boolean
+  needsAdminDoc: boolean
 }
 
 export interface AdminAccount {
@@ -373,23 +375,6 @@ export function isLaunchModeEnabled() {
 const LOCAL_DEMO_ADMIN_EMAIL = 'admin@shisfashion.com'
 const LOCAL_DEMO_ADMIN_PASSWORD = 'luxury123'
 
-function getAuthErrorCode(error: unknown) {
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    return String((error as { code?: unknown }).code ?? '')
-  }
-
-  return ''
-}
-
-function isInvalidLoginError(error: unknown) {
-  const code = getAuthErrorCode(error)
-  return code === 'auth/invalid-credential'
-    || code === 'auth/invalid-login-credentials'
-    || code === 'auth/wrong-password'
-    || code === 'auth/user-not-found'
-    || code === 'auth/invalid-email'
-}
-
 export function isLocalAdminHost() {
   if (typeof window === 'undefined') {
     return !isProductionBuild()
@@ -418,8 +403,14 @@ function getLaunchModeUser(): AdminSessionUser | null {
       return null
     }
 
-    const parsed = JSON.parse(stored) as { uid: string; email: string; role?: AdminAccessRole }
-    return { uid: parsed.uid, email: parsed.email, role: parsed.role ?? 'owner' }
+    const parsed = JSON.parse(stored) as Partial<AdminSessionUser> & { uid: string; email: string }
+    return {
+      uid: parsed.uid,
+      email: parsed.email,
+      role: parsed.role ?? 'owner',
+      canWrite: parsed.canWrite !== false,
+      needsAdminDoc: parsed.needsAdminDoc === true,
+    }
   } catch {
     return null
   }
@@ -432,7 +423,7 @@ function setLaunchModeUser(email: string) {
 
   // Generate a pseudo-uid from email for launch mode
   const pseudoUid = `launch-mode-${email.replace(/[^a-z0-9]/gi, '')}`
-  const user: AdminSessionUser = { uid: pseudoUid, email, role: 'owner' }
+  const user: AdminSessionUser = { uid: pseudoUid, email, role: 'owner', canWrite: true, needsAdminDoc: false }
   window.sessionStorage.setItem(LAUNCH_MODE_USER_KEY, JSON.stringify(user))
 }
 
@@ -583,55 +574,95 @@ function includesAdminRole(role: unknown, roles: unknown) {
   return hasAnyAdminAccessRole(role, roles)
 }
 
-async function resolveSessionRole(uid: string): Promise<AdminAccessRole> {
-  if (!firebaseDb) {
-    return 'owner'
+let lastAdminSession: AdminSessionUser | null = null
+
+function rememberAdminSession(session: AdminSessionUser | null) {
+  lastAdminSession = session
+}
+
+function createAdminDocRequiredError(uid: string) {
+  const error = new Error(`Create Firestore document admins/${uid} with role="admin" and active=true before making changes.`)
+  ;(error as Error & { code?: string; adminUid?: string }).code = 'auth/admin-doc-required'
+  ;(error as Error & { code?: string; adminUid?: string }).adminUid = uid
+  return error
+}
+
+export function describeAdminWriteError(error: unknown, uid?: string | null) {
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code ?? '')
+    : ''
+  const reason = error instanceof Error ? error.message : 'Unknown error'
+  const uidHint = uid
+    || (typeof error === 'object' && error !== null && 'adminUid' in error ? String((error as { adminUid?: unknown }).adminUid ?? '') : '')
+    || lastAdminSession?.uid
+    || '<uid>'
+  const normalized = reason.toLowerCase()
+  if (
+    code === 'auth/admin-doc-required'
+    || normalized.includes('permission-denied')
+    || normalized.includes('missing or insufficient permissions')
+  ) {
+    return `Saving is blocked until Firestore document admins/${uidHint} exists with role="admin" and active=true.`
   }
 
-  try {
-    const snapshot = await getDoc(doc(firebaseDb, 'admins', uid))
-    if (!snapshot.exists()) {
-      return 'owner'
-    }
+  return reason
+}
 
-    const data = snapshot.data() as { role?: unknown; roles?: unknown }
-    return resolveAdminAccessRole(data.role, data.roles)
-  } catch {
-    return 'owner'
+function assertAdminCanWrite() {
+  if (getLaunchModeUser() && isLocalAdminHost()) {
+    return
+  }
+
+  if (lastAdminSession && !lastAdminSession.canWrite) {
+    throw createAdminDocRequiredError(lastAdminSession.uid)
   }
 }
 
-function listIncludesIdentifier(value: unknown, identifier: string) {
-  if (!identifier) {
-    return false
-  }
+type FirebaseAdminAccess =
+  | { status: 'ok'; session: AdminSessionUser }
+  | { status: 'denied'; code: 'auth/forbidden-admin' | 'auth/admin-inactive'; message: string }
 
-  if (!Array.isArray(value)) {
-    return false
-  }
-
-  return value
-    .filter((entry): entry is string => typeof entry === 'string')
-    .map((entry) => entry.trim().toLowerCase())
-    .includes(identifier)
-}
-
-async function isAdminUser(user: User) {
+async function resolveFirebaseAdminAccess(user: User): Promise<FirebaseAdminAccess> {
   const normalizedEmail = user.email?.trim().toLowerCase() ?? ''
   const isEmailAllowListed = configuredAdminEmails.size > 0
     ? Boolean(normalizedEmail && configuredAdminEmails.has(normalizedEmail))
     : null
 
   if (configuredAdminEmails.size > 0 && !isEmailAllowListed) {
-    return false
+    return {
+      status: 'denied',
+      code: 'auth/forbidden-admin',
+      message: 'This account is not on the admin allow-list.',
+    }
   }
 
   const tokenResult = await user.getIdTokenResult()
   const claims = tokenResult.claims as Record<string, unknown>
   const hasAdminClaim = claims.admin === true || includesAdminRole(claims.role, claims.roles)
 
+  const sessionBase = {
+    uid: user.uid,
+    email: user.email,
+  }
+
   if (!firebaseDb) {
-    return isEmailAllowListed === true ? true : hasAdminClaim
+    if (isEmailAllowListed === true || hasAdminClaim) {
+      return {
+        status: 'ok',
+        session: {
+          ...sessionBase,
+          role: resolveAdminAccessRole(claims.role, claims.roles),
+          canWrite: hasAdminClaim,
+          needsAdminDoc: !hasAdminClaim,
+        },
+      }
+    }
+
+    return {
+      status: 'denied',
+      code: 'auth/forbidden-admin',
+      message: 'This account is not authorized for admin dashboard access.',
+    }
   }
 
   let adminDocSnapshot: Awaited<ReturnType<typeof getDoc>>
@@ -652,43 +683,109 @@ async function isAdminUser(user: User) {
       })
     }
 
-    // Continue with claims-only fallback. This prevents generic login failures and
-    // allows signInAdmin() to surface a specific admin-permission-required message.
-    return hasAdminClaim
+    if (isEmailAllowListed === true || hasAdminClaim) {
+      return {
+        status: 'ok',
+        session: {
+          ...sessionBase,
+          role: 'owner',
+          canWrite: hasAdminClaim,
+          needsAdminDoc: !hasAdminClaim,
+        },
+      }
+    }
+
+    return {
+      status: 'denied',
+      code: 'auth/forbidden-admin',
+      message: 'Unable to verify admin access right now. Please try again.',
+    }
   }
 
   if (adminDocSnapshot.exists()) {
     const adminDocData = adminDocSnapshot.data() as Record<string, unknown>
-    const isActive = adminDocData.active !== false
-    if (isActive && includesAdminRole(adminDocData.role, adminDocData.roles)) {
-      return true
+    if (adminDocData.active === false) {
+      return {
+        status: 'denied',
+        code: 'auth/admin-inactive',
+        message: 'This admin account is marked inactive.',
+      }
+    }
+
+    const hasRoleField = typeof adminDocData.role === 'string' || Array.isArray(adminDocData.roles)
+    if (!hasRoleField || includesAdminRole(adminDocData.role, adminDocData.roles)) {
+      return {
+        status: 'ok',
+        session: {
+          ...sessionBase,
+          role: resolveAdminAccessRole(adminDocData.role, adminDocData.roles),
+          canWrite: true,
+          needsAdminDoc: false,
+        },
+      }
+    }
+
+    return {
+      status: 'denied',
+      code: 'auth/forbidden-admin',
+      message: 'This account does not have an admin role.',
     }
   }
 
-  if (adminsSettingsSnapshot.exists()) {
-    const settingsData = adminsSettingsSnapshot.data() as Record<string, unknown>
-    if (listIncludesIdentifier(settingsData.emails, normalizedEmail)) {
-      return true
-    }
-    if (listIncludesIdentifier(settingsData.uids, user.uid.toLowerCase())) {
-      return true
-    }
-    if (listIncludesIdentifier(settingsData.admins, normalizedEmail) || listIncludesIdentifier(settingsData.admins, user.uid.toLowerCase())) {
-      return true
-    }
-  }
+  const settingsData = adminsSettingsSnapshot.exists()
+    ? adminsSettingsSnapshot.data() as Record<string, unknown>
+    : null
+  const listedInSettings = Boolean(settingsData && (
+    listIncludesIdentifier(settingsData.emails, normalizedEmail)
+    || listIncludesIdentifier(settingsData.uids, user.uid.toLowerCase())
+    || listIncludesIdentifier(settingsData.admins, normalizedEmail)
+    || listIncludesIdentifier(settingsData.admins, user.uid.toLowerCase())
+  ))
 
   if (hasAdminClaim) {
-    return true
+    return {
+      status: 'ok',
+      session: {
+        ...sessionBase,
+        role: resolveAdminAccessRole(claims.role, claims.roles),
+        canWrite: true,
+        needsAdminDoc: false,
+      },
+    }
   }
 
-  // Allow-listed emails that already authenticated may enter the dashboard.
-  // Firestore rules still require an admins/{uid} document for writes.
-  if (isEmailAllowListed === true) {
-    return true
+  if (isEmailAllowListed === true || listedInSettings) {
+    return {
+      status: 'ok',
+      session: {
+        ...sessionBase,
+        role: 'owner',
+        canWrite: false,
+        needsAdminDoc: true,
+      },
+    }
   }
 
-  return false
+  return {
+    status: 'denied',
+    code: 'auth/forbidden-admin',
+    message: 'This account is not authorized for admin dashboard access.',
+  }
+}
+
+function listIncludesIdentifier(value: unknown, identifier: string) {
+  if (!identifier) {
+    return false
+  }
+
+  if (!Array.isArray(value)) {
+    return false
+  }
+
+  return value
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map((entry) => entry.trim().toLowerCase())
+    .includes(identifier)
 }
 
 function subscribeToStored<T>(key: string, fallback: T, callback: (value: T) => void) {
@@ -1330,16 +1427,19 @@ export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => 
 
   const launchUser = getLaunchModeUser()
   if (launchUser && (isLaunchModeEnabled() || isLocalAdminHost())) {
+    rememberAdminSession(launchUser)
     callback(launchUser)
     return () => undefined
   }
 
   if (isLaunchModeEnabled()) {
+    rememberAdminSession(null)
     callback(null)
     return () => undefined
   }
 
   if (!firebaseAuth) {
+    rememberAdminSession(null)
     callback(null)
     return () => undefined
   }
@@ -1355,34 +1455,40 @@ export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => 
         }
 
         if (!user) {
+          rememberAdminSession(null)
           callback(null)
           return
         }
 
-        const hasAdminAccess = await isAdminUser(user)
+        const access = await resolveFirebaseAdminAccess(user)
         if (!isActive) {
           return
         }
 
-        if (!hasAdminAccess) {
-          markAccessDenied()
+        if (access.status !== 'ok') {
+          if (access.code === 'auth/forbidden-admin' || access.code === 'auth/admin-inactive') {
+            markAccessDenied()
+          }
           await signOut(auth)
           if (!isActive) {
             return
           }
+          rememberAdminSession(null)
           callback(null)
           return
         }
 
-        callback({
-          uid: user.uid,
-          email: user.email,
-          role: await resolveSessionRole(user.uid),
-        })
+        rememberAdminSession(access.session)
+        callback(access.session)
       } catch {
         if (!isActive) {
           return
         }
+        if (lastAdminSession) {
+          callback(lastAdminSession)
+          return
+        }
+        rememberAdminSession(null)
         callback(null)
       }
     })()
@@ -1397,72 +1503,70 @@ export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => 
 export async function signInAdmin(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase()
 
-  // TEMPORARY LAUNCH MODE - Bypass Firebase if configured
   if (isLaunchModeEnabled()) {
     if (configuredAdminEmails.size === 0 || configuredAdminEmails.has(normalizedEmail)) {
       setLaunchModeUser(normalizedEmail)
-      return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail, role: 'owner' as const }
-    } else {
-      markAccessDenied()
-      const error = new Error('Access Denied')
-      ;(error as Error & { code?: string }).code = 'auth/forbidden-admin'
-      throw error
+      const session = getLaunchModeUser() ?? {
+        uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`,
+        email: normalizedEmail,
+        role: 'owner' as const,
+        canWrite: true,
+        needsAdminDoc: false,
+      }
+      rememberAdminSession(session)
+      return session
     }
+
+    const error = new Error('This account is not authorized for admin dashboard access.')
+    ;(error as Error & { code?: string }).code = 'auth/forbidden-admin'
+    throw error
   }
 
   if (canUseLocalDemoLogin(normalizedEmail, password)) {
     setLaunchModeUser(normalizedEmail)
-    return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail, role: 'owner' as const }
+    const session = getLaunchModeUser() ?? {
+      uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`,
+      email: normalizedEmail,
+      role: 'owner' as const,
+      canWrite: true,
+      needsAdminDoc: false,
+    }
+    rememberAdminSession(session)
+    return session
   }
 
-  // Standard Firebase authentication path
   if (!firebaseAuth) {
     const error = new Error('Firebase authentication is not configured for this environment.')
     ;(error as Error & { code?: string }).code = 'auth/firebase-not-configured'
     throw error
   }
 
-  let result: Awaited<ReturnType<typeof signInWithEmailAndPassword>>
-  try {
-    clearLaunchModeUser()
-    result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
-  } catch (error) {
-    if (!isProductionBuild() && isInvalidLoginError(error) && canUseLocalDemoLogin(normalizedEmail, password)) {
-      setLaunchModeUser(normalizedEmail)
-      return { uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`, email: normalizedEmail, role: 'owner' as const }
-    }
+  clearLaunchModeUser()
+  const result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
+  const access = await resolveFirebaseAdminAccess(result.user)
 
-    throw error
-  }
-
-  const hasAdminAccess = await isAdminUser(result.user)
-  const emailIsAllowListed = configuredAdminEmails.size > 0
-    ? configuredAdminEmails.has(normalizedEmail)
-    : false
-
-  if (!hasAdminAccess) {
-    markAccessDenied()
+  if (access.status !== 'ok') {
     try {
       await signOut(firebaseAuth)
     } catch {
       // Ignore sign-out failures so we can surface a deterministic auth error to the UI.
     }
-    const error = new Error(emailIsAllowListed
-      ? 'Access denied. This account is allow-listed but missing Firestore admin permissions.'
-      : 'Access Denied')
-    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).code = emailIsAllowListed ? 'auth/admin-firestore-permission-required' : 'auth/forbidden-admin'
+
+    const error = new Error(access.message)
+    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).code = access.code
     ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminUid = result.user.uid
     ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminEmail = result.user.email ?? normalizedEmail
     throw error
   }
 
-  return { uid: result.user.uid, email: result.user.email, role: await resolveSessionRole(result.user.uid) }
+  rememberAdminSession(access.session)
+  return access.session
 }
 
 export async function signOutAdmin() {
   clearLegacyAdminBypassState()
-  // TEMPORARY LAUNCH MODE - Clear launch mode session
   clearLaunchModeUser()
+  rememberAdminSession(null)
 
   if (!firebaseAuth) {
     return
@@ -1510,6 +1614,7 @@ export function subscribeToArchivedProducts(callback: (products: AdminProduct[])
 }
 
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
+  assertAdminCanWrite()
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const slug = allocateProductSlug(product.name, currentProducts.map((entry) => getProductSlug(entry)))
   const normalizedProduct = normalizeProduct({ ...product, slug, id: 'draft-product' } as AdminProduct)
@@ -1569,6 +1674,7 @@ export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdA
 }
 
 export async function updateProduct(id: string, product: Partial<AdminProduct>) {
+  assertAdminCanWrite()
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const existing = currentProducts.find((item) => item.id === id)
   const nextName = product.name ?? existing?.name ?? ''
@@ -1623,6 +1729,7 @@ export async function updateProduct(id: string, product: Partial<AdminProduct>) 
 }
 
 export async function deleteProduct(id: string) {
+  assertAdminCanWrite()
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const updatedProducts = currentProducts.map((item) => (item.id === id
     ? { ...item, archived: true, archivedAt: new Date().toISOString() }
@@ -1651,6 +1758,7 @@ export async function deleteProduct(id: string) {
 }
 
 export async function restoreProduct(id: string) {
+  assertAdminCanWrite()
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
   const updatedProducts = currentProducts.map((item) => (item.id === id
     ? { ...item, archived: false, archivedAt: undefined }
@@ -1784,6 +1892,7 @@ export function subscribeToArchivedBrands(callback: (brands: AdminBrand[]) => vo
 }
 
 export async function createBrand(brand: Omit<AdminBrand, 'id' | 'createdAt'>) {
+  assertAdminCanWrite()
   const currentBrands = readBrandStoreWithSeeds()
   const nextBrand = {
     ...brand,
@@ -1829,6 +1938,7 @@ export async function createBrand(brand: Omit<AdminBrand, 'id' | 'createdAt'>) {
 }
 
 export async function updateBrand(id: string, brand: Partial<AdminBrand>) {
+  assertAdminCanWrite()
   const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id ? { ...item, ...brand } : item))
   writeStored(BRANDS_KEY, updatedBrands)
@@ -1863,6 +1973,7 @@ export async function updateBrand(id: string, brand: Partial<AdminBrand>) {
 }
 
 export async function deleteBrand(id: string) {
+  assertAdminCanWrite()
   const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id
     ? { ...item, archived: true, archivedAt: new Date().toISOString() }
@@ -1890,6 +2001,7 @@ export async function deleteBrand(id: string) {
 }
 
 export async function restoreBrand(id: string) {
+  assertAdminCanWrite()
   const currentBrands = readBrandStoreWithSeeds()
   const updatedBrands = currentBrands.map((item) => (item.id === id
     ? { ...item, archived: false, archivedAt: undefined }
@@ -1963,6 +2075,7 @@ export function subscribeToArchivedOrders(callback: (orders: AdminOrder[]) => vo
 }
 
 export async function updateOrderStatus(id: string, status: AdminOrder['status'], trackingNumber?: string) {
+  assertAdminCanWrite()
   const currentOrder = readStored(ORDERS_KEY, defaultOrders).find((order) => order.id === id)
 
   if (currentOrder && currentOrder.status !== status) {
@@ -1981,6 +2094,7 @@ export async function updateOrderDetails(
   id: string,
   updates: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'deliveryAddress' | 'deliveryCharge' | 'notes' | 'status' | 'trackingNumber'>>,
 ) {
+  assertAdminCanWrite()
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
   const updatedOrders = currentOrders.map((order) => (order.id === id ? { ...order, ...updates } : order))
   writeStored(ORDERS_KEY, updatedOrders)
@@ -2015,6 +2129,7 @@ export async function updateOrderDetails(
 }
 
 export async function deleteOrder(id: string) {
+  assertAdminCanWrite()
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
   const updatedOrders = currentOrders.map((order) => (order.id === id
     ? { ...order, archived: true, archivedAt: new Date().toISOString() }
@@ -2043,6 +2158,7 @@ export async function deleteOrder(id: string) {
 }
 
 export async function restoreOrder(id: string) {
+  assertAdminCanWrite()
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
   const updatedOrders = currentOrders.map((order) => (order.id === id
     ? { ...order, archived: false, archivedAt: undefined }
@@ -2362,6 +2478,7 @@ export function subscribeToArchivedCategories(callback: (categories: AdminCatego
 }
 
 export async function createCategory(name: string) {
+  assertAdminCanWrite()
   const normalizedName = name.trim()
   const slug = slugify(normalizedName)
   if (!normalizedName || !slug) {
@@ -2415,6 +2532,7 @@ export async function createCategory(name: string) {
 }
 
 export async function updateCategory(id: string, name: string) {
+  assertAdminCanWrite()
   const normalizedName = name.trim()
   const slug = slugify(normalizedName)
   if (!normalizedName || !slug) {
@@ -2459,6 +2577,7 @@ export async function updateCategory(id: string, name: string) {
 }
 
 export async function deleteCategory(id: string) {
+  assertAdminCanWrite()
   const current = readStored(CATEGORIES_KEY, defaultCategories)
   const updated = current.map((item) => (item.id === id
     ? { ...item, archived: true, archivedAt: new Date().toISOString() }
@@ -2487,6 +2606,7 @@ export async function deleteCategory(id: string) {
 }
 
 export async function restoreCategory(id: string) {
+  assertAdminCanWrite()
   const current = readStored(CATEGORIES_KEY, defaultCategories)
   const updated = current.map((item) => (item.id === id
     ? { ...item, archived: false, archivedAt: undefined }
@@ -2514,6 +2634,7 @@ export async function restoreCategory(id: string) {
 }
 
 export async function updateHomepageContent(content: HomepageContent): Promise<HomepageSaveResult> {
+  assertAdminCanWrite()
   const normalized = normalizeHomepageContent(content)
   const heroImage = normalized.heroImage ?? ''
   const localFirstMode = isLocalFirstDataMode()
@@ -2624,6 +2745,7 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
 }
 
 export async function updateFounderProfile(profile: FounderProfile): Promise<{ mode: 'local' | 'live'; path: string }> {
+  assertAdminCanWrite()
   const normalized = normalizeFounderProfile(profile)
   const localFirstMode = isLocalFirstDataMode()
 
@@ -2934,6 +3056,7 @@ export function resetPopupState(): void {
 }
 
 export async function createCoupon(coupon: Omit<Coupon, 'id' | 'createdDate' | 'usageCount'>): Promise<Coupon> {
+  assertAdminCanWrite()
   if (requiresLiveBackend() && !firebaseDb) {
     throw new Error('Coupon service unavailable: database not configured.')
   }
@@ -3082,6 +3205,7 @@ export async function getCouponByCode(code: string, customerEmail = ''): Promise
 }
 
 export async function updateCoupon(id: string, updates: Partial<Pick<Coupon, 'discountPercent' | 'expiryDate' | 'status' | 'maxUsage'>>): Promise<void> {
+  assertAdminCanWrite()
   const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
   const updated = current.map((coupon) => (coupon.id === id ? { ...coupon, ...updates } : coupon))
   writeStored(COUPON_PREFIX + 'coupons', updated)
@@ -3103,6 +3227,7 @@ export async function updateCoupon(id: string, updates: Partial<Pick<Coupon, 'di
 }
 
 export async function deleteCoupon(id: string): Promise<void> {
+  assertAdminCanWrite()
   const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
   writeStored(COUPON_PREFIX + 'coupons', current.filter((c) => c.id !== id))
 
@@ -3328,6 +3453,7 @@ export function subscribeToAdminReviews(callback: (reviews: ProductReview[]) => 
 }
 
 export async function updateReviewStatus(id: string, status: ReviewStatus) {
+  assertAdminCanWrite()
   const current = readStored(REVIEWS_KEY, [] as ProductReview[])
   writeStored(REVIEWS_KEY, current.map((review) => (review.id === id ? { ...review, status } : review)))
 
@@ -3360,6 +3486,7 @@ export function subscribeToAdminAccounts(callback: (admins: AdminAccount[]) => v
 }
 
 export async function updateAdminAccountRole(uid: string, role: AdminAccessRole) {
+  assertAdminCanWrite()
   if (!firebaseDb || isLocalFirstDataMode()) {
     throw new Error('Admin roles require live Firebase.')
   }

@@ -26,11 +26,15 @@ npm run dev
 - Login: `/shis-admin/login`
 - Dashboard: `/shis-admin/dashboard`
 
-Demo credentials (works in local `npm run dev`, even when Firebase is configured):
+Demo credentials (localhost / `npm run dev` only):
 - Email: `admin@shisfashion.com`
 - Password: `luxury123`
 
-Live/production login uses Firebase Authentication. Create that user in Firebase Console and add `admins/{uid}` with `role="admin"` and `active=true`.
+Production (`shisfashion.com`) uses Firebase Authentication only. After sign-in the app checks `admins/{uid}` for `role: "admin"` (or `owner` / ops roles) and `active: true`.
+
+If an allow-listed email signs in before `admins/{uid}` exists, the dashboard is view-only. Product and order writes stay blocked until that document is created.
+
+Admin auth is verified in the browser with the Firebase SDK. Do not add extra Vercel functions for login.
 
 Troubleshooting:
 - If uploads fail, verify Cloudinary cloud name and upload preset values.
@@ -65,7 +69,8 @@ Optional (fail closed if unset; COD and WhatsApp still work):
 - Firebase Authentication must be enabled for Email/Password sign-in.
 - Firestore must be enabled in production mode.
 - The live admin user must exist in Firebase Auth.
-- Firestore security rules must allow the required admin reads/writes and storefront order writes.
+- Create `admins/{uid}` in Firestore with `{ "role": "admin", "active": true }` for full write access.
+- Firestore security rules must allow the required admin reads/writes. Guest checkout writes go through `/api/create-order`.
 - Place one real test order and confirm it appears in Firestore and the admin dashboard.
 
 3. Admin checks

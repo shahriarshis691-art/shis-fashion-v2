@@ -48,7 +48,8 @@ service cloud.firestore {
     }
 
     match /admins/{adminDocId} {
-      allow read, create, update, delete: if isAdmin();
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == adminDocId);
+      allow create, update, delete: if isAdmin();
     }
 
     match /adminAuditLogs/{logId} {

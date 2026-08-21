@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
+import Loading from '../components/ui/Loading'
 import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
 import { compactManagedImages, getManagedImageEntries } from '../utils/media'
@@ -19,6 +20,7 @@ import {
   deleteOrder,
   deleteAsset,
   deleteProduct,
+  describeAdminWriteError,
   getCouponStats,
   getCoupons,
   getNewsletterSubscribers,
@@ -176,8 +178,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const navigate = useNavigate()
   const firebaseReady = isFirebaseConfigured()
   const launchModeEnabled = isLaunchModeEnabled()
-  const canSignIn = firebaseReady || launchModeEnabled
+  const canSignIn = firebaseReady || launchModeEnabled || isLocalAdminHost()
   const [user, setUser] = useState<AdminSessionUser | null>(null)
+  const [authReady, setAuthReady] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
@@ -251,9 +254,14 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   useEffect(() => {
     const unsubscribe = onAdminAuthChanged((nextUser) => {
       setUser(nextUser)
+      setAuthReady(true)
 
       if (nextUser) {
         setAuthMode('dashboard')
+        if (nextUser.needsAdminDoc) {
+          setBlockedAdminUid(nextUser.uid)
+          setMessage(`Dashboard is view-only until Firestore document admins/${nextUser.uid} exists with role="admin" and active=true.`)
+        }
         if (initialView === 'login') {
           navigate('/admin', { replace: true })
         }
@@ -261,12 +269,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       }
 
       setAuthMode('login')
+      if (initialView === 'login' && consumeAdminAccessDeniedFlag()) {
+        setMessage('Access denied. This account is not authorized for admin access, or it is marked inactive.')
+      }
       if (initialView === 'dashboard') {
-        if (consumeAdminAccessDeniedFlag()) {
-          window.alert('Access Denied')
-          navigate('/', { replace: true })
-          return
-        }
         navigate('/shis-admin/login', { replace: true })
       }
     })
@@ -611,21 +617,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const errorCode = typeof error === 'object' && error !== null && 'code' in error
         ? String((error as { code?: unknown }).code ?? '')
         : ''
-      const adminUidFromError = typeof error === 'object' && error !== null && 'adminUid' in error
-        ? String((error as { adminUid?: unknown }).adminUid ?? '')
-        : ''
       if (errorCode === 'auth/forbidden-admin') {
         setMessage('Access denied. This account is not authorized for admin dashboard access.')
         setBlockedAdminUid(null)
-        navigate('/', { replace: true })
-      } else if (errorCode === 'auth/admin-firestore-permission-required') {
-        setBlockedAdminUid(adminUidFromError || null)
-        const uidHint = adminUidFromError || '<uid>'
-        setMessage(`Login blocked: this account is allow-listed but does not have Firestore admin permission. Add admins/${uidHint} with role="admin" and active=true, then sign in again.`)
+      } else if (errorCode === 'auth/admin-inactive') {
+        setMessage('Access denied. This admin account is marked inactive. Ask an owner to set active=true on the Firestore admins record.')
+        setBlockedAdminUid(null)
       } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-email') {
         setMessage(isLocalAdminHost()
           ? 'Invalid email or password. Local demo login is admin@shisfashion.com / luxury123. Live Firebase needs the password from Firebase Console → Authentication → Users.'
-          : 'Invalid email or password. Use the password from Firebase Authentication, not the demo login.')
+          : 'Invalid email or password. Use the password from Firebase Authentication, not the local demo login.')
         setBlockedAdminUid(null)
       } else if (errorCode === 'auth/unauthorized-domain') {
         setMessage('This domain is not authorized in Firebase Authentication. Add localhost and your live domain under Authentication → Settings → Authorized domains.')
@@ -658,11 +659,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleCopyAdminDocPath = async () => {
-    if (!blockedAdminUid) {
+    const uid = blockedAdminUid || user?.uid
+    if (!uid) {
       return
     }
 
-    const path = `admins/${blockedAdminUid}`
+    const path = `admins/${uid}`
     try {
       await navigator.clipboard.writeText(path)
       setMessage(`Copied Firestore document path: ${path}`)
@@ -992,6 +994,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         setMessage('Product created.')
       }
       resetForm()
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
     } finally {
       setLoading(false)
     }
@@ -1026,11 +1032,17 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return
     }
 
-    await deleteProduct(productId)
-    if (isEditing === productId) {
-      resetForm()
+    try {
+      await deleteProduct(productId)
+      if (isEditing === productId) {
+        resetForm()
+      }
+      setMessage('Product archived.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
     }
-    setMessage('Product archived.')
   }
 
   const toggleProductSelection = (productId: string) => {
@@ -1068,6 +1080,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setSelectedProductIds([])
       setBulkStock('')
       setBulkPrice('')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
     } finally {
       setLoading(false)
     }
@@ -1119,16 +1135,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         savedAt: result.savedAt,
       })
     } catch (error) {
-      const reason = error instanceof Error ? error.message : 'Unknown error'
-      const normalizedReason = reason.toLowerCase()
-      if (normalizedReason.includes('permission-denied') || normalizedReason.includes('missing or insufficient permissions')) {
-        const uidHint = user?.uid ? `admins/${user.uid}` : 'admins/<your-uid>'
-        const permissionHelp = `Homepage save blocked by Firestore rules. Add admin access for this account (${user?.email ?? 'unknown email'}). Create document ${uidHint} with { role: "admin", active: true } or set custom claim admin=true, then sign out/in.`
-        setMessage(permissionHelp)
-        setToast({ kind: 'error', message: permissionHelp })
-      } else {
-        setMessage(`Homepage save failed: ${reason}`)
-        setToast({ kind: 'error', message: `Homepage save failed: ${reason}` })
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setToast({ kind: 'error', message: reason })
+      if (user?.uid) {
+        setBlockedAdminUid(user.uid)
       }
       setHomepageSaveDebug({
         status: 'error',
@@ -1165,21 +1176,20 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setToast({ kind: 'success', message: 'Firestore write test passed.' })
       setMessage('Firestore write test passed.')
     } catch (error) {
-      const reason = error instanceof Error ? error.message : 'Unknown error'
-      const normalizedReason = reason.toLowerCase()
-      const permissionHelp = (normalizedReason.includes('permission-denied') || normalizedReason.includes('missing or insufficient permissions'))
-        ? `Firestore write blocked for ${user?.email ?? 'unknown email'}. Add admins/${user?.uid ?? '<your-uid>'} with role=admin and active=true, or custom claim admin=true.`
-        : reason
+      const reason = describeAdminWriteError(error, user?.uid)
       setHomepageSaveDebug({
         status: 'error',
-        message: permissionHelp,
+        message: reason,
         mode: 'unknown',
         path: 'settings/homepage',
         heroImage: homepageContent.heroImage ?? '',
         savedAt: new Date().toISOString(),
       })
-      setToast({ kind: 'error', message: `Firestore write test failed: ${permissionHelp}` })
-      setMessage(`Firestore write test failed: ${permissionHelp}`)
+      setToast({ kind: 'error', message: `Firestore write test failed: ${reason}` })
+      setMessage(`Firestore write test failed: ${reason}`)
+      if (user?.uid) {
+        setBlockedAdminUid(user.uid)
+      }
     } finally {
       setLoading(false)
     }
@@ -1226,20 +1236,28 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       if (code === 'order/invalid-status-transition') {
         setMessage('Invalid status flow. Use forward lifecycle actions only.')
       } else {
-        setMessage('Unable to update order status right now.')
+        const reason = describeAdminWriteError(error, user?.uid)
+        setMessage(reason)
+        setBlockedAdminUid(user?.uid ?? null)
       }
     }
   }
 
   const handleSaveOrder = async (orderId: string) => {
     const nextEdits = orderEdits[orderId] ?? {}
-    await updateOrderDetails(orderId, nextEdits)
-    setOrderEdits((current) => {
-      const copy = { ...current }
-      delete copy[orderId]
-      return copy
-    })
-    setMessage('Order saved.')
+    try {
+      await updateOrderDetails(orderId, nextEdits)
+      setOrderEdits((current) => {
+        const copy = { ...current }
+        delete copy[orderId]
+        return copy
+      })
+      setMessage('Order saved.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const handleDeleteOrder = async (orderId: string) => {
@@ -1248,25 +1266,37 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return
     }
 
-    await deleteOrder(orderId)
-    setMessage('Order archived.')
+    try {
+      await deleteOrder(orderId)
+      setMessage('Order archived.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const handleSaveCustomer = async (identity: string, orderIds: string[], fallback: { name: string; phone: string; email: string }) => {
     const edit = customerEdits[identity] ?? fallback
-    await Promise.all(orderIds.map((orderId) =>
-      updateOrderDetails(orderId, {
-        customerName: edit.name,
-        customerPhone: edit.phone,
-        customerEmail: edit.email,
-      }),
-    ))
-    setCustomerEdits((current) => {
-      const copy = { ...current }
-      delete copy[identity]
-      return copy
-    })
-    setMessage('Customer profile updated.')
+    try {
+      await Promise.all(orderIds.map((orderId) =>
+        updateOrderDetails(orderId, {
+          customerName: edit.name,
+          customerPhone: edit.phone,
+          customerEmail: edit.email,
+        }),
+      ))
+      setCustomerEdits((current) => {
+        const copy = { ...current }
+        delete copy[identity]
+        return copy
+      })
+      setMessage('Customer profile updated.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const handleSaveCategory = async () => {
@@ -1275,16 +1305,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return
     }
 
-    if (editingCategoryId) {
-      await updateCategory(editingCategoryId, categoryName)
-      setMessage('Category updated.')
-    } else {
-      await createCategory(categoryName)
-      setMessage('Category added.')
-    }
+    try {
+      if (editingCategoryId) {
+        await updateCategory(editingCategoryId, categoryName)
+        setMessage('Category updated.')
+      } else {
+        await createCategory(categoryName)
+        setMessage('Category added.')
+      }
 
-    setCategoryName('')
-    setEditingCategoryId(null)
+      setCategoryName('')
+      setEditingCategoryId(null)
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const scrollToSection = (sectionId: string) => {
@@ -1470,27 +1506,51 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return
     }
 
-    await deleteCategory(categoryId)
-    if (editingCategoryId === categoryId) {
-      setEditingCategoryId(null)
-      setCategoryName('')
+    try {
+      await deleteCategory(categoryId)
+      if (editingCategoryId === categoryId) {
+        setEditingCategoryId(null)
+        setCategoryName('')
+      }
+      setMessage('Category archived.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
     }
-    setMessage('Category archived.')
   }
 
   const handleRestoreProduct = async (productId: string) => {
-    await restoreProduct(productId)
-    setMessage('Product restored from archive.')
+    try {
+      await restoreProduct(productId)
+      setMessage('Product restored from archive.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const handleRestoreOrder = async (orderId: string) => {
-    await restoreOrder(orderId)
-    setMessage('Order restored from archive.')
+    try {
+      await restoreOrder(orderId)
+      setMessage('Order restored from archive.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const handleRestoreCategory = async (categoryId: string) => {
-    await restoreCategory(categoryId)
-    setMessage('Category restored from archive.')
+    try {
+      await restoreCategory(categoryId)
+      setMessage('Category restored from archive.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
   }
 
   const labelForImage = (slotIndex: number) => {
@@ -1505,6 +1565,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const accessRole: AdminAccessRole = user?.role ?? 'owner'
   const canSee = (section: Parameters<typeof canAccessAdminSection>[1]) => canAccessAdminSection(accessRole, section)
+
+  if (!authReady) {
+    return <Loading />
+  }
 
   if (authMode === 'login' && !user) {
     return (
@@ -1524,7 +1588,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   : 'Firebase is active. Use your Firebase Authentication password.')
                 : launchModeEnabled
                   ? 'Launch mode is active. Admin access is limited to configured admin emails.'
-                  : 'Admin login requires Firebase authentication configuration or Launch Mode.'}
+                  : isLocalAdminHost()
+                    ? 'Local demo login: admin@shisfashion.com / luxury123.'
+                    : 'Admin login requires Firebase authentication on this domain.'}
             </p>
             {message ? <p className="mt-3 text-sm text-[var(--color-accent)]">{message}</p> : null}
             {blockedAdminUid ? (
@@ -1570,6 +1636,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             <h1 className="mt-2 text-3xl font-semibold text-[var(--color-text)]">Luxury operations at a glance</h1>
             <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
               Signed in as {user?.email ?? 'admin'} · {accessRole}
+              {user?.needsAdminDoc ? ' · view only' : ''}
             </p>
           </div>
           <div className="flex gap-3">
@@ -1577,6 +1644,23 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             <Button onClick={handleLogout} variant="secondary">Logout</Button>
           </div>
         </div>
+
+        {user?.needsAdminDoc ? (
+          <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4 text-sm leading-6 text-[var(--color-text)]">
+            <p>
+              This Firebase account can view the dashboard, but product and order changes are blocked until
+              Firestore document <code className="font-semibold">admins/{user.uid}</code> exists with
+              {' '}<code className="font-semibold">role: &quot;admin&quot;</code> and <code className="font-semibold">active: true</code>.
+            </p>
+            <button
+              type="button"
+              onClick={handleCopyAdminDocPath}
+              className="mt-2 text-sm font-semibold text-[var(--color-accent)] underline"
+            >
+              Copy admins/{user.uid}
+            </button>
+          </div>
+        ) : null}
 
         {message ? <p className="mt-4 text-sm text-[var(--color-accent)]">{message}</p> : null}
         {uploading ? <p className="mt-2 text-sm text-[var(--color-muted)]">Uploading media... {uploadProgress}%</p> : null}

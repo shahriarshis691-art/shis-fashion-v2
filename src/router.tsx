@@ -4,7 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 import ErrorBoundary from './components/common/ErrorBoundary'
-import { consumeAdminAccessDeniedFlag, onAdminAuthChanged } from './firebase/adminService'
+import { onAdminAuthChanged } from './firebase/adminService'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
@@ -50,10 +50,6 @@ function AdminRouteGuard({ children }: { children: ReactElement }) {
   }
 
   if (!user) {
-    if (consumeAdminAccessDeniedFlag()) {
-      return <Navigate to="/" replace state={{ adminAccessDenied: true }} />
-    }
-
     return <Navigate to="/shis-admin/login" replace />
   }
 
