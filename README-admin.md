@@ -49,6 +49,7 @@ Primary campaign-day runbook:
 - See `docs/campaign-day-qa-checklist.md` for the final go/no-go sequence (Meta + GA4 + checkout verification).
 - See `docs/phase1-launch-checklist.md` for Phase 1 COD soft-launch steps (env, rules deploy, test order).
 - See `docs/phase2-payments-checklist.md` for bKash/Nagad Send Money (01887848304 / 01979614216).
+- See `docs/phase2b-bkash-api-checklist.md` for bKash Tokenized Checkout (API redirect).
 
 1. Environment variables
 - Copy `.env.example` values into your production environment.

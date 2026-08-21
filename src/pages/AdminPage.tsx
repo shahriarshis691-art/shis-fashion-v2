@@ -12,6 +12,7 @@ import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import { buildOpsReport, LOW_STOCK_THRESHOLD } from '../utils/opsReports'
 import {
   consumeAdminAccessDeniedFlag,
+  confirmOrderPayment,
   createCategory,
   createCoupon,
   createProduct,
@@ -1221,6 +1222,17 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return () => window.clearTimeout(timeoutId)
   }, [toast])
 
+  const handleConfirmPayment = async (orderId: string) => {
+    try {
+      await confirmOrderPayment(orderId)
+      setMessage('Payment marked as confirmed.')
+    } catch (error) {
+      const reason = describeAdminWriteError(error, user?.uid)
+      setMessage(reason)
+      setBlockedAdminUid(user?.uid ?? null)
+    }
+  }
+
   const handleStatusChange = async (orderId: string, status: AdminOrder['status']) => {
     try {
       await updateOrderStatus(orderId, status)
@@ -2132,6 +2144,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                       <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}{order.paymentStatus ? ` · ${order.paymentStatus}` : ''}</p>
                       {order.paymentTransactionId ? (
                         <p><span className="font-semibold text-[var(--color-text)]">TrxID:</span> <span className="font-mono tracking-[0.08em]">{order.paymentTransactionId}</span></p>
+                      ) : null}
+                      {order.paymentStatus === 'pending_verification' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmPayment(order.id)}
+                          className="mt-2 rounded-full border border-[var(--color-border)] bg-[var(--color-text)] px-3 py-1.5 text-xs font-semibold text-[var(--color-surface)]"
+                        >
+                          Confirm payment
+                        </button>
                       ) : null}
                       <p><span className="font-semibold text-[var(--color-text)]">Grand Total:</span> {formatBDT(order.total)}</p>
                       <div>

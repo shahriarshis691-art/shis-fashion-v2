@@ -82,6 +82,16 @@ export async function completePrepaidCheckout(input: {
   return { ok: false as const, status: 'unknown' }
 }
 
+export function getPrepaidPublicConfig() {
+  const provider = getConfiguredPrepaidProvider()
+  return {
+    configured: Boolean(provider),
+    provider,
+    bkashOnline: provider === 'bkash',
+    sslcommerz: provider === 'sslcommerz',
+  }
+}
+
 async function startBkashCheckout(input: {
   orderId: string
   amount: number

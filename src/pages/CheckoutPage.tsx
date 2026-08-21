@@ -89,6 +89,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD_COD)
   const [paymentTransactionId, setPaymentTransactionId] = useState('')
   const prepaidEnabled = isPrepaidCheckoutEnabled()
+  const [prepaidOnlineAvailable, setPrepaidOnlineAvailable] = useState(false)
   const walletPaymentsEnabled = isMobileWalletPaymentsEnabled()
   const walletMerchantNumber = useMemo(
     () => getMerchantNumberForMethod(paymentMethod),
@@ -131,6 +132,40 @@ export default function CheckoutPage() {
     })
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    if (!prepaidEnabled) {
+      return
+    }
+
+    let cancelled = false
+
+    void fetch('/api/prepaid-config')
+      .then(async (response) => {
+        const payload = await response.json() as { bkashOnline?: boolean }
+        if (!response.ok) {
+          return false
+        }
+
+        return Boolean(payload.bkashOnline)
+      })
+      .then((available) => {
+        if (!cancelled) {
+          setPrepaidOnlineAvailable(available)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPrepaidOnlineAvailable(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [prepaidEnabled])
+
+  const showPrepaidOption = prepaidEnabled && prepaidOnlineAvailable
 
   useEffect(() => {
     if (!items.length || hasTrackedCheckoutRef.current) {
@@ -577,7 +612,7 @@ export default function CheckoutPage() {
                     </label>
                   </>
                 ) : null}
-                {prepaidEnabled ? (
+                {showPrepaidOption ? (
                   <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH ? 'border-black' : 'border-black/15'}`}>
                     <input
                       type="radio"

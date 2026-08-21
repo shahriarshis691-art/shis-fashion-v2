@@ -98,7 +98,21 @@ if (productionMode) {
   warnIfTruthy('VITE_ALLOW_LOCAL_FALLBACK', 'VITE_ALLOW_LOCAL_FALLBACK=true disables live Firestore in production builds.')
 
   if (isTruthy('VITE_PREPAID_ENABLED')) {
-    warnings.push('VITE_PREPAID_ENABLED=true — confirm live BKASH/SSLCOMMERZ URLs before enabling (Phase 2).')
+    requireKeys([
+      'BKASH_USERNAME',
+      'BKASH_PASSWORD',
+      'BKASH_APP_KEY',
+      'BKASH_APP_SECRET',
+    ], 'prepaid (bKash API)')
+
+    const bkashBase = env('BKASH_BASE_URL') || 'https://tokenized.sandbox.bka.sh/v1.2.0-beta'
+    if (/sandbox|tokenized\.sandbox/i.test(bkashBase)) {
+      errors.push('BKASH_BASE_URL must be the live checkout URL when VITE_PREPAID_ENABLED=true (not sandbox).')
+    }
+
+    if (!env('PREPAID_CALLBACK_URL') && !env('VITE_SITE_URL')) {
+      warnings.push('Set PREPAID_CALLBACK_URL or VITE_SITE_URL for bKash payment return URL.')
+    }
   } else if (env('VITE_PREPAID_ENABLED') && env('VITE_PREPAID_ENABLED').toLowerCase() !== 'false') {
     warnings.push(`Unexpected VITE_PREPAID_ENABLED=${env('VITE_PREPAID_ENABLED')} — use false for COD-only launch.`)
   }

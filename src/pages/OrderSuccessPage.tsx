@@ -7,7 +7,7 @@ import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { STORE_POLICY } from '../data/storePolicy'
 import { getCustomerOrderSupportHref, PAYMENT_METHOD_COD } from '../utils/orderComms'
-import { isManualWalletPayment } from '../utils/paymentMethods'
+import { isApiPrepaidPayment, isManualWalletPayment } from '../utils/paymentMethods'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 
@@ -35,7 +35,21 @@ interface LastOrderSnapshot {
 
 export default function OrderSuccessPage() {
   const location = useLocation()
-  const [order] = useState<LastOrderSnapshot | null>(() => {
+  const confirmationOrderId = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return new URLSearchParams(window.location.search).get('orderId')?.trim() ?? ''
+  }, [])
+  const isPrepaidReturn = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+
+    return new URLSearchParams(window.location.search).get('prepaid') === '1'
+  }, [])
+  const [order, setOrder] = useState<LastOrderSnapshot | null>(() => {
     if (typeof window === 'undefined') {
       return null
     }
@@ -47,6 +61,51 @@ export default function OrderSuccessPage() {
       return null
     }
   })
+  const [confirmationError, setConfirmationError] = useState('')
+
+  useEffect(() => {
+    if (order || !confirmationOrderId) {
+      return
+    }
+
+    let cancelled = false
+
+    void fetch('/api/order-confirmation', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ orderId: confirmationOrderId }),
+    })
+      .then(async (response) => {
+        const payload = await response.json() as { order?: LastOrderSnapshot; error?: string }
+        if (!response.ok || !payload.order) {
+          throw new Error(payload.error || 'Unable to load order confirmation.')
+        }
+
+        return payload.order
+      })
+      .then((loadedOrder) => {
+        if (cancelled) {
+          return
+        }
+
+        setOrder(loadedOrder)
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.setItem(ORDER_CONFIRMATION_KEY, JSON.stringify(loadedOrder))
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return
+        }
+
+        const message = error instanceof Error ? error.message : 'Unable to load order confirmation.'
+        setConfirmationError(message)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [confirmationOrderId, order])
 
   const orderItems = order?.items ?? []
   const hasTrackedPurchaseRef = useRef(false)
@@ -87,9 +146,10 @@ export default function OrderSuccessPage() {
     hasTrackedPurchaseRef.current = true
   }, [order, purchasePayload])
 
-  const supportWhatsAppHref = getCustomerOrderSupportHref(order?.orderId ?? '')
+  const supportWhatsAppHref = getCustomerOrderSupportHref(order?.orderId ?? confirmationOrderId)
   const trackHref = order ? `/track-order?id=${encodeURIComponent(order.orderId)}` : '/track-order'
   const isWalletOrder = order ? isManualWalletPayment(order.paymentMethod) : false
+  const isOnlinePrepaidOrder = order ? isApiPrepaidPayment(order.paymentMethod) : isPrepaidReturn
 
   return (
     <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
@@ -99,19 +159,23 @@ export default function OrderSuccessPage() {
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order Confirmed</p>
             <h1 className="mt-2 text-h2 text-black">Thank you. Your order has been placed.</h1>
             <p className="mt-3 text-sm leading-7 text-black/70">
-              {isWalletOrder
-                ? 'We received your order and wallet Transaction ID. Our team will verify payment, then call to confirm delivery details before dispatch.'
-                : `Our team will call your phone number to confirm delivery details before dispatch. ${STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.`}
+              {isOnlinePrepaidOrder
+                ? 'Your bKash payment was received. Our team will call to confirm delivery details before dispatch.'
+                : isWalletOrder
+                  ? 'We received your order and wallet Transaction ID. Our team will verify payment, then call to confirm delivery details before dispatch.'
+                  : `Our team will call your phone number to confirm delivery details before dispatch. ${STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.`}
             </p>
 
             <div className="mt-4 rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/70">
-              {isWalletOrder
-                ? <>Wallet payment verification is in progress for TrxID <span className="font-semibold text-black">{order?.paymentTransactionId ?? '—'}</span>. Phone confirmation follows after verification.</>
-                : <>Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.</>}
+              {isOnlinePrepaidOrder
+                ? <>Online payment confirmed{order?.paymentTransactionId ? <> for TrxID <span className="font-semibold text-black">{order.paymentTransactionId}</span></> : null}. Phone confirmation follows shortly.</>
+                : isWalletOrder
+                  ? <>Wallet payment verification is in progress for TrxID <span className="font-semibold text-black">{order?.paymentTransactionId ?? '—'}</span>. Phone confirmation follows after verification.</>
+                  : <>Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.</>}
             </div>
 
             <div className="mt-5 grid gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60 sm:grid-cols-3">
-              <span className="border border-black/15 px-3 py-2 text-center">{isWalletOrder ? 'Payment verifying' : 'COD confirmed'}</span>
+              <span className="border border-black/15 px-3 py-2 text-center">{isOnlinePrepaidOrder ? 'Payment confirmed' : isWalletOrder ? 'Payment verifying' : 'COD confirmed'}</span>
               <span className="border border-black/15 px-3 py-2 text-center">Phone verification</span>
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="border border-black/15 px-3 py-2 text-center hover:bg-black/5">
                 WhatsApp support
@@ -179,7 +243,7 @@ export default function OrderSuccessPage() {
               </>
             ) : (
               <div className="mt-4 border border-dashed border-black/20 px-4 py-6 text-sm text-black/65">
-                Order details are unavailable in this session. Check your admin panel or contact support.
+                {confirmationError || 'Order details are unavailable in this session. Check your admin panel or contact support.'}
               </div>
             )}
           </div>

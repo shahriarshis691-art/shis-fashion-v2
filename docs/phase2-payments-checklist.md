@@ -20,7 +20,7 @@ VITE_NAGAD_MERCHANT_NUMBER=01979614216
 VITE_PREPAID_ENABLED=false
 ```
 
-Keep `VITE_PREPAID_ENABLED=false` unless bKash Tokenized Checkout API credentials are configured (Phase 2b).
+Keep `VITE_PREPAID_ENABLED=false` unless bKash Tokenized Checkout API credentials are configured — see [phase2b-bkash-api-checklist.md](./phase2b-bkash-api-checklist.md).
 
 ## Customer flow
 

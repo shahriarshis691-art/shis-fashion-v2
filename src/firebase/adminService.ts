@@ -2098,7 +2098,7 @@ export async function updateOrderStatus(id: string, status: AdminOrder['status']
 
 export async function updateOrderDetails(
   id: string,
-  updates: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'deliveryAddress' | 'deliveryCharge' | 'notes' | 'status' | 'trackingNumber'>>,
+  updates: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'deliveryAddress' | 'deliveryCharge' | 'notes' | 'status' | 'trackingNumber' | 'paymentStatus'>>,
 ) {
   assertAdminCanWrite()
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
@@ -2132,6 +2132,11 @@ export async function updateOrderDetails(
     })
     return updatedOrders.find((order) => order.id === id)
   }
+}
+
+export async function confirmOrderPayment(id: string) {
+  assertAdminCanWrite()
+  return updateOrderDetails(id, { paymentStatus: 'paid' })
 }
 
 export async function deleteOrder(id: string) {
