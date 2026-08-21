@@ -79,3 +79,67 @@ export function formatWalletDialNumber(number: string) {
 
   return number
 }
+
+export interface CheckoutPaymentConfig {
+  cod: boolean
+  mobileWallet: boolean
+  bkashManual: boolean
+  nagadManual: boolean
+  prepaidCheckoutEnabled: boolean
+  bkashOnline: boolean
+  sslcommerz: boolean
+  bkashMerchantNumber: string
+  nagadMerchantNumber: string
+  configured?: boolean
+  provider?: string | null
+}
+
+export function getDefaultCheckoutPaymentConfig(): CheckoutPaymentConfig {
+  const mobileWallet = isMobileWalletPaymentsEnabled()
+  const prepaidCheckoutEnabled = isPrepaidCheckoutEnabled()
+
+  return {
+    cod: true,
+    mobileWallet,
+    bkashManual: mobileWallet,
+    nagadManual: mobileWallet,
+    prepaidCheckoutEnabled,
+    bkashOnline: false,
+    sslcommerz: false,
+    bkashMerchantNumber: getBkashMerchantNumber(),
+    nagadMerchantNumber: getNagadMerchantNumber(),
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+export function parseCheckoutPaymentConfig(payload: unknown): CheckoutPaymentConfig | null {
+  if (!isRecord(payload)) {
+    return null
+  }
+
+  const defaults = getDefaultCheckoutPaymentConfig()
+  const mobileWallet = payload.mobileWallet !== false
+  const bkashManual = mobileWallet && payload.bkashManual !== false
+  const nagadManual = mobileWallet && payload.nagadManual !== false
+
+  return {
+    cod: payload.cod !== false,
+    mobileWallet,
+    bkashManual,
+    nagadManual,
+    prepaidCheckoutEnabled: payload.prepaidCheckoutEnabled === true,
+    bkashOnline: payload.bkashOnline === true,
+    sslcommerz: payload.sslcommerz === true,
+    bkashMerchantNumber: typeof payload.bkashMerchantNumber === 'string' && payload.bkashMerchantNumber
+      ? payload.bkashMerchantNumber
+      : defaults.bkashMerchantNumber,
+    nagadMerchantNumber: typeof payload.nagadMerchantNumber === 'string' && payload.nagadMerchantNumber
+      ? payload.nagadMerchantNumber
+      : defaults.nagadMerchantNumber,
+    configured: typeof payload.configured === 'boolean' ? payload.configured : undefined,
+    provider: typeof payload.provider === 'string' ? payload.provider : payload.provider === null ? null : undefined,
+  }
+}

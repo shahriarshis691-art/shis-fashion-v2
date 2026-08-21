@@ -125,10 +125,10 @@ if (productionMode) {
     warnings.push('Missing VITE_META_PIXEL_ID (recommended before Meta campaigns).')
   }
 
-  if (String(env('VITE_MOBILE_WALLET_PAYMENTS_ENABLED') || 'true').toLowerCase() === 'true') {
-    if (!env('VITE_BKASH_MERCHANT_NUMBER') && !env('VITE_NAGAD_MERCHANT_NUMBER')) {
+  if (String(env('VITE_MOBILE_WALLET_PAYMENTS_ENABLED') || 'true').toLowerCase() === 'false') {
+    warnings.push('VITE_MOBILE_WALLET_PAYMENTS_ENABLED=false hides bKash/Nagad Send Money on checkout.')
+  } else if (!env('VITE_BKASH_MERCHANT_NUMBER') && !env('VITE_NAGAD_MERCHANT_NUMBER')) {
       warnings.push('Wallet payments enabled but merchant numbers use built-in defaults — confirm bKash/Nagad numbers in Vercel.')
-    }
   }
 } else {
   console.log('Running dev checklist (use --production for launch gate).\n')

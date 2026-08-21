@@ -16,13 +16,6 @@ export default function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const config = getCheckoutPaymentConfig()
   res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-  res.status(200).json({
-    configured: config.configured,
-    provider: config.provider,
-    bkashOnline: config.bkashOnline,
-    sslcommerz: config.sslcommerz,
-    mobileWallet: config.mobileWallet,
-  })
+  res.status(200).json(getCheckoutPaymentConfig())
 }

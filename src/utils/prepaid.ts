@@ -14,4 +14,7 @@ export {
   isValidWalletTransactionId,
   normalizeWalletTransactionId,
   formatWalletDialNumber,
+  getDefaultCheckoutPaymentConfig,
+  parseCheckoutPaymentConfig,
+  type CheckoutPaymentConfig,
 } from './paymentMethods'

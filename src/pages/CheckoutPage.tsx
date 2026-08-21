@@ -11,16 +11,15 @@ import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 import { PAYMENT_METHOD_COD } from '../utils/orderComms'
 import {
   formatWalletDialNumber,
-  getBkashMerchantNumber,
+  getDefaultCheckoutPaymentConfig,
   getMerchantNumberForMethod,
-  getNagadMerchantNumber,
   isManualWalletPayment,
-  isMobileWalletPaymentsEnabled,
-  isPrepaidCheckoutEnabled,
   isValidWalletTransactionId,
+  parseCheckoutPaymentConfig,
   PAYMENT_METHOD_BKASH,
   PAYMENT_METHOD_BKASH_MANUAL,
   PAYMENT_METHOD_NAGAD_MANUAL,
+  type CheckoutPaymentConfig,
 } from '../utils/prepaid'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
@@ -88,9 +87,7 @@ export default function CheckoutPage() {
   })
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD_COD)
   const [paymentTransactionId, setPaymentTransactionId] = useState('')
-  const prepaidEnabled = isPrepaidCheckoutEnabled()
-  const [prepaidOnlineAvailable, setPrepaidOnlineAvailable] = useState(false)
-  const walletPaymentsEnabled = isMobileWalletPaymentsEnabled()
+  const [paymentConfig, setPaymentConfig] = useState<CheckoutPaymentConfig>(() => getDefaultCheckoutPaymentConfig())
   const walletMerchantNumber = useMemo(
     () => getMerchantNumberForMethod(paymentMethod),
     [paymentMethod],
@@ -134,38 +131,41 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    if (!prepaidEnabled) {
-      return
-    }
-
     let cancelled = false
 
-    void fetch('/api/prepaid-config')
+    void fetch('/api/payment-config', {
+      headers: { accept: 'application/json' },
+    })
       .then(async (response) => {
-        const payload = await response.json() as { bkashOnline?: boolean }
-        if (!response.ok) {
-          return false
+        const contentType = response.headers.get('content-type') ?? ''
+        if (!response.ok || !contentType.includes('application/json')) {
+          return null
         }
 
-        return Boolean(payload.bkashOnline)
+        return response.json()
       })
-      .then((available) => {
-        if (!cancelled) {
-          setPrepaidOnlineAvailable(available)
+      .then((payload) => {
+        if (cancelled) {
+          return
+        }
+
+        const parsed = parseCheckoutPaymentConfig(payload)
+        if (parsed) {
+          setPaymentConfig(parsed)
         }
       })
       .catch(() => {
-        if (!cancelled) {
-          setPrepaidOnlineAvailable(false)
-        }
+        // Keep build-time defaults when the config API is unavailable.
       })
 
     return () => {
       cancelled = true
     }
-  }, [prepaidEnabled])
+  }, [])
 
-  const showPrepaidOption = prepaidEnabled && prepaidOnlineAvailable
+  const showPrepaidOption = paymentConfig.bkashOnline
+  const bkashMerchantNumber = paymentConfig.bkashMerchantNumber
+  const nagadMerchantNumber = paymentConfig.nagadMerchantNumber
 
   useEffect(() => {
     if (!items.length || hasTrackedCheckoutRef.current) {
@@ -582,35 +582,35 @@ export default function CheckoutPage() {
                   <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_COD}</p>
                   <p className="mt-1 text-sm text-[var(--color-muted)]">Pay the courier when your order arrives. {STORE_POLICY.phoneConfirm}</p>
                 </label>
-                {walletPaymentsEnabled ? (
-                  <>
-                    <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH_MANUAL ? 'border-black' : 'border-black/15'}`}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        className="sr-only"
-                        checked={paymentMethod === PAYMENT_METHOD_BKASH_MANUAL}
-                        onChange={() => setPaymentMethod(PAYMENT_METHOD_BKASH_MANUAL)}
-                      />
-                      <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH_MANUAL}</p>
-                      <p className="mt-1 text-sm text-[var(--color-muted)]">
-                        Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(getBkashMerchantNumber())}</span>, then enter your TrxID below.
-                      </p>
-                    </label>
-                    <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL ? 'border-black' : 'border-black/15'}`}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        className="sr-only"
-                        checked={paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL}
-                        onChange={() => setPaymentMethod(PAYMENT_METHOD_NAGAD_MANUAL)}
-                      />
-                      <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_NAGAD_MANUAL}</p>
-                      <p className="mt-1 text-sm text-[var(--color-muted)]">
-                        Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(getNagadMerchantNumber())}</span>, then enter your TrxID below.
-                      </p>
-                    </label>
-                  </>
+                {paymentConfig.bkashManual ? (
+                  <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH_MANUAL ? 'border-black' : 'border-black/15'}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="sr-only"
+                      checked={paymentMethod === PAYMENT_METHOD_BKASH_MANUAL}
+                      onChange={() => setPaymentMethod(PAYMENT_METHOD_BKASH_MANUAL)}
+                    />
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_BKASH_MANUAL}</p>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">
+                      Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(bkashMerchantNumber)}</span>, then enter your TrxID below.
+                    </p>
+                  </label>
+                ) : null}
+                {paymentConfig.nagadManual ? (
+                  <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL ? 'border-black' : 'border-black/15'}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="sr-only"
+                      checked={paymentMethod === PAYMENT_METHOD_NAGAD_MANUAL}
+                      onChange={() => setPaymentMethod(PAYMENT_METHOD_NAGAD_MANUAL)}
+                    />
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{PAYMENT_METHOD_NAGAD_MANUAL}</p>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">
+                      Send Money to <span className="font-semibold text-[var(--color-text)]">{formatWalletDialNumber(nagadMerchantNumber)}</span>, then enter your TrxID below.
+                    </p>
+                  </label>
                 ) : null}
                 {showPrepaidOption ? (
                   <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_BKASH ? 'border-black' : 'border-black/15'}`}>

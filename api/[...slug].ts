@@ -30,6 +30,7 @@ const ROUTES: Record<string, () => Promise<{ default: RouteHandler }>> = {
   'newsletter-signup': () => import('./_handlers/newsletter-signup.js'),
   'notify-order': () => import('./_handlers/notify-order.js'),
   'order-confirmation': () => import('./_handlers/order-confirmation.js'),
+  'payment-config': () => import('./_handlers/payment-config.js'),
   'prepaid-callback': () => import('./_handlers/prepaid-callback.js'),
   'prepaid-config': () => import('./_handlers/prepaid-config.js'),
   'product-share': () => import('./_handlers/product-share.js'),
