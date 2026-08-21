@@ -138,6 +138,31 @@ const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
   cancelled: 'Cancelled',
 }
 
+type OrderPaymentFilter = 'all' | 'pending_verification' | 'paid' | 'unpaid'
+
+const PAYMENT_STATUS_LABELS: Record<NonNullable<AdminOrder['paymentStatus']>, string> = {
+  unpaid: 'Unpaid (COD)',
+  pending: 'Payment pending',
+  pending_verification: 'Verify payment',
+  paid: 'Paid',
+  failed: 'Payment failed',
+}
+
+function paymentStatusBadgeClass(status?: AdminOrder['paymentStatus']) {
+  switch (status) {
+    case 'pending_verification':
+      return 'border-amber-500/50 bg-amber-500/10 text-amber-950'
+    case 'paid':
+      return 'border-emerald-500/50 bg-emerald-500/10 text-emerald-950'
+    case 'failed':
+      return 'border-red-500/50 bg-red-500/10 text-red-950'
+    case 'pending':
+      return 'border-sky-500/50 bg-sky-500/10 text-sky-950'
+    default:
+      return 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)]'
+  }
+}
+
 function getOrderWhatsAppHref(
   order: AdminOrder,
   edits?: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'trackingNumber'>>,
@@ -213,6 +238,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [orderEdits, setOrderEdits] = useState<Record<string, Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'notes' | 'trackingNumber'>>>>({})
   const [customerEdits, setCustomerEdits] = useState<Record<string, { name: string; phone: string; email: string }>>({})
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | AdminOrder['status']>('all')
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState<OrderPaymentFilter>('all')
   const [showBrandManagement, setShowBrandManagement] = useState(false)
   const [blockedAdminUid, setBlockedAdminUid] = useState<string | null>(null)
   const [homepageSaveDebug, setHomepageSaveDebug] = useState<{
@@ -457,6 +483,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     return {
       todayOrders: todayOrders.length,
       pendingOrders: orders.filter((order) => order.status === 'new').length,
+      pendingPaymentVerifications: orders.filter((order) => order.paymentStatus === 'pending_verification').length,
       confirmedOrders: orders.filter((order) => order.status === 'confirmed').length,
       processingOrders: orders.filter((order) => order.status === 'processing').length,
       deliveredOrders: orders.filter((order) => order.status === 'delivered').length,
@@ -489,8 +516,21 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         order.notes,
         order.status,
         order.id,
+        order.paymentMethod,
+        order.paymentStatus,
+        order.paymentTransactionId,
       ].some((value) => (value ?? '').toLowerCase().includes(query))
       if (!textMatch || (orderStatusFilter !== 'all' && order.status !== orderStatusFilter)) {
+        return false
+      }
+
+      if (orderPaymentFilter === 'pending_verification' && order.paymentStatus !== 'pending_verification') {
+        return false
+      }
+      if (orderPaymentFilter === 'paid' && order.paymentStatus !== 'paid') {
+        return false
+      }
+      if (orderPaymentFilter === 'unpaid' && order.paymentStatus !== 'unpaid') {
         return false
       }
 
@@ -511,6 +551,17 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     })
 
     return matched.sort((left, right) => {
+      if (orderPaymentFilter === 'pending_verification' || orderPaymentFilter === 'all') {
+        const leftNeedsVerify = left.paymentStatus === 'pending_verification'
+        const rightNeedsVerify = right.paymentStatus === 'pending_verification'
+        if (leftNeedsVerify && !rightNeedsVerify) {
+          return -1
+        }
+        if (rightNeedsVerify && !leftNeedsVerify) {
+          return 1
+        }
+      }
+
       if (left.status === 'new' && right.status !== 'new') {
         return -1
       }
@@ -521,11 +572,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const rightTime = getOrderDate(right.createdAt)?.getTime() ?? 0
       return rightTime - leftTime
     })
-  }, [orderDateFrom, orderDateTo, orderSearch, orderStatusFilter, orders])
+  }, [orderDateFrom, orderDateTo, orderPaymentFilter, orderSearch, orderStatusFilter, orders])
 
   const pendingQueueOrders = useMemo(
     () => filteredOrders.filter((order) => order.status === 'new'),
     [filteredOrders],
+  )
+
+  const pendingPaymentOrders = useMemo(
+    () => orders.filter((order) => order.paymentStatus === 'pending_verification'),
+    [orders],
   )
 
   const formatOrderDateTime = (createdAt?: string | { seconds: number }) => {
@@ -1224,8 +1280,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
   const handleConfirmPayment = async (orderId: string) => {
     try {
-      await confirmOrderPayment(orderId)
-      setMessage('Payment marked as confirmed.')
+      const updated = await confirmOrderPayment(orderId)
+      const movedToConfirmed = updated?.status === 'confirmed'
+      setMessage(movedToConfirmed ? 'Payment confirmed. Order moved to Confirmed.' : 'Payment marked as confirmed.')
     } catch (error) {
       const reason = describeAdminWriteError(error, user?.uid)
       setMessage(reason)
@@ -1339,9 +1396,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleSummaryCardClick = (target: 'orders' | 'products' | 'homepage' | 'categories' | 'customers' | 'founder', filter?: 'all' | AdminOrder['status']) => {
+  const handleSummaryCardClick = (
+    target: 'orders' | 'products' | 'homepage' | 'categories' | 'customers' | 'founder',
+    filter?: 'all' | AdminOrder['status'],
+    paymentFilter?: OrderPaymentFilter,
+  ) => {
     if (typeof filter !== 'undefined') {
       setOrderStatusFilter(filter)
+    }
+    if (typeof paymentFilter !== 'undefined') {
+      setOrderPaymentFilter(paymentFilter)
     }
 
     if (target === 'orders') {
@@ -1698,7 +1762,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           <div className="mt-5 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-4">
             <p className="text-sm font-semibold text-[var(--color-text)]">Daily operator flow</p>
             <div className="mt-2 grid gap-2 text-xs text-[var(--color-muted)] sm:grid-cols-2">
-              <p>1. Check <span className="font-semibold text-[var(--color-text)]">New Orders</span> and move to Confirmed.</p>
+              <p>1. Check <span className="font-semibold text-[var(--color-text)]">New Orders</span> and wallet <span className="font-semibold text-[var(--color-text)]">Verify payment</span> queue.</p>
               <p>2. Update stock when creating or editing products.</p>
               <p>3. Keep category list clean before uploading new products.</p>
               <p>4. Toggle homepage sections and click <span className="font-semibold text-[var(--color-text)]">Save content</span>.</p>
@@ -1709,6 +1773,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             {[
               { label: "Today's Orders", value: dashboardSummary.todayOrders, target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
               { label: 'Pending Orders', value: dashboardSummary.pendingOrders, target: () => handleSummaryCardClick('orders', 'new' as const), section: 'orders' as const },
+              { label: 'Verify Payment', value: dashboardSummary.pendingPaymentVerifications, target: () => handleSummaryCardClick('orders', 'all', 'pending_verification'), section: 'orders' as const },
               { label: 'Confirmed Orders', value: dashboardSummary.confirmedOrders, target: () => handleSummaryCardClick('orders', 'confirmed'), section: 'orders' as const },
               { label: 'Processing Orders', value: dashboardSummary.processingOrders, target: () => handleSummaryCardClick('orders', 'processing'), section: 'orders' as const },
               { label: 'Delivered Orders', value: dashboardSummary.deliveredOrders, target: () => handleSummaryCardClick('orders', 'delivered'), section: 'orders' as const },
@@ -2036,7 +2101,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setOrderStatusFilter('all')}
+                  onClick={() => {
+                    setOrderStatusFilter('all')
+                    setOrderPaymentFilter('all')
+                  }}
                   className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
                 >
                   Show all
@@ -2079,6 +2147,32 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </button>
               </div>
             </div>
+            <div className="mt-3 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Payment queue</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                {([
+                  ['all', 'All payments'],
+                  ['pending_verification', 'Verify payment'],
+                  ['paid', 'Paid online'],
+                  ['unpaid', 'Unpaid COD'],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setOrderPaymentFilter(value)}
+                    className={`rounded-full border px-3 py-1.5 font-semibold ${orderPaymentFilter === value ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {pendingPaymentOrders.length && (orderPaymentFilter === 'all' || orderPaymentFilter === 'pending_verification') ? (
+              <div className="mt-4 rounded-[1.2rem] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-950">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]">Wallet verification queue</p>
+                <p className="mt-1">{pendingPaymentOrders.length} order{pendingPaymentOrders.length === 1 ? '' : 's'} waiting for TrxID verification. Confirm payment after checking bKash/Nagad app.</p>
+              </div>
+            ) : null}
             {pendingQueueOrders.length && (orderStatusFilter === 'all' || orderStatusFilter === 'new') ? (
               <div className="mt-4 rounded-[1.2rem] border border-black bg-black px-4 py-3 text-sm text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]">Pending queue</p>
@@ -2087,10 +2181,22 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             ) : null}
             <div className="mt-5 space-y-3">
               {filteredOrders.map((order) => (
-                <div key={order.id} className={`rounded-[1.4rem] border bg-[var(--color-bg)]/70 p-4 ${order.status === 'new' ? 'border-black' : 'border-[var(--color-border)]'}`}>
-                  {order.status === 'new' ? (
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-black">Pending</p>
-                  ) : null}
+                <div key={order.id} className={`rounded-[1.4rem] border bg-[var(--color-bg)]/70 p-4 ${order.status === 'new' || order.paymentStatus === 'pending_verification' ? 'border-black' : 'border-[var(--color-border)]'}`}>
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    {order.status === 'new' ? (
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-black">Pending order</p>
+                    ) : null}
+                    {order.paymentStatus ? (
+                      <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${paymentStatusBadgeClass(order.paymentStatus)}`}>
+                        {PAYMENT_STATUS_LABELS[order.paymentStatus] ?? order.paymentStatus}
+                      </span>
+                    ) : null}
+                    {order.paymentMethod ? (
+                      <span className="rounded-full border border-[var(--color-border)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
+                        {order.paymentMethod}
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <input value={orderEdits[order.id]?.customerName ?? order.customerName} onChange={(event) => setOrderEdits((current) => ({ ...current, [order.id]: { ...current[order.id], customerName: event.target.value } }))} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-[var(--color-text)] outline-none" placeholder="Customer name" />
@@ -2141,7 +2247,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                     <div className="space-y-2">
                       <p><span className="font-semibold text-[var(--color-text)]">Delivery Charge:</span> {formatBDT(order.deliveryCharge ?? 0)}</p>
-                      <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}{order.paymentStatus ? ` · ${order.paymentStatus}` : ''}</p>
+                      <p><span className="font-semibold text-[var(--color-text)]">Payment:</span> {order.paymentMethod ?? 'Cash on Delivery'}</p>
+                      {order.paymentStatus ? (
+                        <p><span className="font-semibold text-[var(--color-text)]">Payment status:</span> {PAYMENT_STATUS_LABELS[order.paymentStatus] ?? order.paymentStatus}</p>
+                      ) : null}
                       {order.paymentTransactionId ? (
                         <p><span className="font-semibold text-[var(--color-text)]">TrxID:</span> <span className="font-mono tracking-[0.08em]">{order.paymentTransactionId}</span></p>
                       ) : null}

@@ -1,18 +1,18 @@
 import { FieldValue, getFirestore, type DocumentReference } from 'firebase-admin/firestore'
-import { getFirebaseAdminDb } from './_firebaseAdmin.js'
-import { createRateLimiter, getClientIp } from './_rateLimit.js'
-import { sendOpsWebhook } from './_opsWebhook.js'
-import { getAvailableStock, getProductSlug, productMatchesSlug } from './_catalog.js'
-import { notifyCustomer } from './_notifyCustomer.js'
-import { getConfiguredPrepaidProvider, startPrepaidCheckout } from './_prepaidProvider.js'
-import { applyStockDecrement, applyStockRestore } from './_stock.js'
+import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
+import { createRateLimiter, getClientIp } from '../_rateLimit.js'
+import { sendOpsWebhook } from '../_opsWebhook.js'
+import { getAvailableStock, getProductSlug, productMatchesSlug } from '../_catalog.js'
+import { notifyCustomer } from '../_notifyCustomer.js'
+import { getConfiguredPrepaidProvider, startPrepaidCheckout } from '../_prepaidProvider.js'
+import { applyStockDecrement, applyStockRestore } from '../_stock.js'
 import {
   isApiPrepaidPayment,
   isManualWalletPayment,
   isValidWalletTransactionId,
   normalizeWalletTransactionId,
   resolvePaymentStatus,
-} from './_payment.js'
+} from '../_payment.js'
 
 export const config = {
   runtime: 'nodejs',

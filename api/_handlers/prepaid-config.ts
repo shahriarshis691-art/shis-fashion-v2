@@ -1,4 +1,4 @@
-import { getPrepaidPublicConfig } from './_prepaidProvider.js'
+import { getPrepaidPublicConfig } from '../_prepaidProvider.js'
 
 export const config = {
   runtime: 'nodejs',

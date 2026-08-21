@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore'
-import { getFirebaseAdminDb } from './_firebaseAdmin.js'
-import { createRateLimiter, getClientIp } from './_rateLimit.js'
+import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
+import { createRateLimiter, getClientIp } from '../_rateLimit.js'
 
 export const config = {
   runtime: 'nodejs',

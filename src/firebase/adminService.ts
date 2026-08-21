@@ -2136,7 +2136,51 @@ export async function updateOrderDetails(
 
 export async function confirmOrderPayment(id: string) {
   assertAdminCanWrite()
-  return updateOrderDetails(id, { paymentStatus: 'paid' })
+  const currentOrders = readStored(ORDERS_KEY, defaultOrders)
+  const currentOrder = currentOrders.find((order) => order.id === id)
+  const token = await getCurrentAdminIdToken()
+
+  if (token && firebaseDb && !isLocalFirstDataMode()) {
+    try {
+      const response = await fetch('/api/confirm-order-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId: id }),
+      })
+
+      if (response.ok) {
+        const payload = await response.json() as { order?: { paymentStatus?: AdminOrder['paymentStatus']; status?: AdminOrder['status'] } }
+        const nextPaymentStatus = payload.order?.paymentStatus ?? 'paid'
+        const nextStatus = payload.order?.status ?? (currentOrder?.status === 'new' ? 'confirmed' : currentOrder?.status)
+        const updatedOrders = currentOrders.map((order) => (
+          order.id === id
+            ? { ...order, paymentStatus: nextPaymentStatus, ...(nextStatus ? { status: nextStatus } : {}) }
+            : order
+        ))
+        writeStored(ORDERS_KEY, updatedOrders)
+        await recordAdminAudit('order.payment.confirm', 'order', id, { mode: 'live-api' })
+        return updatedOrders.find((order) => order.id === id)
+      }
+
+      if (response.status !== 503) {
+        throw new Error(await readApiError(response))
+      }
+    } catch (error) {
+      if (requiresLiveBackend()) {
+        throw error
+      }
+    }
+  }
+
+  const updates: Partial<Pick<AdminOrder, 'paymentStatus' | 'status'>> = { paymentStatus: 'paid' }
+  if (currentOrder?.status === 'new') {
+    updates.status = 'confirmed'
+  }
+
+  return updateOrderDetails(id, updates)
 }
 
 export async function deleteOrder(id: string) {

@@ -1,6 +1,6 @@
 import { getAuth } from 'firebase-admin/auth'
-import { getFirebaseAdminDb } from './_firebaseAdmin.js'
-import { notifyCustomer } from './_notifyCustomer.js'
+import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
+import { notifyCustomer } from '../_notifyCustomer.js'
 
 export const config = {
   runtime: 'nodejs',

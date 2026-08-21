@@ -1,5 +1,5 @@
-import { getFirebaseAdminDb } from './_firebaseAdmin.js'
-import { getProductSlug, productMatchesSlug } from './_catalog.js'
+import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
+import { getProductSlug, productMatchesSlug } from '../_catalog.js'
 
 export const config = {
   runtime: 'nodejs',

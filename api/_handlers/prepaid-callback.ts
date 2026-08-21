@@ -1,8 +1,8 @@
-import { getFirebaseAdminDb } from './_firebaseAdmin.js'
-import { completePrepaidCheckout } from './_prepaidProvider.js'
-import { notifyCustomer } from './_notifyCustomer.js'
-import { getAvailableStock, productMatchesSlug } from './_catalog.js'
-import { applyStockDecrement, applyStockRestore } from './_stock.js'
+import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
+import { completePrepaidCheckout } from '../_prepaidProvider.js'
+import { notifyCustomer } from '../_notifyCustomer.js'
+import { getAvailableStock, productMatchesSlug } from '../_catalog.js'
+import { applyStockDecrement, applyStockRestore } from '../_stock.js'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
 
