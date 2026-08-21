@@ -38,35 +38,61 @@ const ROUTES: Record<string, () => Promise<{ default: RouteHandler }>> = {
   'validate-coupon': () => import('./_handlers/validate-coupon.js'),
 }
 
+function headerValue(headers: LooseRequest['headers'], name: string) {
+  const value = headers?.[name] ?? headers?.[name.toLowerCase()]
+  return Array.isArray(value) ? value[0] ?? '' : value ?? ''
+}
+
 function resolveRouteKey(req: LooseRequest) {
   const slug = req.query?.slug
   if (Array.isArray(slug)) {
-    return slug.filter(Boolean).join('/')
+    const joined = slug.filter(Boolean).join('/')
+    if (joined) {
+      return joined
+    }
+  } else if (typeof slug === 'string' && slug.trim()) {
+    return slug.trim()
   }
 
-  if (typeof slug === 'string' && slug.trim()) {
-    return slug.trim()
+  const forwardedPath = headerValue(req.headers, 'x-vercel-path')
+    || headerValue(req.headers, 'x-invoke-path')
+    || headerValue(req.headers, 'x-forwarded-uri')
+
+  if (forwardedPath.startsWith('/api/')) {
+    const segments = forwardedPath.replace(/^\/api\/?/, '').split('/').filter(Boolean)
+    if (segments.length) {
+      return segments.join('/')
+    }
   }
 
   try {
     const url = new URL(req.url ?? '', 'https://www.shisfashion.com')
     const segments = url.pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean)
-    return segments.join('/')
+    if (segments.length) {
+      return segments.join('/')
+    }
   } catch {
-    return ''
+    // Fall through.
   }
+
+  return ''
+}
+
+function sendJson(res: LooseResponse, status: number, payload: unknown) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+  res.status(status).json(payload)
 }
 
 export default async function handler(req: LooseRequest, res: LooseResponse) {
   const routeKey = resolveRouteKey(req)
   if (!routeKey) {
-    res.status(404).json({ error: 'Not found' })
+    sendJson(res, 404, { error: 'Not found' })
     return
   }
 
   const loadRoute = ROUTES[routeKey]
   if (!loadRoute) {
-    res.status(404).json({ error: 'Not found' })
+    sendJson(res, 404, { error: 'Not found' })
     return
   }
 
@@ -74,6 +100,6 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     const route = await loadRoute()
     await route.default(req, res)
   } catch {
-    res.status(500).json({ error: 'Internal server error' })
+    sendJson(res, 500, { error: 'Internal server error' })
   }
 }

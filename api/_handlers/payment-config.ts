@@ -10,12 +10,17 @@ interface LooseResponse {
   json: (payload: unknown) => void
 }
 
+function sendJson(res: LooseResponse, status: number, payload: unknown) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+  res.status(status).json(payload)
+}
+
 export default function handler(req: LooseRequest, res: LooseResponse) {
   if (req.method && req.method !== 'GET') {
-    res.status(405).json({ error: 'Method not allowed' })
+    sendJson(res, 405, { error: 'Method not allowed' })
     return
   }
 
   res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-  res.status(200).json(getCheckoutPaymentConfig())
+  sendJson(res, 200, getCheckoutPaymentConfig())
 }

@@ -56,11 +56,11 @@
   "routes": [
     {
       "src": "/sitemap.xml",
-      "dest": "/api/sitemap"
+      "dest": "/api/[...slug]?slug=sitemap"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/[...slug]?slug=$1"
     },
     {
       "handle": "filesystem"
