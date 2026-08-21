@@ -21,7 +21,7 @@ interface LookupBody {
   phone?: string
 }
 
-const isRateLimited = createRateLimiter(5, 10 * 60_000)
+const isRateLimited = createRateLimiter(5, 10 * 60_000, 'lookup-order')
 const GENERIC_MISS = 'We could not find an order with that ID and phone number.'
 
 function normalizePhone(raw: string) {
@@ -84,7 +84,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   }
 
   const ip = getClientIp(req.headers)
-  if (isRateLimited(ip)) {
+  if (await isRateLimited(ip)) {
     res.status(429).json({ error: 'Too many lookup attempts. Please wait a few minutes or chat on WhatsApp.' })
     return
   }

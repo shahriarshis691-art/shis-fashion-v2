@@ -30,8 +30,8 @@ function randomVisitorId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
-function isSocialCrawler(userAgent: string) {
-  return /(facebookexternalhit|facebot|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|pinterest|discordbot)/i.test(userAgent)
+function isSearchOrSocialCrawler(userAgent: string) {
+  return /(googlebot|google-inspectiontool|googleother|adsbot-google|bingbot|bingpreview|slurp|duckduckbot|baiduspider|yandex(bot|images)|applebot|facebookexternalhit|facebot|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|pinterest|discordbot|semrushbot|ahrefsbot|dotbot)/i.test(userAgent)
 }
 
 function isProductSharePath(pathname: string) {
@@ -145,16 +145,16 @@ function blockedResponse(mode: string) {
 }
 
 export default function middleware(request: Request) {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
-    return
-  }
-
   const url = new URL(request.url)
   const userAgent = request.headers.get('user-agent') ?? ''
-  if (isSocialCrawler(userAgent) && isProductSharePath(url.pathname)) {
+  if (isSearchOrSocialCrawler(userAgent) && isProductSharePath(url.pathname)) {
     const dest = new URL('/api/product-share', url.origin)
     dest.searchParams.set('path', url.pathname)
     return fetch(dest)
+  }
+
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+    return
   }
 
   const mode = getMode()

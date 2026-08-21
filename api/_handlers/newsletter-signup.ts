@@ -21,7 +21,7 @@ interface NewsletterSignupBody {
   email?: string
 }
 
-const isRateLimited = createRateLimiter(8)
+const isRateLimited = createRateLimiter(8, 60_000, 'newsletter-signup')
 const COUPON_PREFIX = 'SHIS-'
 const COUPON_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const COUPON_CODE_LENGTH = 6
@@ -54,7 +54,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (isRateLimited(getClientIp(req.headers))) {
+  if (await isRateLimited(getClientIp(req.headers))) {
     res.status(429).json({ error: 'Too many requests.' })
     return
   }

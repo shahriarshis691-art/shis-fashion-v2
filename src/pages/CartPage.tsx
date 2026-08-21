@@ -136,7 +136,7 @@ export default function CartPage() {
                       <div className="flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] p-1">
                         <button type="button" onClick={() => updateQuantity(item.id, -1)} className="h-8 w-8 text-lg text-[var(--color-text)]">−</button>
                         <span className="min-w-8 text-center text-sm font-semibold text-[var(--color-text)]">{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.id, 1)} className="h-8 w-8 text-lg text-[var(--color-text)]">+</button>
+                        <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={item.quantity >= (item.stock ?? 0)} className="h-8 w-8 text-lg text-[var(--color-text)] disabled:cursor-not-allowed disabled:opacity-40">+</button>
                       </div>
                       <p className="text-base font-semibold text-[var(--color-accent)]">{formatBDT(parseBDT(item.price) * item.quantity)}</p>
                     </div>

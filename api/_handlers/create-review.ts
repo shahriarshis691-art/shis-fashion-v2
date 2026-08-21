@@ -25,7 +25,7 @@ interface ReviewBody {
   body?: string
 }
 
-const isRateLimited = createRateLimiter(5, 10 * 60_000)
+const isRateLimited = createRateLimiter(5, 10 * 60_000, 'create-review')
 
 function readBody(req: LooseRequest): ReviewBody {
   const raw = req.body
@@ -46,7 +46,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (isRateLimited(getClientIp(req.headers))) {
+  if (await isRateLimited(getClientIp(req.headers))) {
     res.status(429).json({ error: 'Too many reviews submitted. Please wait a few minutes.' })
     return
   }

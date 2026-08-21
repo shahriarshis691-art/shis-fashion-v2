@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 export type PrepaidProvider = 'bkash' | 'sslcommerz'
 
 function env(name: string) {
@@ -46,6 +48,10 @@ export function getPrepaidCallbackUrl() {
   return env('PREPAID_CALLBACK_URL') || `${env('VITE_SITE_URL') || 'https://www.shisfashion.com'}/api/prepaid-callback`
 }
 
+export function getSslcommerzIpnUrl() {
+  return env('SSLCOMMERZ_IPN_URL') || `${env('VITE_SITE_URL') || 'https://www.shisfashion.com'}/api/sslcommerz-ipn`
+}
+
 export async function startPrepaidCheckout(input: {
   orderId: string
   amount: number
@@ -72,7 +78,7 @@ export async function completePrepaidCheckout(input: {
 }) {
   const provider = (input.provider || getConfiguredPrepaidProvider() || '') as PrepaidProvider | ''
   if (provider === 'bkash' && input.paymentId) {
-    return executeBkashPayment(input.paymentId)
+    return verifyBkashPayment(input.paymentId)
   }
 
   if (provider === 'sslcommerz' && input.tranId) {
@@ -151,9 +157,64 @@ async function executeBkashPayment(paymentId: string) {
     body: JSON.stringify({ paymentID: paymentId }),
   })
 
-  const payload = await readJson(response) as { transactionStatus?: string; trxID?: string }
+  const payload = await readJson(response) as { transactionStatus?: string; trxID?: string; amount?: string }
   const paid = String(payload.transactionStatus ?? '').toLowerCase() === 'completed'
-  return { ok: paid, status: payload.transactionStatus || 'failed', trxId: payload.trxID }
+  return {
+    ok: paid,
+    status: payload.transactionStatus || 'failed',
+    trxId: payload.trxID,
+    amount: Number.parseFloat(String(payload.amount ?? '')),
+  }
+}
+
+async function queryBkashPayment(paymentId: string) {
+  const token = await grantBkashToken()
+  if (!token) {
+    return { ok: false as const, status: 'token-failed' }
+  }
+
+  const response = await fetch(`${bkashBaseUrl()}/tokenized/checkout/payment/status`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: token,
+      'x-app-key': env('BKASH_APP_KEY'),
+    },
+    body: JSON.stringify({ paymentID: paymentId }),
+  })
+
+  const payload = await readJson(response) as { transactionStatus?: string; trxID?: string; amount?: string }
+  const status = String(payload.transactionStatus ?? '').toLowerCase()
+  return {
+    ok: status === 'completed',
+    status: payload.transactionStatus || 'unknown',
+    trxId: payload.trxID,
+    amount: Number.parseFloat(String(payload.amount ?? '')),
+  }
+}
+
+export async function verifyBkashPayment(paymentId: string) {
+  const queried = await queryBkashPayment(paymentId)
+  if (queried.ok) {
+    return queried
+  }
+
+  const status = String(queried.status ?? '').toLowerCase()
+  if (status === 'initiated' || status === 'unknown' || status === 'token-failed') {
+    const executed = await executeBkashPayment(paymentId)
+    if (executed.ok) {
+      return executed
+    }
+
+    const retry = await queryBkashPayment(paymentId)
+    if (retry.ok) {
+      return retry
+    }
+
+    return executed.ok ? executed : { ...queried, ok: false as const }
+  }
+
+  return queried
 }
 
 async function grantBkashToken() {
@@ -196,6 +257,7 @@ async function startSslcommerzCheckout(input: {
     success_url: successUrl,
     fail_url: successUrl,
     cancel_url: successUrl,
+    ipn_url: getSslcommerzIpnUrl(),
     cus_name: input.customerName,
     cus_email: input.customerEmail || 'orders@shisfashion.com',
     cus_phone: input.customerPhone,
@@ -232,9 +294,91 @@ async function querySslcommerzPayment(tranId: string) {
     || 'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php'
   const url = `${endpoint}?tran_id=${encodeURIComponent(tranId)}&store_id=${encodeURIComponent(env('SSLCOMMERZ_STORE_ID'))}&store_passwd=${encodeURIComponent(env('SSLCOMMERZ_STORE_PASSWORD'))}&format=json`
   const response = await fetch(url)
-  const payload = await readJson(response) as { element?: Array<{ status?: string }> }
-  const status = String(payload.element?.[0]?.status ?? '').toUpperCase()
-  return { ok: status === 'VALID' || status === 'VALIDATED', status: status || 'failed' }
+  const payload = await readJson(response) as { element?: Array<{ status?: string; val_id?: string; amount?: string; bank_tran_id?: string; tran_id?: string }> }
+  const row = payload.element?.[0]
+  const status = String(row?.status ?? '').toUpperCase()
+  return {
+    ok: status === 'VALID' || status === 'VALIDATED',
+    status: status || 'failed',
+    valId: row?.val_id,
+    trxId: row?.bank_tran_id,
+    amount: Number.parseFloat(String(row?.amount ?? '')),
+    tranId: row?.tran_id || tranId,
+  }
+}
+
+function sslcommerzValIdUrl() {
+  const explicit = env('SSLCOMMERZ_VAL_ID_URL')
+  if (explicit) {
+    return explicit
+  }
+
+  const validation = env('SSLCOMMERZ_VALIDATION_URL')
+  if (validation.includes('merchantTransIDvalidationAPI.php')) {
+    return validation.replace('merchantTransIDvalidationAPI.php', 'validationserverAPI.php')
+  }
+
+  if (/sandbox/i.test(validation) || !validation) {
+    return 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php'
+  }
+
+  return 'https://securepay.sslcommerz.com/validator/api/validationserverAPI.php'
+}
+
+export async function validateSslcommerzByValId(valId: string) {
+  const trimmed = valId.trim()
+  if (!trimmed) {
+    return { ok: false as const, status: 'missing-val-id' }
+  }
+
+  const endpoint = sslcommerzValIdUrl()
+  const url = `${endpoint}?val_id=${encodeURIComponent(trimmed)}&store_id=${encodeURIComponent(env('SSLCOMMERZ_STORE_ID'))}&store_passwd=${encodeURIComponent(env('SSLCOMMERZ_STORE_PASSWORD'))}&format=json`
+  const response = await fetch(url)
+  const payload = await readJson(response) as {
+    status?: string
+    tran_id?: string
+    amount?: string
+    currency_amount?: string
+    bank_tran_id?: string
+    val_id?: string
+    store_id?: string
+  }
+  const status = String(payload.status ?? '').toUpperCase()
+  return {
+    ok: status === 'VALID' || status === 'VALIDATED',
+    status: status || 'failed',
+    valId: payload.val_id || trimmed,
+    trxId: payload.bank_tran_id,
+    amount: Number.parseFloat(String(payload.currency_amount || payload.amount || '')),
+    tranId: payload.tran_id,
+    storeId: payload.store_id,
+  }
+}
+
+export function verifySslcommerzIpnHash(fields: Record<string, string>) {
+  const verifySign = fields.verify_sign?.trim().toLowerCase()
+  const verifyKey = fields.verify_key?.trim()
+  const storePasswd = env('SSLCOMMERZ_STORE_PASSWORD')
+  if (!verifySign || !verifyKey || !storePasswd) {
+    return false
+  }
+
+  const keys = verifyKey.split(',').map((key) => key.trim()).filter(Boolean)
+  const hashed: Record<string, string> = {}
+  for (const key of keys) {
+    if (key in fields) {
+      hashed[key] = fields[key]
+    }
+  }
+  hashed.store_passwd = md5Hex(storePasswd)
+
+  const sortedKeys = Object.keys(hashed).sort()
+  const hashString = sortedKeys.map((key) => `${key}=${hashed[key]}`).join('&')
+  return md5Hex(hashString) === verifySign
+}
+
+function md5Hex(value: string) {
+  return createHash('md5').update(value).digest('hex')
 }
 
 async function readJson(response: Response) {

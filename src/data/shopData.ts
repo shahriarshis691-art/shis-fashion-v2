@@ -1,4 +1,5 @@
 import { resolveCanonicalSubcategorySlug } from './categoryTaxonomy'
+import type { ProductVariantStock } from '../utils/variantStock'
 
 export interface ShopCategory {
   slug: string
@@ -21,6 +22,7 @@ export interface ShopProduct {
   galleryImages?: string[]
   sizes?: string[]
   colors?: string[]
+  variants?: ProductVariantStock[]
   stock?: number
   featured?: boolean
   newArrival?: boolean

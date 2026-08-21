@@ -26,7 +26,7 @@ interface ValidateCouponBody {
   discountAmount?: number
 }
 
-const isValidateLimited = createRateLimiter(30)
+const isValidateLimited = createRateLimiter(30, 60_000, 'validate-coupon')
 
 function isCouponCodeValid(code: string) {
   return /^[A-Z]{3,}-[A-Z0-9]{3,}$/i.test(code)
@@ -69,7 +69,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (action === 'validate' && isValidateLimited(clientIp)) {
+  if (action === 'validate' && await isValidateLimited(clientIp)) {
     res.status(429).json({ valid: false, error: 'Too many requests.' })
     return
   }

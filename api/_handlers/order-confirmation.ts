@@ -20,7 +20,7 @@ interface ConfirmationBody {
   orderId?: string
 }
 
-const isRateLimited = createRateLimiter(12, 10 * 60_000)
+const isRateLimited = createRateLimiter(12, 10 * 60_000, 'order-confirmation')
 const MAX_AGE_MS = 48 * 60 * 60 * 1000
 
 function readBody(req: LooseRequest): ConfirmationBody {
@@ -71,7 +71,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (isRateLimited(getClientIp(req.headers))) {
+  if (await isRateLimited(getClientIp(req.headers))) {
     res.status(429).json({ error: 'Too many requests. Please wait a moment.' })
     return
   }

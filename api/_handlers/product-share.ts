@@ -105,11 +105,47 @@ function firstImage(data: { images?: unknown; image?: unknown; featuredImage?: u
   return DEFAULT_OG_IMAGE
 }
 
-function htmlPage(options: { title: string; description: string; url: string; image: string }) {
+function htmlPage(options: {
+  title: string
+  description: string
+  url: string
+  image: string
+  name?: string
+  price?: number
+  currency?: string
+  availability?: 'InStock' | 'OutOfStock'
+  brand?: string
+  category?: string
+}) {
   const title = escapeHtml(options.title)
   const description = escapeHtml(options.description)
   const url = escapeHtml(options.url)
   const image = escapeHtml(options.image)
+  const name = escapeHtml(options.name || options.title)
+  const brand = escapeHtml(options.brand || 'SHIS Fashion')
+  const category = escapeHtml(options.category || 'Fashion')
+  const availability = options.availability === 'OutOfStock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'
+  const price = Number.isFinite(options.price) ? options.price : 0
+  const currency = options.currency || 'BDT'
+  const availabilityLabel = options.availability === 'OutOfStock' ? 'Out of stock' : 'In stock'
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: options.name || options.title,
+    description: options.description,
+    image: options.image,
+    url: options.url,
+    brand: { '@type': 'Brand', name: options.brand || 'SHIS Fashion' },
+    category: options.category || 'Fashion',
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: currency,
+      price,
+      availability,
+      url: options.url,
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  }
 
   return `<!doctype html>
 <html lang="en">
@@ -118,9 +154,11 @@ function htmlPage(options: { title: string; description: string; url: string; im
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <meta name="description" content="${description}" />
+  <meta name="robots" content="index,follow" />
   <link rel="canonical" href="${url}" />
   <meta property="og:type" content="product" />
   <meta property="og:site_name" content="SHIS Fashion" />
+  <meta property="og:locale" content="en_BD" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:url" content="${url}" />
@@ -129,9 +167,19 @@ function htmlPage(options: { title: string; description: string; url: string; im
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${image}" />
+  <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
 </head>
 <body>
-  <p><a href="${url}">View this product on SHIS Fashion</a></p>
+  <main>
+    <p>SHIS Fashion Bangladesh</p>
+    <h1>${name}</h1>
+    <p>${description}</p>
+    <p>Brand: ${brand}</p>
+    <p>Category: ${category}</p>
+    <p>Price: ${currency} ${price}</p>
+    <p>Availability: ${availabilityLabel}</p>
+    <p><a href="${url}">View this product on SHIS Fashion</a></p>
+  </main>
 </body>
 </html>`
 }
@@ -199,6 +247,10 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       slug?: string
       description?: string
       category?: string
+      brand?: string
+      price?: string
+      stock?: number
+      variants?: Array<{ stock?: number }>
       images?: unknown
       image?: unknown
       featuredImage?: unknown
@@ -209,6 +261,11 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     const category = slugify(String(data.category ?? 'shop')) || 'shop'
     const slug = getProductSlug(data)
     const url = `${SITE_URL}/shop/${category}/${slug}`
+    const numericPrice = Number.parseFloat(String(data.price ?? '').replace(/[^\d.]/g, '')) || 0
+    const variantStock = Array.isArray(data.variants)
+      ? data.variants.reduce((sum, entry) => sum + Math.max(0, Number(entry.stock) || 0), 0)
+      : 0
+    const stock = variantStock > 0 ? variantStock : Math.max(0, Number(data.stock) || 0)
 
     res.status(200)
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -218,6 +275,12 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       description: description.slice(0, 300),
       url,
       image: firstImage(data),
+      name,
+      price: numericPrice,
+      currency: 'BDT',
+      availability: stock > 0 ? 'InStock' : 'OutOfStock',
+      brand: String(data.brand ?? 'SHIS Fashion').trim() || 'SHIS Fashion',
+      category: String(data.category ?? 'Fashion'),
     }))
   } catch {
     res.status(500)

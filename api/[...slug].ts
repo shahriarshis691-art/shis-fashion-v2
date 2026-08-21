@@ -35,6 +35,7 @@ const ROUTES: Record<string, () => Promise<{ default: RouteHandler }>> = {
   'prepaid-config': () => import('./_handlers/prepaid-config.js'),
   'product-share': () => import('./_handlers/product-share.js'),
   sitemap: () => import('./_handlers/sitemap.js'),
+  'sslcommerz-ipn': () => import('./_handlers/sslcommerz-ipn.js'),
   'validate-coupon': () => import('./_handlers/validate-coupon.js'),
 }
 

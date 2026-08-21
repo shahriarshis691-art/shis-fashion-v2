@@ -68,6 +68,8 @@ Optional (fail closed if unset; COD and WhatsApp still work):
 - Or SSLCOMMERZ: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD`.
 - Email: `RESEND_API_KEY` or `SENDGRID_API_KEY`, optional `ORDER_NOTIFY_FROM_EMAIL`.
 - SMS: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, or `SMS_WEBHOOK_URL`.
+- Rate limits: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (Upstash Redis REST). Without these, API limits fall back to in-memory per isolate.
+- SSLCommerz IPN: optional `SSLCOMMERZ_IPN_URL` (defaults to `{VITE_SITE_URL}/api/sslcommerz-ipn`).
 
 2. Firebase project checks
 - Firebase Authentication must be enabled for Email/Password sign-in.

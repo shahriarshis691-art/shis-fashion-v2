@@ -85,7 +85,7 @@ interface HomepageRecord {
   freeDeliveryThreshold?: number
 }
 
-const isRateLimited = createRateLimiter(8)
+const isRateLimited = createRateLimiter(8, 60_000, 'create-order')
 const DHAKA_DELIVERY_CHARGE = 80
 const OUTSIDE_DHAKA_DELIVERY_CHARGE = 130
 const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
@@ -129,7 +129,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  if (isRateLimited(getClientIp(req.headers))) {
+  if (await isRateLimited(getClientIp(req.headers))) {
     res.status(429).json({ error: 'Too many requests. Please wait a moment and try again.' })
     return
   }

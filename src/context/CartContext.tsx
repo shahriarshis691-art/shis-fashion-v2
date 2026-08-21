@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, useCallback } from 'react'
 import type { ShopProduct } from '../data/shopData'
 import { parseBDT } from '../utils/currency'
+import { getVariantStock } from '../utils/variantStock'
 import { useCustomerRecovery } from './CustomerRecoveryContext'
 
 export interface CartItem extends Omit<ShopProduct, 'id'> {
@@ -56,17 +57,8 @@ export function readBuyNowCheckout(): CartItem[] | null {
     return null
   }
 
-  try {
-    const raw = window.sessionStorage.getItem(BUY_NOW_KEY)
-    if (!raw) {
-      return null
-    }
-
-    const parsed = JSON.parse(raw) as CartItem[]
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null
-  } catch {
-    return null
-  }
+  const next = parseStoredCart(window.sessionStorage.getItem(BUY_NOW_KEY))
+  return next.length ? next : null
 }
 
 export function writeBuyNowCheckout(items: CartItem[]) {
@@ -74,7 +66,13 @@ export function writeBuyNowCheckout(items: CartItem[]) {
     return
   }
 
-  window.sessionStorage.setItem(BUY_NOW_KEY, JSON.stringify(items))
+  const next = items.map(hydrateCartItem).filter((item): item is CartItem => Boolean(item))
+  if (!next.length) {
+    window.sessionStorage.removeItem(BUY_NOW_KEY)
+    return
+  }
+
+  window.sessionStorage.setItem(BUY_NOW_KEY, JSON.stringify(next))
 }
 
 export function clearBuyNowCheckout() {
@@ -87,18 +85,58 @@ export function clearBuyNowCheckout() {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined)
 
+function lineStockLimit(product: Pick<ShopProduct, 'stock' | 'variants'>, size: string, color: string) {
+  return Math.max(0, getVariantStock(product, size, color))
+}
+
+function hydrateCartItem(value: unknown): CartItem | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const item = value as CartItem
+  if (!item.slug || !item.size) {
+    return null
+  }
+
+  const limit = lineStockLimit(item, item.size, item.color || 'Default')
+  const quantity = Math.min(Math.max(0, Number(item.quantity) || 0), limit)
+  if (quantity <= 0) {
+    return null
+  }
+
+  return {
+    ...item,
+    color: item.color || 'Default',
+    stock: limit,
+    quantity,
+  }
+}
+
+function parseStoredCart(raw: string | null): CartItem[] {
+  if (!raw) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+
+    return parsed.map(hydrateCartItem).filter((item): item is CartItem => Boolean(item))
+  } catch {
+    return []
+  }
+}
+
 function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     if (typeof window === 'undefined') {
       return []
     }
 
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
-      return stored ? (JSON.parse(stored) as CartItem[]) : []
-    } catch {
-      return []
-    }
+    return parseStoredCart(window.localStorage.getItem(STORAGE_KEY))
   })
   const [coupon, setCoupon] = useState<CouponApplied | null>(() => {
     if (typeof window === 'undefined') {
@@ -179,32 +217,33 @@ function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => {
     const requestedQuantity = Math.max(1, options.quantity ?? 1)
-    const stockLimit = typeof product.stock === 'number' ? Math.max(0, product.stock) : undefined
+    const size = options.size
+    const color = options.color || 'Default'
+    const stockLimit = lineStockLimit(product, size, color)
 
-    if (typeof stockLimit === 'number' && stockLimit <= 0) {
+    if (stockLimit <= 0) {
       return
     }
 
-    const itemId = `${product.slug}-${options.size}-${options.color}`
+    const itemId = `${product.slug}-${size}-${color}`
     let nextAddition: CartAdditionEvent | null = null
 
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === itemId)
-      const effectiveQuantity = typeof stockLimit === 'number'
-        ? Math.min(requestedQuantity, stockLimit)
-        : requestedQuantity
+      const effectiveQuantity = Math.min(requestedQuantity, stockLimit)
 
       if (existingItem) {
-        const nextQuantity = typeof stockLimit === 'number'
-          ? Math.min(existingItem.quantity + effectiveQuantity, stockLimit)
-          : existingItem.quantity + effectiveQuantity
-
+        const nextQuantity = Math.min(existingItem.quantity + effectiveQuantity, stockLimit)
         const quantityAdded = Math.max(0, nextQuantity - existingItem.quantity)
         if (quantityAdded <= 0) {
           return currentItems
         }
 
-        const nextItems = currentItems.map((item) => (item.id === itemId ? { ...item, quantity: nextQuantity } : item))
+        const nextItems = currentItems.map((item) => (
+          item.id === itemId
+            ? { ...item, quantity: nextQuantity, stock: stockLimit, variants: product.variants ?? item.variants }
+            : item
+        ))
         const nextSubtotal = nextItems.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
         const nextItemCount = nextItems.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -228,9 +267,11 @@ function CartProvider({ children }: { children: ReactNode }) {
         {
           ...product,
           id: itemId,
-          size: options.size,
-          color: options.color,
+          size,
+          color,
           quantity: effectiveQuantity,
+          stock: stockLimit,
+          variants: product.variants ?? [],
         },
       ]
 
@@ -241,8 +282,8 @@ function CartProvider({ children }: { children: ReactNode }) {
         itemId,
         productName: product.name,
         productImage: product.image,
-        size: options.size,
-        color: options.color,
+        size,
+        color,
         unitPrice: parseBDT(product.price),
         quantityAdded: effectiveQuantity,
         cartSubtotal: nextSubtotal,
@@ -265,14 +306,9 @@ function CartProvider({ children }: { children: ReactNode }) {
             return item
           }
 
-          const stockLimit = typeof item.stock === 'number' ? Math.max(0, item.stock) : undefined
+          const stockLimit = lineStockLimit(item, item.size, item.color)
           const nextQuantity = item.quantity + change
-
-          if (typeof stockLimit === 'number') {
-            return { ...item, quantity: Math.min(nextQuantity, stockLimit) }
-          }
-
-          return { ...item, quantity: nextQuantity }
+          return { ...item, stock: stockLimit, quantity: Math.min(nextQuantity, stockLimit) }
         })
         .filter((item) => item.quantity > 0),
     )

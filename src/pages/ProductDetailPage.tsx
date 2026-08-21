@@ -355,6 +355,7 @@ export default function ProductDetailPage() {
         size: safeSize,
         color: safeColor,
         quantity: effectiveQuantity,
+        stock: availableStock,
       },
     ])
     googleAnalytics.beginCheckout({

@@ -28,6 +28,7 @@ export function mapAdminProductToShopProduct(
     newArrival: product.newArrival,
     sizes: normalizeSizes(product.sizes),
     colors: Array.isArray(product.colors) ? product.colors.map((color) => color.trim()).filter(Boolean) : [],
+    variants: product.variants ?? [],
     ...overrides,
   }
 }

@@ -117,6 +117,10 @@ if (productionMode) {
     warnings.push(`Unexpected VITE_PREPAID_ENABLED=${env('VITE_PREPAID_ENABLED')} — use false for COD-only launch.`)
   }
 
+  if (!env('UPSTASH_REDIS_REST_URL') || !env('UPSTASH_REDIS_REST_TOKEN')) {
+    warnings.push('UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN unset — API rate limits will not be shared across Vercel isolates.')
+  }
+
   if (!env('VITE_GA_MEASUREMENT_ID')) {
     warnings.push('Missing VITE_GA_MEASUREMENT_ID (recommended before paid traffic).')
   }

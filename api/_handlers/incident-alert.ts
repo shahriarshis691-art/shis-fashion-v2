@@ -1,3 +1,5 @@
+import { createRateLimiter, getClientIp } from '../_rateLimit.js'
+
 interface LooseRequest {
   method?: string
   headers?: Record<string, string | string[] | undefined>
@@ -31,36 +33,7 @@ function sanitize(value: unknown, maxLength: number) {
   return String(value ?? '').trim().slice(0, maxLength)
 }
 
-function getClientIp(req: LooseRequest) {
-  const forwarded = headerValue(req.headers, 'x-forwarded-for')
-  if (forwarded) {
-    return forwarded.split(',')[0]?.trim() ?? 'unknown'
-  }
-
-  return headerValue(req.headers, 'x-real-ip') || 'unknown'
-}
-
-const ipHits = new Map<string, { count: number; windowStart: number }>()
-
-function isRateLimited(ip: string) {
-  const now = Date.now()
-  const windowMs = 60_000
-  const maxHits = 20
-  const current = ipHits.get(ip)
-
-  if (!current || now - current.windowStart > windowMs) {
-    ipHits.set(ip, { count: 1, windowStart: now })
-    return false
-  }
-
-  current.count += 1
-  if (current.count > maxHits) {
-    return true
-  }
-
-  ipHits.set(ip, current)
-  return false
-}
+const isRateLimited = createRateLimiter(20, 60_000, 'incident-alert')
 
 export default async function handler(req: LooseRequest, res: LooseResponse) {
   if (req.method !== 'POST') {
@@ -82,8 +55,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const ip = getClientIp(req)
-  if (isRateLimited(ip)) {
+  if (await isRateLimited(getClientIp(req.headers))) {
     res.status(429).json({ ok: false, error: 'Too many requests' })
     return
   }
