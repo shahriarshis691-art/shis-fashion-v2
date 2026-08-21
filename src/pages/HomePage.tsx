@@ -5,6 +5,7 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
+import SareeShowcaseSection from '../components/home/SareeShowcaseSection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
@@ -486,25 +487,11 @@ export default function HomePage() {
       </section>
 
       {sareeCollection ? (
-        <section className="pb-8 sm:pb-10">
-          <Container>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-caption uppercase tracking-[0.14em] text-black/55">Women's collection</p>
-                <h2 className="mt-1 text-h2 text-black">{sareeCollection.label || 'Saree'}</h2>
-                <p className="mt-3 max-w-2xl text-body text-black/72">
-                  Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.
-                </p>
-              </div>
-              <Link
-                to={sareeCollection.href || '/sarees'}
-                className="ui-interactive inline-flex w-fit shrink-0 border border-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
-              >
-                Explore Sarees
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <SareeShowcaseSection
+          title={sareeCollection.label || 'Saree'}
+          href={sareeCollection.href || '/sarees'}
+          posterImage={sareeCollection.coverImage || sareeCollection.images[0] || ''}
+        />
       ) : null}
 
       {contentSections.map((section) => {
