@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
+import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages } from '../utils/media'
@@ -1131,9 +1132,9 @@ const defaultHomepage: HomepageContent = {
   bannerImageTitle: 'Brand promise banner image',
   bannerImageDescription: 'Editorial banner used beside the brand promise content.',
   categories: [
-    { title: 'Winter', caption: 'Winter.', href: '/collections/winter', image: '/og-image.svg' },
-    { title: 'Summer', caption: 'Summer.', href: '/collections/summer', image: '/og-image.svg' },
-    { title: 'Everyday Wear', caption: 'Everyday wear.', href: '/collections/everyday-wear', image: '/og-image.svg' },
+    { title: 'Winter', caption: 'Winter.', href: '/collections/winter', image: featuredCollectionCovers.winter },
+    { title: 'Summer', caption: 'Summer.', href: '/collections/summer', image: featuredCollectionCovers.summer },
+    { title: 'Everyday Wear', caption: 'Everyday wear.', href: '/collections/everyday-wear', image: featuredCollectionCovers['everyday-wear'] },
   ],
   featuredCollectionPages: [
     {
@@ -1142,7 +1143,7 @@ const defaultHomepage: HomepageContent = {
       subtitle: 'Layer-ready staples',
       description: 'Cold-season essentials with premium texture and clean tailoring.',
       href: '/collections/winter',
-      images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+      images: [featuredCollectionCovers.winter, '/og-image.svg', '/og-image.svg', '/og-image.svg'],
       relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
     },
     {
@@ -1151,7 +1152,7 @@ const defaultHomepage: HomepageContent = {
       subtitle: 'Breathable premium edits',
       description: 'Lightweight silhouettes designed for warm days and evening plans.',
       href: '/collections/summer',
-      images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+      images: [featuredCollectionCovers.summer, '/og-image.svg', '/og-image.svg', '/og-image.svg'],
       relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
     },
     {
@@ -1160,7 +1161,7 @@ const defaultHomepage: HomepageContent = {
       subtitle: 'Daily go-to luxury',
       description: 'Reliable daily pieces balancing comfort, polish, and movement.',
       href: '/collections/everyday-wear',
-      images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+      images: [featuredCollectionCovers['everyday-wear'], '/og-image.svg', '/og-image.svg', '/og-image.svg'],
       relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
     },
   ],

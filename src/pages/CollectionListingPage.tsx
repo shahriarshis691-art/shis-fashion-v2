@@ -9,6 +9,7 @@ import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAt
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
+import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applySeoMetadata } from '../utils/seo'
 
@@ -52,25 +53,25 @@ const fallbackCollections: FeaturedCollectionPage[] = [
     subtitle: 'Layer-ready staples',
     description: 'Cold-season essentials with premium texture and clean tailoring.',
     href: '/collections/winter',
-    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
-    relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
-  },
-  {
-    slug: 'summer',
-    title: 'Summer Collection',
-    subtitle: 'Breathable premium edits',
-    description: 'Lightweight silhouettes designed for warm days and evening plans.',
-    href: '/collections/summer',
-    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
-    relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
-  },
-  {
-    slug: 'everyday-wear',
-    title: 'Everyday Wear',
-    subtitle: 'Daily go-to luxury',
-    description: 'Reliable daily pieces balancing comfort, polish, and movement.',
-    href: '/collections/everyday-wear',
-    images: ['/og-image.svg', '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+    images: [featuredCollectionCovers.winter, '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+      relatedCategorySlugs: ['denim', 'mens-shirt', 'western-outfits'],
+    },
+    {
+      slug: 'summer',
+      title: 'Summer Collection',
+      subtitle: 'Breathable premium edits',
+      description: 'Lightweight silhouettes designed for warm days and evening plans.',
+      href: '/collections/summer',
+      images: [featuredCollectionCovers.summer, '/og-image.svg', '/og-image.svg', '/og-image.svg'],
+      relatedCategorySlugs: ['unisex-tee', 'womens-dresses', 'oversized-tee'],
+    },
+    {
+      slug: 'everyday-wear',
+      title: 'Everyday Wear',
+      subtitle: 'Daily go-to luxury',
+      description: 'Reliable daily pieces balancing comfort, polish, and movement.',
+      href: '/collections/everyday-wear',
+      images: [featuredCollectionCovers['everyday-wear'], '/og-image.svg', '/og-image.svg', '/og-image.svg'],
     relatedCategorySlugs: ['oversized-tee', 'couples', 'kids'],
   },
 ]

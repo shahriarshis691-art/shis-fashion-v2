@@ -6,6 +6,7 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
 import { homeCategoryItems } from '../data/homeCategories'
+import { featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
@@ -351,16 +352,19 @@ export default function HomePage() {
         key: page.slug,
         title: page.title,
         href: page.href || `/collections/${page.slug}`,
-        image: normalizeCatalogImageUrl(page.images[0] ?? '', 1200, 900),
+        image: normalizeCatalogImageUrl(featuredCollectionCover(page.slug, page.images[0] ?? ''), 1200, 900),
       }))
     }
 
-    return homepageContent.categories.map((category) => ({
-      key: category.title,
-      title: category.title,
-      href: category.href || `/collections/${slugify(category.title)}`,
-      image: normalizeCatalogImageUrl(category.image ?? '', 1200, 900),
-    }))
+    return homepageContent.categories.map((category) => {
+      const slug = slugify(category.title)
+      return {
+        key: category.title,
+        title: category.title,
+        href: category.href || `/collections/${slug}`,
+        image: normalizeCatalogImageUrl(featuredCollectionCover(slug, category.image ?? ''), 1200, 900),
+      }
+    })
   }, [homepageContent.categories, homepageContent.featuredCollectionPages])
 
   const contentSections = useMemo(
