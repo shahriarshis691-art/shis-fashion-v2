@@ -235,13 +235,18 @@ export async function settlePrepaidPaid(input: {
     })
 
     if (couponRef && couponSnap?.exists) {
-      const coupon = couponSnap.data() as { status?: string; orderId?: string }
-      const alreadyBound = coupon.orderId === orderId
-      const stolen = coupon.status === 'used' && Boolean(coupon.orderId) && coupon.orderId !== orderId
-      if (!stolen || alreadyBound) {
+      const coupon = couponSnap.data() as { status?: string; orderId?: string; usageCount?: number; maxUsage?: number }
+      if (coupon.orderId === orderId) {
+        return 'applied' as const
+      }
+
+      const usageCount = Number(coupon.usageCount ?? 0)
+      const maxUsage = Math.max(1, Number(coupon.maxUsage ?? 1) || 1)
+      if (String(coupon.status ?? '') === 'active' && usageCount < maxUsage) {
+        const nextUsage = usageCount + 1
         transaction.update(couponRef, {
-          status: 'used',
-          usageCount: 1,
+          status: nextUsage >= maxUsage ? 'used' : 'active',
+          usageCount: nextUsage,
           orderId,
           discountAmount: Number(live.couponDiscountAmount ?? 0),
           usedAt: FieldValue.serverTimestamp(),

@@ -1,10 +1,5 @@
-const PREFIX = 'SHIS-'
-const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-const CODE_LENGTH = 6
-
 export const COUPON_CODE_PATTERN = /^[A-Z][A-Z0-9]{2,11}(?:-[A-Z0-9]{2,14}){0,2}$/
 
-export type CouponAudience = 'public' | 'private'
 export type CouponDiscountType = 'percent' | 'fixed'
 
 export interface CouponQuoteItem {
@@ -19,6 +14,11 @@ export interface CouponRules {
   discountFixedBdt?: number
   minSpend?: number
   applicableCategories?: string[]
+  customerEmail?: string
+  expiryDate?: string
+  status?: string
+  usageCount?: number
+  maxUsage?: number
 }
 
 export interface CouponQuote {
@@ -28,29 +28,15 @@ export interface CouponQuote {
   error?: string
 }
 
-export function generateCouponCode(): string {
-  let code = ''
-  for (let i = 0; i < CODE_LENGTH; i++) {
-    code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length))
-  }
-  return `${PREFIX}${code}`
-}
-
 export function normalizeCouponCode(code: string) {
   return code.trim().toUpperCase()
 }
 
-export function isValidCouponCode(code: string): boolean {
+export function isValidCouponCode(code: string) {
   return COUPON_CODE_PATTERN.test(normalizeCouponCode(code))
 }
 
-export function generateExpiryDate(days: number): string {
-  const expiry = new Date()
-  expiry.setDate(expiry.getDate() + days)
-  return expiry.toISOString()
-}
-
-export function isCouponExpired(expiryDate: string): boolean {
+export function isCouponExpired(expiryDate: string) {
   const parsed = new Date(expiryDate)
   return Number.isNaN(parsed.getTime()) || parsed <= new Date()
 }
@@ -70,14 +56,6 @@ export function normalizeCouponCategories(value: unknown) {
       seen.add(entry)
       return true
     })
-}
-
-export function resolveCouponAudience(customerEmail: string | undefined, audience?: CouponAudience): CouponAudience {
-  if (audience === 'public' || audience === 'private') {
-    return audience
-  }
-
-  return String(customerEmail ?? '').trim() ? 'private' : 'public'
 }
 
 export function resolveCouponDiscountType(value: unknown): CouponDiscountType {
@@ -144,15 +122,34 @@ export function quoteCouponDiscount(rules: CouponRules, items: CouponQuoteItem[]
   return { ok: true, amount, eligibleSubtotal: eligible }
 }
 
-export function formatCouponDiscountLabel(rules: CouponRules) {
-  const type = resolveCouponDiscountType(rules.discountType)
-  if (type === 'fixed') {
-    const amount = Math.max(0, Math.round(Number(rules.discountFixedBdt ?? 0) || 0))
-    return `৳ ${amount.toLocaleString('en-BD')} off`
+export function assertCouponRedeemable(coupon: CouponRules, email = '') {
+  if (coupon.status !== 'active') {
+    return 'This coupon is no longer active.'
   }
 
-  const percent = Math.min(100, Math.max(0, Number(rules.discountPercent ?? 0) || 0))
-  return `${percent}% off`
+  if (isCouponExpired(String(coupon.expiryDate ?? ''))) {
+    return 'This coupon has expired.'
+  }
+
+  const usageCount = Number(coupon.usageCount ?? 0)
+  const maxUsage = Math.max(1, Number(coupon.maxUsage ?? 1) || 1)
+  if (usageCount >= maxUsage) {
+    return 'This coupon has already been used.'
+  }
+
+  const boundEmail = String(coupon.customerEmail ?? '').trim().toLowerCase()
+  const providedEmail = email.trim().toLowerCase()
+  if (boundEmail) {
+    if (!providedEmail) {
+      return 'Enter the email this coupon was issued to.'
+    }
+
+    if (boundEmail !== providedEmail) {
+      return 'This coupon is not valid for this email.'
+    }
+  }
+
+  return ''
 }
 
 export function nextCouponUsage(usageCount: number, maxUsage: number) {
@@ -161,5 +158,21 @@ export function nextCouponUsage(usageCount: number, maxUsage: number) {
   return {
     usageCount: nextUsage,
     status: (nextUsage >= limit ? 'used' : 'active') as 'used' | 'active',
+  }
+}
+
+export function publicCouponPayload(id: string, coupon: CouponRules & { code?: string }) {
+  return {
+    id,
+    code: String(coupon.code ?? ''),
+    discountType: resolveCouponDiscountType(coupon.discountType),
+    discountPercent: Math.min(100, Math.max(0, Number(coupon.discountPercent ?? 0) || 0)),
+    discountFixedBdt: Math.max(0, Math.round(Number(coupon.discountFixedBdt ?? 0) || 0)),
+    minSpend: Math.max(0, Math.round(Number(coupon.minSpend ?? 0) || 0)),
+    applicableCategories: normalizeCouponCategories(coupon.applicableCategories),
+    expiryDate: String(coupon.expiryDate ?? ''),
+    status: coupon.status,
+    usageCount: Number(coupon.usageCount ?? 0),
+    maxUsage: Math.max(1, Number(coupon.maxUsage ?? 1) || 1),
   }
 }

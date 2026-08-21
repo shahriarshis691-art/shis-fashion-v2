@@ -1,16 +1,29 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useCart } from '../../context/CartContext'
 import { getCouponByCode } from '../../firebase/adminService'
+import { parseBDT } from '../../utils/currency'
+import { formatCouponDiscountLabel, quoteCouponDiscount } from '../../utils/coupon'
 
 interface CouponApplyFieldProps {
   customerEmail?: string
 }
 
 export default function CouponApplyField({ customerEmail = '' }: CouponApplyFieldProps) {
-  const { appliedCoupon, applyCoupon, removeCoupon } = useCart()
+  const { items, appliedCoupon, applyCoupon, removeCoupon, discountAmount } = useCart()
   const [couponCode, setCouponCode] = useState(appliedCoupon?.code ?? '')
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponMessage, setCouponMessage] = useState('')
+
+  const quoteItems = useMemo(
+    () => items.map((item) => ({
+      category: item.category,
+      price: parseBDT(item.price),
+      quantity: item.quantity,
+    })),
+    [items],
+  )
+
+  const liveQuote = appliedCoupon ? quoteCouponDiscount(appliedCoupon, quoteItems) : null
 
   const handleApplyCoupon = async () => {
     const trimmed = couponCode.trim()
@@ -23,15 +36,29 @@ export default function CouponApplyField({ customerEmail = '' }: CouponApplyFiel
     setCouponMessage('')
 
     try {
-      const result = await getCouponByCode(trimmed, customerEmail)
+      const result = await getCouponByCode(trimmed, customerEmail, quoteItems)
 
       if (!result || result.status !== 'active' || !result.code) {
         setCouponMessage('Invalid or expired coupon code.')
         return
       }
 
-      applyCoupon(result.code, result.id, result.discountPercent)
-      setCouponMessage(`Coupon applied. You save ${result.discountPercent}%.`)
+      const quote = quoteCouponDiscount(result, quoteItems)
+      if (!quote.ok) {
+        setCouponMessage(quote.error || 'This coupon does not apply to the current cart.')
+        return
+      }
+
+      applyCoupon({
+        code: result.code,
+        couponId: result.id,
+        discountPercent: result.discountPercent,
+        discountType: result.discountType,
+        discountFixedBdt: result.discountFixedBdt,
+        minSpend: result.minSpend,
+        applicableCategories: result.applicableCategories,
+      })
+      setCouponMessage(`${result.code} applied · ${formatCouponDiscountLabel(result)}`)
     } catch (error) {
       setCouponMessage(error instanceof Error ? error.message : 'Unable to validate coupon. Please try again.')
     } finally {
@@ -49,7 +76,7 @@ export default function CouponApplyField({ customerEmail = '' }: CouponApplyFiel
           onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
           placeholder="Enter coupon code"
           className="flex-1 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-[16px] text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-black focus:ring-2 focus:ring-black/5"
-          maxLength={12}
+          maxLength={24}
           autoComplete="off"
         />
         <button
@@ -62,8 +89,12 @@ export default function CouponApplyField({ customerEmail = '' }: CouponApplyFiel
         </button>
       </div>
       {appliedCoupon ? (
-        <div className="mt-2 flex items-center justify-between gap-3 text-sm text-emerald-600">
-          <p role="status">{couponMessage || `${appliedCoupon.code} applied`}</p>
+        <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+          <p role="status" className={liveQuote?.ok ? 'text-emerald-600' : 'text-red-600'}>
+            {liveQuote && !liveQuote.ok
+              ? liveQuote.error
+              : (couponMessage || `${appliedCoupon.code} applied${discountAmount ? ` · save ৳ ${discountAmount.toLocaleString('en-BD')}` : ''}`)}
+          </p>
           <button type="button" onClick={removeCoupon} className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)] hover:text-black">
             Remove
           </button>

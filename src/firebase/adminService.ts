@@ -22,7 +22,7 @@ import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
-import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
+import { isValidCouponCode, isCouponExpired, normalizeCouponCategories, resolveCouponAudience, resolveCouponDiscountType, quoteCouponDiscount, nextCouponUsage, type CouponAudience, type CouponDiscountType, type CouponQuoteItem } from '../utils/coupon'
 import { isApiPrepaidPayment } from '../utils/paymentMethods'
 import { allocateProductSlug, getProductSlug, productMatchesSlug } from '../utils/productIdentity'
 import { decrementMatchingVariant, incrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
@@ -1616,7 +1616,7 @@ export function subscribeToArchivedProducts(callback: (products: AdminProduct[])
 export async function createProduct(product: Omit<AdminProduct, 'id' | 'createdAt'>) {
   assertAdminCanWrite()
   const currentProducts = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
-  const slug = allocateProductSlug(product.name, currentProducts.map((entry) => getProductSlug(entry)))
+  const slug = allocateProductSlug(product.name, currentProducts.map((entry) => getProductSlug(entry)), product.slug)
   const normalizedProduct = normalizeProduct({ ...product, slug, id: 'draft-product' } as AdminProduct)
   const productPayload = {
     ...product,
@@ -3014,6 +3014,11 @@ export interface Coupon {
   id: string
   code?: string
   discountPercent: number
+  discountType?: CouponDiscountType
+  discountFixedBdt?: number
+  minSpend?: number
+  applicableCategories?: string[]
+  audience?: CouponAudience
   customerEmail: string
   createdDate: string
   expiryDate: string
@@ -3038,6 +3043,10 @@ interface PublicCouponValidationResult {
     id: string
     code: string
     discountPercent: number
+    discountType?: CouponDiscountType
+    discountFixedBdt?: number
+    minSpend?: number
+    applicableCategories?: string[]
     expiryDate: string
     status: 'active' | 'used' | 'disabled' | 'expired'
     usageCount: number
@@ -3225,16 +3234,45 @@ export async function createCoupon(coupon: Omit<Coupon, 'id' | 'createdDate' | '
     throw new Error('Coupon service unavailable: database not configured.')
   }
 
-  const code = coupon.code || generateCouponCodeInternal()
-  const discountPercent = coupon.discountPercent ?? computeCouponDiscountPercent()
-  const maxUsage = coupon.maxUsage ?? computeCouponMaxUsage()
+  const code = (coupon.code || generateCouponCodeInternal()).toUpperCase().trim()
+  if (!isValidCouponCode(code)) {
+    throw new Error('Coupon code must look like SHIS-AB12CD or SALE-500.')
+  }
+
+  const discountType = resolveCouponDiscountType(coupon.discountType)
+  const discountPercent = discountType === 'percent'
+    ? Math.min(100, Math.max(0, coupon.discountPercent ?? computeCouponDiscountPercent()))
+    : 0
+  const discountFixedBdt = discountType === 'fixed'
+    ? Math.max(0, Math.round(Number(coupon.discountFixedBdt ?? 0) || 0))
+    : 0
+  if (discountType === 'percent' && discountPercent <= 0) {
+    throw new Error('Enter a percent discount between 1 and 100.')
+  }
+  if (discountType === 'fixed' && discountFixedBdt <= 0) {
+    throw new Error('Enter a fixed discount in BDT.')
+  }
+
+  const maxUsage = Math.max(1, Math.min(10000, coupon.maxUsage ?? computeCouponMaxUsage()))
   const expiryDate = coupon.expiryDate || computeCouponExpiry()
+  const customerEmail = (coupon.customerEmail ?? '').trim().toLowerCase()
+  const audience = resolveCouponAudience(customerEmail, coupon.audience)
+  if (audience === 'private' && !customerEmail) {
+    throw new Error('Private coupons require a customer email.')
+  }
+  const applicableCategories = normalizeCouponCategories(coupon.applicableCategories)
+  const minSpend = Math.max(0, Math.round(Number(coupon.minSpend ?? 0) || 0))
 
   const newCoupon: Coupon = {
     id: `local-coupon-${Date.now()}`,
-    code: code.toUpperCase().trim(),
+    code,
     discountPercent,
-    customerEmail: coupon.customerEmail.trim().toLowerCase(),
+    discountType,
+    discountFixedBdt,
+    minSpend,
+    applicableCategories,
+    audience,
+    customerEmail: audience === 'private' ? customerEmail : '',
     createdDate: new Date().toISOString(),
     expiryDate,
     status: 'active',
@@ -3261,6 +3299,11 @@ export async function createCoupon(coupon: Omit<Coupon, 'id' | 'createdDate' | '
     const ref = await addDoc(collection(firebaseDb, 'coupons'), {
       code: newCoupon.code,
       discountPercent: newCoupon.discountPercent,
+      discountType: newCoupon.discountType,
+      discountFixedBdt: newCoupon.discountFixedBdt,
+      minSpend: newCoupon.minSpend,
+      applicableCategories: newCoupon.applicableCategories,
+      audience: newCoupon.audience,
       customerEmail: newCoupon.customerEmail,
       createdDate: serverTimestamp(),
       expiryDate: newCoupon.expiryDate,
@@ -3302,7 +3345,7 @@ export async function getCoupons(): Promise<Coupon[]> {
   }
 }
 
-export async function getCouponByCode(code: string, customerEmail = ''): Promise<Coupon | null> {
+export async function getCouponByCode(code: string, customerEmail = '', cartItems: CouponQuoteItem[] = []): Promise<Coupon | null> {
   const trimmed = code.trim().toUpperCase()
   const trimmedEmail = customerEmail.trim().toLowerCase()
 
@@ -3310,9 +3353,29 @@ export async function getCouponByCode(code: string, customerEmail = ''): Promise
     return null
   }
 
+  const toCoupon = (entry: Coupon): Coupon => ({
+    ...entry,
+    discountType: resolveCouponDiscountType(entry.discountType),
+    discountFixedBdt: Math.max(0, Number(entry.discountFixedBdt ?? 0) || 0),
+    minSpend: Math.max(0, Number(entry.minSpend ?? 0) || 0),
+    applicableCategories: normalizeCouponCategories(entry.applicableCategories),
+    audience: resolveCouponAudience(entry.customerEmail, entry.audience),
+    customerEmail: entry.customerEmail ?? '',
+  })
+
+  const assertEligible = (coupon: Coupon) => {
+    if (!cartItems.length) {
+      return
+    }
+    const quote = quoteCouponDiscount(coupon, cartItems)
+    if (!quote.ok) {
+      throw new Error(quote.error || 'This coupon does not apply to the current cart.')
+    }
+  }
+
   if (!firebaseDb || isLocalFirstDataMode()) {
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
-    const coupon = coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+    const coupon = coupons.find((c) => (c.code ?? '').toUpperCase() === trimmed && c.status === 'active') || null
     if (!coupon) {
       return null
     }
@@ -3321,12 +3384,14 @@ export async function getCouponByCode(code: string, customerEmail = ''): Promise
       return null
     }
 
-    const boundEmail = coupon.customerEmail.trim().toLowerCase()
+    const boundEmail = (coupon.customerEmail ?? '').trim().toLowerCase()
     if (boundEmail && boundEmail !== trimmedEmail) {
       throw new Error(trimmedEmail ? 'This coupon is not valid for this email.' : 'Enter the email this coupon was issued to.')
     }
 
-    return coupon
+    const normalized = toCoupon(coupon)
+    assertEligible(normalized)
+    return normalized
   }
 
   try {
@@ -3335,7 +3400,12 @@ export async function getCouponByCode(code: string, customerEmail = ''): Promise
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ action: 'validate', code: trimmed, email: trimmedEmail || undefined }),
+      body: JSON.stringify({
+        action: 'validate',
+        code: trimmed,
+        email: trimmedEmail || undefined,
+        items: cartItems,
+      }),
     })
 
     const payload = await response.json() as PublicCouponValidationResult
@@ -3347,24 +3417,31 @@ export async function getCouponByCode(code: string, customerEmail = ''): Promise
       return null
     }
 
-    return {
+    const normalized = toCoupon({
       id: payload.coupon.id,
       code: payload.coupon.code,
       discountPercent: payload.coupon.discountPercent,
+      discountType: payload.coupon.discountType,
+      discountFixedBdt: payload.coupon.discountFixedBdt,
+      minSpend: payload.coupon.minSpend,
+      applicableCategories: payload.coupon.applicableCategories,
       customerEmail: '',
       createdDate: '',
       expiryDate: payload.coupon.expiryDate,
       status: payload.coupon.status,
       usageCount: payload.coupon.usageCount,
       maxUsage: payload.coupon.maxUsage,
-    }
+    })
+    assertEligible(normalized)
+    return normalized
   } catch (error) {
     if (requiresLiveBackend()) {
       throw error instanceof Error ? error : new Error('Unable to validate coupon. Please try again.')
     }
 
     const coupons = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
-    return coupons.find((c) => c.code!.toUpperCase() === trimmed && c.status === 'active') || null
+    const fallback = coupons.find((c) => (c.code ?? '').toUpperCase() === trimmed && c.status === 'active') || null
+    return fallback ? toCoupon(fallback) : null
   }
 }
 
@@ -3452,11 +3529,21 @@ export async function linkCouponToSubscriber(subscriberEmail: string, couponCode
 
 export async function markCouponUsed(couponId: string, orderId: string, discountAmount: number): Promise<void> {
   const current = readStored<Coupon[]>(COUPON_PREFIX + 'coupons', [])
-  const updated = current.map((coupon) =>
-    coupon.id === couponId
-      ? { ...coupon, status: 'used' as const, usageCount: 1, orderId, discountAmount, usedAt: new Date().toISOString() }
-      : coupon,
-  )
+  const updated = current.map((coupon) => {
+    if (coupon.id !== couponId) {
+      return coupon
+    }
+
+    const next = nextCouponUsage(coupon.usageCount, coupon.maxUsage)
+    return {
+      ...coupon,
+      status: next.status,
+      usageCount: next.usageCount,
+      orderId,
+      discountAmount,
+      usedAt: new Date().toISOString(),
+    }
+  })
   writeStored(COUPON_PREFIX + 'coupons', updated)
 
   if (!firebaseDb || isLocalFirstDataMode()) {

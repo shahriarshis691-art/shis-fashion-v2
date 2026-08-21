@@ -13,6 +13,14 @@ import {
   normalizeWalletTransactionId,
   resolvePaymentStatus,
 } from '../_payment.js'
+import {
+  assertCouponRedeemable,
+  isValidCouponCode,
+  nextCouponUsage,
+  quoteCouponDiscount,
+  resolveCouponDiscountType,
+  type CouponRules,
+} from '../_coupon.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -68,16 +76,11 @@ interface ProductRecord {
   sizes?: string[]
   colors?: string[]
   variants?: unknown
+  category?: string
 }
 
-interface CouponRecord {
+interface CouponRecord extends CouponRules {
   code?: string
-  discountPercent?: number
-  customerEmail?: string
-  expiryDate?: string
-  status?: string
-  usageCount?: number
-  maxUsage?: number
   orderId?: string
 }
 
@@ -112,11 +115,6 @@ function normalizePhone(raw: string) {
   }
 
   return ''
-}
-
-function isCouponExpired(expiryDate: string) {
-  const parsed = new Date(expiryDate)
-  return Number.isNaN(parsed.getTime()) || parsed <= new Date()
 }
 
 function getBaseDeliveryCharge(division: string) {
@@ -231,7 +229,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
   let couponRef: DocumentReference | null = null
   if (couponCode) {
-    if (!/^[A-Z]{3,}-[A-Z0-9]{3,}$/.test(couponCode)) {
+    if (!isValidCouponCode(couponCode)) {
       res.status(400).json({ error: 'Invalid coupon code format.' })
       return
     }
@@ -244,25 +242,10 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
     couponRef = couponSnapshot.docs[0].ref
     const coupon = couponSnapshot.docs[0].data() as CouponRecord
-    const boundEmail = String(coupon.customerEmail ?? '').trim().toLowerCase()
-    const usageCount = Number(coupon.usageCount ?? 0)
-    const maxUsage = Number(coupon.maxUsage ?? 1)
-
-    if (coupon.status !== 'active' || isCouponExpired(String(coupon.expiryDate ?? '')) || usageCount >= maxUsage) {
-      res.status(409).json({ error: 'This coupon is no longer active.' })
+    const redeemError = assertCouponRedeemable(coupon, customerEmail)
+    if (redeemError) {
+      res.status(409).json({ error: redeemError })
       return
-    }
-
-    if (boundEmail) {
-      if (!customerEmail) {
-        res.status(409).json({ error: 'Enter the email this coupon was issued to.' })
-        return
-      }
-
-      if (boundEmail !== customerEmail) {
-        res.status(409).json({ error: 'This coupon is not valid for this email.' })
-        return
-      }
     }
   }
 
@@ -314,6 +297,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           size: entry?.size || undefined,
           color: entry?.color || undefined,
           slug: getProductSlug(data),
+          category: String(data.category ?? ''),
           unitPrice: parseBDT(data.price),
           productRef: snap.ref,
           stock: available.stock,
@@ -328,20 +312,34 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       }
 
       let discountPercent = 0
+      let discountAmount = 0
       let couponId = ''
+      let discountType: 'percent' | 'fixed' = 'percent'
+      let couponUsageUpdate: ReturnType<typeof nextCouponUsage> | null = null
       if (couponSnap?.exists) {
         const liveCoupon = couponSnap.data() as CouponRecord
-        const usageCount = Number(liveCoupon.usageCount ?? 0)
-        const maxUsage = Number(liveCoupon.maxUsage ?? 1)
-        if (liveCoupon.status !== 'active' || isCouponExpired(String(liveCoupon.expiryDate ?? '')) || usageCount >= maxUsage) {
-          throw new Error('COUPON_INACTIVE')
+        const redeemError = assertCouponRedeemable(liveCoupon, customerEmail)
+        if (redeemError) {
+          throw new Error(`COUPON_INACTIVE:${redeemError}`)
         }
 
-        discountPercent = Math.min(100, Math.max(0, Number(liveCoupon.discountPercent ?? 0)))
-        couponId = couponSnap.id
-      }
+        const quote = quoteCouponDiscount(liveCoupon, pricedItems.map((item) => ({
+          category: item.category,
+          price: item.unitPrice,
+          quantity: item.quantity,
+        })))
+        if (!quote.ok) {
+          throw new Error(`COUPON_INELIGIBLE:${quote.error || 'This coupon does not apply to the current cart.'}`)
+        }
 
-      const discountAmount = discountPercent ? Math.round(subtotal * discountPercent / 100 * 100) / 100 : 0
+        discountType = resolveCouponDiscountType(liveCoupon.discountType)
+        discountPercent = discountType === 'percent'
+          ? Math.min(100, Math.max(0, Number(liveCoupon.discountPercent ?? 0) || 0))
+          : 0
+        discountAmount = quote.amount
+        couponId = couponSnap.id
+        couponUsageUpdate = nextCouponUsage(Number(liveCoupon.usageCount ?? 0), Number(liveCoupon.maxUsage ?? 1))
+      }
       const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : getBaseDeliveryCharge(division)
       const total = Math.round((subtotal + deliveryCharge - discountAmount) * 100) / 100
       if (total <= 0) {
@@ -386,6 +384,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           couponCode,
           couponDiscountPercent: discountPercent,
           couponDiscountAmount: discountAmount,
+          couponDiscountType: discountType,
           couponId,
         } : {}),
       }
@@ -396,10 +395,10 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         applyStockDecrement(transaction, item)
       })
 
-      if (!isApiPrepaid && couponSnap?.exists && couponRef) {
+      if (!isApiPrepaid && couponSnap?.exists && couponRef && couponUsageUpdate) {
         transaction.update(couponRef, {
-          status: 'used',
-          usageCount: 1,
+          status: couponUsageUpdate.status,
+          usageCount: couponUsageUpdate.usageCount,
           orderId: orderRef.id,
           discountAmount,
           usedAt: FieldValue.serverTimestamp(),
@@ -527,8 +526,13 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       return
     }
 
-    if (message === 'COUPON_INACTIVE') {
-      res.status(409).json({ error: 'This coupon is no longer active.' })
+    if (message === 'COUPON_INACTIVE' || message.startsWith('COUPON_INACTIVE:')) {
+      res.status(409).json({ error: message.split(':').slice(1).join(':') || 'This coupon is no longer active.' })
+      return
+    }
+
+    if (message.startsWith('COUPON_INELIGIBLE:')) {
+      res.status(409).json({ error: message.slice('COUPON_INELIGIBLE:'.length) || 'This coupon does not apply to the current cart.' })
       return
     }
 

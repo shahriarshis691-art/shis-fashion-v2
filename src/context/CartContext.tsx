@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import type { ShopProduct } from '../data/shopData'
 import { parseBDT } from '../utils/currency'
 import { getVariantStock } from '../utils/variantStock'
+import { quoteCouponDiscount, type CouponDiscountType } from '../utils/coupon'
 import { useCustomerRecovery } from './CustomerRecoveryContext'
 
 export interface CartItem extends Omit<ShopProduct, 'id'> {
@@ -29,6 +30,10 @@ export interface CouponApplied {
   discountPercent: number
   discountAmount: number
   couponId?: string
+  discountType?: CouponDiscountType
+  discountFixedBdt?: number
+  minSpend?: number
+  applicableCategories?: string[]
 }
 
 interface CartContextValue {
@@ -40,7 +45,7 @@ interface CartContextValue {
   itemCount: number
   subtotal: number
   appliedCoupon: CouponApplied | null
-  applyCoupon: (couponCode: string, couponId?: string, discountPercent?: number) => boolean
+  applyCoupon: (coupon: Omit<CouponApplied, 'discountAmount'> & { discountAmount?: number }) => boolean
   removeCoupon: () => void
   discountAmount: number
   grandTotal: number
@@ -332,19 +337,25 @@ function CartProvider({ children }: { children: ReactNode }) {
     setRecentAddition(null)
   }
 
-  const applyCoupon = useCallback((code: string, couponId?: string, discountPercent?: number): boolean => {
-    const trimmedCode = code.trim().toUpperCase()
+  const applyCoupon = useCallback((couponInput: Omit<CouponApplied, 'discountAmount'> & { discountAmount?: number }): boolean => {
+    const trimmedCode = couponInput.code.trim().toUpperCase()
     if (!trimmedCode) {
       return false
     }
 
-    const safePercent = Number.isFinite(discountPercent) ? Math.min(100, Math.max(0, Number(discountPercent))) : 5
+    const safePercent = Number.isFinite(couponInput.discountPercent)
+      ? Math.min(100, Math.max(0, Number(couponInput.discountPercent)))
+      : 0
 
     const newCoupon: CouponApplied = {
       code: trimmedCode,
       discountPercent: safePercent,
       discountAmount: 0,
-      couponId,
+      couponId: couponInput.couponId,
+      discountType: couponInput.discountType === 'fixed' ? 'fixed' : 'percent',
+      discountFixedBdt: Math.max(0, Number(couponInput.discountFixedBdt ?? 0) || 0),
+      minSpend: Math.max(0, Number(couponInput.minSpend ?? 0) || 0),
+      applicableCategories: couponInput.applicableCategories ?? [],
     }
 
     setCoupon(newCoupon)
@@ -357,8 +368,14 @@ function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
-  const discountAmount = coupon ? Math.round(subtotal * coupon.discountPercent / 100 * 100) / 100 : 0
-  const grandTotal = subtotal - discountAmount
+  const discountAmount = coupon
+    ? quoteCouponDiscount(coupon, items.map((item) => ({
+      category: item.category,
+      price: parseBDT(item.price),
+      quantity: item.quantity,
+    }))).amount
+    : 0
+  const grandTotal = Math.max(0, subtotal - discountAmount)
 
   const value = useMemo<CartContextValue>(
     () => ({

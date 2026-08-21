@@ -1,6 +1,14 @@
 import { getFirestore } from 'firebase-admin/firestore'
 import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
 import { createRateLimiter, getClientIp } from '../_rateLimit.js'
+import {
+  assertCouponRedeemable,
+  isValidCouponCode,
+  publicCouponPayload,
+  quoteCouponDiscount,
+  type CouponQuoteItem,
+  type CouponRules,
+} from '../_coupon.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -24,17 +32,13 @@ interface ValidateCouponBody {
   couponId?: string
   orderId?: string
   discountAmount?: number
+  items?: CouponQuoteItem[]
 }
 
 const isValidateLimited = createRateLimiter(30, 60_000, 'validate-coupon')
 
 function isCouponCodeValid(code: string) {
-  return /^[A-Z]{3,}-[A-Z0-9]{3,}$/i.test(code)
-}
-
-function isCouponExpired(expiryDate: string) {
-  const parsed = new Date(expiryDate)
-  return Number.isNaN(parsed.getTime()) || parsed <= new Date()
+  return isValidCouponCode(code)
 }
 
 async function findCoupon(db: NonNullable<ReturnType<typeof getFirebaseAdminDb>>, code?: string, couponId?: string) {
@@ -95,56 +99,30 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       return
     }
 
-    const coupon = couponSnapshot.data() as {
-      code: string
-      discountPercent: number
-      expiryDate: string
-      status: 'active' | 'used' | 'disabled' | 'expired'
-      usageCount: number
-      maxUsage: number
-      customerEmail?: string
-    }
+    const coupon = couponSnapshot.data() as CouponRules & { code?: string }
 
-    if (coupon.status !== 'active') {
-      res.status(409).json({ valid: false, error: 'This coupon is no longer active.' })
+    const redeemError = assertCouponRedeemable(coupon, String(body.email ?? ''))
+    if (redeemError) {
+      res.status(409).json({
+        valid: false,
+        error: redeemError,
+        emailRequired: redeemError.includes('issued to'),
+      })
       return
     }
 
-    if (isCouponExpired(coupon.expiryDate)) {
-      res.status(409).json({ valid: false, error: 'This coupon has expired.' })
-      return
-    }
-
-    if (coupon.usageCount >= coupon.maxUsage) {
-      res.status(409).json({ valid: false, error: 'This coupon has already been used.' })
-      return
-    }
-
-    const boundEmail = String(coupon.customerEmail ?? '').trim().toLowerCase()
-    const providedEmail = String(body.email ?? '').trim().toLowerCase()
-    if (boundEmail) {
-      if (!providedEmail) {
-        res.status(409).json({ valid: false, error: 'Enter the email this coupon was issued to.', emailRequired: true })
-        return
-      }
-
-      if (boundEmail !== providedEmail) {
-        res.status(409).json({ valid: false, error: 'This coupon is not valid for this email.' })
+    const items = Array.isArray(body.items) ? body.items : []
+    if (items.length) {
+      const quote = quoteCouponDiscount(coupon, items)
+      if (!quote.ok) {
+        res.status(409).json({ valid: false, error: quote.error || 'This coupon does not apply to the current cart.' })
         return
       }
     }
 
     res.status(200).json({
       valid: true,
-      coupon: {
-        id: couponSnapshot.id,
-        code: coupon.code,
-        discountPercent: coupon.discountPercent,
-        expiryDate: coupon.expiryDate,
-        status: coupon.status,
-        usageCount: coupon.usageCount,
-        maxUsage: coupon.maxUsage,
-      },
+      coupon: publicCouponPayload(couponSnapshot.id, coupon),
     })
     return
   }

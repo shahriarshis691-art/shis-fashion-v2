@@ -6,10 +6,17 @@ import Container from '../components/ui/Container'
 import Loading from '../components/ui/Loading'
 import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
+import ProductCsvPanel from '../components/admin/ProductCsvPanel'
 import { compactManagedImages, getManagedImageEntries } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
-import { buildOpsReport, LOW_STOCK_THRESHOLD } from '../utils/opsReports'
+import { buildOpsReport, defaultOpsReportRange, LOW_STOCK_THRESHOLD, shiftDayKey, toDayKey } from '../utils/opsReports'
+import {
+  formatCouponDiscountLabel,
+  generateCouponCode,
+  type CouponAudience,
+  type CouponDiscountType,
+} from '../utils/coupon'
 import {
   ORDER_LIFECYCLE,
   ORDER_STATUS_LABELS,
@@ -215,6 +222,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [orderSearch, setOrderSearch] = useState('')
   const [orderDateFrom, setOrderDateFrom] = useState('')
   const [orderDateTo, setOrderDateTo] = useState('')
+  const [reportRange, setReportRange] = useState(() => defaultOpsReportRange())
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
   const [bulkStock, setBulkStock] = useState('')
   const [bulkPrice, setBulkPrice] = useState('')
@@ -261,10 +269,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
    const [showCouponForm, setShowCouponForm] = useState(false)
    const [newCouponForm, setNewCouponForm] = useState({
      code: '',
-     discountPercent: 5,
+     audience: 'public' as CouponAudience,
+     discountType: 'percent' as CouponDiscountType,
+     discountPercent: 10,
+     discountFixedBdt: 500,
+     minSpend: 0,
+     applicableCategories: [] as string[],
      customerEmail: '',
      expiryDays: 30,
-     maxUsage: 1,
+     maxUsage: 100,
    })
 
   useEffect(() => {
@@ -403,11 +416,14 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
      downloadCsv(
        `coupons-${new Date().toISOString().slice(0, 10)}.csv`,
-       ['Code', 'Customer Email', 'Discount %', 'Status', 'Usage Count', 'Max Usage', 'Expiry Date', 'Created At'],
+       ['Code', 'Audience', 'Customer', 'Discount', 'Min spend', 'Categories', 'Status', 'Usage', 'Expiry', 'Created'],
        coupons.map((coupon) => [
          coupon.code ?? '',
+         coupon.audience ?? (coupon.customerEmail ? 'private' : 'public'),
          coupon.customerEmail ?? '',
-         `${coupon.discountPercent}%`,
+         formatCouponDiscountLabel(coupon),
+         coupon.minSpend ?? 0,
+         (coupon.applicableCategories ?? []).join('|'),
          coupon.status,
          `${coupon.usageCount}/${coupon.maxUsage}`,
          coupon.expiryDate ? new Date(coupon.expiryDate).toISOString() : '',
@@ -416,9 +432,6 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
      )
      setMessage('Coupons exported.')
    }
-
-  const toDayKey = (date: Date) =>
-    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
   const customers = useMemo(() => {
     const byIdentity = new Map<string, { identity: string; name: string; phone: string; email: string; totalOrders: number; orderIds: string[] }>()
@@ -490,7 +503,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }, [archivedBrands.length, brands.length, customers.length, orders, products])
 
-  const opsReport = useMemo(() => buildOpsReport(orders), [orders])
+  const opsReport = useMemo(
+    () => buildOpsReport(orders, { range: reportRange }),
+    [orders, reportRange],
+  )
 
   const filteredOrders = useMemo(() => {
     const query = orderSearch.toLowerCase()
@@ -619,13 +635,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       `ops-report-${new Date().toISOString().slice(0, 10)}.csv`,
       ['Type', 'Name', 'Quantity', 'Amount'],
       [
+        ['KPI', 'Orders in range', opsReport.scopedOrders, ''],
         ['KPI', 'Billable orders', opsReport.billableOrders, ''],
+        ['KPI', 'Revenue', '', opsReport.revenue],
         ['KPI', 'Average order value', '', opsReport.aov],
         ['KPI', 'Last 7 days orders', opsReport.last7Orders, ''],
         ['KPI', 'Last 7 days revenue', '', opsReport.last7Revenue],
         ['KPI', 'Pending COD value', '', opsReport.pendingValue],
         ['KPI', 'Cancel rate %', opsReport.cancelledRate, ''],
-        ...opsReport.bestSellers.map((item) => ['Best seller', item.name, item.quantity, Math.round(item.revenue)] as Array<string | number>),
+        ...opsReport.daily.map((point) => ['Daily', point.date, point.orders, Math.round(point.revenue)] as Array<string | number>),
+        ...opsReport.productSales.map((item) => ['Product sales', item.name, item.quantity, Math.round(item.revenue)] as Array<string | number>),
       ],
     )
     setMessage('Operations report exported.')
@@ -1800,7 +1819,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               <div>
                 <p className="text-sm font-semibold text-[var(--color-text)]">Operations report</p>
                 <p className="mt-1 text-xs text-[var(--color-muted)]">
-                  From loaded orders. Cancel rate {opsReport.cancelledRate}% · Coupons used {couponStats.used}/{couponStats.total || 0}.
+                  {opsReport.billableOrders} billable orders · {formatBDT(opsReport.revenue)} revenue · AOV {formatBDT(opsReport.aov)} · cancel rate {opsReport.cancelledRate}%
                 </p>
               </div>
               <button
@@ -1811,6 +1830,37 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 Export report
               </button>
             </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {([
+                ['7d', () => setReportRange(defaultOpsReportRange())],
+                ['30d', () => setReportRange({ from: shiftDayKey(toDayKey(new Date()), -29), to: toDayKey(new Date()) })],
+                ['Today', () => setReportRange({ from: toDayKey(new Date()), to: toDayKey(new Date()) })],
+                ['All', () => setReportRange({ from: '', to: '' })],
+              ] as const).map(([label, onClick]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={onClick}
+                  className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)]"
+                >
+                  {label}
+                </button>
+              ))}
+              <input
+                type="date"
+                value={reportRange.from ?? ''}
+                onChange={(event) => setReportRange((current) => ({ ...current, from: event.target.value }))}
+                className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs text-[var(--color-text)] outline-none"
+                aria-label="Report from date"
+              />
+              <input
+                type="date"
+                value={reportRange.to ?? ''}
+                onChange={(event) => setReportRange((current) => ({ ...current, to: event.target.value }))}
+                className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs text-[var(--color-text)] outline-none"
+                aria-label="Report to date"
+              />
+            </div>
             <div className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
               {opsReport.bestSellers.length ? opsReport.bestSellers.map((item) => (
                 <div key={item.name} className="flex items-center justify-between gap-3">
@@ -1818,7 +1868,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <span className="shrink-0">{item.quantity} sold · {formatBDT(item.revenue)}</span>
                 </div>
               )) : (
-                <p>Best sellers appear after the first billable orders.</p>
+                <p>Product sales appear after billable orders in this date range.</p>
               )}
             </div>
           </div>
@@ -1834,6 +1884,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 </div>
                 <Button onClick={resetForm} variant="secondary">Reset</Button>
               </div>
+              <ProductCsvPanel products={products} canWrite={Boolean(user?.canWrite)} onMessage={setMessage} />
 
               <form className="mt-6 space-y-4" onSubmit={handleSaveProduct}>
                 <input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Product name" />
@@ -3137,26 +3188,92 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
             {showCouponForm ? (
               <div className="mt-6 rounded-xl border border-black/10 bg-black/[0.02] p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black">Generate New Coupon</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black">Create coupon</h3>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs font-medium text-black/60">Customer Email</label>
+                    <label className="text-xs font-medium text-black/60">Code</label>
                     <input
-                      type="email"
-                      value={newCouponForm.customerEmail}
-                      onChange={(event) => setNewCouponForm({ ...newCouponForm, customerEmail: event.target.value })}
+                      value={newCouponForm.code}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, code: event.target.value.toUpperCase() })}
                       className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
-                      placeholder="customer@email.com"
+                      placeholder="EID-500 or leave blank to generate"
+                      maxLength={24}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-black/60">Discount (%)</label>
+                    <label className="text-xs font-medium text-black/60">Audience</label>
+                    <select
+                      value={newCouponForm.audience}
+                      onChange={(event) => {
+                        const audience = event.target.value as CouponAudience
+                        setNewCouponForm({
+                          ...newCouponForm,
+                          audience,
+                          maxUsage: audience === 'public' ? Math.max(newCouponForm.maxUsage, 100) : 1,
+                        })
+                      }}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                    >
+                      <option value="public">Public campaign</option>
+                      <option value="private">Private / email-bound</option>
+                    </select>
+                  </div>
+                  {newCouponForm.audience === 'private' ? (
+                    <div>
+                      <label className="text-xs font-medium text-black/60">Customer Email</label>
+                      <input
+                        type="email"
+                        value={newCouponForm.customerEmail}
+                        onChange={(event) => setNewCouponForm({ ...newCouponForm, customerEmail: event.target.value })}
+                        className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                        placeholder="customer@email.com"
+                      />
+                    </div>
+                  ) : null}
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Discount type</label>
+                    <select
+                      value={newCouponForm.discountType}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, discountType: event.target.value as CouponDiscountType })}
+                      className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                    >
+                      <option value="percent">Percent off</option>
+                      <option value="fixed">Fixed BDT off</option>
+                    </select>
+                  </div>
+                  {newCouponForm.discountType === 'percent' ? (
+                    <div>
+                      <label className="text-xs font-medium text-black/60">Discount (%)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={newCouponForm.discountPercent}
+                        onChange={(event) => setNewCouponForm({ ...newCouponForm, discountPercent: Number(event.target.value) })}
+                        className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="text-xs font-medium text-black/60">Fixed amount (BDT)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100000"
+                        value={newCouponForm.discountFixedBdt}
+                        onChange={(event) => setNewCouponForm({ ...newCouponForm, discountFixedBdt: Number(event.target.value) })}
+                        className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-xs font-medium text-black/60">Minimum spend (BDT)</label>
                     <input
                       type="number"
-                      min="1"
-                      max="100"
-                      value={newCouponForm.discountPercent}
-                      onChange={(event) => setNewCouponForm({ ...newCouponForm, discountPercent: Number(event.target.value) })}
+                      min="0"
+                      max="1000000"
+                      value={newCouponForm.minSpend}
+                      onChange={(event) => setNewCouponForm({ ...newCouponForm, minSpend: Number(event.target.value) })}
                       className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
                     />
                   </div>
@@ -3172,42 +3289,84 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-black/60">Max Usage</label>
+                    <label className="text-xs font-medium text-black/60">Max usage</label>
                     <input
                       type="number"
                       min="1"
-                      max="100"
+                      max="10000"
                       value={newCouponForm.maxUsage}
                       onChange={(event) => setNewCouponForm({ ...newCouponForm, maxUsage: Number(event.target.value) })}
                       className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none"
                     />
                   </div>
                 </div>
+                <div className="mt-4">
+                  <p className="text-xs font-medium text-black/60">Category targeting (optional)</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {taxonomyCategoryOptions.map((option) => {
+                      const selected = newCouponForm.applicableCategories.includes(option.slug)
+                      return (
+                        <button
+                          key={`${option.segment}-${option.slug}`}
+                          type="button"
+                          onClick={() => setNewCouponForm((current) => ({
+                            ...current,
+                            applicableCategories: selected
+                              ? current.applicableCategories.filter((entry) => entry !== option.slug)
+                              : [...current.applicableCategories, option.slug],
+                          }))}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${selected ? 'border-black text-black' : 'border-black/15 text-black/60'}`}
+                        >
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
                 <div className="mt-4 flex gap-3">
                   <Button
                     onClick={async () => {
-                      if (!newCouponForm.customerEmail.trim()) return
+                      if (newCouponForm.audience === 'private' && !newCouponForm.customerEmail.trim()) {
+                        setToast({ kind: 'error', message: 'Private coupons need a customer email.' })
+                        return
+                      }
                       try {
                         await createCoupon({
-                          code: (newCouponForm.code || '').toUpperCase(),
+                          code: (newCouponForm.code || generateCouponCode()).toUpperCase(),
                           discountPercent: newCouponForm.discountPercent,
-                          customerEmail: newCouponForm.customerEmail.trim(),
+                          discountType: newCouponForm.discountType,
+                          discountFixedBdt: newCouponForm.discountFixedBdt,
+                          minSpend: newCouponForm.minSpend,
+                          applicableCategories: newCouponForm.applicableCategories,
+                          audience: newCouponForm.audience,
+                          customerEmail: newCouponForm.audience === 'private' ? newCouponForm.customerEmail.trim() : '',
                           expiryDate: new Date(Date.now() + newCouponForm.expiryDays * 86400000).toISOString(),
                           maxUsage: newCouponForm.maxUsage,
                           status: 'active',
                         })
-                        setNewCouponForm({ code: '', discountPercent: 5, customerEmail: '', expiryDays: 30, maxUsage: 1 })
+                        setNewCouponForm({
+                          code: '',
+                          audience: 'public',
+                          discountType: 'percent',
+                          discountPercent: 10,
+                          discountFixedBdt: 500,
+                          minSpend: 0,
+                          applicableCategories: [],
+                          customerEmail: '',
+                          expiryDays: 30,
+                          maxUsage: 100,
+                        })
                         setShowCouponForm(false)
                         const allCoupons = await getCoupons()
                         setCoupons(allCoupons)
                         setCouponStats(getCouponStats(allCoupons))
-                        setToast({ kind: 'success', message: 'Coupon generated successfully.' })
-                      } catch {
-                        setToast({ kind: 'error', message: 'Failed to generate coupon.' })
+                        setToast({ kind: 'success', message: 'Coupon created.' })
+                      } catch (error) {
+                        setToast({ kind: 'error', message: error instanceof Error ? error.message : 'Failed to create coupon.' })
                       }
                     }}
                   >
-                    Generate
+                    Create coupon
                   </Button>
                   <Button variant="secondary" onClick={() => setShowCouponForm(false)}>
                     Cancel
@@ -3249,13 +3408,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     {coupons
                       .filter((coupon) => {
                         const q = couponSearch.toLowerCase()
-                        return (coupon.code || '').toLowerCase().includes(q) || coupon.customerEmail.toLowerCase().includes(q)
+                        return (coupon.code || '').toLowerCase().includes(q) || (coupon.customerEmail ?? '').toLowerCase().includes(q)
                       })
                       .map((coupon) => (
                         <tr key={coupon.id} className="border-b border-black/5">
                           <td className="py-2 font-mono text-[var(--color-text)]">{coupon.code}</td>
-                          <td className="py-2 text-[var(--color-muted)]">{coupon.customerEmail}</td>
-                          <td className="py-2 text-[var(--color-text)]">{coupon.discountPercent}%</td>
+                          <td className="py-2 text-[var(--color-muted)]">{coupon.customerEmail || 'Public'}</td>
+                          <td className="py-2 text-[var(--color-text)]">{formatCouponDiscountLabel(coupon)}{coupon.minSpend ? ` · min ৳ ${coupon.minSpend}` : ''}</td>
                           <td className="py-2">
                             <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
                               coupon.status === 'active' ? 'bg-emerald-100 text-emerald-700' :

@@ -9,6 +9,7 @@ import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 import { PAYMENT_METHOD_COD } from '../utils/orderComms'
+import { quoteCouponDiscount } from '../utils/coupon'
 import {
   formatWalletDialNumber,
   getDefaultCheckoutPaymentConfig,
@@ -99,7 +100,14 @@ export default function CheckoutPage() {
   const hasTrackedCheckoutRef = useRef(false)
   const enteredAtRef = useRef(0)
   const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
-  const discountAmount = appliedCoupon ? Math.round(subtotal * appliedCoupon.discountPercent / 100 * 100) / 100 : 0
+  const couponQuote = appliedCoupon
+    ? quoteCouponDiscount(appliedCoupon, items.map((item) => ({
+      category: item.category,
+      price: parseBDT(item.price),
+      quantity: item.quantity,
+    })))
+    : null
+  const discountAmount = couponQuote?.ok ? couponQuote.amount : 0
   const deliveryCharge = getDeliveryCharge(form.division as BangladeshDivision, subtotal, freeDeliveryThreshold)
   const effectiveGrandTotal = subtotal + deliveryCharge - discountAmount
   const districtOptions = getDistrictsForDivision(form.division as BangladeshDivision)
@@ -120,6 +128,7 @@ export default function CheckoutPage() {
     form.district &&
     form.upazila &&
     (!requiresWalletTrxId || isValidWalletTransactionId(paymentTransactionId)) &&
+    !(appliedCoupon && couponQuote && !couponQuote.ok) &&
     !isSubmitting,
   )
 
@@ -552,9 +561,9 @@ export default function CheckoutPage() {
                   <span className="text-[var(--color-text)]">{formatBDT(subtotal)}</span>
                 </div>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between text-emerald-600">
+                  <div className={`flex items-center justify-between ${couponQuote?.ok ? 'text-emerald-600' : 'text-red-600'}`}>
                     <span>Discount ({appliedCoupon.code})</span>
-                    <span>-{formatBDT(discountAmount)}</span>
+                    <span>{couponQuote?.ok ? `-${formatBDT(discountAmount)}` : 'Not eligible'}</span>
                   </div>
                 ) : null}
                 <div className="flex items-center justify-between text-[var(--color-muted)]">
