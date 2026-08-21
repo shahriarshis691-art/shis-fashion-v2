@@ -156,3 +156,32 @@ export function decrementMatchingVariant(
 
   return next
 }
+
+export function incrementMatchingVariant(
+  variants: ProductVariantStock[],
+  size: string,
+  color: string,
+  quantity: number,
+) {
+  const qty = toStock(quantity)
+  let matched = false
+  const next = variants.map((entry) => {
+    if (matched || entry.size !== normalizeLabel(size)) {
+      return entry
+    }
+
+    const colorLabel = normalizeLabel(color) || 'Default'
+    if (entry.color !== colorLabel) {
+      return entry
+    }
+
+    matched = true
+    return { ...entry, stock: entry.stock + qty }
+  })
+
+  if (!matched) {
+    return null
+  }
+
+  return next
+}

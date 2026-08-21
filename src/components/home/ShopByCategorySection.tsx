@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { homeCategoryItems } from '../../data/homeCategories'
-import { normalizeCatalogImageUrl } from '../../utils/media'
+import { catalogImageAttrs } from '../../utils/media'
 import Container from '../ui/Container'
 
 interface ShopByCategoryCardItem {
@@ -14,7 +14,7 @@ interface ShopByCategoryCardItem {
 function CategoryCard({
   name,
   href,
-  image,
+  image: imageSrc,
   index,
 }: {
   name: string
@@ -22,7 +22,7 @@ function CategoryCard({
   image: string
   index: number
 }) {
-  const optimizedImage = normalizeCatalogImageUrl(image, 960, 1280)
+  const image = catalogImageAttrs(imageSrc, 960, 1280, '(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw', [320, 480, 768, 960])
 
   return (
     <motion.div
@@ -38,7 +38,9 @@ function CategoryCard({
         aria-label={`${name} collection`}
       >
         <img
-          src={optimizedImage}
+          src={image.src}
+          srcSet={image.srcSet}
+          sizes={image.sizes}
           alt={`${name} category`}
           loading="lazy"
           decoding="async"

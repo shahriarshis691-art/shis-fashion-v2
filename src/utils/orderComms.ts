@@ -42,10 +42,14 @@ export function getAdminCustomerNotifyHref(input: {
     text = `Hi ${name}, your SHIS Fashion order ${input.orderId} is confirmed. We will call before dispatch. Payment is Cash on Delivery. Track: ${trackUrl}`
   } else if (input.status === 'processing') {
     text = `Hi ${name}, your SHIS Fashion order ${input.orderId} is being prepared. Track: ${trackUrl}`
+  } else if (input.status === 'in_courier') {
+    text = `Hi ${name}, your SHIS Fashion order ${input.orderId} is with the courier.${tracking ? ` Tracking: ${tracking}.` : ''} Track: ${trackUrl}`
   } else if (input.status === 'shipped') {
     text = `Hi ${name}, your SHIS Fashion order ${input.orderId} has been shipped.${tracking ? ` Tracking: ${tracking}.` : ''} Track: ${trackUrl}`
   } else if (input.status === 'delivered') {
     text = `Hi ${name}, your SHIS Fashion order ${input.orderId} has been delivered. Thank you for shopping with SHIS Fashion.`
+  } else if (input.status === 'returned') {
+    text = `Hi ${name}, we received the return for SHIS Fashion order ${input.orderId}. Message us on WhatsApp if you need help.`
   } else if (input.status === 'cancelled') {
     text = `Hi ${name}, your SHIS Fashion order ${input.orderId} has been cancelled. Message us on WhatsApp if you need help.`
   }

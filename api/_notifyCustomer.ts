@@ -1,5 +1,7 @@
+import type { OrderNotifyChannel } from './_orderStatus.js'
+
 export async function notifyCustomer(input: {
-  channel: 'order-placed' | 'order-shipped'
+  channel: OrderNotifyChannel
   orderId: string
   customerName?: string
   customerPhone?: string
@@ -10,17 +12,79 @@ export async function notifyCustomer(input: {
 }) {
   const name = input.customerName?.trim() || 'there'
   const trackUrl = `https://www.shisfashion.com/track-order?id=${encodeURIComponent(input.orderId)}`
-  const subject = input.channel === 'order-shipped'
-    ? `Your SHIS Fashion order ${input.orderId} has shipped`
-    : `We received your SHIS Fashion order ${input.orderId}`
-  const text = input.channel === 'order-shipped'
-    ? `Hi ${name}, your SHIS Fashion order ${input.orderId} has been shipped.${input.trackingNumber ? ` Tracking: ${input.trackingNumber}.` : ''} Track: ${trackUrl}`
-    : `Hi ${name}, we received your SHIS Fashion order ${input.orderId}. Payment is ${input.paymentMethod || 'Cash on Delivery'}. We will call to confirm. Track: ${trackUrl}`
+  const tracking = input.trackingNumber?.trim()
+  const payment = input.paymentMethod || 'Cash on Delivery'
+  const { subject, text } = notifyCopy({
+    channel: input.channel,
+    name,
+    orderId: input.orderId,
+    trackUrl,
+    tracking,
+    payment,
+  })
 
   await Promise.allSettled([
     sendEmail(input.customerEmail, subject, text),
     sendSms(input.customerPhone, text),
   ])
+}
+
+function notifyCopy(input: {
+  channel: OrderNotifyChannel
+  name: string
+  orderId: string
+  trackUrl: string
+  tracking?: string
+  payment: string
+}) {
+  const { channel, name, orderId, trackUrl, tracking, payment } = input
+
+  if (channel === 'order-processing') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} is being prepared`,
+      text: `Hi ${name}, your SHIS Fashion order ${orderId} is being prepared. Track: ${trackUrl}`,
+    }
+  }
+
+  if (channel === 'order-shipped') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} has shipped`,
+      text: `Hi ${name}, your SHIS Fashion order ${orderId} has been shipped.${tracking ? ` Tracking: ${tracking}.` : ''} Track: ${trackUrl}`,
+    }
+  }
+
+  if (channel === 'order-in-courier') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} is with the courier`,
+      text: `Hi ${name}, your SHIS Fashion order ${orderId} is with the courier.${tracking ? ` Tracking: ${tracking}.` : ''} Track: ${trackUrl}`,
+    }
+  }
+
+  if (channel === 'order-delivered') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} has been delivered`,
+      text: `Hi ${name}, your SHIS Fashion order ${orderId} has been delivered. Thank you for shopping with SHIS Fashion.`,
+    }
+  }
+
+  if (channel === 'order-cancelled') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} was cancelled`,
+      text: `Hi ${name}, your SHIS Fashion order ${orderId} has been cancelled. Message us on WhatsApp if you need help.`,
+    }
+  }
+
+  if (channel === 'order-returned') {
+    return {
+      subject: `Your SHIS Fashion order ${orderId} return was received`,
+      text: `Hi ${name}, we received the return for SHIS Fashion order ${orderId}. Inventory has been restocked. Message us on WhatsApp if you need help.`,
+    }
+  }
+
+  return {
+    subject: `We received your SHIS Fashion order ${orderId}`,
+    text: `Hi ${name}, we received your SHIS Fashion order ${orderId}. Payment is ${payment}. We will call to confirm. Track: ${trackUrl}`,
+  }
 }
 
 async function sendEmail(to: string | undefined, subject: string, text: string) {

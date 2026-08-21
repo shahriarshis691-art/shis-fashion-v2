@@ -152,6 +152,31 @@ function writeWorkingProducts(transaction: Transaction, working: Map<string, Wor
   }
 }
 
+export async function matchOrderProductRefs(db: Firestore, items: PrepaidOrderItem[]) {
+  return matchProductRefs(db, items)
+}
+
+export async function restoreMatchedInventory(
+  transaction: Transaction,
+  matched: Array<{ item: PrepaidOrderItem; ref: DocumentReference | null }>,
+) {
+  const working = await readWorkingProducts(transaction, matched, false)
+  for (const entry of matched) {
+    if (!entry.ref) {
+      continue
+    }
+
+    const product = working.get(entry.ref.path)
+    if (!product) {
+      continue
+    }
+
+    applyLineToWorking(product, entry.item, 'restore')
+  }
+
+  writeWorkingProducts(transaction, working)
+}
+
 export async function settlePrepaidPaid(input: {
   db: Firestore
   orderRef: DocumentReference

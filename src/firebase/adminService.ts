@@ -25,10 +25,12 @@ import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired } from '../utils/coupon'
 import { isApiPrepaidPayment } from '../utils/paymentMethods'
 import { allocateProductSlug, getProductSlug, productMatchesSlug } from '../utils/productIdentity'
-import { decrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
+import { decrementMatchingVariant, incrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
 import { hasAnyAdminAccessRole, resolveAdminAccessRole, type AdminAccessRole } from '../utils/adminAccess'
 import { auth as firebaseAuth, db as firebaseDb } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
+import type { OrderNotifyChannel, OrderStatus } from '../utils/orderStatus'
+import { canTransitionOrderStatus, shouldRestockOnStatus } from '../utils/orderStatus'
 
 export type HomepageSectionKey = 'hero' | 'featuredCollection' | 'newArrivals' | 'bestSellers' | 'brandPromise'
 
@@ -78,7 +80,7 @@ export interface AdminOrder {
   notes?: string
   items: Array<{ name: string; price: string; quantity: number; size?: string; color?: string; slug?: string }>
   total: number
-  status: 'new' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: OrderStatus
   trackingNumber?: string
   paymentMethod?: string
   paymentStatus?: 'unpaid' | 'pending' | 'pending_verification' | 'paid' | 'failed'
@@ -91,6 +93,7 @@ export interface AdminOrder {
   couponDiscountAmount?: number
   couponId?: string
   stockCommitted?: boolean
+  stockRestored?: boolean
 }
 
 export interface AdminSessionUser {
@@ -160,15 +163,6 @@ export interface FounderProfile {
     instagram: string
     email: string
   }
-}
-
-const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
-  new: ['confirmed', 'cancelled'],
-  confirmed: ['processing', 'cancelled'],
-  processing: ['shipped', 'cancelled'],
-  shipped: ['delivered', 'cancelled'],
-  delivered: [],
-  cancelled: [],
 }
 
 export interface HomepageShopCategory {
@@ -2080,25 +2074,105 @@ export function subscribeToArchivedOrders(callback: (orders: AdminOrder[]) => vo
   )
 }
 
+function throwInvalidStatusTransition(from: string, to: string): never {
+  const error = new Error(`Invalid order transition: ${from} -> ${to}`)
+  ;(error as Error & { code?: string }).code = 'order/invalid-status-transition'
+  throw error
+}
+
 export async function updateOrderStatus(id: string, status: AdminOrder['status'], trackingNumber?: string) {
   assertAdminCanWrite()
-  const currentOrder = readStored(ORDERS_KEY, defaultOrders).find((order) => order.id === id)
+  const currentOrders = readStored(ORDERS_KEY, defaultOrders)
+  const currentOrder = currentOrders.find((order) => order.id === id)
 
-  if (currentOrder && currentOrder.status !== status) {
-    const allowedNextStatuses = ORDER_STATUS_TRANSITIONS[currentOrder.status] ?? []
-    if (!allowedNextStatuses.includes(status)) {
-      const error = new Error(`Invalid order transition: ${currentOrder.status} -> ${status}`)
-      ;(error as Error & { code?: string }).code = 'order/invalid-status-transition'
-      throw error
+  if (currentOrder && currentOrder.status !== status && !canTransitionOrderStatus(currentOrder.status, status)) {
+    throwInvalidStatusTransition(currentOrder.status, status)
+  }
+
+  const nextTracking = trackingNumber ?? currentOrder?.trackingNumber ?? ''
+  const restock = Boolean(
+    currentOrder
+    && currentOrder.status !== status
+    && shouldRestockOnStatus(status)
+    && currentOrder.stockCommitted
+    && !currentOrder.stockRestored,
+  )
+
+  if (!firebaseDb || isLocalFirstDataMode()) {
+    if (restock && currentOrder) {
+      applyLocalStockRestore(currentOrder.items)
+    }
+
+    return updateOrderDetails(id, {
+      status,
+      trackingNumber: nextTracking,
+      ...(restock ? { stockCommitted: false, stockRestored: true } : {}),
+    })
+  }
+
+  const token = await getCurrentAdminIdToken()
+  if (token) {
+    try {
+      const response = await fetch('/api/update-order-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId: id, status, trackingNumber: nextTracking }),
+      })
+
+      if (response.ok) {
+        const payload = await response.json() as {
+          order?: Pick<AdminOrder, 'status' | 'trackingNumber' | 'stockCommitted' | 'stockRestored'>
+        }
+        const nextOrder = {
+          ...(currentOrder ?? { id } as AdminOrder),
+          status: payload.order?.status ?? status,
+          trackingNumber: payload.order?.trackingNumber ?? nextTracking,
+          stockCommitted: payload.order?.stockCommitted ?? (restock ? false : currentOrder?.stockCommitted),
+          stockRestored: payload.order?.stockRestored ?? (restock ? true : currentOrder?.stockRestored),
+        }
+        writeStored(ORDERS_KEY, currentOrders.map((order) => (order.id === id ? { ...order, ...nextOrder } : order)))
+        await recordAdminAudit('order.status', 'order', id, { status, mode: 'live-api' })
+        return nextOrder
+      }
+
+      if (response.status === 409) {
+        throwInvalidStatusTransition(currentOrder?.status ?? 'unknown', status)
+      }
+
+      if (response.status !== 503) {
+        throw new Error(await readApiError(response))
+      }
+    } catch (error) {
+      const code = typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code ?? '')
+        : ''
+      if (code === 'order/invalid-status-transition' || requiresLiveBackend()) {
+        throw error
+      }
     }
   }
 
-  return updateOrderDetails(id, { status, trackingNumber: trackingNumber ?? '' })
+  if (requiresLiveBackend()) {
+    throw new Error('Unable to update order status. Live inventory service is unavailable.')
+  }
+
+  if (restock && currentOrder) {
+    applyLocalStockRestore(currentOrder.items)
+  }
+
+  return updateOrderDetails(id, {
+    status,
+    trackingNumber: nextTracking,
+    ...(restock ? { stockCommitted: false, stockRestored: true } : {}),
+  })
 }
 
 export async function updateOrderDetails(
   id: string,
-  updates: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'deliveryAddress' | 'deliveryCharge' | 'notes' | 'status' | 'trackingNumber' | 'paymentStatus'>>,
+  updates: Partial<Pick<AdminOrder, 'customerName' | 'customerPhone' | 'customerEmail' | 'address' | 'deliveryAddress' | 'deliveryCharge' | 'notes' | 'status' | 'trackingNumber' | 'paymentStatus' | 'stockCommitted' | 'stockRestored'>>,
 ) {
   assertAdminCanWrite()
   const currentOrders = readStored(ORDERS_KEY, defaultOrders)
@@ -2238,6 +2312,40 @@ export async function restoreOrder(id: string) {
 
     await recordAdminAudit('order.restore', 'order', id, { mode: 'fallback-local' })
   }
+}
+
+function applyLocalStockRestore(items: AdminOrder['items']) {
+  const products = readStored(PRODUCTS_KEY, defaultProducts).map(normalizeProduct)
+  const next = products.map((product) => {
+    const matchingItems = items.filter((item) => (
+      productMatchesSlug(product, item.slug ?? item.name)
+      || product.name.trim().toLowerCase() === item.name.trim().toLowerCase()
+    ))
+
+    if (!matchingItems.length) {
+      return product
+    }
+
+    let variants = normalizeVariants(product.variants)
+    let stock = product.stock
+
+    matchingItems.forEach((item) => {
+      const qty = Math.max(0, item.quantity)
+      if (variants.length) {
+        const incremented = incrementMatchingVariant(variants, item.size ?? '', item.color ?? '', qty)
+        if (incremented) {
+          variants = incremented
+          stock = variants.reduce((sum, entry) => sum + entry.stock, 0)
+          return
+        }
+      }
+
+      stock += qty
+    })
+
+    return { ...product, stock, variants: variants.length ? variants : product.variants }
+  })
+  writeStored(PRODUCTS_KEY, next)
 }
 
 function applyLocalStockDecrement(items: AdminOrder['items']) {
@@ -3554,7 +3662,7 @@ export async function updateAdminAccountRole(uid: string, role: AdminAccessRole)
   await recordAdminAudit('admin.role', 'admin', uid, { role })
 }
 
-export async function requestOrderStatusNotify(orderId: string, channel: 'order-placed' | 'order-shipped' = 'order-shipped') {
+export async function requestOrderStatusNotify(orderId: string, channel: OrderNotifyChannel = 'order-shipped') {
   const token = await getCurrentAdminIdToken()
   if (!token) {
     return

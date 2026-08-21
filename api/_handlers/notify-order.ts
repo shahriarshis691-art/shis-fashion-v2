@@ -1,6 +1,7 @@
 import { getAuth } from 'firebase-admin/auth'
 import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
 import { notifyCustomer } from '../_notifyCustomer.js'
+import { isOrderNotifyChannel } from '../_orderStatus.js'
 
 export const config = {
   runtime: 'nodejs',
@@ -97,8 +98,14 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       total?: number
     }
 
+    const requestedChannel = String(body.channel ?? '').trim()
+    if (!isOrderNotifyChannel(requestedChannel)) {
+      res.status(400).json({ error: 'Invalid notify channel.' })
+      return
+    }
+
     await notifyCustomer({
-      channel: body.channel === 'order-shipped' ? 'order-shipped' : 'order-placed',
+      channel: requestedChannel,
       orderId,
       customerName: data.customerName,
       customerPhone: data.customerPhone,

@@ -18,7 +18,7 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { normalizeCatalogImageUrl } from '../utils/media'
+import { catalogImageAttrs, normalizeCatalogImageUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { slugify } from '../utils/slugify'
@@ -173,7 +173,13 @@ const defaultHomepage: HomepageContent = {
 const IMAGE_PLACEHOLDER =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
+function homeCatalogImg(url: string, width: number, height: number, sizes: string, widths?: number[]) {
+  const attrs = catalogImageAttrs(url, width, height, sizes, widths)
+  return { ...attrs, src: attrs.src || IMAGE_PLACEHOLDER }
+}
+
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.removeAttribute('srcset')
   event.currentTarget.src = IMAGE_PLACEHOLDER
 }
 
@@ -435,7 +441,9 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            {categoryStrips.map((item, index) => (
+            {categoryStrips.map((item, index) => {
+              const img = homeCatalogImg(item.image, 1200, 900, '(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw', [480, 768, 960, 1200])
+              return (
               <motion.article
                 key={item.key}
                 initial={{ opacity: 0, y: 12 }}
@@ -446,11 +454,12 @@ export default function HomePage() {
                 <Link to={item.href} className="group block">
                   <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
                     <img
-                      src={item.image || IMAGE_PLACEHOLDER}
+                      src={img.src}
+                      srcSet={img.srcSet}
+                      sizes={img.sizes}
                       alt={item.label}
                       loading="lazy"
                       decoding="async"
-                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
                       onError={handleImageError}
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                     />
@@ -462,7 +471,8 @@ export default function HomePage() {
                   </div>
                 </Link>
               </motion.article>
-            ))}
+              )
+            })}
           </div>
         </Container>
       </section>
@@ -507,7 +517,9 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {featuredCollections.map((item, index) => (
+                  {featuredCollections.map((item, index) => {
+                    const img = homeCatalogImg(item.image, 1200, 900, '(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw', [480, 768, 960, 1200])
+                    return (
                     <motion.article
                       key={item.key}
                       initial={{ opacity: 0, y: 12 }}
@@ -518,11 +530,12 @@ export default function HomePage() {
                       <Link to={item.href} className="group block">
                         <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
                           <img
-                            src={item.image || IMAGE_PLACEHOLDER}
+                            src={img.src}
+                            srcSet={img.srcSet}
+                            sizes={img.sizes}
                             alt={item.title}
                             loading="lazy"
                             decoding="async"
-                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw"
                             onError={handleImageError}
                             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                           />
@@ -534,7 +547,8 @@ export default function HomePage() {
                         </div>
                       </Link>
                     </motion.article>
-                  ))}
+                    )
+                  })}
                 </div>
               </Container>
             </section>
@@ -589,7 +603,7 @@ export default function HomePage() {
         }
 
         if (section.key === 'brandPromise') {
-          const bannerImage = normalizeCatalogImageUrl(homepageContent.bannerImage ?? '', 1400, 800)
+          const banner = homeCatalogImg(homepageContent.bannerImage ?? '', 1400, 800, '(max-width: 639px) 100vw, 1100px', [640, 960, 1400])
 
           return (
             <section key={section.key} className="pb-8 sm:pb-10">
@@ -601,14 +615,15 @@ export default function HomePage() {
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
                   {homepageContent.brandPromiseDescription}
                 </p>
-                {bannerImage ? (
+                {homepageContent.bannerImage ? (
                   <div className="mt-5 overflow-hidden bg-black/5">
                     <img
-                      src={bannerImage}
+                      src={banner.src}
+                      srcSet={banner.srcSet}
+                      sizes={banner.sizes}
                       alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
                       loading="lazy"
                       decoding="async"
-                      sizes="(max-width: 639px) 100vw, 1100px"
                       onError={handleImageError}
                       className="h-full max-h-[420px] w-full object-cover"
                     />

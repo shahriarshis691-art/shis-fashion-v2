@@ -11,6 +11,15 @@ import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import { buildOpsReport, LOW_STOCK_THRESHOLD } from '../utils/opsReports'
 import {
+  ORDER_LIFECYCLE,
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_TRANSITIONS,
+  ORDER_STATUSES,
+  isBillableOrderStatus,
+  notifyChannelForStatus,
+  orderMatchesStatusFilter,
+} from '../utils/orderStatus'
+import {
   consumeAdminAccessDeniedFlag,
   confirmOrderPayment,
   createCategory,
@@ -116,26 +125,6 @@ function galleryLabel(index: number) {
     return 'Close-up image'
   }
   return `Image ${index + 1}`
-}
-
-const ORDER_LIFECYCLE: AdminOrder['status'][] = ['new', 'confirmed', 'processing', 'shipped', 'delivered']
-
-const ORDER_STATUS_TRANSITIONS: Record<AdminOrder['status'], AdminOrder['status'][]> = {
-  new: ['confirmed', 'cancelled'],
-  confirmed: ['processing', 'cancelled'],
-  processing: ['shipped', 'cancelled'],
-  shipped: ['delivered', 'cancelled'],
-  delivered: [],
-  cancelled: [],
-}
-
-const ORDER_STATUS_LABELS: Record<AdminOrder['status'], string> = {
-  new: 'New',
-  confirmed: 'Confirmed',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
 }
 
 type OrderPaymentFilter = 'all' | 'pending_verification' | 'paid' | 'unpaid'
@@ -473,8 +462,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return orderDate ? isSameLocalDay(orderDate, today) : false
     })
 
-    const billableOrders = orders.filter((order) => order.status !== 'cancelled')
-    const billableTodayOrders = todayOrders.filter((order) => order.status !== 'cancelled')
+    const billableOrders = orders.filter((order) => isBillableOrderStatus(order.status))
+    const billableTodayOrders = todayOrders.filter((order) => isBillableOrderStatus(order.status))
     const revenue = billableOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
     const todayRevenue = billableTodayOrders.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
     const outOfStockProducts = products.filter((product) => product.stock <= 0).length
@@ -486,7 +475,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       pendingPaymentVerifications: orders.filter((order) => order.paymentStatus === 'pending_verification').length,
       confirmedOrders: orders.filter((order) => order.status === 'confirmed').length,
       processingOrders: orders.filter((order) => order.status === 'processing').length,
+      inCourierOrders: orders.filter((order) => order.status === 'in_courier' || order.status === 'shipped').length,
       deliveredOrders: orders.filter((order) => order.status === 'delivered').length,
+      returnedOrders: orders.filter((order) => order.status === 'returned').length,
       cancelledOrders: orders.filter((order) => order.status === 'cancelled').length,
       totalRevenue: revenue,
       todayRevenue,
@@ -520,7 +511,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         order.paymentStatus,
         order.paymentTransactionId,
       ].some((value) => (value ?? '').toLowerCase().includes(query))
-      if (!textMatch || (orderStatusFilter !== 'all' && order.status !== orderStatusFilter)) {
+      if (!textMatch || (orderStatusFilter !== 'all' && !orderMatchesStatusFilter(order.status, orderStatusFilter))) {
         return false
       }
 
@@ -1293,9 +1284,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const handleStatusChange = async (orderId: string, status: AdminOrder['status']) => {
     try {
       await updateOrderStatus(orderId, status)
-      setMessage('Order status updated.')
-      if (status === 'shipped' || status === 'confirmed') {
-        void requestOrderStatusNotify(orderId, status === 'shipped' ? 'order-shipped' : 'order-placed')
+      setMessage(status === 'returned' ? 'Order marked returned. Stock restocked.' : 'Order status updated.')
+      const channel = notifyChannelForStatus(status)
+      if (channel) {
+        void requestOrderStatusNotify(orderId, channel)
       }
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error
@@ -1776,7 +1768,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               { label: 'Verify Payment', value: dashboardSummary.pendingPaymentVerifications, target: () => handleSummaryCardClick('orders', 'all', 'pending_verification'), section: 'orders' as const },
               { label: 'Confirmed Orders', value: dashboardSummary.confirmedOrders, target: () => handleSummaryCardClick('orders', 'confirmed'), section: 'orders' as const },
               { label: 'Processing Orders', value: dashboardSummary.processingOrders, target: () => handleSummaryCardClick('orders', 'processing'), section: 'orders' as const },
+              { label: 'In Courier', value: dashboardSummary.inCourierOrders, target: () => handleSummaryCardClick('orders', 'in_courier'), section: 'orders' as const },
               { label: 'Delivered Orders', value: dashboardSummary.deliveredOrders, target: () => handleSummaryCardClick('orders', 'delivered'), section: 'orders' as const },
+              { label: 'Returned Orders', value: dashboardSummary.returnedOrders, target: () => handleSummaryCardClick('orders', 'returned'), section: 'orders' as const },
               { label: 'Cancelled Orders', value: dashboardSummary.cancelledOrders, target: () => handleSummaryCardClick('orders', 'cancelled'), section: 'orders' as const },
               { label: 'Total Revenue', value: formatBDT(dashboardSummary.totalRevenue), target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
               { label: "Today's Revenue", value: formatBDT(dashboardSummary.todayRevenue), target: () => handleSummaryCardClick('orders'), section: 'orders' as const },
@@ -2131,7 +2125,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     <button
                       type="button"
                       onClick={() => setOrderStatusFilter(status)}
-                      className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === status ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                      className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === status || (status === 'in_courier' && orderStatusFilter === 'shipped') ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
                     >
                       {ORDER_STATUS_LABELS[status]}
                     </button>
@@ -2144,6 +2138,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === 'cancelled' ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
                 >
                   Cancelled
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter('returned')}
+                  className={`rounded-full border px-3 py-1.5 font-semibold ${orderStatusFilter === 'returned' ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-[var(--color-border)] text-[var(--color-text)]'}`}
+                >
+                  Returned
                 </button>
               </div>
             </div>
@@ -2207,7 +2208,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
                     <div className="min-w-[180px]">
                       <select value={order.status} onChange={(event) => handleStatusChange(order.id, event.target.value as AdminOrder['status'])} className="w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none">
-                        {['new', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => <option key={status} value={status}>{status}</option>)}
+                        {ORDER_STATUSES.map((status) => <option key={status} value={status}>{ORDER_STATUS_LABELS[status]}</option>)}
                       </select>
                       <p className="mt-2 text-xs text-[var(--color-muted)]">Current: {ORDER_STATUS_LABELS[order.status]}</p>
                       <input value={orderEdits[order.id]?.trackingNumber ?? order.trackingNumber ?? ''} onChange={(event) => setOrderEdits((current) => ({ ...current, [order.id]: { ...current[order.id], trackingNumber: event.target.value } }))} className="mt-2 w-full rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none" placeholder="Tracking number" />
@@ -2217,7 +2218,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                             key={`${order.id}-${nextStatus}`}
                             type="button"
                             onClick={() => handleStatusChange(order.id, nextStatus)}
-                            className={`rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold ${nextStatus === 'cancelled' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]'}`}
+                            className={`rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold ${nextStatus === 'cancelled' || nextStatus === 'returned' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text)]'}`}
                           >
                             Mark {ORDER_STATUS_LABELS[nextStatus]}
                           </button>

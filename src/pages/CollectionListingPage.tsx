@@ -5,7 +5,7 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { useListingWishlist } from '../hooks/useListingWishlist'
-import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
@@ -121,8 +121,7 @@ export default function CollectionListingPage() {
   const collectionImages = useMemo(
     () => activeCollection.images
       .map((image) => image.trim())
-      .filter((image) => image && !/og-image\.svg/i.test(image))
-      .map((image) => normalizeCatalogImageUrl(image, 960, 1200)),
+      .filter((image) => image && !/og-image\.svg/i.test(image)),
     [activeCollection.images],
   )
 
@@ -176,18 +175,22 @@ export default function CollectionListingPage() {
 
         {collectionImages.length ? (
           <div className="mt-8 grid grid-cols-2 items-start gap-x-1.5 gap-y-4 sm:grid-cols-4 sm:gap-x-2.5 sm:gap-y-5">
-            {collectionImages.map((image, index) => (
+            {collectionImages.map((image, index) => {
+              const look = catalogImageAttrs(image, 960, 1200, '(max-width: 639px) 50vw, 25vw', [320, 480, 768, 960])
+              return (
               <div key={`${activeCollection.slug}-look-${index}`} className="min-w-0 aspect-[4/5] overflow-hidden bg-black/5">
                 <img
-                  src={image}
+                  src={look.src || image}
+                  srcSet={look.srcSet}
+                  sizes={look.sizes}
                   alt={`${activeCollection.title} look ${index + 1}`}
                   loading="lazy"
                   decoding="async"
-                  sizes="(max-width: 639px) 50vw, 25vw"
                   className={`h-full w-full object-cover object-center ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                 />
               </div>
-            ))}
+              )
+            })}
           </div>
         ) : null}
 

@@ -1,4 +1,5 @@
 import { parseBDT } from './currency'
+import { isBillableOrderStatus } from './orderStatus'
 
 export const LOW_STOCK_THRESHOLD = 5
 
@@ -25,8 +26,8 @@ function toDate(createdAt?: string | { seconds: number }) {
 }
 
 export function buildOpsReport(orders: ReportOrder[], now = new Date()) {
-  const billable = orders.filter((order) => order.status !== 'cancelled')
-  const cancelled = orders.filter((order) => order.status === 'cancelled')
+  const billable = orders.filter((order) => isBillableOrderStatus(order.status))
+  const cancelled = orders.filter((order) => order.status === 'cancelled' || order.status === 'returned')
   const revenue = billable.reduce((sum, order) => sum + (Number.isFinite(order.total) ? order.total : 0), 0)
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   const last7 = billable.filter((order) => {

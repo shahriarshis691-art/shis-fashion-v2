@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Container from './ui/Container'
-import { isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { isDemoImageUrl, catalogImageAttrs } from '../utils/media'
 
 export interface HeroMediaItem {
   type: 'image' | 'video'
@@ -106,8 +106,10 @@ export default function HeroBanner({
             media.map((item, index) => {
               const isActive = index === currentIndex
               const isDemo = item.type === 'image' && isDemoImageUrl(item.src)
-              const mediaSrc =
-                item.type === 'image' ? normalizeCatalogImageUrl(item.src, 1400, 900) : item.src
+              const image = item.type === 'image'
+                ? catalogImageAttrs(item.src, 1400, 900, '100vw', [640, 960, 1400, 1920])
+                : null
+              const mediaSrc = image?.src || item.src
 
               return (
                 <div
@@ -159,11 +161,14 @@ export default function HeroBanner({
                   ) : (
                     <img
                       src={mediaSrc || IMAGE_PLACEHOLDER}
+                      srcSet={image?.srcSet}
+                      sizes={image?.sizes}
                       alt={item.alt || ''}
                       loading={index === 0 ? 'eager' : 'lazy'}
                       fetchPriority={index === 0 ? 'high' : 'low'}
                       decoding="async"
                       onError={(e) => {
+                        e.currentTarget.removeAttribute('srcset')
                         e.currentTarget.src = IMAGE_PLACEHOLDER
                       }}
                       className={`h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}

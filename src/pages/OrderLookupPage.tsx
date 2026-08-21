@@ -10,13 +10,20 @@ import {
   getPublicTrackingHref,
   PAYMENT_METHOD_COD,
 } from '../utils/orderComms'
+import {
+  TRACKING_TIMELINE,
+  getTrackingStepState,
+  trackingTimelineStatus,
+} from '../utils/orderStatus'
 
 const STATUS_LABELS: Record<string, string> = {
   new: 'Received — we will call to confirm',
   confirmed: 'Confirmed',
   processing: 'Preparing for dispatch',
+  in_courier: 'With the courier',
   shipped: 'Shipped',
   delivered: 'Delivered',
+  returned: 'Returned',
   cancelled: 'Cancelled',
 }
 
@@ -31,6 +38,50 @@ interface LookupOrder {
   deliveryCharge: number
   createdAt: string
   items: Array<{ name: string; quantity: number; size: string; color: string }>
+}
+
+function OrderStatusTimeline({ status }: { status: string }) {
+  const normalized = trackingTimelineStatus(status)
+  const isCancelled = normalized === 'cancelled'
+  const isReturned = normalized === 'returned'
+
+  return (
+    <div className="mt-5 border border-black/10 bg-black/[0.02] px-3 py-4">
+      <p className="text-caption uppercase tracking-[0.14em] text-black/55">Status timeline</p>
+      <ol className="mt-3 space-y-2.5">
+        {TRACKING_TIMELINE.map((step, index) => {
+          const state = getTrackingStepState(status, step.status)
+          const markerClass = state === 'complete'
+            ? 'border-black bg-black text-white'
+            : state === 'current'
+              ? 'border-black bg-white text-black'
+              : 'border-black/20 bg-white text-black/35'
+          const labelClass = state === 'upcoming' ? 'text-black/40' : 'text-black'
+
+          return (
+            <li key={step.status} className="flex items-center gap-3">
+              <span
+                className={`flex h-6 w-6 shrink-0 items-center justify-center border text-[10px] font-semibold ${markerClass}`}
+                aria-hidden="true"
+              >
+                {state === 'complete' ? '✓' : index + 1}
+              </span>
+              <span className={`text-sm font-medium ${labelClass}`}>
+                {step.label}
+                {state === 'current' ? ' — current' : ''}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+      {isCancelled ? (
+        <p className="mt-3 text-sm font-semibold text-black">This order was cancelled.</p>
+      ) : null}
+      {isReturned ? (
+        <p className="mt-3 text-sm font-semibold text-black">This order was returned after delivery.</p>
+      ) : null}
+    </div>
+  )
 }
 
 export default function OrderLookupPage() {
@@ -138,6 +189,7 @@ export default function OrderLookupPage() {
           <div className="mt-8 max-w-lg border border-black/15 p-5">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order {order.orderId}</p>
             <h2 className="mt-2 text-h2 text-black">{STATUS_LABELS[order.status] ?? order.status}</h2>
+            <OrderStatusTimeline status={order.status} />
             {order.trackingNumber ? (
               <div className="mt-4 border border-black/10 bg-black/[0.02] px-3 py-3">
                 <p className="text-caption uppercase tracking-[0.14em] text-black/55">Courier tracking</p>
@@ -157,7 +209,7 @@ export default function OrderLookupPage() {
                 </button>
               </div>
             ) : (
-              <p className="mt-4 text-sm text-black/65">Tracking appears here after the order is shipped.</p>
+              <p className="mt-4 text-sm text-black/65">Tracking appears here after the order is with the courier.</p>
             )}
             <div className="mt-4 space-y-2 text-sm text-black/75">
               <p><span className="text-black/55">Name:</span> {order.customerName}</p>

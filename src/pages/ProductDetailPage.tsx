@@ -7,7 +7,7 @@ import { useListingWishlist } from '../hooks/useListingWishlist'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
 import { subscribeToApprovedProductReviews, subscribeToProducts, type AdminProduct, type ProductReview } from '../firebase/adminService'
-import { getManagedImageEntries, getProductImage, isDemoImageUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
 import { parseBDT } from '../utils/currency'
 import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
@@ -132,12 +132,18 @@ export default function ProductDetailPage() {
 
   const fallbackImages = product?.image ? [product.image] : []
   const sourceImages = product?.galleryImages?.length ? product.galleryImages : fallbackImages
-  const galleryImages = sourceImages
-    .filter(Boolean)
-    .map((image) => normalizeCatalogImageUrl(image, 1400, 1700))
+  const galleryImages = sourceImages.filter(Boolean)
   const resolvedGalleryImages = galleryImages.length ? galleryImages : [getPlaceholderDataUri()]
 
   const activeImage = resolvedGalleryImages[Math.min(activeImageIndex, resolvedGalleryImages.length - 1)] ?? resolvedGalleryImages[0]
+  const heroImage = catalogImageAttrs(
+    activeImage,
+    1400,
+    1700,
+    '(max-width: 639px) 100vw, (max-width: 1279px) 58vw, 50vw',
+    [640, 960, 1400],
+  )
+  const zoomImage = catalogImageAttrs(activeImage, 1600, 2000, '100vw', [960, 1400, 1600])
 
   const relatedProducts = (() => {
     if (!product) {
@@ -264,6 +270,7 @@ export default function ProductDetailPage() {
   }
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    event.currentTarget.removeAttribute('srcset')
     event.currentTarget.src = getPlaceholderDataUri()
   }
 
@@ -453,14 +460,15 @@ export default function ProductDetailPage() {
             >
               <div className="aspect-[4/5]">
                 <img
-                  src={activeImage}
+                  src={heroImage.src || activeImage}
+                  srcSet={heroImage.srcSet}
+                  sizes={heroImage.sizes}
                   alt={product.galleryImageTitles?.[activeImageIndex] || product.name}
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
                   width="1200"
                   height="1500"
-                  sizes="(max-width: 639px) 100vw, (max-width: 1279px) 58vw, 50vw"
                   onError={handleImageError}
                   onClick={() => setIsZoomOpen(true)}
                   className={`h-full w-full cursor-zoom-in object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
@@ -498,7 +506,9 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="mt-3 grid grid-cols-4 gap-2">
-              {resolvedGalleryImages.map((image, index) => (
+              {resolvedGalleryImages.map((image, index) => {
+                const thumb = catalogImageAttrs(image, 480, 600, '(max-width: 639px) 25vw, 10vw', [160, 240, 480])
+                return (
                 <button
                   key={`${image}-${index}`}
                   type="button"
@@ -508,17 +518,19 @@ export default function ProductDetailPage() {
                 >
                   <div className="aspect-[4/5] bg-black/5">
                     <img
-                      src={image}
+                      src={thumb.src || image}
+                      srcSet={thumb.srcSet}
+                      sizes={thumb.sizes}
                       alt={`${product.name} view ${index + 1}`}
                       loading="lazy"
                       decoding="async"
-                      sizes="(max-width: 639px) 25vw, 10vw"
                       onError={handleImageError}
                       className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                     />
                   </div>
                 </button>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -850,7 +862,9 @@ export default function ProductDetailPage() {
 
             <div className="relative flex-1 overflow-hidden bg-black/25">
               <img
-                src={activeImage}
+                src={zoomImage.src || activeImage}
+                srcSet={zoomImage.srcSet}
+                sizes={zoomImage.sizes}
                 alt={`${product.name} zoom image`}
                 loading="eager"
                 decoding="async"
