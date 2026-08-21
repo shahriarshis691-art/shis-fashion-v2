@@ -26,9 +26,11 @@ npm run dev
 - Login: `/shis-admin/login`
 - Dashboard: `/shis-admin/dashboard`
 
-Demo credentials (works when Firebase is not configured):
+Demo credentials (works in local `npm run dev`, even when Firebase is configured):
 - Email: `admin@shisfashion.com`
 - Password: `luxury123`
+
+Live/production login uses Firebase Authentication. Create that user in Firebase Console and add `admins/{uid}` with `role="admin"` and `active=true`.
 
 Troubleshooting:
 - If uploads fail, verify Cloudinary cloud name and upload preset values.

@@ -25,6 +25,7 @@ import {
   isFirebaseConfigured,
   isHomepageLocalFirstMode,
   isLaunchModeEnabled,
+  isLocalAdminHost,
   restoreCategory,
   restoreOrder,
   restoreProduct,
@@ -621,8 +622,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         setBlockedAdminUid(adminUidFromError || null)
         const uidHint = adminUidFromError || '<uid>'
         setMessage(`Login blocked: this account is allow-listed but does not have Firestore admin permission. Add admins/${uidHint} with role="admin" and active=true, then sign in again.`)
-      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found') {
-        setMessage('Invalid email or password. Please try again.')
+      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-email') {
+        setMessage(isLocalAdminHost()
+          ? 'Invalid email or password. Local demo login is admin@shisfashion.com / luxury123. Live Firebase needs the password from Firebase Console → Authentication → Users.'
+          : 'Invalid email or password. Use the password from Firebase Authentication, not the demo login.')
+        setBlockedAdminUid(null)
+      } else if (errorCode === 'auth/unauthorized-domain') {
+        setMessage('This domain is not authorized in Firebase Authentication. Add localhost and your live domain under Authentication → Settings → Authorized domains.')
+        setBlockedAdminUid(null)
+      } else if (errorCode === 'auth/network-request-failed') {
+        setMessage('Network error while contacting Firebase. Check your connection and try again.')
         setBlockedAdminUid(null)
       } else if (errorCode === 'auth/firebase-not-configured') {
         setMessage('Admin authentication is not configured in this environment.')
@@ -1510,7 +1519,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
             </form>
             <p className="mt-4 text-sm text-[var(--color-muted)]">
               {firebaseReady
-                ? 'Firebase is active.'
+                ? (isLocalAdminHost()
+                  ? 'Firebase is active. Local demo login still works: admin@shisfashion.com / luxury123.'
+                  : 'Firebase is active. Use your Firebase Authentication password.')
                 : launchModeEnabled
                   ? 'Launch mode is active. Admin access is limited to configured admin emails.'
                   : 'Admin login requires Firebase authentication configuration or Launch Mode.'}
