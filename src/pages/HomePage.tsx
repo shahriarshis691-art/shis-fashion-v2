@@ -5,7 +5,6 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
-import SareeShowcaseSection from '../components/home/SareeShowcaseSection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
@@ -277,23 +276,6 @@ export default function HomePage() {
       })
   }, [homepageContent.categorySections])
 
-  const sareeCollection = useMemo(() => {
-    const section = homepageContent.categorySections?.saree
-    if (section && !section.enabled) {
-      return null
-    }
-
-    return section ?? {
-      key: 'saree',
-      label: 'Saree',
-      href: '/sarees',
-      enabled: true,
-      order: 15,
-      coverImage: '',
-      images: [],
-    }
-  }, [homepageContent.categorySections])
-
   useEffect(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})
     if (!sectionEntries.length) {
@@ -485,14 +467,6 @@ export default function HomePage() {
           </div>
         </Container>
       </section>
-
-      {sareeCollection ? (
-        <SareeShowcaseSection
-          title={sareeCollection.label || 'Saree'}
-          href={sareeCollection.href || '/sarees'}
-          posterImage={sareeCollection.coverImage || sareeCollection.images[0] || ''}
-        />
-      ) : null}
 
       {contentSections.map((section) => {
         if (section.key === 'featuredCollection' && featuredCollections.length) {
