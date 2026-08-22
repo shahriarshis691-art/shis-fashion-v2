@@ -38,6 +38,7 @@ interface ApplySeoOptions {
   ogImage?: string
   type?: string
   robots?: string
+  canonicalPath?: string
   schema?: Array<Record<string, unknown>>
 }
 
@@ -85,6 +86,41 @@ function normalizePath(pathname: string) {
   }
 
   return cleanPath === '/' ? '/' : cleanPath.replace(/\/+$/, '') || '/'
+}
+
+function isRecognizedStorefrontPath(pathname: string) {
+  const knownExact = new Set([
+    '/',
+    '/shop',
+    '/shop/new-arrivals',
+    '/new-arrivals',
+    '/shop/best-sellers',
+    '/best-sellers',
+    '/about',
+    '/brands',
+    '/contact',
+    '/privacy',
+    '/terms',
+    '/track-order',
+    '/sale',
+    '/women',
+    '/sarees',
+    '/men',
+    '/kids',
+    '/cart',
+    '/checkout',
+    '/order-success',
+    '/founder',
+  ])
+
+  if (knownExact.has(pathname) || pathname.startsWith('/admin') || pathname.startsWith('/shis-admin')) {
+    return true
+  }
+
+  return pathname.startsWith('/shop/')
+    || pathname.startsWith('/collections/')
+    || pathname.startsWith('/product/')
+    || pathname.startsWith('/brands/')
 }
 
 function createCanonicalUrl(pathname: string) {
@@ -633,6 +669,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
     }
   }
 
+  if (!isRecognizedStorefrontPath(normalizedPath)) {
+    return {
+      title: 'Page not found | SHIS Fashion Bangladesh',
+      description: 'This SHIS Fashion page is unavailable. Continue shopping the latest collection.',
+      keywords: DEFAULT_KEYWORDS,
+      canonicalPath: normalizedPath,
+      ogImage: DEFAULT_OG_IMAGE,
+      type: pageType,
+      robots: 'noindex,nofollow',
+    }
+  }
+
   return {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
@@ -661,14 +709,17 @@ function removeExistingJsonLd() {
 
 export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   const metadata = getRouteMetadata(pathname)
-  const canonicalUrl = createCanonicalUrl(pathname)
+  const canonicalPath = options?.canonicalPath ?? metadata.canonicalPath
+  const canonicalUrl = createCanonicalUrl(canonicalPath)
   const runtimeOverride = getRuntimeOverride(pathname)
   const mergedSchemas = options?.schema ?? options?.schemas ?? []
   const mergedMetadata = {
     ...metadata,
     ...(runtimeOverride ?? {}),
     ...options,
+    canonicalPath,
     schema: mergedSchemas,
+    robots: options?.robots ?? metadata.robots,
   }
 
   document.title = mergedMetadata.title
@@ -702,6 +753,19 @@ export function applySeoMetadata(pathname: string, options?: ApplySeoOptions) {
   })
 }
 
+export function applyNotFoundSeo(pathname: string) {
+  applySeoMetadata(pathname, {
+    title: 'Page not found | SHIS Fashion Bangladesh',
+    description: 'This SHIS Fashion page is unavailable. Continue shopping the latest collection.',
+    robots: 'noindex,nofollow',
+    canonicalPath: pathname,
+  })
+}
+
 export function getSiteUrl() {
   return SITE_URL
+}
+
+export function getCanonicalUrl(pathname: string) {
+  return createCanonicalUrl(pathname)
 }

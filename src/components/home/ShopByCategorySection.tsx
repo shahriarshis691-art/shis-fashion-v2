@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { homeCategoryItems } from '../../data/homeCategories'
-import { catalogImageAttrs } from '../../utils/media'
 import Container from '../ui/Container'
+import Reveal from '../common/Reveal'
+import LuxuryImage from '../common/LuxuryImage'
 
 interface ShopByCategoryCardItem {
   key: string
@@ -22,29 +22,21 @@ function CategoryCard({
   image: string
   index: number
 }) {
-  const image = catalogImageAttrs(imageSrc, 960, 1280, '(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw', [320, 480, 768, 960])
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.45, delay: index * 0.06, ease: 'easeOut' }}
-      className="snap-start"
-    >
+    <Reveal delayMs={index * 50} className="snap-start">
       <Link
         to={href}
-        className="group relative block aspect-[4/5] overflow-hidden rounded-[1.15rem] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="group luxury-tap relative block overflow-hidden rounded-[1.15rem] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-shadow duration-300 ease-out hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         aria-label={`${name} collection`}
       >
-        <img
-          src={image.src}
-          srcSet={image.srcSet}
-          sizes={image.sizes}
+        <LuxuryImage
+          src={imageSrc}
           alt={`${name} category`}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+          width={960}
+          height={1280}
+          sizes="(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw"
+          widths={[320, 480, 768, 960]}
+          hover
         />
 
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_12%,rgba(0,0,0,0.1)_52%,rgba(0,0,0,0.52)_100%)]" />
@@ -53,7 +45,7 @@ function CategoryCard({
           <h3 className="font-sans text-[0.9rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
         </div>
       </Link>
-    </motion.div>
+    </Reveal>
   )
 }
 
@@ -61,11 +53,7 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
   const categoryItems = items?.length ? items : homeCategoryItems
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+    <section
       className="bg-transparent px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14"
       aria-labelledby="shop-by-category-title"
     >
@@ -107,6 +95,6 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
           </Link>
         </div>
       </Container>
-    </motion.section>
+    </section>
   )
 }

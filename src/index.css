@@ -19,6 +19,15 @@
 html {
   font-size: 100%;
   scroll-behavior: smooth;
+  scroll-padding-top: 4.25rem;
+}
+
+html.luxury-scroll {
+  scroll-behavior: smooth;
+}
+
+html.reduce-motion {
+  scroll-behavior: auto;
 }
 
 @media (max-width: 640px) {
@@ -31,6 +40,8 @@ body {
   overflow-x: hidden;
   font-family: var(--font-sans);
   letter-spacing: 0.01em;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 * {
@@ -51,6 +62,12 @@ svg,
 video {
   display: block;
   max-width: 100%;
+}
+
+.overflow-auto,
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 button,
@@ -114,19 +131,29 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: var(--fw-semibold);
 }
 
-/* Smooth Page Transitions */
+/* Smooth Page Transitions — CSS only, compositor-friendly */
 main {
-  animation: fadeIn 0.22s var(--ease-standard);
+  animation: fadeIn 0.22s var(--ease-luxury);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  main {
+    animation: none;
+  }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

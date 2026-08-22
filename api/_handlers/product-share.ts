@@ -116,6 +116,7 @@ function htmlPage(options: {
   availability?: 'InStock' | 'OutOfStock'
   brand?: string
   category?: string
+  robots?: string
 }) {
   const title = escapeHtml(options.title)
   const description = escapeHtml(options.description)
@@ -154,7 +155,7 @@ function htmlPage(options: {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <meta name="description" content="${description}" />
-  <meta name="robots" content="index,follow" />
+  <meta name="robots" content="${escapeHtml(options.robots || 'index,follow')}" />
   <link rel="canonical" href="${url}" />
   <meta property="og:type" content="product" />
   <meta property="og:site_name" content="SHIS Fashion" />
@@ -192,16 +193,18 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
   const parsed = parseProductPath(readPath(req))
   const fallback = htmlPage({
-    title: 'SHIS Fashion Bangladesh',
-    description: 'Shop premium fashion essentials from SHIS Fashion Bangladesh.',
+    title: 'Page not found | SHIS Fashion Bangladesh',
+    description: 'This SHIS Fashion product is unavailable. Continue shopping the latest collection.',
     url: SITE_URL,
     image: DEFAULT_OG_IMAGE,
+    robots: 'noindex,nofollow',
   })
 
   if (!parsed?.slug) {
     res.status(404)
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
     res.setHeader('Cache-Control', 'public, max-age=60')
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow')
     res.send(fallback)
     return
   }
@@ -238,6 +241,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       res.status(404)
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
       res.setHeader('Cache-Control', 'public, max-age=60')
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow')
       res.send(fallback)
       return
     }

@@ -135,16 +135,20 @@ export default function MiniCartConfirmation() {
             </div>
 
             <div className="mt-3 flex items-center gap-3 rounded-[0.9rem] bg-[rgba(0,0,0,0.04)] p-2.5 sm:p-3">
-              <img
+              <div className="aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-[0.8rem] sm:h-16 sm:w-16">
+                <img
                 src={recentAddition.productImage || IMAGE_PLACEHOLDER}
                 alt={recentAddition.productName}
+                width={64}
+                height={64}
                 loading="lazy"
                 decoding="async"
                 onError={(event) => {
                   event.currentTarget.src = IMAGE_PLACEHOLDER
                 }}
-                className="h-14 w-14 rounded-[0.8rem] object-cover sm:h-16 sm:w-16"
+                className="gpu-media h-full w-full object-cover"
               />
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-[var(--color-text)]">Cart total: {formatBDT(recentAddition.cartSubtotal)}</p>
                 <p className="mt-0.5 text-xs text-[var(--color-muted)]">{recentAddition.cartItemCount} item(s) in your bag</p>

@@ -1,8 +1,16 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import { applyNotFoundSeo } from '../utils/seo'
 
 export default function NotFoundPage() {
+  const location = useLocation()
+
+  useEffect(() => {
+    applyNotFoundSeo(location.pathname)
+  }, [location.pathname])
+
   return (
     <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-24" aria-labelledby="not-found-title">
       <Container>

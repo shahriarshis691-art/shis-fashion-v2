@@ -220,7 +220,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [coupon])
 
-  const addToCart = (product: ShopProduct, options: { size: string; color: string; quantity?: number }) => {
+  const addToCart = useCallback((product: ShopProduct, options: { size: string; color: string; quantity?: number }) => {
     const requestedQuantity = Math.max(1, options.quantity ?? 1)
     const size = options.size
     const color = options.color || 'Default'
@@ -301,9 +301,9 @@ function CartProvider({ children }: { children: ReactNode }) {
     if (nextAddition) {
       setRecentAddition(nextAddition)
     }
-  }
+  }, [])
 
-  const updateQuantity = (itemId: string, change: number) => {
+  const updateQuantity = useCallback((itemId: string, change: number) => {
     setItems((currentItems) =>
       currentItems
         .map((item) => {
@@ -317,11 +317,11 @@ function CartProvider({ children }: { children: ReactNode }) {
         })
         .filter((item) => item.quantity > 0),
     )
-  }
+  }, [])
 
-  const removeFromCart = (itemId: string) => {
+  const removeFromCart = useCallback((itemId: string) => {
     setItems((currentItems) => currentItems.filter((item) => item.id !== itemId))
-  }
+  }, [])
 
   const clearCart = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -333,9 +333,9 @@ function CartProvider({ children }: { children: ReactNode }) {
     clearAbandonedCart()
   }, [clearAbandonedCart])
 
-  const dismissRecentAddition = () => {
+  const dismissRecentAddition = useCallback(() => {
     setRecentAddition(null)
-  }
+  }, [])
 
   const applyCoupon = useCallback((couponInput: Omit<CouponApplied, 'discountAmount'> & { discountAmount?: number }): boolean => {
     const trimmedCode = couponInput.code.trim().toUpperCase()
@@ -366,8 +366,8 @@ function CartProvider({ children }: { children: ReactNode }) {
     setCoupon(null)
   }, [])
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0)
+  const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items])
+  const subtotal = useMemo(() => items.reduce((sum, item) => sum + parseBDT(item.price) * item.quantity, 0), [items])
   const discountAmount = coupon
     ? quoteCouponDiscount(coupon, items.map((item) => ({
       category: item.category,
@@ -394,7 +394,7 @@ function CartProvider({ children }: { children: ReactNode }) {
       recentAddition,
       dismissRecentAddition,
     }),
-    [items, itemCount, recentAddition, subtotal, coupon, applyCoupon, removeCoupon, discountAmount, grandTotal, clearCart],
+    [items, itemCount, recentAddition, subtotal, coupon, addToCart, updateQuantity, removeFromCart, applyCoupon, removeCoupon, discountAmount, grandTotal, clearCart, dismissRecentAddition],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

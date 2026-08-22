@@ -108,6 +108,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       createdAt?: unknown
       items?: Array<{ name?: string; price?: string; quantity?: number; size?: string; color?: string; slug?: string }>
       couponDiscountAmount?: number
+      customerEmail?: string
+      purchaseEventId?: string
     }
 
     if (data.archived) {
@@ -131,6 +133,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
     const items = (data.items ?? []).map((item, index) => ({
       id: `${item.slug || item.name || 'item'}-${index}`,
+      slug: item.slug ?? '',
       name: item.name ?? 'Item',
       image: '',
       price: item.price ?? '৳ 0',
@@ -149,7 +152,9 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         orderId: snapshot.id,
         customerName: data.customerName ?? '',
         customerPhone: data.customerPhone ?? '',
+        customerEmail: data.customerEmail ?? '',
         address: data.address ?? '',
+        purchaseEventId: data.purchaseEventId ?? '',
         paymentMethod: data.paymentMethod ?? 'Cash on Delivery',
         paymentTransactionId: data.paymentTransactionId ?? '',
         paymentStatus,

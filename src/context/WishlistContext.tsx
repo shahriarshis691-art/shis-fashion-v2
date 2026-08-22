@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ShopProduct } from '../data/shopData'
 
 export interface WishlistItem {
@@ -40,14 +40,14 @@ function WishlistProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  const addToWishlist = (product: ShopProduct) => {
+  const addToWishlist = useCallback((product: ShopProduct) => {
     setItems((currentItems) => {
       const exists = currentItems.some((item) => item.product.id === product.id)
       if (exists) {
         return currentItems
       }
 
-      const nextItems = [
+      return [
         ...currentItems,
         {
           id: String(product.id),
@@ -55,31 +55,24 @@ function WishlistProvider({ children }: { children: ReactNode }) {
           addedAt: new Date().toISOString(),
         },
       ]
-
-      return nextItems
     })
-  }
+  }, [])
 
-  const removeFromWishlist = (productId: string) => {
+  const removeFromWishlist = useCallback((productId: string) => {
     setItems((currentItems) => currentItems.filter((item) => item.product.id !== productId))
-  }
+  }, [])
 
-  const isInWishlist = (productId: string) => {
+  const isInWishlist = useCallback((productId: string) => {
     return items.some((item) => item.product.id === productId)
-  }
+  }, [items])
 
-  const clearWishlist = () => {
+  const clearWishlist = useCallback(() => {
     setItems([])
-  }
+  }, [])
 
-  const moveToCart = (productId: string) => {
-    const wishlistItem = items.find((item) => item.product.id === productId)
-    if (!wishlistItem) {
-      return
-    }
-
+  const moveToCart = useCallback((productId: string) => {
     setItems((currentItems) => currentItems.filter((item) => item.product.id !== productId))
-  }
+  }, [])
 
   const itemCount = items.length
 
@@ -93,8 +86,7 @@ function WishlistProvider({ children }: { children: ReactNode }) {
       itemCount,
       moveToCart,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, itemCount],
+    [items, itemCount, addToWishlist, removeFromWishlist, isInWishlist, clearWishlist, moveToCart],
   )
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>

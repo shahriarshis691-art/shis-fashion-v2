@@ -1,5 +1,9 @@
+import { classifyStorefrontPath } from './middleware.routes.ts'
+
 const INVITE_COOKIE = 'shis_soft_launch_invite_ok'
 const VISITOR_COOKIE = 'shis_soft_launch_visitor'
+const PAID_TRAFFIC_COOKIE = 'shis_paid_traffic'
+const CAMPAIGN_QUERY_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid', 'msclkid']
 
 function readCookie(cookieHeader: string, key: string) {
   const parts = cookieHeader.split(';').map((part) => part.trim())
@@ -61,6 +65,7 @@ function isBypassedPath(pathname: string) {
     pathname.startsWith('/icons/') ||
     pathname.startsWith('/brands/') ||
     pathname === '/favicon.svg' ||
+    pathname === '/index.html' ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
     pathname.endsWith('.js') ||
@@ -105,6 +110,70 @@ function getInviteCodes() {
     .filter(Boolean)
 }
 
+function hasPaidTrafficSignals(url: URL, cookieHeader: string) {
+  if (readCookie(cookieHeader, PAID_TRAFFIC_COOKIE) === '1') {
+    return true
+  }
+
+  return CAMPAIGN_QUERY_KEYS.some((key) => Boolean(url.searchParams.get(key)?.trim()))
+}
+
+async function spaNotFoundResponse(request: Request) {
+  try {
+    const indexRes = await fetch(new URL('/index.html', request.url))
+    return new Response(indexRes.body, {
+      status: 404,
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'x-robots-tag': 'noindex, nofollow',
+        'cache-control': 'no-store',
+      },
+    })
+  } catch {
+    return new Response('Not found', {
+      status: 404,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'x-robots-tag': 'noindex, nofollow',
+        'cache-control': 'no-store',
+      },
+    })
+  }
+}
+
+async function resolveCatalogStatus(request: Request, pathname: string) {
+  const classified = classifyStorefrontPath(pathname)
+  if (classified.kind === 'static') {
+    return true
+  }
+
+  if (classified.kind === 'listing') {
+    return classified.ok
+  }
+
+  if (classified.kind === 'unknown') {
+    return false
+  }
+
+  try {
+    const dest = new URL('/api/catalog-exists', request.url)
+    dest.searchParams.set('path', pathname)
+    const response = await fetch(dest, {
+      headers: {
+        accept: 'application/json',
+      },
+    })
+    if (!response.ok) {
+      return true
+    }
+
+    const payload = await response.json() as { exists?: boolean }
+    return payload.exists !== false
+  } catch {
+    return true
+  }
+}
+
 function blockedResponse(mode: string) {
   const body = `<!doctype html>
 <html lang="en">
@@ -112,6 +181,7 @@ function blockedResponse(mode: string) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Soft Launch Access</title>
+  <meta name="robots" content="noindex, nofollow" />
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #f6f4ee; color: #151515; }
     main { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
@@ -136,21 +206,29 @@ function blockedResponse(mode: string) {
 </html>`
 
   return new Response(body, {
-    status: 403,
+    status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
+      'x-robots-tag': 'noindex, nofollow',
       'cache-control': 'no-store',
     },
   })
 }
 
-export default function middleware(request: Request) {
+export default async function middleware(request: Request) {
   const url = new URL(request.url)
   const userAgent = request.headers.get('user-agent') ?? ''
   if (isSearchOrSocialCrawler(userAgent) && isProductSharePath(url.pathname)) {
     const dest = new URL('/api/product-share', url.origin)
     dest.searchParams.set('path', url.pathname)
     return fetch(dest)
+  }
+
+  if (!isBypassedPath(url.pathname)) {
+    const catalogExists = await resolveCatalogStatus(request, url.pathname)
+    if (!catalogExists) {
+      return spaNotFoundResponse(request)
+    }
   }
 
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
@@ -171,6 +249,10 @@ export default function middleware(request: Request) {
   }
 
   const cookieHeader = request.headers.get('cookie') ?? ''
+
+  if (hasPaidTrafficSignals(url, cookieHeader)) {
+    return
+  }
 
   if (mode === 'invite-only') {
     const inviteCookie = readCookie(cookieHeader, INVITE_COOKIE)

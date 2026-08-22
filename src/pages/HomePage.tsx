@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
+import TrustStrip from '../components/home/TrustStrip'
+import Reveal from '../components/common/Reveal'
+import LuxuryImage from '../components/common/LuxuryImage'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
@@ -19,7 +21,7 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { catalogImageAttrs, normalizeCatalogImageUrl } from '../utils/media'
+import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { slugify } from '../utils/slugify'
@@ -171,13 +173,7 @@ const defaultHomepage: HomepageContent = {
   ],
 }
 
-const IMAGE_PLACEHOLDER =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
-
-function homeCatalogImg(url: string, width: number, height: number, sizes: string, widths?: number[]) {
-  const attrs = catalogImageAttrs(url, width, height, sizes, widths)
-  return { ...attrs, src: attrs.src || IMAGE_PLACEHOLDER }
-}
+const IMAGE_PLACEHOLDER = CATALOG_IMAGE_PLACEHOLDER
 
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.removeAttribute('srcset')
@@ -419,6 +415,8 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
+      <TrustStrip />
+
       <section className="py-7 sm:py-9">
         <Container>
           <div className="flex items-end justify-between gap-3">
@@ -432,27 +430,19 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            {categoryStrips.map((item, index) => {
-              const img = homeCatalogImg(item.image, 1200, 900, '(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw', [480, 768, 960, 1200])
-              return (
-              <motion.article
-                key={item.key}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.22, delay: index * 0.04 }}
-              >
-                <Link to={item.href} className="group block">
-                  <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
-                    <img
-                      src={img.src}
-                      srcSet={img.srcSet}
-                      sizes={img.sizes}
+            {categoryStrips.map((item, index) => (
+              <Reveal key={item.key} as="article" delayMs={index * 40}>
+                <Link to={item.href} className="group luxury-tap block">
+                  <div className="relative">
+                    <LuxuryImage
+                      src={item.image}
                       alt={item.label}
-                      loading="lazy"
-                      decoding="async"
-                      onError={handleImageError}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                      width={1200}
+                      height={900}
+                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
+                      widths={[480, 768, 960, 1200]}
+                      aspectClassName="aspect-[16/10]"
+                      hover
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                     <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
@@ -461,9 +451,8 @@ export default function HomePage() {
                     </div>
                   </div>
                 </Link>
-              </motion.article>
-              )
-            })}
+              </Reveal>
+            ))}
           </div>
         </Container>
       </section>
@@ -486,27 +475,19 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {featuredCollections.map((item, index) => {
-                    const img = homeCatalogImg(item.image, 1200, 900, '(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw', [480, 768, 960, 1200])
-                    return (
-                    <motion.article
-                      key={item.key}
-                      initial={{ opacity: 0, y: 12 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.25 }}
-                      transition={{ duration: 0.22, delay: index * 0.04 }}
-                    >
-                      <Link to={item.href} className="group block">
-                        <div className="relative aspect-[16/10] overflow-hidden bg-black/5">
-                          <img
-                            src={img.src}
-                            srcSet={img.srcSet}
-                            sizes={img.sizes}
+                  {featuredCollections.map((item, index) => (
+                    <Reveal key={item.key} as="article" delayMs={index * 40}>
+                      <Link to={item.href} className="group luxury-tap block">
+                        <div className="relative">
+                          <LuxuryImage
+                            src={item.image}
                             alt={item.title}
-                            loading="lazy"
-                            decoding="async"
-                            onError={handleImageError}
-                            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                            width={1200}
+                            height={900}
+                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw"
+                            widths={[480, 768, 960, 1200]}
+                            aspectClassName="aspect-[16/10]"
+                            hover
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                           <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
@@ -515,9 +496,8 @@ export default function HomePage() {
                           </div>
                         </div>
                       </Link>
-                    </motion.article>
-                    )
-                  })}
+                    </Reveal>
+                  ))}
                 </div>
               </Container>
             </section>
@@ -572,8 +552,6 @@ export default function HomePage() {
         }
 
         if (section.key === 'brandPromise') {
-          const banner = homeCatalogImg(homepageContent.bannerImage ?? '', 1400, 800, '(max-width: 639px) 100vw, 1100px', [640, 960, 1400])
-
           return (
             <section key={section.key} className="pb-8 sm:pb-10">
               <Container>
@@ -585,16 +563,15 @@ export default function HomePage() {
                   {homepageContent.brandPromiseDescription}
                 </p>
                 {homepageContent.bannerImage ? (
-                  <div className="mt-5 overflow-hidden bg-black/5">
-                    <img
-                      src={banner.src}
-                      srcSet={banner.srcSet}
-                      sizes={banner.sizes}
+                  <div className="mt-5">
+                    <LuxuryImage
+                      src={homepageContent.bannerImage}
                       alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
-                      loading="lazy"
-                      decoding="async"
-                      onError={handleImageError}
-                      className="h-full max-h-[420px] w-full object-cover"
+                      width={1400}
+                      height={800}
+                      sizes="(max-width: 639px) 100vw, 1100px"
+                      widths={[640, 960, 1400]}
+                      aspectClassName="aspect-[21/9]"
                     />
                   </div>
                 ) : null}
@@ -659,14 +636,16 @@ export default function HomePage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {featuredBrands.map((brand) => (
                   <article key={brand.id} className="rounded-[1.15rem] border border-white/18 bg-white/8 p-4 backdrop-blur-sm">
-                    <div className="overflow-hidden rounded-[0.9rem] border border-white/20 bg-white/95">
+                    <div className="aspect-[16/10] overflow-hidden rounded-[0.9rem] border border-white/20 bg-white/95">
                       <img
                         src={brand.logo}
                         alt={`${brand.name} logo`}
+                        width={640}
+                        height={400}
                         loading="lazy"
                         decoding="async"
                         onError={handleImageError}
-                        className="h-24 w-full object-contain p-3 sm:h-28"
+                        className="gpu-media h-full w-full object-contain p-3"
                       />
                     </div>
 

@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import Reveal from '../components/common/Reveal'
 
 const pillars = [
   'Luxury comfort in every silhouette',
@@ -15,7 +15,7 @@ export default function AboutPage() {
       <Container>
         <h1 className="sr-only">About SHIS Fashion</h1>
         <SectionTitle eyebrow="Our philosophy" title="Luxury, redefined for everyday life" description="We create pieces that feel as elevated as they look, balancing luxury details with effortless wearability." />
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mt-10">
+        <Reveal className="mt-10">
           <Card className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] p-8">
               <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">Signature</p>
@@ -32,7 +32,7 @@ export default function AboutPage() {
               ))}
             </div>
           </Card>
-        </motion.div>
+        </Reveal>
       </Container>
     </section>
   )

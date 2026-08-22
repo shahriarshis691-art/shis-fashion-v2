@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
@@ -25,7 +24,12 @@ import {
   resolveCanonicalSubcategorySlug,
   getDedicatedListingFromPath,
   getDedicatedListingPath,
+  isKnownListingSlug,
 } from '../data/categoryTaxonomy'
+import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdentity'
+import { pickCampaignSearch } from '../utils/attribution'
+import { applyNotFoundSeo } from '../utils/seo'
+import NotFoundPage from './NotFoundPage'
 
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
 
@@ -218,6 +222,15 @@ export default function ShopPage() {
   const activeSubcategory = dedicatedListing?.subcategory ?? normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
   const effectiveSubcategory = dedicatedListing?.subcategory ?? (legacySubcategory || activeSubcategory)
   const listingKey = `${effectiveSegment}|${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery.toLowerCase()}|${location.pathname}`
+  const isInvalidListing = Boolean(legacyCategorySlug && !isKnownListingSlug(legacyCategorySlug))
+
+  useEffect(() => {
+    if (!isInvalidListing) {
+      return
+    }
+
+    applyNotFoundSeo(location.pathname)
+  }, [isInvalidListing, location.pathname])
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
@@ -298,10 +311,15 @@ export default function ShopPage() {
 
       if (legacySubcategory && inferredLegacySegment) {
         const dedicatedPath = getDedicatedListingPath(inferredLegacySegment, legacySubcategory)
-        params.set('sub', legacySubcategory)
+        if (dedicatedPath) {
+          params.delete('segment')
+          params.delete('sub')
+        } else {
+          params.set('sub', legacySubcategory)
+        }
         replaceWithCanonical(
           dedicatedPath ?? `/${inferredLegacySegment}`,
-          dedicatedPath ? '' : `?${params.toString()}`,
+          params.toString() ? `?${params.toString()}` : '',
           dedicatedPath ? 'dedicated-collection-route' : 'legacy-subcategory-route',
         )
         return
@@ -310,7 +328,13 @@ export default function ShopPage() {
 
     const dedicatedPath = getDedicatedListingPath(effectiveSegment, effectiveSubcategory)
     if (dedicatedPath && location.pathname !== dedicatedPath) {
-      replaceWithCanonical(dedicatedPath, '', 'dedicated-collection-route')
+      params.delete('segment')
+      params.delete('sub')
+      replaceWithCanonical(
+        dedicatedPath,
+        params.toString() ? `?${params.toString()}` : '',
+        'dedicated-collection-route',
+      )
       return
     }
 
@@ -459,7 +483,7 @@ export default function ShopPage() {
 
     metaPixel.trackViewContent({
       content_name: 'Oversized Tee Listing',
-      content_ids: visibleProducts.slice(0, 8).map((product) => String(product.id)),
+      content_ids: getCatalogContentIds(visibleProducts.slice(0, 8)),
       content_type: 'product_group',
       value: visibleProducts[0] ? parseBDT(visibleProducts[0].price) : 0,
       currency: 'BDT',
@@ -475,7 +499,7 @@ export default function ShopPage() {
 
     const itemListId = `${effectiveSegment}:${effectiveSubcategory}`
     const itemListName = legacyHeading?.title ?? heading.title
-    const visibleProductIds = visibleProducts.slice(0, 12).map((product) => String(product.id))
+    const visibleProductIds = getCatalogContentIds(visibleProducts.slice(0, 12))
     const listStateKey = `${itemListId}|${visibleProductIds.join(',')}`
 
     if (lastTrackedListStateRef.current === listStateKey) {
@@ -488,7 +512,7 @@ export default function ShopPage() {
       item_list_id: itemListId,
       item_list_name: itemListName,
       items: visibleProducts.slice(0, 12).map((product) => ({
-        item_id: String(product.id),
+        item_id: getCatalogContentId(product),
         item_name: product.name,
         item_category: product.category,
         price: parseBDT(product.price),
@@ -632,7 +656,10 @@ export default function ShopPage() {
   const navigateWithSubcategory = (subcategory: string) => {
     const dedicatedPath = getDedicatedListingPath(effectiveSegment, subcategory)
     if (dedicatedPath) {
-      navigate(dedicatedPath)
+      navigate({
+        pathname: dedicatedPath,
+        search: pickCampaignSearch(location.search),
+      })
       return
     }
 
@@ -656,6 +683,10 @@ export default function ShopPage() {
       pathname: location.pathname,
       search: params.toString() ? `?${params.toString()}` : '',
     })
+  }
+
+  if (isInvalidListing) {
+    return <NotFoundPage />
   }
 
   return (
@@ -687,7 +718,10 @@ export default function ShopPage() {
                 type="button"
                 onClick={() => {
                   setFilters({ inStockOnly: false, newOnly: false })
-                  navigate(tab.path)
+                  navigate({
+                    pathname: tab.path,
+                    search: pickCampaignSearch(location.search),
+                  })
                 }}
                 className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
                   effectiveSegment === tab.key
@@ -699,13 +733,13 @@ export default function ShopPage() {
               </button>
             ))}
             <Link
-              to="/sale"
+              to={{ pathname: '/sale', search: pickCampaignSearch(location.search) }}
               className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
             >
               Sale
             </Link>
             <Link
-              to="/shop/new-arrivals"
+              to={{ pathname: '/shop/new-arrivals', search: pickCampaignSearch(location.search) }}
               className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
             >
               New Arrivals
@@ -876,27 +910,17 @@ function AnimateMobileSheet({
   onFiltersChange: (value: ProductFilters) => void
 }) {
   return (
-    <motion.div>
+    <div>
       {open ? (
         <>
-          <motion.button
+          <button
             type="button"
             aria-label="Close filter panel"
-            className="fixed inset-0 z-40 bg-black/40 sm:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
+            className="luxury-fade-in fixed inset-0 z-40 bg-black/40 sm:hidden"
             onClick={onClose}
           />
 
-          <motion.aside
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ duration: 0.22 }}
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-xl border-t border-black/15 bg-white px-4 pb-6 pt-4 sm:hidden"
-          >
+          <aside className="luxury-sheet-up gpu-media fixed inset-x-0 bottom-0 z-50 rounded-t-xl border-t border-black/15 bg-white px-4 pb-6 pt-4 sm:hidden">
             <div className="mx-auto max-w-7xl">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Filter & Sort</h2>
@@ -970,9 +994,9 @@ function AnimateMobileSheet({
                 Apply
               </button>
             </div>
-          </motion.aside>
+          </aside>
         </>
       ) : null}
-    </motion.div>
+    </div>
   )
 }

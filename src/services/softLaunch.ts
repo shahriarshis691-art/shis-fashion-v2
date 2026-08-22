@@ -1,10 +1,12 @@
+import { captureCampaignAttribution, hasCampaignSignals, hasStoredCampaignAttribution } from '../utils/attribution'
+
 export type SoftLaunchMode = 'off' | 'percentage' | 'invite-only'
 
 export interface SoftLaunchDecision {
   allowed: boolean
   mode: SoftLaunchMode
   bucket: number
-  reason: 'off' | 'dev-bypass' | 'admin-route' | 'percentage-allow' | 'percentage-block' | 'invite-valid' | 'invite-session' | 'invite-invalid' | 'invite-missing'
+  reason: 'off' | 'dev-bypass' | 'admin-route' | 'paid-traffic-bypass' | 'percentage-allow' | 'percentage-block' | 'invite-valid' | 'invite-session' | 'invite-invalid' | 'invite-missing'
 }
 
 const SOFT_LAUNCH_SESSION_KEY = 'shis-soft-launch-invite-ok'
@@ -92,9 +94,14 @@ export function evaluateSoftLaunchAccess(pathname: string, search: string): Soft
   const mode = getMode()
   const visitorId = getOrCreateVisitorId()
   const bucket = hashToBucket(visitorId)
+  captureCampaignAttribution(search, pathname)
 
   if (mode === 'off') {
     return { allowed: true, mode, bucket, reason: 'off' }
+  }
+
+  if (hasCampaignSignals(search) || hasStoredCampaignAttribution()) {
+    return { allowed: true, mode, bucket, reason: 'paid-traffic-bypass' }
   }
 
   if (!import.meta.env.PROD && !shouldEnforceInDev()) {

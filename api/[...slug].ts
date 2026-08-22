@@ -27,6 +27,8 @@ const ROUTES: Record<string, () => Promise<{ default: RouteHandler }>> = {
   'create-review': () => import('./_handlers/create-review.js'),
   'incident-alert': () => import('./_handlers/incident-alert.js'),
   'lookup-order': () => import('./_handlers/lookup-order.js'),
+  'catalog-exists': () => import('./_handlers/catalog-exists.js'),
+  'meta-capi': () => import('./_handlers/meta-capi.js'),
   'newsletter-signup': () => import('./_handlers/newsletter-signup.js'),
   'notify-order': () => import('./_handlers/notify-order.js'),
   'order-confirmation': () => import('./_handlers/order-confirmation.js'),

@@ -61,6 +61,9 @@ Primary campaign-day runbook:
 - Set `VITE_ADMIN_EMAILS` to the final admin email list only.
 - Set `VITE_GA_MEASUREMENT_ID` to the live Google Analytics 4 Measurement ID.
 - Set `VITE_META_PIXEL_ID` to the live Meta Pixel ID.
+- Set server `META_PIXEL_ID` to the same Pixel ID (or rely on `VITE_META_PIXEL_ID` if it is available to serverless functions).
+- Set server `META_CAPI_ACCESS_TOKEN` to the Meta Conversions API access token so browser Pixel events are paired with server CAPI events using the same `event_id`.
+- Optional: `META_CAPI_TEST_EVENT_CODE` for Events Manager Test Events during launch QA.
 
 Optional (fail closed if unset; COD and WhatsApp still work):
 - `VITE_PREPAID_ENABLED=true` to show bKash on checkout.
@@ -121,6 +124,8 @@ Note:
 - Confirm currency is `BDT`.
 - Confirm product name and content IDs are present in product events.
 - Confirm purchase value matches the order grand total.
+- Confirm browser and server events share the same `event_id` for PageView, ViewContent, AddToCart, InitiateCheckout, and Purchase.
+- Confirm `content_ids` use the product slug / catalog ID, not cart line IDs.
 
 4. Go-live pass criteria
 - All six events arrive in Meta Events Manager without errors.

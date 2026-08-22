@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Container from './ui/Container'
-import { isDemoImageUrl, catalogImageAttrs } from '../utils/media'
+import { isDemoImageUrl, catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../utils/media'
 
 export interface HeroMediaItem {
   type: 'image' | 'video'
@@ -24,9 +23,6 @@ interface HeroBannerProps {
 
 const IMAGE_SLIDE_DURATION = 5000
 const VIDEO_MAX_DURATION = 15000
-
-const IMAGE_PLACEHOLDER =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
 
 export default function HeroBanner({
   media,
@@ -114,7 +110,7 @@ export default function HeroBanner({
               return (
                 <div
                   key={index}
-                  className="absolute inset-0 h-full w-full transition-opacity duration-500 ease-in-out"
+                  className="absolute inset-0 h-full w-full gpu-media transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
                   style={{
                     opacity: isActive ? 1 : 0,
                     zIndex: isActive ? 10 : 0,
@@ -156,22 +152,24 @@ export default function HeroBanner({
                           }
                         }
                       }}
-                      className={`h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
                     />
                   ) : (
                     <img
-                      src={mediaSrc || IMAGE_PLACEHOLDER}
+                      src={mediaSrc || CATALOG_IMAGE_PLACEHOLDER}
                       srcSet={image?.srcSet}
                       sizes={image?.sizes}
                       alt={item.alt || ''}
+                      width={1400}
+                      height={900}
                       loading={index === 0 ? 'eager' : 'lazy'}
-                      fetchPriority={index === 0 ? 'high' : 'low'}
+                      fetchPriority={index === 0 ? 'high' : undefined}
                       decoding="async"
                       onError={(e) => {
                         e.currentTarget.removeAttribute('srcset')
-                        e.currentTarget.src = IMAGE_PLACEHOLDER
+                        e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
                       }}
-                      className={`h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
                     />
                   )}
                 </div>
@@ -184,12 +182,7 @@ export default function HeroBanner({
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.4)_52%,rgba(0,0,0,0.05)_100%)]" />
 
           <Container className="relative z-10 flex h-full items-end pb-8 pt-14 sm:items-center sm:py-0">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="max-w-[17rem] sm:max-w-[25rem]"
-            >
+            <div className="luxury-fade-in max-w-[17rem] sm:max-w-[25rem]">
               <p
                 className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/80"
                 style={{ textShadow: '0 1px 8px rgba(0, 0, 0, 0.4)' }}
@@ -211,7 +204,7 @@ export default function HeroBanner({
               <div className="mt-5 flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
                 <Link
                   to={primaryLink ?? '/shop'}
-                  className="ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
+                  className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
                 >
                   {cta}
                 </Link>
@@ -219,20 +212,20 @@ export default function HeroBanner({
                   <button
                     type="button"
                     onClick={onSecondaryClick}
-                    className="ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
+                    className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
                   >
                     {secondaryCta || 'Explore Our Brands'}
                   </button>
                 ) : secondaryCta && secondaryLink ? (
                   <Link
                     to={secondaryLink}
-                    className="ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
+                    className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
                   >
                     {secondaryCta}
                   </Link>
                 ) : null}
               </div>
-            </motion.div>
+            </div>
           </Container>
 
           {hasMedia && media.length > 1 && (

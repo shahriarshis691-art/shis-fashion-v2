@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
 import Container from '../components/ui/Container'
 import SectionTitle from '../components/ui/SectionTitle'
+import Reveal from '../components/common/Reveal'
 import { SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
 
 export default function ContactPage() {
@@ -11,7 +11,7 @@ export default function ContactPage() {
       <Container>
         <h1 className="sr-only">Contact SHIS Fashion</h1>
         <SectionTitle eyebrow="Let’s talk" title="Book a private styling consultation" description="Whether you're planning a wardrobe refresh or a special event, our team is ready to assist." />
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mt-10">
+        <Reveal className="mt-10">
           <Card className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] p-8">
               <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">Studio</p>
@@ -40,7 +40,7 @@ export default function ContactPage() {
               </a>
             </div>
           </Card>
-        </motion.div>
+        </Reveal>
       </Container>
     </section>
   )

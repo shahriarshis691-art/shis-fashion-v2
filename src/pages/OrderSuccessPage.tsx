@@ -5,6 +5,7 @@ import Container from '../components/ui/Container'
 import { parseBDT, formatBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
+import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdentity'
 import { STORE_POLICY } from '../data/storePolicy'
 import { getCustomerOrderSupportHref, PAYMENT_METHOD_COD } from '../utils/orderComms'
 import { isApiPrepaidPayment, isManualWalletPayment } from '../utils/paymentMethods'
@@ -15,6 +16,7 @@ interface LastOrderSnapshot {
   orderId: string
   customerName: string
   customerPhone: string
+  customerEmail?: string
   address: string
   paymentMethod: string
   paymentTransactionId?: string
@@ -22,8 +24,10 @@ interface LastOrderSnapshot {
   subtotal: number
   grandTotal: number
   createdAt: string
+  purchaseEventId?: string
   items: Array<{
     id: string
+    slug?: string
     name: string
     image: string
     price: string
@@ -115,13 +119,14 @@ export default function OrderSuccessPage() {
       return null
     }
 
-    const contentIds = order.items.map((item) => item.id)
+    const contentIds = getCatalogContentIds(order.items)
     return {
       value: order.grandTotal,
       currency: 'BDT',
       content_type: 'product' as const,
       content_ids: contentIds,
       content_name: order.items.length === 1 ? order.items[0].name : `${order.items.length} items`,
+      event_id: order.purchaseEventId,
     }
   }, [order])
 
@@ -130,13 +135,21 @@ export default function OrderSuccessPage() {
       return
     }
 
-    metaPixel.trackPurchase(purchasePayload)
+    metaPixel.trackPurchase(purchasePayload, {
+      eventId: order.purchaseEventId,
+      userData: {
+        email: order.customerEmail,
+        phone: order.customerPhone,
+        firstName: order.customerName.split(' ')[0],
+        country: 'bd',
+      },
+    })
     googleAnalytics.purchase({
       transaction_id: order.orderId,
       value: order.grandTotal,
       currency: 'BDT',
       items: order.items.map((item) => ({
-        item_id: item.id,
+        item_id: getCatalogContentId(item),
         item_name: item.name,
         price: parseBDT(item.price),
         quantity: item.quantity,

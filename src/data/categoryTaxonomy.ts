@@ -76,6 +76,21 @@ export const SEGMENT_TABS: Array<{ key: ShopSegment; label: string; path: string
   { key: 'all', label: 'All', path: '/shop' },
 ]
 
+const RESERVED_SHOP_SLUGS = new Set(['new-arrivals', 'best-sellers', 'saree', 'sarees'])
+
+export function isKnownListingSlug(slug: string) {
+  const normalized = slug.trim().toLowerCase()
+  if (!normalized) {
+    return false
+  }
+
+  if (RESERVED_SHOP_SLUGS.has(normalized) || normalized === 'women' || normalized === 'womens' || normalized === 'men' || normalized === 'mens' || normalized === 'kids' || normalized === 'kid') {
+    return true
+  }
+
+  return Boolean(getTaxonomyLabelForSlug(normalized))
+}
+
 export function getTaxonomyLabelForSlug(slug: string) {
   const normalized = slug.trim().toLowerCase()
   if (!normalized) {

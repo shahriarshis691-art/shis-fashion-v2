@@ -1,25 +1,54 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
-import MiniCartConfirmation from '../components/common/MiniCartConfirmation'
-import WelcomePopup from '../components/common/WelcomePopup'
-import AbandonedCartBanner from '../components/common/AbandonedCartBanner'
+import SmoothScroll from '../components/common/SmoothScroll'
 import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata, setRuntimeSeoOverrides } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
+import { captureCampaignAttribution } from '../utils/attribution'
 import { subscribeToHomepageContent } from '../firebase/adminService'
 import { normalizeCatalogImageUrl } from '../utils/media'
 import { subscribeNewsletter } from '../firebase/adminService'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
+
+const MiniCartConfirmation = lazy(() => import('../components/common/MiniCartConfirmation'))
+const WelcomePopup = lazy(() => import('../components/common/WelcomePopup'))
+const AbandonedCartBanner = lazy(() => import('../components/common/AbandonedCartBanner'))
+const WhatsAppWidget = lazy(() => import('../components/common/WhatsAppWidget'))
+
+function DeferredChrome({ children }: { children: ReactNode }) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    }
+
+    if (typeof win.requestIdleCallback === 'function') {
+      const idleId = win.requestIdleCallback(() => setReady(true), { timeout: 1200 })
+      return () => win.cancelIdleCallback?.(idleId)
+    }
+
+    const timeoutId = window.setTimeout(() => setReady(true), 400)
+    return () => window.clearTimeout(timeoutId)
+  }, [])
+
+  if (!ready) {
+    return null
+  }
+
+  return children
+}
 
 function getOversizedCampaignLandingPath(pathname: string, search: string) {
   const params = new URLSearchParams(search)
@@ -73,6 +102,10 @@ export default function MainLayout() {
     () => getOversizedCampaignLandingPath(location.pathname, location.search),
     [location.pathname, location.search],
   )
+
+  useEffect(() => {
+    captureCampaignAttribution(location.search, location.pathname)
+  }, [location.pathname, location.search])
 
   useEffect(() => {
     if (!oversizedCampaignLanding) {
@@ -201,23 +234,29 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <SmoothScroll />
       <ScrollToTop />
       <Navbar />
-      <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
       <main className="page-shell min-h-screen">
         <PageTransition>
           <Outlet />
         </PageTransition>
       </main>
-      <MiniCartConfirmation />
       <Footer />
-      <WelcomePopup
-        isOpen={isPopupOpen}
-        onClose={closePopup}
-        onSubscribe={handleSubscribe}
-        onWelcomeBack={handleWelcomeBack}
-        heroImage={heroImage}
-      />
+      <DeferredChrome>
+        <Suspense fallback={null}>
+          <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
+          <MiniCartConfirmation />
+          {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? <WhatsAppWidget /> : null}
+          <WelcomePopup
+            isOpen={isPopupOpen}
+            onClose={closePopup}
+            onSubscribe={handleSubscribe}
+            onWelcomeBack={handleWelcomeBack}
+            heroImage={heroImage}
+          />
+        </Suspense>
+      </DeferredChrome>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 import ErrorBoundary from './components/common/ErrorBoundary'
@@ -31,6 +31,11 @@ const withSuspense = (element: ReactElement) => (
     <Suspense fallback={<Loading />}>{element}</Suspense>
   </ErrorBoundary>
 )
+
+function RedirectPreserveSearch({ to }: { to: string }) {
+  const location = useLocation()
+  return <Navigate to={{ pathname: to, search: location.search, hash: location.hash }} replace />
+}
 
 function AdminRouteGuard({ children }: { children: ReactElement }) {
   const [user, setUser] = useState<{ uid: string; email: string | null } | null>(null)
@@ -87,7 +92,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'saree',
-        element: <Navigate to="/sarees" replace />,
+        element: <RedirectPreserveSearch to="/sarees" />,
       },
       {
         path: 'shop/new-arrivals',
@@ -99,7 +104,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'best-sellers',
-        element: <Navigate to="/shop/best-sellers" replace />,
+        element: <RedirectPreserveSearch to="/shop/best-sellers" />,
       },
       {
         path: 'shop/:slug',

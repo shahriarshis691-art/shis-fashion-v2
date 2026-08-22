@@ -24,6 +24,9 @@ import {
 } from '../utils/prepaid'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
+import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdentity'
+import { getOrderAttribution } from '../utils/attribution'
+import { createMetaEventId } from '../utils/metaEvents'
 
 const ORDER_CONFIRMATION_KEY = 'shis-fashion-last-order'
 const CHECKOUT_ANTI_BOT_COOLDOWN_KEY = 'shis-checkout-last-submit-at'
@@ -185,14 +188,14 @@ export default function CheckoutPage() {
       value: subtotal - discountAmount,
       currency: 'BDT',
       content_type: 'product',
-      content_ids: items.map((item) => String(item.id)),
+      content_ids: getCatalogContentIds(items),
     })
 
     googleAnalytics.beginCheckout({
       value: subtotal - discountAmount,
       currency: 'BDT',
       items: items.map((item) => ({
-        item_id: item.id,
+        item_id: getCatalogContentId(item),
         item_name: item.name,
         item_category: item.category,
         price: parseBDT(item.price),
@@ -288,6 +291,7 @@ export default function CheckoutPage() {
       .join(', ')
 
     try {
+      const purchaseEventId = createMetaEventId('Purchase')
       const createdOrder = await createOrder({
         customerName: form.name.trim(),
         customerPhone: phoneNumber,
@@ -315,6 +319,8 @@ export default function CheckoutPage() {
         trackingNumber: '',
         paymentMethod,
         paymentTransactionId: requiresWalletTrxId ? paymentTransactionId.trim().toUpperCase() : undefined,
+        attribution: getOrderAttribution() ?? undefined,
+        purchaseEventId,
       }, appliedCoupon ? {
         code: appliedCoupon.code,
         discountPercent: appliedCoupon.discountPercent,
@@ -334,6 +340,7 @@ export default function CheckoutPage() {
         grandTotal: createdOrder.total,
         items: items.map((item) => ({
           id: item.id,
+          slug: item.slug,
           name: item.name,
           image: item.image,
           price: item.price,
@@ -341,6 +348,8 @@ export default function CheckoutPage() {
           size: item.size,
           color: item.color,
         })),
+        customerEmail: form.email.trim(),
+        purchaseEventId: createdOrder.purchaseEventId ?? purchaseEventId,
         couponCode: appliedCoupon?.code ?? createdOrder.couponCode ?? '',
         couponDiscountPercent: appliedCoupon?.discountPercent ?? createdOrder.couponDiscountPercent ?? 0,
         couponDiscountAmount: createdOrder.couponDiscountAmount ?? discountAmount,

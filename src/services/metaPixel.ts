@@ -1,3 +1,6 @@
+import { sendMetaCapiEvent } from './metaCapi'
+import { createMetaEventId, isMetaCapiEventName } from '../utils/metaEvents'
+
 interface PixelWindow extends Window {
   fbq?: FbqFunction
   _fbq?: FbqFunction
@@ -10,10 +13,14 @@ interface PixelWindow extends Window {
 type FbqPayload = Record<string, unknown>
 type FbqArg = FbqPayload | string | number | boolean
 
+type FbqEventOptions = {
+  eventID?: string
+}
+
 type FbqFunction = {
-  (command: string, action: string, payload?: FbqArg, extra?: string): void
-  callMethod?: (command: string, action: string, payload?: FbqArg, extra?: string) => void
-  queue?: Array<[string, string, FbqArg?, string?]>
+  (command: string, action: string, payload?: FbqArg, extra?: string | FbqEventOptions): void
+  callMethod?: (command: string, action: string, payload?: FbqArg, extra?: string | FbqEventOptions) => void
+  queue?: Array<[string, string, FbqArg | undefined, string | FbqEventOptions | undefined]>
   push?: FbqFunction
   loaded?: boolean
   version?: string
@@ -35,6 +42,20 @@ interface PixelSearchPayload {
 interface PixelPurchasePayload extends PixelBasePayload {
   value: number
   currency: string
+  event_id?: string
+}
+
+export interface MetaPixelUserData {
+  email?: string
+  phone?: string
+  firstName?: string
+  city?: string
+  country?: string
+}
+
+export interface MetaPixelTrackOptions {
+  eventId?: string
+  userData?: MetaPixelUserData
 }
 
 const PIXEL_SCRIPT_ID = 'shis-meta-pixel-sdk'
@@ -101,17 +122,17 @@ class MetaPixelService {
     this.initialized = true
   }
 
-  trackPageView(pathname: string, search = ''): void {
+  trackPageView(pathname: string, search = '', options?: MetaPixelTrackOptions): void {
     const pageKey = `${pathname}${search}`
     if (this.lastPageViewKey === pageKey) {
       return
     }
 
     this.lastPageViewKey = pageKey
-    this.trackStandardEvent('PageView')
+    this.trackStandardEvent('PageView', undefined, options)
   }
 
-  trackViewContent(payload: PixelBasePayload): void {
+  trackViewContent(payload: PixelBasePayload, options?: MetaPixelTrackOptions): void {
     this.trackStandardEvent('ViewContent', {
       content_name: payload.content_name ?? 'Product',
       content_ids: payload.content_ids ?? [],
@@ -119,10 +140,10 @@ class MetaPixelService {
       value: payload.value ?? 0,
       currency: payload.currency ?? META_FALLBACK_CURRENCY,
       brand: payload.brand,
-    })
+    }, options)
   }
 
-  trackAddToCart(payload: PixelBasePayload): void {
+  trackAddToCart(payload: PixelBasePayload, options?: MetaPixelTrackOptions): void {
     this.trackStandardEvent('AddToCart', {
       content_name: payload.content_name ?? 'Product',
       content_ids: payload.content_ids ?? [],
@@ -130,10 +151,10 @@ class MetaPixelService {
       value: payload.value ?? 0,
       currency: payload.currency ?? META_FALLBACK_CURRENCY,
       brand: payload.brand,
-    })
+    }, options)
   }
 
-  trackInitiateCheckout(payload: PixelBasePayload): void {
+  trackInitiateCheckout(payload: PixelBasePayload, options?: MetaPixelTrackOptions): void {
     const eventPayload = {
       value: payload.value ?? 0,
       currency: payload.currency ?? META_FALLBACK_CURRENCY,
@@ -160,10 +181,10 @@ class MetaPixelService {
     this.lastInitiateCheckoutSignature = signature
     this.lastInitiateCheckoutTrackedAt = now
 
-    this.trackStandardEvent('InitiateCheckout', eventPayload)
+    this.trackStandardEvent('InitiateCheckout', eventPayload, options)
   }
 
-  trackPurchase(payload: PixelPurchasePayload): void {
+  trackPurchase(payload: PixelPurchasePayload, options?: MetaPixelTrackOptions): void {
     this.trackStandardEvent('Purchase', {
       value: payload.value,
       currency: payload.currency,
@@ -171,6 +192,9 @@ class MetaPixelService {
       content_ids: payload.content_ids ?? [],
       content_name: payload.content_name ?? 'Order',
       brand: payload.brand,
+    }, {
+      ...options,
+      eventId: options?.eventId ?? payload.event_id,
     })
   }
 
@@ -192,26 +216,35 @@ class MetaPixelService {
     return this.pixelId
   }
 
-  private trackStandardEvent(eventName: string, payload?: FbqPayload): void {
+  private trackStandardEvent(eventName: string, payload?: FbqPayload, options?: MetaPixelTrackOptions): void {
     if (!import.meta.env.PROD || typeof window === 'undefined') {
       return
     }
 
     const fbq = (window as PixelWindow).fbq
-    if (!fbq) {
-      return
+    const eventId = options?.eventId?.trim() || createMetaEventId(eventName)
+    const sanitizedPayload = this.sanitizePayload(payload)
+
+    if (fbq) {
+      try {
+        if (sanitizedPayload) {
+          fbq('track', eventName, sanitizedPayload, { eventID: eventId })
+        } else {
+          fbq('track', eventName, {}, { eventID: eventId })
+        }
+      } catch {
+        // Ignore runtime errors to avoid blocking user flows.
+      }
     }
 
-    try {
-      const sanitizedPayload = this.sanitizePayload(payload)
-
-      if (sanitizedPayload) {
-        fbq('track', eventName, sanitizedPayload)
-      } else {
-        fbq('track', eventName)
-      }
-    } catch {
-      // Ignore runtime errors to avoid blocking user flows.
+    if (isMetaCapiEventName(eventName)) {
+      sendMetaCapiEvent({
+        eventName,
+        eventId,
+        eventSourceUrl: window.location.href,
+        customData: sanitizedPayload,
+        userData: options?.userData,
+      })
     }
   }
 
@@ -259,14 +292,14 @@ class MetaPixelService {
       return
     }
 
-    const stub: FbqFunction = ((command: string, action: string, payload?: FbqArg, extra?: string) => {
+    const stub: FbqFunction = ((command: string, action: string, payload?: FbqArg, extra?: string | FbqEventOptions) => {
       if (stub.callMethod) {
         stub.callMethod(command, action, payload, extra)
         return
       }
 
       stub.queue = stub.queue ?? []
-      stub.queue.push([command, action, payload, extra])
+      stub.queue.push([command, action, payload, extra ?? undefined])
     }) as FbqFunction
 
     stub.queue = []

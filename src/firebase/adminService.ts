@@ -95,6 +95,21 @@ export interface AdminOrder {
   couponId?: string
   stockCommitted?: boolean
   stockRestored?: boolean
+  attribution?: {
+    utm_source?: string
+    utm_medium?: string
+    utm_campaign?: string
+    utm_content?: string
+    utm_term?: string
+    fbclid?: string
+    gclid?: string
+    ttclid?: string
+    msclkid?: string
+    landingPath?: string
+    landingSearch?: string
+    capturedAt?: string
+  }
+  purchaseEventId?: string
 }
 
 export interface AdminSessionUser {
@@ -2433,6 +2448,8 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
         deliveryAddress: order.deliveryAddress,
         paymentMethod: order.paymentMethod,
         paymentTransactionId: order.paymentTransactionId,
+        attribution: order.attribution,
+        purchaseEventId: order.purchaseEventId,
       }),
     })
 

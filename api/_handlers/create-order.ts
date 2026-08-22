@@ -13,6 +13,7 @@ import {
   normalizeWalletTransactionId,
   resolvePaymentStatus,
 } from '../_payment.js'
+import { sendConversionsApiEvent } from '../_metaCapi.js'
 import {
   assertCouponRedeemable,
   isValidCouponCode,
@@ -65,6 +66,21 @@ interface CreateOrderBody {
   deliveryAddress?: DeliveryAddressInput
   paymentMethod?: string
   paymentTransactionId?: string
+  attribution?: {
+    utm_source?: string
+    utm_medium?: string
+    utm_campaign?: string
+    utm_content?: string
+    utm_term?: string
+    fbclid?: string
+    gclid?: string
+    ttclid?: string
+    msclkid?: string
+    landingPath?: string
+    landingSearch?: string
+    capturedAt?: string
+  }
+  purchaseEventId?: string
 }
 
 interface ProductRecord {
@@ -121,6 +137,50 @@ function getBaseDeliveryCharge(division: string) {
   return division === 'Dhaka' ? DHAKA_DELIVERY_CHARGE : OUTSIDE_DHAKA_DELIVERY_CHARGE
 }
 
+function sanitizeAttrValue(value: unknown, maxLength = 180) {
+  let next = ''
+  for (const char of String(value ?? '')) {
+    const code = char.charCodeAt(0)
+    if (code >= 32 && char !== '<' && char !== '>') {
+      next += char
+    }
+  }
+
+  return next.trim().slice(0, maxLength)
+}
+
+function sanitizeAttribution(raw: CreateOrderBody['attribution']) {
+  if (!raw || typeof raw !== 'object') {
+    return undefined
+  }
+
+  const next = {
+    utm_source: sanitizeAttrValue(raw.utm_source),
+    utm_medium: sanitizeAttrValue(raw.utm_medium),
+    utm_campaign: sanitizeAttrValue(raw.utm_campaign),
+    utm_content: sanitizeAttrValue(raw.utm_content),
+    utm_term: sanitizeAttrValue(raw.utm_term),
+    fbclid: sanitizeAttrValue(raw.fbclid),
+    gclid: sanitizeAttrValue(raw.gclid),
+    ttclid: sanitizeAttrValue(raw.ttclid),
+    msclkid: sanitizeAttrValue(raw.msclkid),
+    landingPath: sanitizeAttrValue(raw.landingPath, 200),
+    landingSearch: sanitizeAttrValue(raw.landingSearch, 300),
+    capturedAt: sanitizeAttrValue(raw.capturedAt, 40),
+  }
+
+  const compact = Object.fromEntries(
+    Object.entries(next).filter(([, value]) => Boolean(value)),
+  )
+
+  return Object.keys(compact).length ? compact : undefined
+}
+
+function sanitizePurchaseEventId(value: unknown) {
+  const eventId = sanitizeAttrValue(value, 80)
+  return /^[A-Za-z0-9._:-]+$/.test(eventId) ? eventId : ''
+}
+
 export default async function handler(req: LooseRequest, res: LooseResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' })
@@ -156,6 +216,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   const isManualWallet = isManualWalletPayment(requestedPayment)
   const isApiPrepaid = isApiPrepaidPayment(requestedPayment)
   const paymentTransactionId = normalizeWalletTransactionId(String(body.paymentTransactionId ?? ''))
+  const attribution = sanitizeAttribution(body.attribution)
+  const purchaseEventId = sanitizePurchaseEventId(body.purchaseEventId)
 
   if (customerName.length < 2 || customerName.length > 100) {
     res.status(400).json({ error: 'Please enter a valid full name.' })
@@ -387,6 +449,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           couponDiscountType: discountType,
           couponId,
         } : {}),
+        ...(attribution ? { attribution } : {}),
+        ...(purchaseEventId ? { purchaseEventId } : {}),
       }
 
       transaction.set(orderRef, orderPayload)
@@ -429,6 +493,36 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         ...lowStockAlerts.map((item) => `${item.name}: ${item.remaining} left`),
       ].join('\n'))
     }
+
+    const purchaseContentIds = (order.items ?? [])
+      .map((item) => String(item.slug ?? '').trim())
+      .filter(Boolean)
+
+    void sendConversionsApiEvent({
+      eventName: 'Purchase',
+      eventId: purchaseEventId || `purchase-${order.id}`,
+      eventSourceUrl: 'https://www.shisfashion.com/order-success',
+      customData: {
+        value: Number(order.total ?? 0),
+        currency: 'BDT',
+        content_type: 'product',
+        content_ids: purchaseContentIds,
+        content_name: purchaseContentIds.length === 1 ? order.items?.[0]?.name : `${purchaseContentIds.length} items`,
+        order_id: order.id,
+        num_items: (order.items ?? []).reduce((sum, item) => sum + Number(item.quantity ?? 0), 0),
+      },
+      userData: {
+        email: customerEmail,
+        phone: customerPhone,
+        firstName: customerName.split(' ')[0],
+        city: district,
+        country: 'bd',
+        clientIpAddress: getClientIp(req.headers),
+        clientUserAgent: String(
+          req.headers?.['user-agent'] ?? req.headers?.['User-Agent'] ?? '',
+        ).slice(0, 280),
+      },
+    }).catch(() => undefined)
 
     if (isManualWallet) {
       void sendOpsWebhook([

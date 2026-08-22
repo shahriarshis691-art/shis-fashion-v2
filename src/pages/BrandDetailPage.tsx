@@ -4,7 +4,7 @@ import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { brandEntries } from '../data/brandShowcase'
 import { subscribeToAdminBrands, type AdminBrand } from '../firebase/adminService'
-import { applySeoMetadata } from '../utils/seo'
+import { applyNotFoundSeo, applySeoMetadata } from '../utils/seo'
 
 type DisplayBrand = {
   id: string
@@ -61,12 +61,14 @@ export default function BrandDetailPage() {
 
   useEffect(() => {
     if (!brand) {
+      applyNotFoundSeo(location.pathname)
       return
     }
 
     applySeoMetadata(location.pathname, {
       title: `${brand.name} | SHIS Fashion Bangladesh`,
       description: brand.summary,
+      canonicalPath: location.pathname,
     })
   }, [brand, location.pathname])
 
@@ -91,11 +93,15 @@ export default function BrandDetailPage() {
           <Button to="/brands" variant="secondary" className="mb-4">← Back to brands</Button>
 
           <div className="mt-4 grid gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
-            <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]">
+            <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]">
               <img
                 src={brand.logo}
                 alt={`${brand.name} logo`}
-                className="h-auto w-full object-cover"
+                width={600}
+                height={750}
+                loading="eager"
+                decoding="async"
+                className="gpu-media h-full w-full object-cover"
               />
             </div>
 

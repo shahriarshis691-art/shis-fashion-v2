@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
 import Button from '../components/ui/Button'
 import { useCart, clearBuyNowCheckout } from '../context/CartContext'
@@ -70,7 +69,9 @@ export default function CartPage() {
               <div className="mt-4 space-y-3">
                 {wishlistItems.map((wishlistItem) => (
                   <div key={wishlistItem.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-                    <img src={wishlistItem.product.image} alt={wishlistItem.product.name} loading="lazy" decoding="async" className="h-16 w-16 rounded-[0.75rem] object-cover sm:h-20 sm:w-20" />
+                    <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-[0.75rem] sm:h-20 sm:w-20">
+                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
+                    </div>
                     <div className="flex-1">
                       <h3 className="text-sm font-semibold text-[var(--color-text)]">{wishlistItem.product.name}</h3>
                       <p className="mt-1 text-sm text-[var(--color-accent)]">{wishlistItem.product.price}</p>
@@ -108,22 +109,23 @@ export default function CartPage() {
             </div>
 
             {items.map((item) => (
-              <motion.div
+              <div
                 key={item.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-                className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:rounded-[1.8rem] sm:p-5"
+                className="luxury-fade-in rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:rounded-[1.8rem] sm:p-5"
               >
                 <div className="flex gap-4">
-                  <img
+                  <div className="aspect-square h-20 w-20 shrink-0 overflow-hidden rounded-[0.9rem] sm:h-28 sm:w-28 sm:rounded-[1.2rem]">
+                    <img
                     src={item.image}
                     alt={item.name}
                     loading="lazy"
                     decoding="async"
+                    width={112}
+                    height={112}
                     sizes="(max-width: 639px) 80px, 112px"
-                    className="h-20 w-20 rounded-[0.9rem] object-cover sm:h-28 sm:w-28 sm:rounded-[1.2rem]"
+                    className="gpu-media h-full w-full object-cover"
                   />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -142,7 +144,7 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
 
             <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
@@ -160,7 +162,9 @@ export default function CartPage() {
                 <div className="mt-4 space-y-3">
                   {wishlistItems.map((wishlistItem) => (
                     <div key={wishlistItem.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} loading="lazy" decoding="async" className="h-16 w-16 rounded-[0.75rem] object-cover sm:h-20 sm:w-20" />
+                      <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-[0.75rem] sm:h-20 sm:w-20">
+                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
+                    </div>
                       <div className="flex-1">
                         <h3 className="text-sm font-semibold text-[var(--color-text)]">{wishlistItem.product.name}</h3>
                         <p className="mt-1 text-sm text-[var(--color-accent)]">{wishlistItem.product.price}</p>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import Container from '../components/ui/Container'
+import Reveal from '../components/common/Reveal'
 import { founderProfile as staticFounderProfile, brandEntries, type BrandEntry } from '../data/brandShowcase'
 import { subscribeToAdminBrands, subscribeToFounderProfile, type AdminBrand, type FounderProfile } from '../firebase/adminService'
 import { applySeoMetadata } from '../utils/seo'
@@ -33,23 +33,19 @@ function mapLiveBrandToDisplayBrand(brand: AdminBrand): DisplayBrand {
 
 function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="relative overflow-hidden rounded-[1.3rem] border border-white/14 bg-[#0b0b0b] p-3 shadow-[0_20px_65px_rgba(0,0,0,0.4)] sm:p-4"
-    >
+    <Reveal as="article" delayMs={index * 50} className="relative overflow-hidden rounded-[1.3rem] border border-white/14 bg-[#0b0b0b] p-3 shadow-[0_20px_65px_rgba(0,0,0,0.4)] sm:p-4">
       <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.14),rgba(255,255,255,0))]" aria-hidden />
 
-      <div className="overflow-hidden rounded-[1rem] border border-white/10 bg-[#141414]">
+      <div className="aspect-[16/9] overflow-hidden rounded-[1rem] border border-white/10 bg-[#141414]">
         <img
           src={brand.logo}
           alt={`${brand.name} logo`}
+          width={1200}
+          height={675}
           loading="lazy"
           decoding="async"
           onError={(event) => handleImageError(event, LOGO_PLACEHOLDER)}
-          className="h-36 w-full object-cover sm:h-40"
+          className="gpu-media h-full w-full object-cover"
         />
       </div>
 
@@ -78,7 +74,7 @@ function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
           </a>
         </div>
       </div>
-    </motion.article>
+    </Reveal>
   )
 }
 
@@ -131,14 +127,16 @@ export default function BrandsPage() {
         </div>
 
         <div className="mt-8 grid gap-4 rounded-[1.35rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:mt-10 sm:rounded-[1.8rem] sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:p-7">
-          <div className="overflow-hidden rounded-[1rem] border border-[var(--color-border)] bg-[#0e0e0e]">
+          <div className="aspect-[4/5] overflow-hidden rounded-[1rem] border border-[var(--color-border)] bg-[#0e0e0e]">
             <img
               src={displayFounder.image}
               alt={displayFounder.name}
+              width={900}
+              height={1100}
               loading="lazy"
               decoding="async"
               onError={(event) => handleImageError(event, FOUNDER_PLACEHOLDER)}
-              className="h-full min-h-[18rem] w-full object-cover"
+              className="gpu-media h-full w-full object-cover"
             />
           </div>
 

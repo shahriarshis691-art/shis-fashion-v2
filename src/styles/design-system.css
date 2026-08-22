@@ -43,6 +43,9 @@
   --transition-fast: 180ms;
   --transition-base: 220ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-duration: 620ms;
+  --reveal-distance: 18px;
 
   color: var(--color-text);
   background-color: var(--color-bg);
@@ -87,6 +90,97 @@
 
 .ui-interactive:hover {
   opacity: 0.9;
+}
+
+.ui-interactive,
+a,
+button,
+[role='button'],
+.product-card {
+  touch-action: manipulation;
+}
+
+.luxury-tap {
+  transform: translate3d(0, 0, 0);
+  transition: transform var(--transition-fast) var(--ease-luxury);
+}
+
+.luxury-tap:active {
+  transform: translate3d(0, 1px, 0) scale(0.98);
+}
+
+.gpu-media {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.media-hover {
+  transition: transform 520ms var(--ease-luxury);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .media-hover,
+  .group:focus-visible .media-hover {
+    will-change: transform;
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+}
+
+.luxury-reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-distance), 0);
+  transition:
+    opacity var(--reveal-duration) var(--ease-luxury),
+    transform var(--reveal-duration) var(--ease-luxury);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.luxury-reveal.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.luxury-fade-in {
+  animation: luxuryFadeIn 280ms var(--ease-luxury) both;
+}
+
+.luxury-sheet-up {
+  animation: luxurySheetUp 320ms var(--ease-luxury) both;
+}
+
+@keyframes luxuryFadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes luxurySheetUp {
+  from {
+    opacity: 0.6;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luxury-reveal,
+  .luxury-fade-in,
+  .luxury-sheet-up,
+  .media-hover,
+  .luxury-tap {
+    animation: none;
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
 }
 
 /* Mobile micro-pass: tighter image gaps for <=420px screens */

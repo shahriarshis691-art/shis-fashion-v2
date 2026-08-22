@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import shisLogo from '../../assets/logo/shis-logo.svg'
@@ -8,6 +7,7 @@ import { subscribeToHomepageContent, type HomepageContent } from '../../firebase
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
 import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
+import { useRafScroll } from '../../hooks/useRafThrottle'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -111,16 +111,12 @@ function MobileAccordionGroup({
         <span aria-hidden className="text-base leading-none">{expanded ? '−' : '+'}</span>
       </button>
 
-      <AnimatePresence initial={false}>
-        {expanded ? (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="overflow-hidden border-t border-black/10"
-          >
-            <nav className="grid gap-1 p-1.5" aria-label={`${title} links`}>
+      <div
+        className={`grid overflow-hidden border-t border-black/10 transition-[grid-template-rows] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <nav className="min-h-0 grid gap-1 p-1.5" aria-label={`${title} links`}>
               {links.map((link) => (
                 <NavLink
                   key={`${title}-${link.label}-${link.href}`}
@@ -137,9 +133,7 @@ function MobileAccordionGroup({
                 </NavLink>
               ))}
             </nav>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -168,12 +162,9 @@ export default function Navbar() {
     return unsubscribe
   }, [])
 
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 4)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  useRafScroll((scrollY) => {
+    setIsScrolled(scrollY > 4)
+  })
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -230,7 +221,7 @@ export default function Navbar() {
           </button>
 
           <Link to="/" onClick={closeOverlays} className="ml-2 md:ml-0" aria-label="SHIS Fashion home">
-            <img src={shisLogo} alt="SHIS Fashion" className="h-9 w-auto sm:h-8" loading="eager" />
+            <img src={shisLogo} alt="SHIS Fashion" width={120} height={36} className="h-9 w-auto sm:h-8" loading="eager" decoding="async" />
           </Link>
 
           <nav className="ml-8 hidden min-w-0 flex-1 items-center gap-5 md:flex" aria-label="Primary navigation">
@@ -253,35 +244,27 @@ export default function Navbar() {
                 >
                   <CategoryLink href={menu.href} label={menu.label} onNavigate={closeOverlays} />
 
-                  <AnimatePresence>
-                    {openMegaMenu === key ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.18 }}
-                        className="absolute left-0 top-full z-50 mt-2 w-56 border border-black/10 bg-white p-2 shadow-[0_14px_28px_rgba(0,0,0,0.12)]"
-                      >
-                        <nav className="grid gap-1" aria-label={`${menu.label} dropdown`}>
-                          {menu.links.map((item) => (
-                            <NavLink
-                              key={`${menu.label}-${item.label}`}
-                              to={item.href}
-                              onClick={closeOverlays}
-                              className={({ isActive }) =>
-                                `ui-interactive flex items-center justify-between px-2 py-2 text-sm ${
-                                  isActive ? 'bg-black text-white' : 'text-black hover:bg-black/5'
-                                }`
-                              }
-                            >
-                              <span>{item.label}</span>
-                              <span aria-hidden>→</span>
-                            </NavLink>
-                          ))}
-                        </nav>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
+                  {openMegaMenu === key ? (
+                    <div className="luxury-fade-in absolute left-0 top-full z-50 mt-2 w-56 border border-black/10 bg-white p-2 shadow-[0_14px_28px_rgba(0,0,0,0.12)]">
+                      <nav className="grid gap-1" aria-label={`${menu.label} dropdown`}>
+                        {menu.links.map((item) => (
+                          <NavLink
+                            key={`${menu.label}-${item.label}`}
+                            to={item.href}
+                            onClick={closeOverlays}
+                            className={({ isActive }) =>
+                              `ui-interactive flex items-center justify-between px-2 py-2 text-sm ${
+                                isActive ? 'bg-black text-white' : 'text-black hover:bg-black/5'
+                              }`
+                            }
+                          >
+                            <span>{item.label}</span>
+                            <span aria-hidden>→</span>
+                          </NavLink>
+                        ))}
+                      </nav>
+                    </div>
+                  ) : null}
                 </div>
               )
             })}
@@ -339,15 +322,8 @@ export default function Navbar() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {isSearchOpen ? (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="border-t border-black/10 bg-white"
-            >
+        {isSearchOpen ? (
+          <div className="luxury-fade-in border-t border-black/10 bg-white">
               <div className="mx-auto flex w-full max-w-7xl gap-2 px-3.5 py-3 sm:px-6 lg:px-8">
                 <label htmlFor="site-search" className="sr-only">
                   Search products
@@ -391,9 +367,8 @@ export default function Navbar() {
                   Search
                 </button>
               </div>
-            </motion.div>
+            </div>
           ) : null}
-        </AnimatePresence>
 
         <nav className="border-t border-black/10 md:hidden" aria-label="Primary categories">
           <div className="mx-auto flex w-full max-w-7xl items-center gap-4 overflow-x-auto px-3.5 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -404,46 +379,34 @@ export default function Navbar() {
         </nav>
       </header>
 
-      <AnimatePresence>
-        {isMenuOpen ? (
-          <>
-            <motion.button
-              type="button"
-              aria-label="Close menu"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.16 }}
-              className="fixed inset-0 z-40 bg-black/40 md:hidden"
-              onClick={() => setIsMenuOpen(false)}
-            />
+      {isMenuOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="luxury-fade-in fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          />
 
-            <motion.aside
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 rounded-md bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.22)] md:hidden"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/50">Categories</p>
-              <div className="mt-2 grid gap-2" aria-label="Mobile category menu">
-                {mobileMenuGroups.map((group) => (
-                  <MobileAccordionGroup
-                    key={group.key}
-                    title={group.title}
-                    links={group.links}
-                    expanded={expandedMobileGroup === group.key}
-                    onToggle={() =>
-                      setExpandedMobileGroup((current) => (current === group.key ? null : group.key))
-                    }
-                    onNavigate={closeOverlays}
-                  />
-                ))}
-              </div>
-            </motion.aside>
-          </>
-        ) : null}
-      </AnimatePresence>
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 rounded-md bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.22)] md:hidden">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/50">Categories</p>
+            <div className="mt-2 grid gap-2" aria-label="Mobile category menu">
+              {mobileMenuGroups.map((group) => (
+                <MobileAccordionGroup
+                  key={group.key}
+                  title={group.title}
+                  links={group.links}
+                  expanded={expandedMobileGroup === group.key}
+                  onToggle={() =>
+                    setExpandedMobileGroup((current) => (current === group.key ? null : group.key))
+                  }
+                  onNavigate={closeOverlays}
+                />
+              ))}
+            </div>
+          </aside>
+        </>
+      ) : null}
     </>
   )
 }

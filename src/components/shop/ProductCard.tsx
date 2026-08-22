@@ -1,7 +1,8 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import type { ShopProduct } from '../../data/shopData'
-import { isDemoImageUrl, catalogImageAttrs } from '../../utils/media'
+import { isDemoImageUrl } from '../../utils/media'
+import LuxuryImage from '../common/LuxuryImage'
 
 interface ProductCardProps {
   product: ShopProduct
@@ -10,39 +11,23 @@ interface ProductCardProps {
   onProductClick?: (product: ShopProduct) => void
 }
 
-const IMAGE_PLACEHOLDER =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f8f5ed"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23c9a227"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
-
-function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.removeAttribute('srcset')
-  event.currentTarget.src = IMAGE_PLACEHOLDER
-}
-
 const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInWishlist, onProductClick }: ProductCardProps) {
-  const image = catalogImageAttrs(
-    product.image,
-    960,
-    1200,
-    '(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw',
-    [320, 480, 768, 960],
-  )
-  const imageSrc = image.src || IMAGE_PLACEHOLDER
-  const imageToneClass = isDemoImageUrl(imageSrc) ? 'shis-media-tone' : ''
+  const imageToneClass = isDemoImageUrl(product.image) ? 'shis-media-tone' : ''
   const isSoldOut = (product.stock ?? 0) <= 0
 
   return (
-    <article className="product-card min-w-0">
+    <article className="product-card luxury-tap min-w-0">
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block" onClick={() => onProductClick?.(product)}>
-        <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
-          <img
-            src={imageSrc}
-            srcSet={image.srcSet}
-            sizes={image.sizes}
+        <div className="relative">
+          <LuxuryImage
+            src={product.image}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
-            onError={handleImageError}
-            className={`h-full w-full object-cover object-center ${imageToneClass}`}
+            width={960}
+            height={1200}
+            sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
+            widths={[320, 480, 768, 960]}
+            hover
+            imgClassName={imageToneClass}
           />
           {onToggleWishlist ? (
             <button

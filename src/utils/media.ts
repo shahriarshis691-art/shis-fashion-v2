@@ -1,6 +1,9 @@
 const DEMO_IMAGE_HOSTS = ['images.unsplash.com', 'plus.unsplash.com']
 const CLOUDINARY_HOST = 'res.cloudinary.com'
 
+export const CATALOG_IMAGE_PLACEHOLDER =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"%3E%3Crect width="1200" height="1200" fill="%23f6f6f6"%3E%3C/rect%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="%23808080"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
+
 export interface ManagedImageSource {
   images?: string[]
   image?: string
@@ -180,6 +183,43 @@ export function catalogImageAttrs(
     srcSet: buildCatalogSrcSet(url, width, height, widths),
     sizes,
   }
+}
+
+export function buildLqipUrl(url: string) {
+  if (!url || url.startsWith('data:')) {
+    return ''
+  }
+
+  try {
+    const parsed = new URL(url)
+
+    if (parsed.hostname.includes(CLOUDINARY_HOST)) {
+      const marker = '/upload/'
+      const markerIndex = parsed.pathname.indexOf(marker)
+      if (markerIndex === -1) {
+        return ''
+      }
+
+      const cleanPath = stripCloudinaryTransforms(parsed.pathname)
+      const prefix = cleanPath.slice(0, cleanPath.indexOf(marker) + marker.length)
+      const suffix = cleanPath.slice(cleanPath.indexOf(marker) + marker.length)
+      parsed.pathname = `${prefix}f_auto,q_1,e_blur:800,c_fill,g_auto,w_32/${suffix}`
+      return parsed.toString()
+    }
+
+    if (DEMO_IMAGE_HOSTS.some((host) => parsed.hostname.includes(host))) {
+      parsed.searchParams.set('auto', 'format')
+      parsed.searchParams.set('fit', 'crop')
+      parsed.searchParams.set('w', '32')
+      parsed.searchParams.set('q', '10')
+      parsed.searchParams.set('blur', '40')
+      return parsed.toString()
+    }
+  } catch {
+    return ''
+  }
+
+  return ''
 }
 
 export function getManagedImageEntries(source: ManagedImageSource, minLength = 0): ManagedImageEntry[] {

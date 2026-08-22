@@ -5,13 +5,15 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { useListingWishlist } from '../hooks/useListingWishlist'
-import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
+import { getManagedImageEntries, getProductImage, isDemoImageUrl } from '../utils/media'
+import LuxuryImage from '../components/common/LuxuryImage'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
-import { applySeoMetadata } from '../utils/seo'
+import { applyNotFoundSeo, applySeoMetadata } from '../utils/seo'
+import NotFoundPage from './NotFoundPage'
 
 interface ListingProduct {
   id: string
@@ -109,32 +111,42 @@ export default function CollectionListingPage() {
     const collectionSlug = (slug ?? '').trim().toLowerCase()
     return homepageContent.featuredCollectionPages.find((entry) => entry.slug === collectionSlug)
       ?? fallbackCollections.find((entry) => entry.slug === collectionSlug)
-      ?? fallbackCollections[0]
+      ?? null
   }, [homepageContent.featuredCollectionPages, slug])
 
   const collectionProducts = useMemo(() => {
-    const relatedCategories = activeCollection.relatedCategorySlugs.map((item) => item.trim().toLowerCase())
+    const relatedCategories = (activeCollection?.relatedCategorySlugs ?? []).map((item) => item.trim().toLowerCase())
     return relatedCategories.length
       ? products.filter((item) => relatedCategories.includes(item.category.trim().toLowerCase()))
       : []
-  }, [activeCollection.relatedCategorySlugs, products])
+  }, [activeCollection?.relatedCategorySlugs, products])
 
   const collectionImages = useMemo(
-    () => activeCollection.images
+    () => (activeCollection?.images ?? [])
       .map((image) => image.trim())
       .filter((image) => image && !/og-image\.svg/i.test(image)),
-    [activeCollection.images],
+    [activeCollection?.images],
   )
 
   useEffect(() => {
+    if (!ready) {
+      return
+    }
+
+    if (!activeCollection) {
+      applyNotFoundSeo(location.pathname)
+      return
+    }
+
     applySeoMetadata(location.pathname, {
       title: `${activeCollection.title} | SHIS Fashion Bangladesh`,
       description: `${activeCollection.description} Discover premium fashion collections from SHIS Fashion Bangladesh.`,
+      canonicalPath: location.pathname,
     })
-  }, [activeCollection.description, activeCollection.title, location.pathname])
+  }, [activeCollection, location.pathname, ready])
 
   useEffect(() => {
-    if (!ready) {
+    if (!ready || !activeCollection) {
       return
     }
 
@@ -150,7 +162,7 @@ export default function CollectionListingPage() {
       result_count: collectionProducts.length,
       path: location.pathname,
     })
-  }, [activeCollection.slug, collectionProducts.length, location.pathname, ready])
+  }, [activeCollection, collectionProducts.length, location.pathname, ready])
 
   if (!ready) {
     return (
@@ -160,6 +172,10 @@ export default function CollectionListingPage() {
         </Container>
       </section>
     )
+  }
+
+  if (!activeCollection) {
+    return <NotFoundPage />
   }
 
   return (
@@ -176,22 +192,20 @@ export default function CollectionListingPage() {
 
         {collectionImages.length ? (
           <div className="mt-8 grid grid-cols-2 items-start gap-x-1.5 gap-y-4 sm:grid-cols-4 sm:gap-x-2.5 sm:gap-y-5">
-            {collectionImages.map((image, index) => {
-              const look = catalogImageAttrs(image, 960, 1200, '(max-width: 639px) 50vw, 25vw', [320, 480, 768, 960])
-              return (
-              <div key={`${activeCollection.slug}-look-${index}`} className="min-w-0 aspect-[4/5] overflow-hidden bg-black/5">
-                <img
-                  src={look.src || image}
-                  srcSet={look.srcSet}
-                  sizes={look.sizes}
-                  alt={`${activeCollection.title} look ${index + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  className={`h-full w-full object-cover object-center ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
-                />
-              </div>
-              )
-            })}
+            {collectionImages.map((image, index) => (
+              <LuxuryImage
+                key={`${activeCollection.slug}-look-${index}`}
+                src={image}
+                alt={`${activeCollection.title} look ${index + 1}`}
+                width={960}
+                height={1200}
+                sizes="(max-width: 639px) 50vw, 25vw"
+                widths={[320, 480, 768, 960]}
+                className="min-w-0"
+                hover
+                imgClassName={isDemoImageUrl(image) ? 'shis-media-tone' : ''}
+              />
+            ))}
           </div>
         ) : null}
 

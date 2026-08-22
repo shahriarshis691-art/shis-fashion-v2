@@ -12,9 +12,10 @@ import { parseBDT } from '../utils/currency'
 import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
-import { applySeoMetadata, buildProductSchema } from '../utils/seo'
+import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 import { DELIVERY_RETURN_BULLETS, EXCHANGE_WINDOW_DAYS } from '../data/storePolicy'
 import { getProductSlug } from '../utils/productIdentity'
+import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 
 function toProduct(product: AdminProduct) {
@@ -170,6 +171,14 @@ export default function ProductDetailPage() {
   })()
 
   useEffect(() => {
+    if (!ready || product) {
+      return
+    }
+
+    applyNotFoundSeo(location.pathname)
+  }, [location.pathname, product, ready])
+
+  useEffect(() => {
     if (!product || !ready) {
       return
     }
@@ -182,7 +191,7 @@ export default function ProductDetailPage() {
 
     metaPixel.trackViewContent({
       content_name: product.name,
-      content_ids: [String(product.id)],
+      content_ids: [getCatalogContentId(product)],
       content_type: 'product',
       value: parseBDT(product.price),
       currency: 'BDT',
@@ -190,7 +199,7 @@ export default function ProductDetailPage() {
     })
 
     googleAnalytics.viewItem({
-      item_id: String(product.id),
+      item_id: getCatalogContentId(product),
       item_name: product.name,
       item_category: product.category,
       price: parseBDT(product.price),
@@ -201,6 +210,7 @@ export default function ProductDetailPage() {
     applySeoMetadata(location.pathname, {
       title: `${product.name} | SHIS Fashion Bangladesh`,
       description: `${product.description} Shop now with fast dispatch and cash on delivery in Bangladesh.`,
+      canonicalPath: location.pathname,
       schema: [
         buildProductSchema(
           {
@@ -330,7 +340,7 @@ export default function ProductDetailPage() {
     addToCart(product, { size: safeSize, color: safeColor, quantity: effectiveQuantity })
     metaPixel.trackAddToCart({
       content_name: product.name,
-      content_ids: [String(product.id)],
+      content_ids: [getCatalogContentId(product)],
       content_type: 'product',
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
@@ -338,7 +348,7 @@ export default function ProductDetailPage() {
     })
 
     googleAnalytics.addToBag({
-      item_id: String(product.id),
+      item_id: getCatalogContentId(product),
       item_name: product.name,
       item_category: product.category,
       price: parseBDT(product.price),
@@ -471,7 +481,7 @@ export default function ProductDetailPage() {
                   height="1500"
                   onError={handleImageError}
                   onClick={() => setIsZoomOpen(true)}
-                  className={`h-full w-full cursor-zoom-in object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
+                  className={`gpu-media h-full w-full cursor-zoom-in object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
                 />
               </div>
 
@@ -513,7 +523,7 @@ export default function ProductDetailPage() {
                   key={`${image}-${index}`}
                   type="button"
                   onClick={() => setActiveImageIndex(index)}
-                  className={`overflow-hidden border ${index === activeImageIndex ? 'border-black' : 'border-black/15'}`}
+                  className={`luxury-tap overflow-hidden border ${index === activeImageIndex ? 'border-black' : 'border-black/15'}`}
                   aria-label={`Image ${index + 1}`}
                 >
                   <div className="aspect-[4/5] bg-black/5">
@@ -525,7 +535,7 @@ export default function ProductDetailPage() {
                       loading="lazy"
                       decoding="async"
                       onError={handleImageError}
-                      className={`h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                     />
                   </div>
                 </button>
