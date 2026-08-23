@@ -6,6 +6,7 @@ export const featuredCollectionCovers: Record<string, string> = {
 
 export const categoryStripCovers: Record<string, string> = {
   saree: '/collections/category-saree-blue.jpg',
+  denim: '/collections/featured-denim-collection.jpg',
 }
 
 export function featuredCollectionCover(slug: string, fallback = '') {

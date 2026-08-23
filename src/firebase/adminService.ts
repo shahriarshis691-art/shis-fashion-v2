@@ -192,6 +192,7 @@ export type HomepageCategorySectionKey =
   | 'women'
   | 'saree'
   | 'men'
+  | 'denim'
   | 'kids'
   | 'western'
   | 'sale'
@@ -903,6 +904,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'women', label: 'Women', href: '/women', order: 10, legacyImageKey: 'womens' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, legacyImageKey: 'saree' },
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
+  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, legacyImageKey: 'oversized-tee' },
@@ -941,6 +943,16 @@ const defaultCategorySections: HomepageCategorySections = {
     enabled: true,
     order: 20,
     coverImage: getLegacyCategoryImage('mens'),
+    images: [],
+    updatedAt: null,
+  },
+  denim: {
+    key: 'denim',
+    label: 'Denim',
+    href: '/men?sub=denim',
+    enabled: true,
+    order: 25,
+    coverImage: getLegacyCategoryImage('denim'),
     images: [],
     updatedAt: null,
   },
@@ -1008,6 +1020,9 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
   }
 
   if (normalizedHref.startsWith('/men')) {
+    if (normalizedHref.includes('sub=denim')) {
+      return 'denim'
+    }
     return 'men'
   }
 
@@ -1104,6 +1119,10 @@ function aliasToSectionKey(value: string): HomepageCategorySectionKey | null {
 
   if (normalized === 'mens' || normalized === 'man') {
     return 'men'
+  }
+
+  if (normalized === 'denims' || normalized === 'jeans') {
+    return 'denim'
   }
 
   return null

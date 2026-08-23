@@ -30,7 +30,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'denim',
     name: 'Denim',
     href: '/men?sub=denim',
-    image: '/og-image.svg',
+    image: '/collections/featured-denim-collection.jpg',
   },
   {
     key: 'kids',

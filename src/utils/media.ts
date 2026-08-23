@@ -42,6 +42,7 @@ export function isBundledFallbackMediaUrl(value: string) {
   const normalized = value.trim().toLowerCase()
   return normalized.includes('featured-saree-collection.jpg')
     || normalized.includes('category-saree-blue.jpg')
+    || normalized.includes('featured-denim-collection.jpg')
 }
 
 export function isRemoteMediaUrl(value: unknown): value is string {
