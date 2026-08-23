@@ -388,24 +388,8 @@ export function isLaunchModeEnabled() {
   return (import.meta.env.VITE_LAUNCH_MODE ?? 'false') === 'true' && !isProductionBuild()
 }
 
-const LOCAL_DEMO_ADMIN_EMAIL = 'admin@shisfashion.com'
-const LOCAL_DEMO_ADMIN_PASSWORD = 'luxury123'
-
-export function isLocalAdminHost() {
-  if (typeof window === 'undefined') {
-    return !isProductionBuild()
-  }
-
-  const host = window.location.hostname
-  return host === 'localhost' || host === '127.0.0.1'
-}
-
-function canUseLocalDemoLogin(email: string, password: string) {
-  if (email !== LOCAL_DEMO_ADMIN_EMAIL || password !== LOCAL_DEMO_ADMIN_PASSWORD) {
-    return false
-  }
-
-  return isLocalAdminHost()
+function isLaunchModeSessionActive() {
+  return isLaunchModeEnabled() && Boolean(getLaunchModeUser())
 }
 
 function getLaunchModeUser(): AdminSessionUser | null {
@@ -625,7 +609,7 @@ export function describeAdminWriteError(error: unknown, uid?: string | null) {
 }
 
 function assertAdminCanWrite() {
-  if (getLaunchModeUser() && isLocalAdminHost()) {
+  if (isLaunchModeSessionActive()) {
     return
   }
 
@@ -1441,20 +1425,14 @@ export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => 
   ensureSeedData()
   clearLegacyAdminBypassState()
 
-  const launchUser = getLaunchModeUser()
-  if (launchUser && (isLaunchModeEnabled() || isLocalAdminHost())) {
-    rememberAdminSession(launchUser)
-    callback(launchUser)
-    return () => undefined
-  }
-
-  if (isLaunchModeEnabled()) {
-    rememberAdminSession(null)
-    callback(null)
-    return () => undefined
-  }
-
   if (!firebaseAuth) {
+    if (isLaunchModeEnabled()) {
+      const launchUser = getLaunchModeUser()
+      rememberAdminSession(launchUser)
+      callback(launchUser)
+      return () => undefined
+    }
+
     rememberAdminSession(null)
     callback(null)
     return () => undefined
@@ -1516,8 +1494,64 @@ export function onAdminAuthChanged(callback: (user: AdminSessionUser | null) => 
   }
 }
 
+export function describeAdminSignInError(error: unknown) {
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code ?? '')
+    : ''
+
+  switch (code) {
+    case 'auth/forbidden-admin':
+      return 'Access denied. This account is not authorized for admin dashboard access.'
+    case 'auth/admin-inactive':
+      return 'Access denied. This admin account is marked inactive. Ask an owner to set active=true on the Firestore admins record.'
+    case 'auth/invalid-credential':
+    case 'auth/invalid-login-credentials':
+    case 'auth/wrong-password':
+      return 'Invalid email or password.'
+    case 'auth/user-not-found':
+      return 'No Firebase Authentication user was found for this email.'
+    case 'auth/invalid-email':
+      return 'Enter a valid email address.'
+    case 'auth/too-many-requests':
+      return 'Too many login attempts. Please wait a few minutes and try again.'
+    case 'auth/user-disabled':
+      return 'This Firebase Authentication account is disabled.'
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized in Firebase Authentication. Add localhost and your live domain under Authentication → Settings → Authorized domains.'
+    case 'auth/network-request-failed':
+      return 'Network error while contacting Firebase. Check your connection and try again.'
+    case 'auth/firebase-not-configured':
+      return 'Admin authentication is not configured in this environment.'
+    default:
+      return 'Firebase sign-in failed. Check your connection and try again.'
+  }
+}
+
 export async function signInAdmin(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase()
+
+  if (firebaseAuth) {
+    clearLaunchModeUser()
+    const result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
+    const access = await resolveFirebaseAdminAccess(result.user)
+
+    if (access.status !== 'ok') {
+      try {
+        await signOut(firebaseAuth)
+      } catch {
+        // Ignore sign-out failures so we can surface a deterministic auth error to the UI.
+      }
+
+      const error = new Error(access.message)
+      ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).code = access.code
+      ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminUid = result.user.uid
+      ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminEmail = result.user.email ?? normalizedEmail
+      throw error
+    }
+
+    rememberAdminSession(access.session)
+    return access.session
+  }
 
   if (isLaunchModeEnabled()) {
     if (configuredAdminEmails.size === 0 || configuredAdminEmails.has(normalizedEmail)) {
@@ -1538,45 +1572,9 @@ export async function signInAdmin(email: string, password: string) {
     throw error
   }
 
-  if (canUseLocalDemoLogin(normalizedEmail, password)) {
-    setLaunchModeUser(normalizedEmail)
-    const session = getLaunchModeUser() ?? {
-      uid: `launch-mode-${normalizedEmail.replace(/[^a-z0-9]/gi, '')}`,
-      email: normalizedEmail,
-      role: 'owner' as const,
-      canWrite: true,
-      needsAdminDoc: false,
-    }
-    rememberAdminSession(session)
-    return session
-  }
-
-  if (!firebaseAuth) {
-    const error = new Error('Firebase authentication is not configured for this environment.')
-    ;(error as Error & { code?: string }).code = 'auth/firebase-not-configured'
-    throw error
-  }
-
-  clearLaunchModeUser()
-  const result = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password)
-  const access = await resolveFirebaseAdminAccess(result.user)
-
-  if (access.status !== 'ok') {
-    try {
-      await signOut(firebaseAuth)
-    } catch {
-      // Ignore sign-out failures so we can surface a deterministic auth error to the UI.
-    }
-
-    const error = new Error(access.message)
-    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).code = access.code
-    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminUid = result.user.uid
-    ;(error as Error & { code?: string; adminUid?: string; adminEmail?: string }).adminEmail = result.user.email ?? normalizedEmail
-    throw error
-  }
-
-  rememberAdminSession(access.session)
-  return access.session
+  const error = new Error('Firebase authentication is not configured for this environment.')
+  ;(error as Error & { code?: string }).code = 'auth/firebase-not-configured'
+  throw error
 }
 
 export async function signOutAdmin() {

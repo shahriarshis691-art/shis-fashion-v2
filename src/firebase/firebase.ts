@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps, type FirebaseApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { browserLocalPersistence, getAuth, setPersistence } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -27,6 +27,14 @@ export const app: FirebaseApp | undefined = hasFirebaseConfig
 
 export const auth = app ? getAuth(app) : undefined
 export const db = app ? getFirestore(app) : undefined
+
+if (auth) {
+  void setPersistence(auth, browserLocalPersistence).catch((error: unknown) => {
+    if (import.meta.env.DEV) {
+      console.warn('[firebase] failed to set auth persistence', error)
+    }
+  })
+}
 
 if (import.meta.env.DEV) {
   console.info('[firebase] init', {

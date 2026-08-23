@@ -26,11 +26,12 @@ npm run dev
 - Login: `/shis-admin/login`
 - Dashboard: `/shis-admin/dashboard`
 
-Demo credentials (localhost / `npm run dev` only):
-- Email: `admin@shisfashion.com`
-- Password: `luxury123`
+Admin login uses Firebase Authentication (Email/Password) only. There is no local demo password in the app.
 
-Production (`shisfashion.com`) uses Firebase Authentication only. After sign-in the app checks `admins/{uid}` for `role: "admin"` (or `owner` / ops roles) and `active: true`.
+1. Enable Email/Password in Firebase Console → Authentication → Sign-in method.
+2. Create (or enable) the user `admin@shisfashion.com` in Authentication → Users and set its password there.
+3. Add `admin@shisfashion.com` to `VITE_ADMIN_EMAILS`.
+4. After sign-in, the app checks `admins/{uid}` for `role: "admin"` (or `owner` / ops roles) and `active: true`.
 
 If an allow-listed email signs in before `admins/{uid}` exists, the dashboard is view-only. Product and order writes stay blocked until that document is created.
 

@@ -37,6 +37,7 @@ import {
   deleteOrder,
   deleteAsset,
   deleteProduct,
+  describeAdminSignInError,
   describeAdminWriteError,
   getCouponStats,
   getCoupons,
@@ -44,7 +45,6 @@ import {
   isFirebaseConfigured,
   isHomepageLocalFirstMode,
   isLaunchModeEnabled,
-  isLocalAdminHost,
   restoreCategory,
   restoreOrder,
   restoreProduct,
@@ -119,6 +119,7 @@ const emptyProductForm = {
   variants: [] as ProductVariantStock[],
 }
 
+const DEFAULT_ADMIN_LOGIN_EMAIL = 'admin@shisfashion.com'
 const MAX_PRODUCT_IMAGES = 6
 
 function galleryLabel(index: number) {
@@ -200,11 +201,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const navigate = useNavigate()
   const firebaseReady = isFirebaseConfigured()
   const launchModeEnabled = isLaunchModeEnabled()
-  const canSignIn = firebaseReady || launchModeEnabled || isLocalAdminHost()
+  const canSignIn = firebaseReady || launchModeEnabled
   const [user, setUser] = useState<AdminSessionUser | null>(null)
   const [authReady, setAuthReady] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'dashboard'>(initialView)
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [loginForm, setLoginForm] = useState({ email: DEFAULT_ADMIN_LOGIN_EMAIL, password: '' })
   const [loading, setLoading] = useState(false)
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
@@ -681,33 +682,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setBlockedAdminUid(null)
       navigate('/admin', { replace: true })
     } catch (error) {
-      const errorCode = typeof error === 'object' && error !== null && 'code' in error
-        ? String((error as { code?: unknown }).code ?? '')
+      setMessage(describeAdminSignInError(error))
+      const adminUid = typeof error === 'object' && error !== null && 'adminUid' in error
+        ? String((error as { adminUid?: unknown }).adminUid ?? '')
         : ''
-      if (errorCode === 'auth/forbidden-admin') {
-        setMessage('Access denied. This account is not authorized for admin dashboard access.')
-        setBlockedAdminUid(null)
-      } else if (errorCode === 'auth/admin-inactive') {
-        setMessage('Access denied. This admin account is marked inactive. Ask an owner to set active=true on the Firestore admins record.')
-        setBlockedAdminUid(null)
-      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/invalid-login-credentials' || errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-email') {
-        setMessage(isLocalAdminHost()
-          ? 'Invalid email or password. Local demo login is admin@shisfashion.com / luxury123. Live Firebase needs the password from Firebase Console → Authentication → Users.'
-          : 'Invalid email or password. Use the password from Firebase Authentication, not the local demo login.')
-        setBlockedAdminUid(null)
-      } else if (errorCode === 'auth/unauthorized-domain') {
-        setMessage('This domain is not authorized in Firebase Authentication. Add localhost and your live domain under Authentication → Settings → Authorized domains.')
-        setBlockedAdminUid(null)
-      } else if (errorCode === 'auth/network-request-failed') {
-        setMessage('Network error while contacting Firebase. Check your connection and try again.')
-        setBlockedAdminUid(null)
-      } else if (errorCode === 'auth/firebase-not-configured') {
-        setMessage('Admin authentication is not configured in this environment.')
-        setBlockedAdminUid(null)
-      } else {
-        setMessage('Sign in failed. Please try again in a moment.')
-        setBlockedAdminUid(null)
-      }
+      setBlockedAdminUid(adminUid || null)
 
       if (import.meta.env.DEV) {
         console.error('Admin login failed', error)
@@ -1664,20 +1643,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           <SectionTitle eyebrow="Admin access" title="Secure control center" description="Fast sign-in for your premium operations dashboard." />
           <Card className="mt-8 rounded-[2rem] p-5 sm:p-7">
             <form className="space-y-4" onSubmit={handleLogin}>
-              <input required value={loginForm.email} onChange={(event) => setLoginForm({ ...loginForm, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Email" />
-              <input required type="password" value={loginForm.password} onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Password" />
+              <input required type="email" autoComplete="username" value={loginForm.email} onChange={(event) => setLoginForm({ ...loginForm, email: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Email" />
+              <input required type="password" autoComplete="current-password" value={loginForm.password} onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })} className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none" placeholder="Password" />
               <Button type="submit" disabled={loading || !canSignIn} className="w-full justify-center">{loading ? 'Signing in…' : 'Enter dashboard'}</Button>
             </form>
             <p className="mt-4 text-sm text-[var(--color-muted)]">
               {firebaseReady
-                ? (isLocalAdminHost()
-                  ? 'Firebase is active. Local demo login still works: admin@shisfashion.com / luxury123.'
-                  : 'Firebase is active. Use your Firebase Authentication password.')
+                ? 'Firebase Authentication is active. Sign in with the password set for this email in Firebase Console → Authentication → Users.'
                 : launchModeEnabled
                   ? 'Launch mode is active. Admin access is limited to configured admin emails.'
-                  : isLocalAdminHost()
-                    ? 'Local demo login: admin@shisfashion.com / luxury123.'
-                    : 'Admin login requires Firebase authentication on this domain.'}
+                  : 'Admin login requires Firebase authentication on this domain.'}
             </p>
             {message ? <p className="mt-3 text-sm text-[var(--color-accent)]">{message}</p> : null}
             {blockedAdminUid ? (
