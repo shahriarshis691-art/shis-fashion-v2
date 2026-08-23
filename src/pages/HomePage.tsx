@@ -40,9 +40,9 @@ const fallbackCategoryStrips = [
 
 const categoryStripCardImage = {
   width: 960,
-  height: 1200,
-  aspectClassName: 'aspect-[4/5] w-full sm:aspect-[3/4]',
-  imgClassName: 'h-full w-full object-cover object-center',
+  height: 800,
+  aspectClassName: 'aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8]',
+  imgClassName: 'h-full w-full object-cover object-top',
 } as const
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
@@ -493,7 +493,7 @@ export default function HomePage() {
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link
                   to={item.href}
-                  className="group luxury-tap relative block w-full overflow-hidden rounded-none sm:rounded-lg aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/7] cursor-pointer"
+                  className="group luxury-tap relative block w-full overflow-hidden rounded-none sm:rounded-lg aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8] cursor-pointer"
                   aria-label={`${item.label} collection`}
                 >
                   <LuxuryImage
@@ -504,9 +504,9 @@ export default function HomePage() {
                     sizes="(max-width: 639px) 100vw, (max-width: 1023px) 100vw, 100vw"
                     widths={[480, 768, 960, 1200]}
                     className="h-full w-full"
-                    aspectClassName="aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/7]"
-                    imgClassName="h-full w-full object-cover object-top sm:object-center"
-                    objectPosition={item.imagePosition}
+                    aspectClassName="aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8]"
+                    imgClassName="h-full w-full object-cover object-top"
+                    objectPosition="center top"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 inset-x-0 flex items-center justify-between p-4 sm:p-6 z-10">
