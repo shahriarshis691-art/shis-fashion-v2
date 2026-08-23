@@ -491,6 +491,7 @@ export default function HomePage() {
                       aspectClassName={categoryStripCardImage.aspectClassName}
                       imgClassName={categoryStripCardImage.imgClassName}
                       objectPosition={item.imagePosition}
+                      cinematicFill={item.key === 'saree'}
                       hover
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />

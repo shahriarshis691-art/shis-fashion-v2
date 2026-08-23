@@ -16,6 +16,7 @@ interface LuxuryImageProps {
   className?: string
   imgClassName?: string
   objectPosition?: string
+  cinematicFill?: boolean
   priority?: boolean
   hover?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
@@ -37,6 +38,7 @@ export default function LuxuryImage({
   className = '',
   imgClassName = '',
   objectPosition,
+  cinematicFill = false,
   priority = false,
   hover = false,
   onError,
@@ -44,7 +46,8 @@ export default function LuxuryImage({
   const [loaded, setLoaded] = useState(priority)
   const image = catalogImageAttrs(src, width, height, sizes, widths)
   const imageSrc = image.src || CATALOG_IMAGE_PLACEHOLDER
-  const lqip = !priority ? buildLqipUrl(src) : ''
+  const lqip = !priority && !cinematicFill ? buildLqipUrl(src) : ''
+  const imageStyle: CSSProperties | undefined = objectPosition ? { objectPosition } : undefined
   const wrapperStyle: CSSProperties | undefined = lqip
     ? {
       backgroundImage: `url("${lqip}")`,
@@ -55,9 +58,29 @@ export default function LuxuryImage({
 
   return (
     <div
-      className={`relative overflow-hidden bg-black/5 ${aspectClassName} ${className}`.trim()}
+      className={`relative overflow-hidden ${cinematicFill ? 'bg-black' : 'bg-black/5'} ${aspectClassName} ${className}`.trim()}
       style={wrapperStyle}
     >
+      {cinematicFill ? (
+        <>
+          <img
+            src={imageSrc}
+            alt=""
+            aria-hidden
+            width={width}
+            height={height}
+            loading={priority ? 'eager' : 'lazy'}
+            decoding="async"
+            style={imageStyle}
+            className={[
+              'pointer-events-none absolute inset-0 h-full w-full scale-[1.2] object-cover blur-[32px]',
+              objectPosition ? '' : 'object-center',
+              hover ? 'media-hover' : '',
+            ].filter(Boolean).join(' ')}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-black/35" aria-hidden />
+        </>
+      ) : null}
       <img
         src={imageSrc}
         srcSet={image.srcSet}
@@ -77,9 +100,9 @@ export default function LuxuryImage({
           }
           handleFallback(event)
         }}
-        style={objectPosition ? { objectPosition } : undefined}
+        style={imageStyle}
         className={[
-          'gpu-media h-full w-full object-cover',
+          'gpu-media relative z-[1] h-full w-full object-cover',
           objectPosition ? '' : 'object-center',
           hover ? 'media-hover' : '',
           loaded || priority ? 'opacity-100' : 'opacity-0',
