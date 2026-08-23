@@ -40,6 +40,13 @@ const fallbackCategoryStrips = [
   { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
 ] as const
 
+const categoryStripCardImage = {
+  width: 1200,
+  height: 900,
+  aspectClassName: 'aspect-[4/3] sm:aspect-[16/10]',
+  imgClassName: '!object-contain',
+} as const
+
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
   const seen = new Set<string>()
   return items.filter((item) => {
@@ -470,29 +477,19 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {categoryStrips.map((item, index) => {
-              const isDenimCard = item.key === 'denim'
-              const isSareeCard = item.key === 'saree'
-
-              return (
+            {categoryStrips.map((item, index) => (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link to={item.href} className="group luxury-tap block">
                   <div className="relative">
                     <LuxuryImage
                       src={item.image}
                       alt={item.label}
-                      width={isDenimCard ? 736 : isSareeCard ? 941 : 1200}
-                      height={isDenimCard ? 1104 : isSareeCard ? 1672 : 900}
+                      width={categoryStripCardImage.width}
+                      height={categoryStripCardImage.height}
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 25vw"
                       widths={[480, 768, 960, 1200]}
-                      aspectClassName={
-                        isDenimCard
-                          ? 'aspect-[2/3] sm:aspect-[16/10]'
-                          : isSareeCard
-                            ? 'aspect-[941/1672] sm:aspect-[16/10]'
-                            : 'aspect-[4/3] sm:aspect-[16/10]'
-                      }
-                      imgClassName={isDenimCard || isSareeCard ? 'max-sm:!object-contain' : ''}
+                      aspectClassName={categoryStripCardImage.aspectClassName}
+                      imgClassName={categoryStripCardImage.imgClassName}
                       objectPosition={item.imagePosition}
                       hover
                     />
@@ -504,8 +501,7 @@ export default function HomePage() {
                   </div>
                 </Link>
               </Reveal>
-              )
-            })}
+            ))}
           </div>
         </Container>
       </section>
