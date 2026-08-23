@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -173,14 +173,23 @@ function getOrderWhatsAppHref(
   })
 }
 
+function isInternalAppHref(href: string) {
+  const value = href.trim()
+  if (!value.startsWith('/') || value.startsWith('//') || /:\/\//.test(value)) {
+    return false
+  }
+
+  return /^\/[A-Za-z0-9/_?=&%.,-]*$/.test(value)
+}
+
 const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string) => boolean> = {
-  women: (href) => /^\/women(?:\?sub=[a-z0-9-]+)?$/i.test(href),
-  saree: (href) => /^\/sarees?(?:\?sub=saree)?$/i.test(href) || /^\/women\?sub=sarees?$/i.test(href),
-  men: (href) => /^\/men(?:\?sub=[a-z0-9-]+)?$/i.test(href),
-  kids: (href) => /^\/kids(?:\?sub=[a-z0-9-]+)?$/i.test(href),
-  western: (href) => /^\/women\?sub=tunic$/i.test(href),
-  sale: (href) => /^\/(?:sale|men\?sub=shirts|shop\/mens-shirt)$/i.test(href),
-  'new-arrivals': (href) => /^\/(?:shop\/new-arrivals|new-arrivals)$/i.test(href),
+  women: isInternalAppHref,
+  saree: isInternalAppHref,
+  men: isInternalAppHref,
+  kids: isInternalAppHref,
+  western: isInternalAppHref,
+  sale: isInternalAppHref,
+  'new-arrivals': isInternalAppHref,
 }
 
 const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
@@ -216,6 +225,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [archivedCategories, setArchivedCategories] = useState<AdminCategory[]>([])
   const [archivedBrands, setArchivedBrands] = useState<AdminBrand[]>([])
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
+  const homepageSavingRef = useRef(false)
+  const [homepageSaving, setHomepageSaving] = useState(false)
   const [form, setForm] = useState(emptyProductForm)
   const [isEditing, setIsEditing] = useState<string | null>(null)
   const [message, setMessage] = useState('')
@@ -318,7 +329,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent, meta) => {
-      setHomepageContent(nextContent)
+      if (!homepageSavingRef.current) {
+        setHomepageContent(nextContent)
+      }
       if (meta) {
         setHomepageSnapshotDebug(meta)
       }
@@ -1136,52 +1149,55 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }
 
   const handleHomepageSave = async () => {
-    if (!homepageContent) {
+    if (homepageSavingRef.current) {
       return
     }
 
-    const sectionEntries = Object.values(homepageContent.categorySections ?? {})
-    const invalidSection = sectionEntries.find((section) => {
-      const href = section.href.trim()
-      const isHrefValid = SECTION_ROUTE_VALIDATORS[section.key](href)
-      if (!isHrefValid) {
-        return true
-      }
-
-      if (section.enabled && !section.coverImage.trim()) {
-        return true
-      }
-
-      return false
-    })
-
-    if (invalidSection) {
-      const href = invalidSection.href.trim()
-      const isHrefValid = SECTION_ROUTE_VALIDATORS[invalidSection.key](href)
-      const reason = !isHrefValid
-        ? `Invalid route for ${invalidSection.key.toUpperCase()}.`
-        : `Cover image is required for enabled section ${invalidSection.key.toUpperCase()}.`
-
+    const contentToSave = homepageContent
+    if (!contentToSave) {
+      const reason = 'Failed to save content: Homepage content is not loaded yet.'
       setMessage(reason)
       setToast({ kind: 'error', message: reason })
       return
     }
 
+    const sectionEntries = Object.values(contentToSave.categorySections ?? {})
+    const invalidSection = sectionEntries.find((section) => {
+      const href = (section.href ?? '').trim()
+      if (!href) {
+        return section.enabled
+      }
+
+      const validator = SECTION_ROUTE_VALIDATORS[section.key]
+      const isHrefValid = validator ? validator(href) : isInternalAppHref(href)
+      return !isHrefValid
+    })
+
+    if (invalidSection) {
+      const reason = `Failed to save content: Invalid route for ${invalidSection.key.toUpperCase()}. ${SECTION_ROUTE_HINTS[invalidSection.key] ?? 'Route must start with /.'}`
+      setMessage(reason)
+      setToast({ kind: 'error', message: reason })
+      return
+    }
+
+    homepageSavingRef.current = true
+    setHomepageSaving(true)
     setLoading(true)
     try {
-      const result: HomepageSaveResult = await updateHomepageContent(homepageContent)
-      setMessage('Homepage content saved.')
-      setToast({ kind: 'success', message: 'Homepage saved and verified in Firestore.' })
+      const result: HomepageSaveResult = await updateHomepageContent(contentToSave)
+      setHomepageContent(result.content)
+      setMessage('Content saved successfully.')
+      setToast({ kind: 'success', message: 'Content saved successfully.' })
       setHomepageSaveDebug({
         status: 'success',
-        message: `Saved and verified in Firestore (${result.mode} mode).`,
+        message: `Content saved successfully (${result.mode} mode).`,
         mode: result.mode,
         path: result.path,
         heroImage: result.heroImage,
         savedAt: result.savedAt,
       })
     } catch (error) {
-      const reason = describeAdminWriteError(error, user?.uid)
+      const reason = `Failed to save content: ${describeAdminWriteError(error, user?.uid)}`
       setMessage(reason)
       setToast({ kind: 'error', message: reason })
       if (user?.uid) {
@@ -1192,13 +1208,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         message: reason,
         mode: 'unknown',
         path: 'settings/homepage',
-        heroImage: homepageContent.heroImage ?? '',
+        heroImage: contentToSave.heroImage ?? '',
         savedAt: new Date().toISOString(),
       })
-      if (import.meta.env.DEV) {
-        console.error('[admin] homepage save failed', error)
-      }
+      console.error('[admin] homepage save failed', error)
     } finally {
+      homepageSavingRef.current = false
+      setHomepageSaving(false)
       setLoading(false)
     }
   }
@@ -1520,27 +1536,27 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     key: HomepageCategorySectionKey,
     updates: Partial<HomepageCategorySection>,
   ) => {
-    if (!homepageContent?.categorySections) {
-      return
-    }
+    setHomepageContent((current) => {
+      if (!current?.categorySections) {
+        return current
+      }
 
-    const target = homepageContent.categorySections[key]
-    if (!target) {
-      return
-    }
+      const target = current.categorySections[key]
+      if (!target) {
+        return current
+      }
 
-    const nextCategorySection: HomepageCategorySection = {
-      ...target,
-      ...updates,
-      key,
-    }
-
-    setHomepageContent({
-      ...homepageContent,
-      categorySections: {
-        ...homepageContent.categorySections,
-        [key]: nextCategorySection,
-      },
+      return {
+        ...current,
+        categorySections: {
+          ...current.categorySections,
+          [key]: {
+            ...target,
+            ...updates,
+            key,
+          },
+        },
+      }
     })
   }
 
@@ -2318,7 +2334,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button onClick={handleHomepageWriteTest} variant="secondary" disabled={loading}>Test Firestore write</Button>
-                <Button onClick={handleHomepageSave} variant="secondary" disabled={loading}>Save content</Button>
+                <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving || loading}>{homepageSaving ? 'Saving...' : 'Save content'}</Button>
               </div>
             </div>
             <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 text-xs text-[var(--color-muted)]">
@@ -2788,7 +2804,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
                   <p className="text-xs text-[var(--color-muted)]">After uploading category images, click save to publish these changes.</p>
-                  <Button onClick={handleHomepageSave} variant="secondary" className="mt-3 sm:mt-0">Save content</Button>
+                  <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
                 </div>
 
                 <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
@@ -2892,7 +2908,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
                   <p className="text-xs text-[var(--color-muted)]">Save section-wise edits to publish exact label, route, and image mapping.</p>
-                  <Button onClick={handleHomepageSave} variant="secondary" className="mt-3 sm:mt-0">Save content</Button>
+                  <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
                 </div>
               </div>
             ) : null}

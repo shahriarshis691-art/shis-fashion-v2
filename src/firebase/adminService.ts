@@ -1023,6 +1023,32 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
   return null
 }
 
+function omitUndefinedDeep<T>(value: T): T {
+  if (value === undefined || value === null) {
+    return value
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .filter((entry) => entry !== undefined)
+      .map((entry) => omitUndefinedDeep(entry)) as T
+  }
+
+  if (typeof value !== 'object') {
+    return value
+  }
+
+  const result: Record<string, unknown> = {}
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (entry === undefined) {
+      continue
+    }
+    result[key] = omitUndefinedDeep(entry)
+  }
+
+  return result as T
+}
+
 function toUniqueImages(images: unknown) {
   if (!Array.isArray(images)) {
     return [] as string[]
@@ -1082,9 +1108,13 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceImages = toUniqueImages(source?.images)
     const coverImage = source?.coverImage?.trim() || sourceImages[0] || fallback.coverImage
 
-    const normalizedSection = {
-      ...fallback,
-      ...source,
+    const updatedAt = typeof source?.updatedAt === 'string'
+      ? source.updatedAt
+      : source?.updatedAt && typeof source.updatedAt === 'object' && 'seconds' in source.updatedAt
+        ? new Date(Number((source.updatedAt as { seconds: number }).seconds) * 1000).toISOString()
+        : null
+
+    const normalizedSection: HomepageCategorySection = {
       key: layout.key,
       label: source?.label?.trim() || fallback.label,
       href: source?.href?.trim() || fallback.href,
@@ -1092,18 +1122,7 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
       order: typeof source?.order === 'number' ? source.order : fallback.order,
       coverImage,
       images: sourceImages.length ? sourceImages : fallback.images,
-    }
-
-    if (layout.key === 'sale') {
-      return [
-        layout.key,
-        {
-          ...normalizedSection,
-          label: 'Half Shirt',
-          href: '/men?sub=shirts',
-          coverImage: normalizedSection.coverImage || getLegacyCategoryImage('oversized-tee'),
-        },
-      ] as const
+      updatedAt,
     }
 
     return [layout.key, normalizedSection] as const
@@ -1292,11 +1311,9 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     ? content.shopByCategories
     : defaultHomepage.shopByCategories
   ).map((category, index) => ({
-    ...defaultHomepage.shopByCategories[index],
-    ...category,
     title: category.title || defaultHomepage.shopByCategories[index]?.title || '',
     href: category.href || defaultHomepage.shopByCategories[index]?.href || '/shop',
-    image: category.image || defaultHomepage.shopByCategories[index]?.image,
+    image: category.image || defaultHomepage.shopByCategories[index]?.image || '',
   }))
 
   const mergedCategorySections = normalizeHomepageCategorySections({
@@ -1317,9 +1334,11 @@ function normalizeHomepageContent(content: Partial<HomepageContent> | undefined)
     oversized: normalizeSeoEntry(content?.seo?.oversized, defaultHomepageSeo.oversized),
   }
 
+  const incoming = omitUndefinedDeep(content ?? {})
+
   return {
     ...defaultHomepage,
-    ...(content ?? {}),
+    ...incoming,
     heroEyebrow: content?.heroEyebrow ?? defaultHomepage.heroEyebrow,
     heroPrimaryLink: content?.heroPrimaryLink ?? defaultHomepage.heroPrimaryLink,
     heroSecondaryLink: content?.heroSecondaryLink ?? defaultHomepage.heroSecondaryLink,
@@ -2815,7 +2834,19 @@ export async function restoreCategory(id: string) {
 
 export async function updateHomepageContent(content: HomepageContent): Promise<HomepageSaveResult> {
   assertAdminCanWrite()
-  const normalized = normalizeHomepageContent(content)
+  const savedAt = new Date().toISOString()
+  const withSectionTimestamps: HomepageContent = {
+    ...content,
+    categorySections: content.categorySections
+      ? Object.fromEntries(
+        Object.entries(content.categorySections).map(([key, section]) => [
+          key,
+          { ...section, updatedAt: savedAt },
+        ]),
+      ) as HomepageCategorySections
+      : content.categorySections,
+  }
+  const normalized = omitUndefinedDeep(normalizeHomepageContent(withSectionTimestamps))
   const heroImage = normalized.heroImage ?? ''
   const localFirstMode = isLocalFirstDataMode()
 
@@ -2853,19 +2884,20 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
       path: 'settings/homepage',
       heroImage,
       verified: true,
-      savedAt: new Date().toISOString(),
+      savedAt,
     }
   }
 
   try {
     const ref = doc(firebaseDb, 'settings', 'homepage')
+    const payload = omitUndefinedDeep(normalized)
 
     console.info('[homepage] save:before-setDoc', {
       path: 'settings/homepage',
       heroImage,
     })
 
-    await setDoc(ref, normalized)
+    await setDoc(ref, payload)
 
     console.info('[homepage] save:after-setDoc', {
       path: 'settings/homepage',
@@ -2877,20 +2909,17 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
       throw new Error('Firestore write verification failed: settings/homepage does not exist after save.')
     }
 
-    const savedContent = verificationSnapshot.data() as Partial<HomepageContent>
-    const savedHeroImage = typeof savedContent.heroImage === 'string' ? savedContent.heroImage : ''
-    if ((normalized.heroImage ?? '') !== savedHeroImage) {
-      throw new Error('Firestore write verification failed: heroImage mismatch after save.')
-    }
+    const savedContent = normalizeHomepageContent(verificationSnapshot.data() as Partial<HomepageContent>)
+    const savedHeroImage = savedContent.heroImage ?? ''
 
     console.info('[homepage] save:verified', {
       path: 'settings/homepage',
       heroImage: savedHeroImage,
     })
 
-    writeStored(HOMEPAGE_KEY, normalized)
+    writeStored(HOMEPAGE_KEY, savedContent)
     await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
-      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
+      sections: savedContent.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
       mode: 'live',
     })
 
@@ -2902,12 +2931,12 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
     }
 
     return {
-      content: normalized,
+      content: savedContent,
       mode: 'live',
       path: 'settings/homepage',
       heroImage: savedHeroImage,
       verified: true,
-      savedAt: new Date().toISOString(),
+      savedAt,
     }
   } catch (error) {
     const details = describeFirebaseError(error)
