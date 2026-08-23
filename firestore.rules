@@ -65,6 +65,13 @@ service cloud.firestore {
       allow read, create, update, delete: if isAdmin();
     }
 
+    match /paymentEvents/{eventId} {
+      // Replay ledger for gateway callbacks/IPNs. Written only by the payment
+      // handlers through the Admin SDK, which bypasses these rules.
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
     match /reviews/{reviewId} {
       allow read: if resource.data.status == 'approved' || isAdmin();
       allow create: if false;

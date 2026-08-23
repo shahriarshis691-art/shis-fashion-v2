@@ -71,21 +71,121 @@ export async function startPrepaidCheckout(input: {
   return startSslcommerzCheckout(input)
 }
 
-export async function completePrepaidCheckout(input: {
+export type PrepaidOutcome = 'paid' | 'failed' | 'pending'
+
+export interface PrepaidVerification {
+  provider: PrepaidProvider | ''
+  /** `pending` means "not proven either way" — never settle an order on it. */
+  outcome: PrepaidOutcome
+  status: string
+  amount: number
+  trxId?: string
+  valId?: string
+  tranId?: string
+  storeId?: string
+}
+
+/**
+ * Statuses that providers only return once a payment can no longer succeed.
+ * Anything outside this set (including our own internal `token-failed` marker)
+ * is treated as `pending` so a transient provider error can never cancel a
+ * customer's order.
+ */
+const TERMINAL_FAILURE_STATUSES = new Set([
+  'FAILED',
+  'FAILURE',
+  'CANCEL',
+  'CANCELED',
+  'CANCELLED',
+  'EXPIRED',
+  'UNATTEMPTED',
+  'DECLINED',
+  'INVALID',
+  'INVALID_TRANSACTION',
+])
+
+export function classifyPrepaidStatus(status: string, ok: boolean): PrepaidOutcome {
+  if (ok) {
+    return 'paid'
+  }
+
+  const normalized = status.trim().toUpperCase().replace(/[\s-]+/g, '_')
+  if (!normalized) {
+    return 'pending'
+  }
+
+  return TERMINAL_FAILURE_STATUSES.has(normalized) ? 'failed' : 'pending'
+}
+
+export function getExpectedSslcommerzStoreId() {
+  return env('SSLCOMMERZ_STORE_ID')
+}
+
+function resolveProvider(requested?: string): PrepaidProvider | '' {
+  const normalized = String(requested ?? '').trim().toLowerCase()
+  if (normalized === 'bkash' || normalized === 'sslcommerz') {
+    return normalized
+  }
+
+  return getConfiguredPrepaidProvider() ?? ''
+}
+
+/**
+ * Server-to-server verification of a gateway return. The browser-supplied
+ * status is never trusted: the outcome always comes from the provider API.
+ * For SSLCommerz the `val_id` validation endpoint is preferred because it also
+ * returns `store_id` and `tran_id` for cross-checking.
+ */
+export async function verifyPrepaidReturn(input: {
   provider?: string
   paymentId?: string
   tranId?: string
-}) {
-  const provider = (input.provider || getConfiguredPrepaidProvider() || '') as PrepaidProvider | ''
+  valId?: string
+}): Promise<PrepaidVerification> {
+  const provider = resolveProvider(input.provider)
+
   if (provider === 'bkash' && input.paymentId) {
-    return verifyBkashPayment(input.paymentId)
+    const result = await verifyBkashPayment(input.paymentId)
+    const status = String(result.status ?? '')
+    return {
+      provider,
+      outcome: classifyPrepaidStatus(status, result.ok),
+      status: status || 'unknown',
+      amount: Number(result.amount),
+      trxId: result.trxId,
+    }
   }
 
-  if (provider === 'sslcommerz' && input.tranId) {
-    return querySslcommerzPayment(input.tranId)
+  if (provider === 'sslcommerz') {
+    if (input.valId) {
+      const validated = await validateSslcommerzByValId(input.valId)
+      return {
+        provider,
+        outcome: classifyPrepaidStatus(validated.status, validated.ok),
+        status: validated.status || 'unknown',
+        amount: Number('amount' in validated ? validated.amount : Number.NaN),
+        trxId: 'trxId' in validated ? validated.trxId : undefined,
+        valId: 'valId' in validated ? validated.valId : input.valId,
+        tranId: 'tranId' in validated ? validated.tranId : undefined,
+        storeId: 'storeId' in validated ? validated.storeId : undefined,
+      }
+    }
+
+    if (input.tranId) {
+      const queried = await querySslcommerzPayment(input.tranId)
+      return {
+        provider,
+        outcome: classifyPrepaidStatus(queried.status, queried.ok),
+        status: queried.status || 'unknown',
+        amount: Number(queried.amount),
+        trxId: queried.trxId,
+        valId: queried.valId,
+        tranId: queried.tranId,
+      }
+    }
   }
 
-  return { ok: false as const, status: 'unknown' }
+  return { provider, outcome: 'pending', status: 'unknown', amount: Number.NaN }
 }
 
 export function getPrepaidPublicConfig() {

@@ -2,10 +2,18 @@ import { FieldValue, getFirestore, type DocumentReference } from 'firebase-admin
 import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
 import { createRateLimiter, getClientIp } from '../_rateLimit.js'
 import { sendOpsWebhook } from '../_opsWebhook.js'
-import { getAvailableStock, getProductSlug, productMatchesSlug } from '../_catalog.js'
+import { getProductSlug, productMatchesSlug } from '../_catalog.js'
 import { notifyCustomer } from '../_notifyCustomer.js'
 import { getConfiguredPrepaidProvider, startPrepaidCheckout } from '../_prepaidProvider.js'
-import { applyStockDecrement, applyStockRestore } from '../_stock.js'
+import {
+  buildStockWorkingSet,
+  commitStockWorkingSet,
+  formatStockFailure,
+  peekAvailableStock,
+  readStockWorkingSet,
+  releaseStock,
+  reserveStock,
+} from '../_stock.js'
 import {
   isApiPrepaidPayment,
   isManualWalletPayment,
@@ -324,47 +332,58 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       }
 
       const couponSnap = couponRef ? await transaction.get(couponRef) : null
+
+      // One working copy per product. Every cart line reserves against the same
+      // copy, so two lines of the same product (different sizes, or a repeated
+      // variant) cannot both pass a check that only one of them can satisfy.
+      const stockWorking = buildStockWorkingSet(productSnaps.map((snap) => ({
+        ref: snap.ref,
+        exists: snap.exists,
+        data: snap.data() as { stock?: unknown; variants?: unknown; archived?: boolean } | undefined,
+      })))
+
       const pricedItems = productSnaps.map((snap, index) => {
         const entry = matchedItems[index]
         const data = (snap.data() ?? {}) as ProductRecord
+        const label = String(data.name ?? entry?.name ?? '').trim()
+        const size = entry?.size ?? ''
+        const color = entry?.color ?? ''
+        const quantity = entry?.quantity ?? 0
         const sizes = Array.isArray(data.sizes) ? data.sizes.map((value) => String(value).trim()).filter(Boolean) : []
         const colors = Array.isArray(data.colors) ? data.colors.map((value) => String(value).trim()).filter(Boolean) : []
-        const available = getAvailableStock(data, entry?.size ?? '', entry?.color ?? '')
-        const variantsConfigured = available.variants.length > 0
 
-        if (!snap.exists || data.archived) {
-          throw new Error('INSUFFICIENT_STOCK')
+        // Catalog guard: the chosen option must still be offered at all.
+        const optionRetired = Boolean(sizes.length && size && !sizes.includes(size))
+          || Boolean(colors.length && color && color !== 'Default' && !colors.includes(color))
+
+        if (optionRetired) {
+          throw new Error(`VARIANT_UNAVAILABLE:${formatStockFailure({
+            reason: 'unknown-variant',
+            label,
+            size,
+            color,
+            requested: quantity,
+            available: 0,
+          })}`)
         }
 
-        if (sizes.length && entry?.size && !sizes.includes(entry.size)) {
-          throw new Error('INVALID_VARIANT')
-        }
-
-        if (colors.length && entry?.color && entry.color !== 'Default' && !colors.includes(entry.color)) {
-          throw new Error('INVALID_VARIANT')
-        }
-
-        if (variantsConfigured && available.variantIndex < 0) {
-          throw new Error('INVALID_VARIANT')
-        }
-
-        if (available.stock < (entry?.quantity ?? 0)) {
-          throw new Error('INSUFFICIENT_STOCK')
+        // Variant-level reservation (size x color), accumulated across lines.
+        const failure = reserveStock(stockWorking, { ref: snap.ref, quantity, size, color, label })
+        if (failure) {
+          throw new Error(`VARIANT_UNAVAILABLE:${formatStockFailure(failure)}`)
         }
 
         return {
-          name: String(data.name ?? entry?.name ?? ''),
+          name: label,
           price: String(data.price ?? ''),
-          quantity: entry?.quantity ?? 0,
+          quantity,
           size: entry?.size || undefined,
           color: entry?.color || undefined,
           slug: getProductSlug(data),
           category: String(data.category ?? ''),
           unitPrice: parseBDT(data.price),
           productRef: snap.ref,
-          stock: available.stock,
-          variants: available.variants,
-          variantIndex: available.variantIndex,
+          remaining: peekAvailableStock(stockWorking, { ref: snap.ref, size, color }),
         }
       })
 
@@ -455,9 +474,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
 
       transaction.set(orderRef, orderPayload)
 
-      pricedItems.forEach((item) => {
-        applyStockDecrement(transaction, item)
-      })
+      // Single write per product, containing every reservation from this order.
+      commitStockWorkingSet(transaction, stockWorking)
 
       if (!isApiPrepaid && couponSnap?.exists && couponRef && couponUsageUpdate) {
         transaction.update(couponRef, {
@@ -475,8 +493,8 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
         createdAt: new Date().toISOString(),
         lowStockAlerts: pricedItems
           .map((item) => ({
-            name: item.name,
-            remaining: Math.max(0, item.stock - item.quantity),
+            name: [item.name, item.size, item.color].filter(Boolean).join(' / '),
+            remaining: item.remaining,
           }))
           .filter((item) => item.remaining <= LOW_STOCK_THRESHOLD),
       }
@@ -550,30 +568,28 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
           const orderSnap = await transaction.get(orderRef)
           const orderData = orderSnap.data() as { items?: Array<{ slug?: string; name?: string; quantity?: number; size?: string; color?: string }> } | undefined
 
-          for (const item of orderData?.items ?? []) {
-            const qty = Math.max(0, Math.floor(Number(item.quantity ?? 0)))
+          const lines = (orderData?.items ?? []).map((item) => {
             const match = liveProducts.find((doc) => {
               const data = doc.data() as ProductRecord
               return productMatchesSlug(data, String(item.slug || item.name || ''))
                 || String(data.name || '').trim().toLowerCase() === String(item.name || '').trim().toLowerCase()
             })
-            if (!match) {
-              continue
-            }
 
-            const snap = await transaction.get(match.ref)
-            const product = (snap.data() ?? {}) as ProductRecord
-            const available = getAvailableStock(product, String(item.size ?? ''), String(item.color ?? ''))
-            applyStockRestore(transaction, {
-              productRef: match.ref,
-              quantity: qty,
+            return {
+              ref: match?.ref ?? null,
+              quantity: Number(item.quantity ?? 0),
               size: item.size,
               color: item.color,
-              variantIndex: available.variantIndex,
-              variants: available.variants,
-              stock: available.stock,
-            })
+              label: String(item.name ?? ''),
+            }
+          })
+
+          const working = await readStockWorkingSet(transaction, lines.map((line) => line.ref))
+          for (const line of lines) {
+            releaseStock(working, line)
           }
+
+          commitStockWorkingSet(transaction, working)
 
           transaction.update(orderRef, {
             paymentStatus: 'failed',
@@ -610,13 +626,21 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     res.status(200).json({ order })
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
+    if (message.startsWith('VARIANT_UNAVAILABLE:')) {
+      res.status(409).json({
+        error: message.slice('VARIANT_UNAVAILABLE:'.length) || 'A selected size or colour is no longer available.',
+        code: 'VARIANT_UNAVAILABLE',
+      })
+      return
+    }
+
     if (message === 'INSUFFICIENT_STOCK') {
       res.status(409).json({ error: 'Some items are out of stock. Update your bag and try again.' })
       return
     }
 
     if (message === 'INVALID_VARIANT') {
-      res.status(409).json({ error: 'A selected size or color is no longer available.' })
+      res.status(409).json({ error: 'A selected size or colour is no longer available.' })
       return
     }
 

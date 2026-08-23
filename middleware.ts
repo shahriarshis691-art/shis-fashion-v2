@@ -118,6 +118,44 @@ function hasPaidTrafficSignals(url: URL, cookieHeader: string) {
   return CAMPAIGN_QUERY_KEYS.some((key) => Boolean(url.searchParams.get(key)?.trim()))
 }
 
+/**
+ * Serves the prerendered PDP to crawlers. The upstream status is preserved so
+ * Googlebot sees 200 for live products and 404 for retired slugs. Returns
+ * `null` when prerendering is unavailable so the request falls through to the
+ * normal SPA response instead of failing.
+ */
+async function renderForCrawler(url: URL, userAgent: string, method: string) {
+  const dest = new URL('/api/product-share', url.origin)
+  dest.searchParams.set('path', url.pathname)
+
+  try {
+    const upstream = await fetch(dest, {
+      headers: {
+        'user-agent': userAgent,
+        accept: 'text/html',
+      },
+    })
+
+    if (upstream.status >= 500) {
+      return null
+    }
+
+    const headers = new Headers(upstream.headers)
+    // `fetch` already decoded the body; stale framing headers would corrupt it.
+    headers.delete('content-encoding')
+    headers.delete('content-length')
+    headers.set('vary', 'User-Agent')
+
+    return new Response(method === 'HEAD' ? null : upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers,
+    })
+  } catch {
+    return null
+  }
+}
+
 async function spaNotFoundResponse(request: Request) {
   try {
     const indexRes = await fetch(new URL('/index.html', request.url))
@@ -219,9 +257,10 @@ export default async function middleware(request: Request) {
   const url = new URL(request.url)
   const userAgent = request.headers.get('user-agent') ?? ''
   if (isSearchOrSocialCrawler(userAgent) && isProductSharePath(url.pathname)) {
-    const dest = new URL('/api/product-share', url.origin)
-    dest.searchParams.set('path', url.pathname)
-    return fetch(dest)
+    const prerendered = await renderForCrawler(url, userAgent, request.method)
+    if (prerendered) {
+      return prerendered
+    }
   }
 
   if (!isBypassedPath(url.pathname)) {

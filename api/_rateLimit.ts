@@ -1,6 +1,14 @@
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
 type HitRecord = { count: number; windowStart: number }
 
 const memoryBuckets = new Map<string, HitRecord>()
+const limiterCache = new Map<string, Ratelimit>()
+const warnedKeys = new Set<string>()
+
+let redisClient: Redis | null = null
+let redisInitFailed = false
 
 export function headerValue(headers: Record<string, string | string[] | undefined> | undefined, key: string) {
   const value = headers?.[key] ?? headers?.[key.toLowerCase()]
@@ -24,6 +32,25 @@ export function isDistributedRateLimitConfigured() {
   return Boolean(env('UPSTASH_REDIS_REST_URL') && env('UPSTASH_REDIS_REST_TOKEN'))
 }
 
+function isProductionRuntime() {
+  return process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
+}
+
+/** Log each distinct degradation once per isolate so warnings stay readable under load. */
+function warnOnce(key: string, message: string, error?: unknown) {
+  if (warnedKeys.has(key)) {
+    return
+  }
+
+  warnedKeys.add(key)
+  if (error === undefined) {
+    console.error(message)
+    return
+  }
+
+  console.error(message, error)
+}
+
 function memoryHit(key: string, maxHits: number, windowMs: number) {
   const now = Date.now()
   const current = memoryBuckets.get(key)
@@ -38,62 +65,96 @@ function memoryHit(key: string, maxHits: number, windowMs: number) {
   return current.count > maxHits
 }
 
-async function redisHit(key: string, maxHits: number, windowMs: number) {
-  const base = env('UPSTASH_REDIS_REST_URL').replace(/\/+$/, '')
-  const token = env('UPSTASH_REDIS_REST_TOKEN')
-  const ttlSeconds = Math.max(1, Math.ceil(windowMs / 1000))
+function getRedis() {
+  if (redisInitFailed) {
+    return null
+  }
 
-  const response = await fetch(`${base}/pipeline`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify([
-      ['INCR', key],
-      ['EXPIRE', key, String(ttlSeconds), 'NX'],
-    ]),
+  if (redisClient) {
+    return redisClient
+  }
+
+  if (!isDistributedRateLimitConfigured()) {
+    return null
+  }
+
+  try {
+    redisClient = new Redis({
+      url: env('UPSTASH_REDIS_REST_URL'),
+      token: env('UPSTASH_REDIS_REST_TOKEN'),
+      enableAutoPipelining: true,
+    })
+    return redisClient
+  } catch (error) {
+    redisInitFailed = true
+    warnOnce('redis-init', '[rate-limit] Upstash Redis client could not be created; using per-isolate memory limits.', error)
+    return null
+  }
+}
+
+function toDuration(windowMs: number): `${number} ms` {
+  return `${Math.max(1_000, Math.floor(windowMs))} ms`
+}
+
+function getLimiter(bucket: string, maxHits: number, windowMs: number) {
+  const cacheKey = `${bucket}:${maxHits}:${windowMs}`
+  const cached = limiterCache.get(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const redis = getRedis()
+  if (!redis) {
+    return null
+  }
+
+  const limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(maxHits, toDuration(windowMs)),
+    prefix: `rl:${bucket}`,
+    analytics: false,
+    // Short-circuits repeat offenders inside the same isolate without a Redis round trip.
+    ephemeralCache: new Map<string, number>(),
   })
 
-  if (!response.ok) {
-    throw new Error(`upstash-http-${response.status}`)
-  }
-
-  const payload = await response.json() as Array<{ result?: unknown; error?: string }>
-  if (!Array.isArray(payload) || payload[0]?.error) {
-    throw new Error(payload[0]?.error || 'upstash-pipeline-failed')
-  }
-
-  const count = Number(payload[0]?.result)
-  if (!Number.isFinite(count)) {
-    throw new Error('upstash-incr-invalid')
-  }
-
-  return count > maxHits
+  limiterCache.set(cacheKey, limiter)
+  return limiter
 }
 
 /**
- * Distributed limiter via Upstash Redis REST (INCR + EXPIRE NX).
- * Falls back to process memory when KV env is unset or Redis errors,
- * so local `npm run dev` keeps working.
+ * Sliding-window limiter shared across every Vercel isolate via Upstash Redis.
+ *
+ * Degrades to a per-isolate in-memory window when `UPSTASH_REDIS_REST_URL` /
+ * `UPSTASH_REDIS_REST_TOKEN` are unset or Redis is unreachable, so local
+ * `npm run dev` and transient Upstash outages never fail a customer request.
+ * The identifier is normally the client IP, but any stable string works
+ * (order id, transaction id) for per-resource limits.
  */
 export function createRateLimiter(maxHits: number, windowMs = 60_000, bucket = 'api') {
   const safeBucket = bucket.replace(/[^a-z0-9:_-]/gi, '_') || 'api'
 
-  return async function isRateLimited(ip: string) {
-    const client = (ip || 'unknown').slice(0, 128)
-    const key = `rl:${safeBucket}:${client}`
+  return async function isRateLimited(identifier: string) {
+    const client = (identifier || 'unknown').slice(0, 128)
+    const limiter = getLimiter(safeBucket, maxHits, windowMs)
 
-    if (isDistributedRateLimitConfigured()) {
+    if (limiter) {
       try {
-        return await redisHit(key, maxHits, windowMs)
+        const { success } = await limiter.limit(client)
+        return !success
       } catch (error) {
-        console.error('[rate-limit] Upstash failed, using in-memory fallback', error)
+        warnOnce(
+          `limit:${safeBucket}`,
+          `[rate-limit] Upstash unreachable for bucket "${safeBucket}"; falling back to per-isolate memory limits.`,
+          error,
+        )
       }
-    } else if (process.env.VERCEL_ENV === 'production') {
-      console.error('[rate-limit] UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN unset in production')
+    } else if (isProductionRuntime()) {
+      warnOnce(
+        'missing-env',
+        '[rate-limit] UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN unset in production — limits are per-isolate only.',
+      )
     }
 
-    return memoryHit(key, maxHits, windowMs)
+    return memoryHit(`rl:${safeBucket}:${client}`, maxHits, windowMs)
   }
 }

@@ -1,5 +1,5 @@
 import { getFirebaseAdminDb } from '../_firebaseAdmin.js'
-import { validateSslcommerzByValId, verifySslcommerzIpnHash } from '../_prepaidProvider.js'
+import { classifyPrepaidStatus, validateSslcommerzByValId, verifySslcommerzIpnHash } from '../_prepaidProvider.js'
 import { notifyCustomer } from '../_notifyCustomer.js'
 import { amountsMatch, settlePrepaidFailed, settlePrepaidPaid, type PrepaidOrderData } from '../_prepaidSettle.js'
 import { createRateLimiter, getClientIp } from '../_rateLimit.js'
@@ -23,6 +23,7 @@ interface LooseResponse {
 }
 
 const isRateLimited = createRateLimiter(60, 60_000, 'sslcommerz-ipn')
+const isTransactionRateLimited = createRateLimiter(12, 60_000, 'sslcommerz-ipn-tran')
 const EXPECTED_STORE_ID = process.env.SSLCOMMERZ_STORE_ID ?? ''
 
 function asFields(body: unknown): Record<string, string> {
@@ -91,8 +92,20 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
+  if (await isTransactionRateLimited(tranId)) {
+    sendText(res, 429, 'Too many requests')
+    return
+  }
+
   const verified = await validateSslcommerzByValId(valId)
   if (!verified.ok) {
+    // Only cancel on a status the gateway will never revise. A transient
+    // validation error returns 5xx so SSLCommerz retries the IPN instead.
+    if (classifyPrepaidStatus(verified.status, false) !== 'failed') {
+      sendText(res, 503, 'Validation unavailable')
+      return
+    }
+
     const db = getFirebaseAdminDb()
     if (db && tranId) {
       const orderSnap = await db.collection('orders').doc(tranId).get()

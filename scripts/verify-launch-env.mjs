@@ -98,27 +98,49 @@ if (productionMode) {
   warnIfTruthy('VITE_ALLOW_LOCAL_FALLBACK', 'VITE_ALLOW_LOCAL_FALLBACK=true disables live Firestore in production builds.')
 
   if (isTruthy('VITE_PREPAID_ENABLED')) {
-    requireKeys([
-      'BKASH_USERNAME',
-      'BKASH_PASSWORD',
-      'BKASH_APP_KEY',
-      'BKASH_APP_SECRET',
-    ], 'prepaid (bKash API)')
+    const hasBkash = Boolean(
+      env('BKASH_USERNAME') && env('BKASH_PASSWORD') && env('BKASH_APP_KEY') && env('BKASH_APP_SECRET'),
+    )
+    const hasSslcommerz = Boolean(env('SSLCOMMERZ_STORE_ID') && env('SSLCOMMERZ_STORE_PASSWORD'))
 
-    const bkashBase = env('BKASH_BASE_URL') || 'https://tokenized.sandbox.bka.sh/v1.2.0-beta'
-    if (/sandbox|tokenized\.sandbox/i.test(bkashBase)) {
-      errors.push('BKASH_BASE_URL must be the live checkout URL when VITE_PREPAID_ENABLED=true (not sandbox).')
+    if (!hasBkash && !hasSslcommerz) {
+      errors.push('VITE_PREPAID_ENABLED=true needs one complete provider: bKash (BKASH_USERNAME, BKASH_PASSWORD, BKASH_APP_KEY, BKASH_APP_SECRET) or SSLCommerz (SSLCOMMERZ_STORE_ID, SSLCOMMERZ_STORE_PASSWORD).')
+    }
+
+    if (hasBkash) {
+      const bkashBase = env('BKASH_BASE_URL') || 'https://tokenized.sandbox.bka.sh/v1.2.0-beta'
+      if (/sandbox|tokenized\.sandbox/i.test(bkashBase)) {
+        errors.push('BKASH_BASE_URL must be the live checkout URL when VITE_PREPAID_ENABLED=true (not sandbox).')
+      }
+    }
+
+    if (hasSslcommerz) {
+      const sslBase = env('SSLCOMMERZ_BASE_URL') || 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'
+      const sslValidation = env('SSLCOMMERZ_VALIDATION_URL')
+        || 'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php'
+
+      if (/sandbox/i.test(sslBase) || /sandbox/i.test(sslValidation)) {
+        errors.push('SSLCOMMERZ_BASE_URL / SSLCOMMERZ_VALIDATION_URL must use securepay.sslcommerz.com in production (not sandbox).')
+      }
+
+      if (!env('SSLCOMMERZ_IPN_URL') && !env('VITE_SITE_URL')) {
+        errors.push('Set SSLCOMMERZ_IPN_URL or VITE_SITE_URL so SSLCommerz can reach /api/sslcommerz-ipn for IPN settlement.')
+      }
     }
 
     if (!env('PREPAID_CALLBACK_URL') && !env('VITE_SITE_URL')) {
-      warnings.push('Set PREPAID_CALLBACK_URL or VITE_SITE_URL for bKash payment return URL.')
+      warnings.push('Set PREPAID_CALLBACK_URL or VITE_SITE_URL for the gateway payment return URL.')
+    }
+
+    if (!env('UPSTASH_REDIS_REST_URL') || !env('UPSTASH_REDIS_REST_TOKEN')) {
+      errors.push('Online payments require UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN so payment callback rate limits are shared across Vercel isolates.')
     }
   } else if (env('VITE_PREPAID_ENABLED') && env('VITE_PREPAID_ENABLED').toLowerCase() !== 'false') {
     warnings.push(`Unexpected VITE_PREPAID_ENABLED=${env('VITE_PREPAID_ENABLED')} — use false for COD-only launch.`)
   }
 
   if (!env('UPSTASH_REDIS_REST_URL') || !env('UPSTASH_REDIS_REST_TOKEN')) {
-    warnings.push('UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN unset — API rate limits will not be shared across Vercel isolates.')
+    warnings.push('UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN unset — API rate limits fall back to per-isolate memory and will not be shared across Vercel isolates.')
   }
 
   if (!env('VITE_GA_MEASUREMENT_ID')) {

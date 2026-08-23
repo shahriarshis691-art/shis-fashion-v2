@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.2",
     "firebase": "^12.16.0",
     "firebase-admin": "^13.10.0",
     "framer-motion": "^12.42.2",

@@ -1,6 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import type { DocumentReference, Firestore, Transaction } from 'firebase-admin/firestore'
-import { getAvailableStock, productMatchesSlug } from './_catalog.js'
+import { productMatchesSlug } from './_catalog.js'
+import {
+  commitStockWorkingSet,
+  readStockWorkingSet,
+  releaseStock,
+  reserveStock,
+  type StockWorkingSet,
+} from './_stock.js'
 
 export interface PrepaidOrderItem {
   slug?: string
@@ -30,25 +37,21 @@ export interface PrepaidOrderData {
 export type SettlePaidResult = 'applied' | 'already-settled'
 export type SettleFailedResult = 'applied' | 'already-failed' | 'ignored-paid'
 
-interface WorkingProduct {
-  ref: DocumentReference
-  variants: ReturnType<typeof getAvailableStock>['variants']
-  stock: number
+export type MatchedOrderLine = { item: PrepaidOrderItem; ref: DocumentReference | null }
+
+const PAYMENT_EVENTS_COLLECTION = 'paymentEvents'
+
+/**
+ * Firestore document ids cannot contain `/`. Provider event ids are already
+ * shaped like `bkash:<paymentId>` or `sslcommerz:<orderId>:<valId>`, so this
+ * only guards against unexpected provider payloads.
+ */
+export function toPaymentEventDocId(paymentEventId: string) {
+  const safe = paymentEventId.trim().replace(/[^A-Za-z0-9._:-]/g, '_')
+  return safe.slice(0, 400) || 'unknown-event'
 }
 
-function toQty(value: unknown) {
-  return Math.max(0, Math.floor(Number(value ?? 0)))
-}
-
-function productStockTotal(product: WorkingProduct) {
-  if (product.variants.length) {
-    return product.variants.reduce((sum, variant) => sum + variant.stock, 0)
-  }
-
-  return Math.max(0, product.stock)
-}
-
-async function matchProductRefs(db: Firestore, items: PrepaidOrderItem[]) {
+async function matchProductRefs(db: Firestore, items: PrepaidOrderItem[]): Promise<MatchedOrderLine[]> {
   const productsSnapshot = await db.collection('products').get()
   return items.map((item) => {
     const match = productsSnapshot.docs.find((doc) => {
@@ -63,93 +66,18 @@ async function matchProductRefs(db: Firestore, items: PrepaidOrderItem[]) {
   })
 }
 
-async function readWorkingProducts(
-  transaction: Transaction,
-  matched: Array<{ item: PrepaidOrderItem; ref: DocumentReference | null }>,
-  requireAll: boolean,
-) {
-  const working = new Map<string, WorkingProduct>()
-
-  for (const entry of matched) {
-    if (!entry.ref) {
-      if (requireAll) {
-        throw new Error('MISSING_PRODUCT')
-      }
-      continue
-    }
-
-    if (working.has(entry.ref.path)) {
-      continue
-    }
-
-    const productSnap = await transaction.get(entry.ref)
-    const product = (productSnap.data() ?? {}) as { stock?: unknown; variants?: unknown }
-    const available = getAvailableStock(product, '', '')
-    const stock = available.variants.length
-      ? available.variants.reduce((sum, variant) => sum + variant.stock, 0)
-      : Math.max(0, Number(product.stock ?? 0) || 0)
-
-    working.set(entry.ref.path, {
-      ref: entry.ref,
-      variants: available.variants.map((variant) => ({ ...variant })),
-      stock,
-    })
+function toStockRequest(line: MatchedOrderLine) {
+  return {
+    ref: line.ref,
+    quantity: Number(line.item.quantity ?? 0),
+    size: line.item.size,
+    color: line.item.color,
+    label: String(line.item.name ?? '').trim(),
   }
-
-  return working
 }
 
-function applyLineToWorking(product: WorkingProduct, item: PrepaidOrderItem, mode: 'decrement' | 'restore') {
-  const qty = toQty(item.quantity)
-  if (qty <= 0) {
-    return
-  }
-
-  const available = getAvailableStock(
-    { stock: product.stock, variants: product.variants },
-    String(item.size ?? ''),
-    String(item.color ?? ''),
-  )
-
-  if (mode === 'decrement') {
-    if (available.stock < qty) {
-      throw new Error('INSUFFICIENT_STOCK')
-    }
-
-    if (available.variantIndex >= 0) {
-      product.variants = product.variants.map((variant, index) => (
-        index === available.variantIndex
-          ? { ...variant, stock: Math.max(0, variant.stock - qty) }
-          : variant
-      ))
-      product.stock = productStockTotal(product)
-      return
-    }
-
-    product.stock = Math.max(0, product.stock - qty)
-    return
-  }
-
-  if (available.variantIndex >= 0) {
-    product.variants = product.variants.map((variant, index) => (
-      index === available.variantIndex
-        ? { ...variant, stock: variant.stock + qty }
-        : variant
-    ))
-    product.stock = productStockTotal(product)
-    return
-  }
-
-  product.stock += qty
-}
-
-function writeWorkingProducts(transaction: Transaction, working: Map<string, WorkingProduct>) {
-  for (const product of working.values()) {
-    transaction.update(product.ref, {
-      variants: product.variants,
-      stock: productStockTotal(product),
-    })
-  }
+async function readOrderStockWorkingSet(transaction: Transaction, matched: MatchedOrderLine[]) {
+  return readStockWorkingSet(transaction, matched.map((line) => line.ref))
 }
 
 export async function matchOrderProductRefs(db: Firestore, items: PrepaidOrderItem[]) {
@@ -158,23 +86,31 @@ export async function matchOrderProductRefs(db: Firestore, items: PrepaidOrderIt
 
 export async function restoreMatchedInventory(
   transaction: Transaction,
-  matched: Array<{ item: PrepaidOrderItem; ref: DocumentReference | null }>,
+  matched: MatchedOrderLine[],
 ) {
-  const working = await readWorkingProducts(transaction, matched, false)
-  for (const entry of matched) {
-    if (!entry.ref) {
-      continue
-    }
-
-    const product = working.get(entry.ref.path)
-    if (!product) {
-      continue
-    }
-
-    applyLineToWorking(product, entry.item, 'restore')
+  const working = await readOrderStockWorkingSet(transaction, matched)
+  for (const line of matched) {
+    releaseStock(working, toStockRequest(line))
   }
 
-  writeWorkingProducts(transaction, working)
+  commitStockWorkingSet(transaction, working)
+}
+
+function releaseAll(working: StockWorkingSet, matched: MatchedOrderLine[]) {
+  for (const line of matched) {
+    releaseStock(working, toStockRequest(line))
+  }
+}
+
+function reserveAll(working: StockWorkingSet, matched: MatchedOrderLine[]) {
+  for (const line of matched) {
+    const failure = reserveStock(working, toStockRequest(line))
+    if (!failure) {
+      continue
+    }
+
+    throw new Error(failure.reason === 'missing-product' ? 'MISSING_PRODUCT' : 'INSUFFICIENT_STOCK')
+  }
 }
 
 export async function settlePrepaidPaid(input: {
@@ -187,8 +123,10 @@ export async function settlePrepaidPaid(input: {
 }): Promise<SettlePaidResult> {
   const { db, orderRef, orderId, paymentEventId } = input
   const matched = await matchProductRefs(db, input.data.items ?? [])
+  const eventRef = db.collection(PAYMENT_EVENTS_COLLECTION).doc(toPaymentEventDocId(paymentEventId))
 
   return db.runTransaction(async (transaction) => {
+    // All reads must happen before any write inside a Firestore transaction.
     const snap = await transaction.get(orderRef)
     if (!snap.exists) {
       throw new Error('ORDER_MISSING')
@@ -199,6 +137,11 @@ export async function settlePrepaidPaid(input: {
       throw new Error('ORDER_ARCHIVED')
     }
 
+    const eventSnap = await transaction.get(eventRef)
+    if (eventSnap.exists) {
+      return 'already-settled' as const
+    }
+
     if (String(live.paymentStatus ?? '') === 'paid') {
       return 'already-settled' as const
     }
@@ -207,23 +150,22 @@ export async function settlePrepaidPaid(input: {
     const couponRef = couponId ? db.collection('coupons').doc(couponId) : null
     const couponSnap = couponRef ? await transaction.get(couponRef) : null
     const working = !live.stockCommitted
-      ? await readWorkingProducts(transaction, matched, true)
-      : new Map<string, WorkingProduct>()
+      ? await readOrderStockWorkingSet(transaction, matched)
+      : (new Map() as StockWorkingSet)
 
     if (!live.stockCommitted) {
-      for (const entry of matched) {
-        if (!entry.ref) {
-          throw new Error('MISSING_PRODUCT')
-        }
-        const product = working.get(entry.ref.path)
-        if (!product) {
-          throw new Error('MISSING_PRODUCT')
-        }
-        applyLineToWorking(product, entry.item, 'decrement')
-      }
+      reserveAll(working, matched)
     }
 
-    writeWorkingProducts(transaction, working)
+    commitStockWorkingSet(transaction, working)
+
+    transaction.create(eventRef, {
+      orderId,
+      outcome: 'paid',
+      paymentEventId,
+      ...(input.trxId ? { trxId: input.trxId } : {}),
+      createdAt: FieldValue.serverTimestamp(),
+    })
 
     transaction.update(orderRef, {
       paymentStatus: 'paid',
@@ -266,6 +208,7 @@ export async function settlePrepaidFailed(input: {
 }): Promise<SettleFailedResult> {
   const { db, orderRef, paymentEventId } = input
   const matched = await matchProductRefs(db, input.data.items ?? [])
+  const eventRef = db.collection(PAYMENT_EVENTS_COLLECTION).doc(toPaymentEventDocId(paymentEventId))
 
   return db.runTransaction(async (transaction) => {
     const snap = await transaction.get(orderRef)
@@ -282,28 +225,31 @@ export async function settlePrepaidFailed(input: {
       return 'ignored-paid' as const
     }
 
+    const eventSnap = await transaction.get(eventRef)
+    if (eventSnap.exists) {
+      return 'already-failed' as const
+    }
+
     if (String(live.paymentStatus ?? '') === 'failed' && live.status === 'cancelled' && !live.stockCommitted) {
       return 'already-failed' as const
     }
 
     const working = live.stockCommitted
-      ? await readWorkingProducts(transaction, matched, false)
-      : new Map<string, WorkingProduct>()
+      ? await readOrderStockWorkingSet(transaction, matched)
+      : (new Map() as StockWorkingSet)
 
     if (live.stockCommitted) {
-      for (const entry of matched) {
-        if (!entry.ref) {
-          continue
-        }
-        const product = working.get(entry.ref.path)
-        if (!product) {
-          continue
-        }
-        applyLineToWorking(product, entry.item, 'restore')
-      }
+      releaseAll(working, matched)
     }
 
-    writeWorkingProducts(transaction, working)
+    commitStockWorkingSet(transaction, working)
+
+    transaction.create(eventRef, {
+      orderId: orderRef.id,
+      outcome: 'failed',
+      paymentEventId,
+      createdAt: FieldValue.serverTimestamp(),
+    })
 
     transaction.update(orderRef, {
       paymentStatus: 'failed',
