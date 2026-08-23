@@ -413,7 +413,7 @@ export default function HomePage() {
 
   const contentSections = useMemo(
     () => [...homepageContent.sections]
-      .filter((section) => section.enabled && section.key !== 'hero' && section.key !== 'featuredCollection')
+      .filter((section) => section.enabled && section.key !== 'hero' && section.key !== 'featuredCollection' && section.key !== 'brandPromise')
       .sort((left, right) => left.order - right.order),
     [homepageContent.sections],
   )
@@ -476,7 +476,7 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
-      <section className="py-7 sm:py-9">
+      <section className="pt-7 pb-4 sm:pt-9 sm:pb-6">
         <Container>
           <div className="flex items-end justify-between gap-3">
             <div>
@@ -521,6 +521,37 @@ export default function HomePage() {
         </Container>
       </section>
 
+      {homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false ? (
+        <section className="py-12 sm:py-16">
+              <Container>
+                <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+                  {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
+                </p>
+                <h2 className="mt-1 text-h2 text-black">{homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}</h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
+                  {homepageContent.brandPromiseDescription}
+                </p>
+                {homepageContent.bannerImage ? (
+                  <div className="mt-5">
+                    <LuxuryImage
+                      src={homepageContent.bannerImage}
+                      alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
+                      width={1400}
+                      height={800}
+                      sizes="(max-width: 639px) 100vw, 1100px"
+                      widths={[640, 960, 1400]}
+                      aspectClassName="aspect-[21/9]"
+                    />
+                  </div>
+                ) : null}
+                <p className="mt-4 text-sm text-black/70">
+                  <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
+                  {homepageContent.brandSignatureText}
+                </p>
+              </Container>
+            </section>
+      ) : null}
+
       {contentSections.map((section) => {
         if (section.key === 'newArrivals' && newArrivals.length) {
           return (
@@ -564,39 +595,6 @@ export default function HomePage() {
                 </div>
 
                 <HomepageProductGrid products={bestSellers} />
-              </Container>
-            </section>
-          )
-        }
-
-        if (section.key === 'brandPromise') {
-          return (
-            <section key={section.key} className="pb-8 sm:pb-10">
-              <Container>
-                <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                  {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
-                </p>
-                <h2 className="mt-1 text-h2 text-black">{homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
-                  {homepageContent.brandPromiseDescription}
-                </p>
-                {homepageContent.bannerImage ? (
-                  <div className="mt-5">
-                    <LuxuryImage
-                      src={homepageContent.bannerImage}
-                      alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
-                      width={1400}
-                      height={800}
-                      sizes="(max-width: 639px) 100vw, 1100px"
-                      widths={[640, 960, 1400]}
-                      aspectClassName="aspect-[21/9]"
-                    />
-                  </div>
-                ) : null}
-                <p className="mt-4 text-sm text-black/70">
-                  <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
-                  {homepageContent.brandSignatureText}
-                </p>
               </Container>
             </section>
           )
