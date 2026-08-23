@@ -470,18 +470,22 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {categoryStrips.map((item, index) => (
+            {categoryStrips.map((item, index) => {
+              const isDenimCard = item.key === 'denim'
+
+              return (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link to={item.href} className="group luxury-tap block">
                   <div className="relative">
                     <LuxuryImage
                       src={item.image}
                       alt={item.label}
-                      width={1200}
-                      height={900}
+                      width={isDenimCard ? 736 : 1200}
+                      height={isDenimCard ? 1104 : 900}
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 25vw"
                       widths={[480, 768, 960, 1200]}
-                      aspectClassName="aspect-[4/3] sm:aspect-[16/10]"
+                      aspectClassName={isDenimCard ? 'aspect-[2/3] sm:aspect-[16/10]' : 'aspect-[4/3] sm:aspect-[16/10]'}
+                      imgClassName={isDenimCard ? 'max-sm:!object-contain' : ''}
                       objectPosition={item.imagePosition}
                       hover
                     />
@@ -493,7 +497,8 @@ export default function HomePage() {
                   </div>
                 </Link>
               </Reveal>
-            ))}
+              )
+            })}
           </div>
         </Container>
       </section>
