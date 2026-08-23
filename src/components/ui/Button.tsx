@@ -21,8 +21,8 @@ const variants: Record<ButtonVariant, string> = {
     'rounded-[2px] border border-black bg-black text-white shadow-none hover:translate-y-0 hover:bg-[#121212] hover:border-black',
 }
 
-export default function Button({ children, variant = 'primary', to, className = '', ...props }: ButtonProps) {
-  const sharedClasses = `luxury-tap inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 text-[15px] font-semibold leading-none transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-base ${variants[variant]} ${className}`
+export default function Button({ children, variant = 'primary', to, className = '', type = 'button', ...props }: ButtonProps) {
+  const sharedClasses = `luxury-tap inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 text-[15px] font-semibold leading-none transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60 sm:text-base ${variants[variant]} ${className}`
   const ariaLabel = props['aria-label'] ?? (typeof children === 'string' ? children : undefined)
 
   if (to) {
@@ -34,7 +34,7 @@ export default function Button({ children, variant = 'primary', to, className = 
   }
 
   return (
-    <button type="button" className={sharedClasses} aria-label={ariaLabel} {...props}>
+    <button className={sharedClasses} aria-label={ariaLabel} {...props} type={type}>
       {children}
     </button>
   )

@@ -248,13 +248,15 @@ export default function MainLayout() {
           <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
           <MiniCartConfirmation />
           {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? <WhatsAppWidget /> : null}
-          <WelcomePopup
-            isOpen={isPopupOpen}
-            onClose={closePopup}
-            onSubscribe={handleSubscribe}
-            onWelcomeBack={handleWelcomeBack}
-            heroImage={heroImage}
-          />
+          {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (
+            <WelcomePopup
+              isOpen={isPopupOpen}
+              onClose={closePopup}
+              onSubscribe={handleSubscribe}
+              onWelcomeBack={handleWelcomeBack}
+              heroImage={heroImage}
+            />
+          ) : null}
         </Suspense>
       </DeferredChrome>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -202,6 +202,27 @@ const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
   'new-arrivals': 'Allowed: /shop/new-arrivals or /new-arrivals',
 }
 
+function resolveCategorySectionEntry(
+  sections: HomepageContent['categorySections'],
+  key: HomepageCategorySectionKey,
+): { storageKey: string; section: HomepageCategorySection } | null {
+  if (!sections) {
+    return null
+  }
+
+  const direct = sections[key]
+  if (direct) {
+    return { storageKey: key, section: direct }
+  }
+
+  const match = Object.entries(sections).find(([, section]) => section?.key === key)
+  if (!match?.[1]) {
+    return null
+  }
+
+  return { storageKey: match[0], section: match[1] }
+}
+
 interface AdminPageProps {
   initialView?: 'login' | 'dashboard'
 }
@@ -253,7 +274,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [showBrandManagement, setShowBrandManagement] = useState(false)
   const [blockedAdminUid, setBlockedAdminUid] = useState<string | null>(null)
   const [homepageSaveDebug, setHomepageSaveDebug] = useState<{
-    status: 'idle' | 'success' | 'error'
+    status: 'idle' | 'saving' | 'success' | 'error'
     message: string
     mode: 'local' | 'live' | 'unknown'
     path: string
@@ -261,6 +282,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     sareeCoverImage: string
     firebaseProjectId: string
     savedAt?: string
+    lastClickAt?: string
   }>({
     status: 'idle',
     message: 'No homepage save attempt yet.',
@@ -339,10 +361,21 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent, meta) => {
-      if (!homepageSavingRef.current && !homepageDirtyRef.current) {
+      setHomepageContent((current) => {
+        if (homepageSavingRef.current || homepageDirtyRef.current) {
+          console.info('[homepage] snapshot skipped; preserving local edits', {
+            dirty: homepageDirtyRef.current,
+            saving: homepageSavingRef.current,
+            source: meta?.source,
+            incomingSareeCoverImage: nextContent.categorySections?.saree?.coverImage || '(empty)',
+            currentSareeCoverImage: current?.categorySections?.saree?.coverImage || '(empty)',
+          })
+          return current
+        }
+
         homepageContentRef.current = nextContent
-        setHomepageContent(nextContent)
-      }
+        return nextContent
+      })
       if (meta) {
         setHomepageSnapshotDebug(meta)
       }
@@ -822,6 +855,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setUploadError('')
       setUploadProgress(0)
 
+      if (target === 'category-section-image') {
+        console.info('[saree] image selected', {
+          sectionKey: sectionKey ?? '(missing)',
+          fileCount: imageFiles.length,
+          fileName: imageFiles[0]?.name ?? '(none)',
+        })
+        console.info('[saree] upload started', { sectionKey: sectionKey ?? '(missing)' })
+      }
+
       const uploadedImages = imageFiles.length
         ? await uploadAssets(imageFiles, target === 'hero-image' || target === 'banner-image' || target === 'category-image' || target === 'shop-category-image' || target === 'category-section-image' || target === 'featured-page-image' ? 'homepage' : 'products', {
           retries: 2,
@@ -886,6 +928,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         })
       } else if (target === 'category-section-image') {
         const persistableUrl = uploadedImages[0]?.trim() ?? ''
+        console.info('[saree] upload completed', {
+          sectionKey: sectionKey ?? '(missing)',
+          uploadedURL: persistableUrl || '(empty)',
+        })
         if (!isPersistableMediaUrl(persistableUrl)) {
           throw new Error('Image upload did not return a persistable URL. Please retry the upload.')
         }
@@ -894,52 +940,64 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           throw new Error('Image upload succeeded but the category section key was missing. Please retry from the Saree section.')
         }
 
-        console.info('[admin] category-section upload', {
+        console.info('[saree] uploaded URL', {
           sectionKey,
-          path: 'settings/homepage',
           field: `categorySections.${sectionKey}.coverImage`,
           persistableUrl,
         })
 
         homepageDirtyRef.current = true
-        setHomepageContent((current) => {
-          if (!current || !current.categorySections) {
-            return current
-          }
+        const current = homepageContentRef.current
+        if (!current) {
+          throw new Error('Uploaded image but homepage content is not loaded yet. Refresh and retry.')
+        }
 
-          const section = current.categorySections[sectionKey]
-          if (!section) {
-            return current
-          }
+        const resolved = resolveCategorySectionEntry(current.categorySections, sectionKey)
+        if (!resolved) {
+          console.error('[saree] state not updated: section missing from homepageContent.categorySections', {
+            sectionKey,
+            availableKeys: Object.keys(current.categorySections ?? {}),
+          })
+          throw new Error(`Uploaded ${sectionKey} image but homepage state did not contain that section. Refresh and retry.`)
+        }
 
-          const nextSection: HomepageCategorySection = {
-            ...section,
-            coverImage: persistableUrl,
-            images: Array.from(new Set([persistableUrl, ...(section.images ?? [])])).filter(Boolean),
-          }
+        const nextSection: HomepageCategorySection = {
+          ...resolved.section,
+          key: sectionKey,
+          coverImage: persistableUrl,
+          images: Array.from(new Set([persistableUrl, ...(resolved.section.images ?? [])])).filter(Boolean),
+        }
 
-          const nextContent = {
-            ...current,
-            categorySections: {
-              ...current.categorySections,
-              [sectionKey]: nextSection,
-            },
-            shopByCategories: (current.shopByCategories ?? []).map((item) => {
-              if (sectionKey !== 'saree') {
-                return item
-              }
+        const nextContent: HomepageContent = {
+          ...current,
+          categorySections: {
+            ...(current.categorySections ?? {}),
+            [resolved.storageKey]: nextSection,
+            [sectionKey]: nextSection,
+          } as HomepageContent['categorySections'],
+          shopByCategories: (current.shopByCategories ?? []).map((item) => {
+            if (sectionKey !== 'saree') {
+              return item
+            }
 
-              const href = (item.href ?? '').toLowerCase()
-              const title = (item.title ?? '').toLowerCase()
-              if (!href.includes('saree') && title !== 'saree') {
-                return item
-              }
+            const href = (item.href ?? '').toLowerCase()
+            const title = (item.title ?? '').toLowerCase()
+            if (!href.includes('saree') && title !== 'saree') {
+              return item
+            }
 
-              return { ...item, image: persistableUrl }
-            }),
-          }
-          homepageContentRef.current = nextContent
-          return nextContent
+            return { ...item, image: persistableUrl }
+          }),
+        }
+
+        homepageContentRef.current = nextContent
+        setHomepageContent(nextContent)
+
+        console.info('[saree] state updated', {
+          sectionKey,
+          field: `categorySections.${sectionKey}.coverImage`,
+          persistableUrl,
+          saveStateUrl: nextContent.categorySections?.saree?.coverImage || '(empty)',
         })
       } else if (target === 'featured-page-image') {
         setHomepageContent((current) => {
@@ -1192,16 +1250,40 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleHomepageSave = async () => {
+  const handleHomepageSave = async (event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault()
+    event?.stopPropagation()
+    console.info('[homepage] save button clicked')
+
+    const clickedAt = new Date().toISOString()
+    const contentToSave = homepageContentRef.current ?? homepageContent
+    const currentSareeCover = contentToSave?.categorySections?.saree?.coverImage ?? ''
+    const projectId = (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'
+
+    setHomepageSaveDebug({
+      status: 'saving',
+      message: 'Saving...',
+      mode: 'unknown',
+      path: 'settings/homepage',
+      heroImage: contentToSave?.heroImage ?? '',
+      sareeCoverImage: currentSareeCover,
+      firebaseProjectId: projectId,
+      lastClickAt: clickedAt,
+    })
+
     if (homepageSavingRef.current) {
+      const reason = 'Failed to save content: a save is already in progress.'
+      setMessage(reason)
+      setToast({ kind: 'error', message: reason })
+      setHomepageSaveDebug((current) => ({ ...current, status: 'error', message: reason }))
       return
     }
 
-    const contentToSave = homepageContentRef.current ?? homepageContent
     if (!contentToSave) {
       const reason = 'Failed to save content: Homepage content is not loaded yet.'
       setMessage(reason)
       setToast({ kind: 'error', message: reason })
+      setHomepageSaveDebug((current) => ({ ...current, status: 'error', message: reason }))
       return
     }
 
@@ -1221,24 +1303,25 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const reason = `Failed to save content: Invalid route for ${invalidSection.key.toUpperCase()}. ${SECTION_ROUTE_HINTS[invalidSection.key] ?? 'Route must start with /.'}`
       setMessage(reason)
       setToast({ kind: 'error', message: reason })
+      setHomepageSaveDebug((current) => ({ ...current, status: 'error', message: reason }))
       return
     }
 
     homepageSavingRef.current = true
     setHomepageSaving(true)
-    setLoading(true)
     try {
       const sareeCoverImage = contentToSave.categorySections?.saree?.coverImage?.trim() ?? ''
       if (sareeCoverImage && !isPersistableMediaUrl(sareeCoverImage)) {
         throw new Error('Saree image is not a permanent URL. Re-upload the image before saving.')
       }
 
-      console.info('[admin] homepage save click', {
-        projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+      console.info('[homepage] save handler running', {
+        projectId,
         path: 'settings/homepage',
         field: 'categorySections.saree.coverImage',
         sareeCoverImage: sareeCoverImage || '(empty)',
-        hasState: Boolean(contentToSave),
+        canWrite: user?.canWrite ?? false,
+        uid: user?.uid ?? '(missing)',
       })
 
       const result: HomepageSaveResult = await updateHomepageContent(contentToSave)
@@ -1249,15 +1332,16 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setToast({ kind: 'success', message: 'Content saved successfully.' })
       setHomepageSaveDebug({
         status: 'success',
-        message: `Content saved successfully (${result.mode} mode). Firestore getDoc confirmed categorySections.saree.coverImage.`,
+        message: `Content saved successfully (${result.mode} mode). Fresh getDoc confirmed categorySections.saree.coverImage.`,
         mode: result.mode,
         path: result.path,
         heroImage: result.heroImage,
         sareeCoverImage: result.sareeCoverImage,
         firebaseProjectId: result.firebaseProjectId,
         savedAt: result.savedAt,
+        lastClickAt: clickedAt,
       })
-      console.info('[admin] homepage save success', {
+      console.info('[homepage] save success', {
         projectId: result.firebaseProjectId,
         path: result.path,
         mode: result.mode,
@@ -1279,56 +1363,78 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         path: 'settings/homepage',
         heroImage: contentToSave.heroImage ?? '',
         sareeCoverImage: contentToSave.categorySections?.saree?.coverImage ?? '',
-        firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+        firebaseProjectId: projectId,
         savedAt: new Date().toISOString(),
+        lastClickAt: clickedAt,
       })
-      console.error('[admin] homepage save failed', error)
+      console.error('[homepage] save failed', error)
     } finally {
       homepageSavingRef.current = false
       setHomepageSaving(false)
-      setLoading(false)
     }
   }
 
-  const handleHomepageWriteTest = async () => {
-    if (!homepageContent) {
+  const handleHomepageWriteTest = async (event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault()
+    event?.stopPropagation()
+    console.info('[homepage] test firestore write clicked')
+
+    const contentToTest = homepageContentRef.current ?? homepageContent
+    const projectId = (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'
+    const clickedAt = new Date().toISOString()
+
+    setHomepageSaveDebug({
+      status: 'saving',
+      message: 'Testing Firestore write to settings/homepage...',
+      mode: 'unknown',
+      path: 'settings/homepage',
+      heroImage: contentToTest?.heroImage ?? '',
+      sareeCoverImage: contentToTest?.categorySections?.saree?.coverImage ?? '',
+      firebaseProjectId: projectId,
+      lastClickAt: clickedAt,
+    })
+
+    if (!contentToTest) {
+      const reason = 'ERROR: Homepage content is not loaded yet, so the Firestore write test cannot run.'
+      setHomepageSaveDebug((current) => ({ ...current, status: 'error', message: reason }))
+      setToast({ kind: 'error', message: reason })
+      setMessage(reason)
       return
     }
 
-    setLoading(true)
     try {
-      const result = await updateHomepageContent(homepageContent)
+      const result = await updateHomepageContent(contentToTest)
       setHomepageSaveDebug({
         status: 'success',
-        message: `Firestore write test passed (${result.mode} mode).`,
+        message: `SUCCESS: Firestore write test passed (${result.mode} mode). Fresh getDoc categorySections.saree.coverImage=${result.sareeCoverImage || '(empty)'}`,
         mode: result.mode,
         path: result.path,
         heroImage: result.heroImage,
         sareeCoverImage: result.sareeCoverImage,
         firebaseProjectId: result.firebaseProjectId,
         savedAt: result.savedAt,
+        lastClickAt: clickedAt,
       })
-      setToast({ kind: 'success', message: 'Firestore write test passed.' })
-      setMessage('Firestore write test passed.')
+      setToast({ kind: 'success', message: 'SUCCESS: Firestore write test passed.' })
+      setMessage('SUCCESS: Firestore write test passed.')
     } catch (error) {
-      const reason = describeAdminWriteError(error, user?.uid)
+      const reason = `ERROR: ${describeAdminWriteError(error, user?.uid)}`
       setHomepageSaveDebug({
         status: 'error',
         message: reason,
         mode: 'unknown',
         path: 'settings/homepage',
-        heroImage: homepageContent.heroImage ?? '',
-        sareeCoverImage: homepageContent.categorySections?.saree?.coverImage ?? '',
-        firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+        heroImage: contentToTest.heroImage ?? '',
+        sareeCoverImage: contentToTest.categorySections?.saree?.coverImage ?? '',
+        firebaseProjectId: projectId,
         savedAt: new Date().toISOString(),
+        lastClickAt: clickedAt,
       })
       setToast({ kind: 'error', message: `Firestore write test failed: ${reason}` })
       setMessage(`Firestore write test failed: ${reason}`)
       if (user?.uid) {
         setBlockedAdminUid(user.uid)
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -1339,6 +1445,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       localFirstMode: isHomepageLocalFirstMode(),
       firebaseConfigured: firebaseReady,
       firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+      canWrite: user?.canWrite ?? false,
+      needsAdminDoc: user?.needsAdminDoc ?? false,
+      authEmail: user?.email ?? null,
+      authUid: user?.uid ?? null,
+      currentSareeCoverImage: homepageContent?.categorySections?.saree?.coverImage ?? '',
     }
 
     try {
@@ -2410,9 +2521,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Homepage</p>
                 <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">Tune the storefront instantly</h2>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button onClick={handleHomepageWriteTest} variant="secondary" disabled={loading}>Test Firestore write</Button>
-                <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving || loading}>{homepageSaving ? 'Saving...' : 'Save content'}</Button>
+              <div className="relative z-10 flex flex-wrap items-center gap-2">
+                <Button type="button" onClick={handleHomepageWriteTest} variant="secondary" disabled={homepageSaving}>Test Firestore write</Button>
+                <Button type="button" onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving}>{homepageSaving ? 'Saving...' : 'Save content'}</Button>
               </div>
             </div>
             <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 text-xs text-[var(--color-muted)]">
@@ -2439,8 +2550,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p><span className="font-semibold text-[var(--color-text)]">Firebase project:</span> {homepageSaveDebug.firebaseProjectId || (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Auth email:</span> {user?.email ?? '(not signed in)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Auth uid:</span> {user?.uid ?? '(not signed in)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Can write:</span> {user?.canWrite ? 'yes' : 'no'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Needs admin doc:</span> {user?.needsAdminDoc ? `yes (admins/${user?.uid ?? 'uid'})` : 'no'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Hero URL snapshot:</span> {homepageSaveDebug.heroImage || '(empty)'}</p>
-                <p className="sm:col-span-2 break-all"><span className="font-semibold text-[var(--color-text)]">Saree coverImage:</span> {homepageSaveDebug.sareeCoverImage || homepageContent?.categorySections?.saree?.coverImage || '(empty)'}</p>
+                <p className="sm:col-span-2 break-all"><span className="font-semibold text-[var(--color-text)]">Current Saree coverImage (save state):</span> {homepageContent?.categorySections?.saree?.coverImage || '(empty)'}</p>
+                <p className="sm:col-span-2 break-all"><span className="font-semibold text-[var(--color-text)]">Last verified Saree coverImage:</span> {homepageSaveDebug.sareeCoverImage || '(none yet)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Last click time:</span> {homepageSaveDebug.lastClickAt ? new Date(homepageSaveDebug.lastClickAt).toLocaleString('en-BD') : '-'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Last save time:</span> {homepageSaveDebug.savedAt ? new Date(homepageSaveDebug.savedAt).toLocaleString('en-BD') : '-'}</p>
               </div>
             </div>
@@ -2883,7 +2998,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
                   <p className="text-xs text-[var(--color-muted)]">After uploading category images, click save to publish these changes.</p>
-                  <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
+                  <Button type="button" onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="relative z-10 mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
                 </div>
 
                 <div className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4">
@@ -2949,14 +3064,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                         </div>
 
                         <div className="mt-3">
-                          <label className="cursor-pointer text-sm text-[var(--color-muted)]">
+                          <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-semibold text-[var(--color-text)]">
                             <input
+                              id={`category-section-image-${section.key}`}
                               type="file"
                               accept="image/*"
-                              onChange={(event) => handleUpload(event.target.files, 'category-section-image', undefined, undefined, section.key)}
+                              onChange={(event) => {
+                                const files = event.target.files
+                                void handleUpload(files, 'category-section-image', undefined, undefined, section.key)
+                                event.target.value = ''
+                              }}
                               className="hidden"
                             />
-                            Add image for this section
+                            {section.key === 'saree' ? 'Replace Saree image' : `Replace ${section.label} image`}
                           </label>
 
                           {section.coverImage ? (
@@ -2964,7 +3084,9 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                               <img src={section.coverImage} alt={`${section.label} section preview`} className="h-24 w-full rounded-[1rem] object-cover object-center" />
                               <button
                                 type="button"
-                                onClick={async () => {
+                                onClick={async (event) => {
+                                  event.preventDefault()
+                                  event.stopPropagation()
                                   try {
                                     await deleteAsset(section.coverImage)
                                     updateHomepageCategorySection(section.key, { coverImage: '', images: section.images.filter((image) => image !== section.coverImage) })
@@ -2979,6 +3101,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                               </button>
                             </div>
                           ) : null}
+                          <p className="mt-2 break-all text-[11px] text-[var(--color-muted)]">{section.coverImage || '(no image URL in save state yet)'}</p>
                         </div>
                       </div>
                     ))}
@@ -2987,7 +3110,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
                 <div className="rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3 sm:flex sm:items-center sm:justify-between">
                   <p className="text-xs text-[var(--color-muted)]">Save section-wise edits to publish exact label, route, and image mapping.</p>
-                  <Button onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
+                  <Button type="button" onClick={handleHomepageSave} variant="secondary" disabled={homepageSaving} className="relative z-10 mt-3 sm:mt-0">{homepageSaving ? 'Saving...' : 'Save content'}</Button>
                 </div>
               </div>
             ) : null}
