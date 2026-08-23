@@ -41,8 +41,8 @@ const fallbackCategoryStrips = [
 const categoryStripCardImage = {
   width: 960,
   height: 1200,
-  aspectClassName: 'aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4]',
-  imgClassName: 'h-full w-full object-cover object-top',
+  aspectClassName: 'aspect-[4/5]',
+  imgClassName: 'h-full w-full object-cover object-center',
 } as const
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
@@ -478,40 +478,35 @@ export default function HomePage() {
 
       <section className="pt-7 pb-4 sm:pt-9 sm:pb-6">
         <Container>
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-caption uppercase tracking-[0.14em] text-black/55">Browse by category</p>
-              <h2 className="mt-1 text-h2 text-black">Category Strips</h2>
-            </div>
-            <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
-              View all
-            </Link>
-          </div>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-center text-neutral-900 uppercase mb-6 sm:mb-8">
+            SHOP BY CATEGORY
+          </h2>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6">
             {categoryStrips.map((item, index) => (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link
                   to={item.href}
-                  className="group luxury-tap relative block w-full overflow-hidden rounded-xl aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4] cursor-pointer"
+                  className="group luxury-tap flex flex-col items-center w-full cursor-pointer"
                   aria-label={`${item.label} collection`}
                 >
-                  <LuxuryImage
-                    src={item.image || CATALOG_IMAGE_PLACEHOLDER}
-                    alt={item.label}
-                    width={categoryStripCardImage.width}
-                    height={categoryStripCardImage.height}
-                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
-                    widths={[480, 768, 960, 1200]}
-                    className="h-full w-full"
-                    aspectClassName="aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4]"
-                    imgClassName="h-full w-full object-cover object-top"
-                    objectPosition="center top"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 inset-x-0 flex items-center justify-between p-4 sm:p-6 z-10">
-                    <span className="text-white text-base sm:text-lg font-medium tracking-wider uppercase drop-shadow-sm">{item.label}</span>
-                    <span className="text-white text-lg transition-transform duration-300 group-hover:translate-x-1">→</span>
+                  <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100">
+                    <LuxuryImage
+                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
+                      alt={item.label}
+                      width={categoryStripCardImage.width}
+                      height={categoryStripCardImage.height}
+                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                      widths={[480, 768, 960, 1200]}
+                      className="h-full w-full"
+                      aspectClassName={categoryStripCardImage.aspectClassName}
+                      imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="mt-3 text-center w-full">
+                    <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase group-hover:text-neutral-600 transition-colors">
+                      {item.label}
+                    </span>
                   </div>
                 </Link>
               </Reveal>
