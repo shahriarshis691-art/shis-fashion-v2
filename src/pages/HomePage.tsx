@@ -13,6 +13,7 @@ import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
+  isLiveHomepageBackend,
   subscribeToAdminBrands,
   subscribeToHomepageContent,
   subscribeToProducts,
@@ -21,7 +22,7 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl } from '../utils/media'
+import { CATALOG_IMAGE_PLACEHOLDER, isPersistableMediaUrl, normalizeCatalogImageUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { slugify } from '../utils/slugify'
@@ -214,7 +215,18 @@ export default function HomePage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   useEffect(() => {
-    const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
+    const unsubscribe = subscribeToHomepageContent((content, meta) => {
+      if (isLiveHomepageBackend() && (meta?.source === 'local-seed' || meta?.source === 'local-storage-sync')) {
+        return
+      }
+
+      console.info('[homepage] applied', {
+        source: meta?.source ?? 'unknown',
+        path: meta?.path ?? 'settings/homepage',
+        sareeCoverImage: content.categorySections?.saree?.coverImage || '(empty)',
+      })
+      setHomepageContent(content)
+    })
     return unsubscribe
   }, [])
 
@@ -257,11 +269,12 @@ export default function HomePage() {
       .sort((left, right) => left.order - right.order)
       .map((section) => {
         const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const sectionImage = normalizeCatalogImageUrl(
-          categoryStripCover(section.key, section.coverImage || section.images[0] || fallback?.image || ''),
-          1200,
-          900,
-        )
+        const savedCover = section.coverImage?.trim() ?? ''
+        const savedGallery = (section.images ?? []).find((item) => isPersistableMediaUrl(item)) ?? ''
+        const resolvedCover = isPersistableMediaUrl(savedCover)
+          ? savedCover
+          : savedGallery || fallback?.image || categoryStripCover(section.key, '')
+        const sectionImage = normalizeCatalogImageUrl(resolvedCover, 1200, 900)
 
         return {
           key: section.key,

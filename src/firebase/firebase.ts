@@ -36,6 +36,8 @@ if (auth) {
   })
 }
 
+export const firebaseProjectId = firebaseConfig.projectId
+
 if (import.meta.env.DEV) {
   console.info('[firebase] init', {
     hasFirebaseConfig,
@@ -44,6 +46,8 @@ if (import.meta.env.DEV) {
     authInitialized: Boolean(auth),
     firestoreInitialized: Boolean(db),
   })
+} else if (hasFirebaseConfig) {
+  console.info('[firebase] project', firebaseConfig.projectId)
 }
 
 if (import.meta.env.PROD && !hasFirebaseConfig) {

@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   limit,
   onSnapshot,
@@ -20,7 +21,7 @@ import { homeCategoryItems } from '../data/homeCategories'
 import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
-import { compactManagedImages } from '../utils/media'
+import { compactManagedImages, isPersistableMediaUrl } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired, normalizeCouponCategories, resolveCouponAudience, resolveCouponDiscountType, quoteCouponDiscount, nextCouponUsage, type CouponAudience, type CouponDiscountType, type CouponQuoteItem } from '../utils/coupon'
@@ -28,7 +29,7 @@ import { isApiPrepaidPayment } from '../utils/paymentMethods'
 import { allocateProductSlug, getProductSlug, productMatchesSlug } from '../utils/productIdentity'
 import { decrementMatchingVariant, incrementMatchingVariant, getProductStockTotal, normalizeVariants, type ProductVariantStock } from '../utils/variantStock'
 import { hasAnyAdminAccessRole, resolveAdminAccessRole, type AdminAccessRole } from '../utils/adminAccess'
-import { auth as firebaseAuth, db as firebaseDb } from './firebase'
+import { auth as firebaseAuth, db as firebaseDb, firebaseProjectId } from './firebase'
 import type { DeliveryAddress } from '../utils/bangladeshAddress'
 import type { OrderNotifyChannel, OrderStatus } from '../utils/orderStatus'
 import { canTransitionOrderStatus, shouldRestockOnStatus } from '../utils/orderStatus'
@@ -305,6 +306,8 @@ export interface HomepageSaveResult {
   mode: 'local' | 'live'
   path: 'settings/homepage'
   heroImage: string
+  sareeCoverImage: string
+  firebaseProjectId: string
   verified: boolean
   savedAt: string
 }
@@ -466,6 +469,10 @@ export function isHomepageLocalFirstMode() {
   return isLocalFirstDataMode()
 }
 
+export function isLiveHomepageBackend() {
+  return Boolean(firebaseDb) && !isLocalFirstDataMode()
+}
+
 function markAccessDenied() {
   if (typeof window === 'undefined') {
     return
@@ -602,7 +609,7 @@ export function describeAdminWriteError(error: unknown, uid?: string | null) {
     || normalized.includes('permission-denied')
     || normalized.includes('missing or insufficient permissions')
   ) {
-    return `Saving is blocked until Firestore document admins/${uidHint} exists with role="admin" and active=true.`
+    return `${reason} Firestore rules require isAdmin() to write settings/homepage. Create admins/${uidHint} with role and active=true, or set the Auth token claim admin=true. The write was not saved locally as a fallback.`
   }
 
   return reason
@@ -1073,6 +1080,146 @@ function toUniqueImages(images: unknown) {
   return normalized
 }
 
+const HOMEPAGE_CATEGORY_SECTION_KEY_SET = new Set<HomepageCategorySectionKey>(
+  HOMEPAGE_CATEGORY_SECTION_LAYOUT.map((layout) => layout.key),
+)
+
+function isHomepageCategorySectionKey(value: string): value is HomepageCategorySectionKey {
+  return HOMEPAGE_CATEGORY_SECTION_KEY_SET.has(value as HomepageCategorySectionKey)
+}
+
+function aliasToSectionKey(value: string): HomepageCategorySectionKey | null {
+  const normalized = value.trim().toLowerCase()
+  if (isHomepageCategorySectionKey(normalized)) {
+    return normalized
+  }
+
+  if (normalized === 'sarees' || normalized === 'sari' || normalized === 'saris') {
+    return 'saree'
+  }
+
+  if (normalized === 'womens' || normalized === 'woman') {
+    return 'women'
+  }
+
+  if (normalized === 'mens' || normalized === 'man') {
+    return 'men'
+  }
+
+  return null
+}
+
+function resolveIncomingCategorySection(
+  categorySections: unknown,
+  key: HomepageCategorySectionKey,
+): Partial<HomepageCategorySection> | undefined {
+  if (!categorySections || typeof categorySections !== 'object') {
+    return undefined
+  }
+
+  if (!Array.isArray(categorySections)) {
+    const record = categorySections as Record<string, unknown>
+    const direct = record[key]
+    if (direct && typeof direct === 'object') {
+      return direct as Partial<HomepageCategorySection>
+    }
+
+    for (const [entryKey, value] of Object.entries(record)) {
+      if (aliasToSectionKey(entryKey) === key && value && typeof value === 'object') {
+        return value as Partial<HomepageCategorySection>
+      }
+    }
+  }
+
+  const candidates = Array.isArray(categorySections)
+    ? categorySections
+    : Object.entries(categorySections as Record<string, unknown>).map(([entryKey, value]) => {
+      if (!value || typeof value !== 'object') {
+        return null
+      }
+
+      return {
+        ...(value as Record<string, unknown>),
+        key: (value as { key?: unknown }).key ?? entryKey,
+      }
+    })
+
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'object') {
+      continue
+    }
+
+    const section = candidate as Partial<HomepageCategorySection>
+    if (aliasToSectionKey(String(section.key ?? '')) === key) {
+      return section
+    }
+  }
+
+  return undefined
+}
+
+function readStoredCategoryCover(content: unknown, key: HomepageCategorySectionKey): string {
+  if (!content || typeof content !== 'object') {
+    return ''
+  }
+
+  const categorySections = (content as { categorySections?: unknown }).categorySections
+  const section = resolveIncomingCategorySection(categorySections, key)
+  const cover = typeof section?.coverImage === 'string' ? section.coverImage.trim() : ''
+  if (isPersistableMediaUrl(cover)) {
+    return cover
+  }
+
+  const images = Array.isArray(section?.images) ? section.images : []
+  const fromImages = images.find((item) => isPersistableMediaUrl(item))
+  return typeof fromImages === 'string' ? fromImages.trim() : ''
+}
+
+function applyIntendedCategoryCovers(normalized: HomepageContent, original: Partial<HomepageContent>): HomepageContent {
+  const sections: HomepageCategorySections = {
+    ...defaultCategorySections,
+    ...(normalized.categorySections ?? {}),
+  }
+
+  for (const layout of HOMEPAGE_CATEGORY_SECTION_LAYOUT) {
+    const intended = readStoredCategoryCover(original, layout.key)
+    if (!isPersistableMediaUrl(intended)) {
+      continue
+    }
+
+    const current = sections[layout.key]
+    if (!current) {
+      continue
+    }
+
+    sections[layout.key] = {
+      ...current,
+      coverImage: intended,
+      images: toUniqueImages([intended, ...(current.images ?? [])]),
+    }
+  }
+
+  const shopByCategories = (normalized.shopByCategories ?? []).map((item) => {
+    const mappedKey = normalizeSectionKeyFromHref(item.href ?? '') ?? aliasToSectionKey(item.title ?? '')
+    if (!mappedKey) {
+      return item
+    }
+
+    const cover = sections[mappedKey]?.coverImage
+    if (!isPersistableMediaUrl(cover)) {
+      return item
+    }
+
+    return { ...item, image: cover }
+  })
+
+  return {
+    ...normalized,
+    categorySections: sections,
+    shopByCategories,
+  }
+}
+
 function mapLegacyShopByCategoriesToSections(shopByCategories: HomepageShopCategory[] | undefined) {
   const mapped: Partial<Record<HomepageCategorySectionKey, HomepageCategorySection>> = {}
   if (!shopByCategories?.length) {
@@ -1102,11 +1249,16 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
   const legacySections = mapLegacyShopByCategoriesToSections(content?.shopByCategories)
   const sectionEntries = HOMEPAGE_CATEGORY_SECTION_LAYOUT.map((layout) => {
     const fallback = defaultCategorySections[layout.key]
-    const incoming = content?.categorySections?.[layout.key]
+    const incoming = resolveIncomingCategorySection(content?.categorySections, layout.key)
     const legacy = legacySections[layout.key]
     const source = incoming ?? legacy
     const sourceImages = toUniqueImages(source?.images)
-    const coverImage = source?.coverImage?.trim() || sourceImages[0] || fallback.coverImage
+    const incomingCover = typeof incoming?.coverImage === 'string' ? incoming.coverImage.trim() : ''
+    const sourceCover = typeof source?.coverImage === 'string' ? source.coverImage.trim() : ''
+    const persistableIncoming = isPersistableMediaUrl(incomingCover) ? incomingCover : ''
+    const persistableSource = isPersistableMediaUrl(sourceCover) ? sourceCover : ''
+    const persistableGallery = sourceImages.find((item) => isPersistableMediaUrl(item)) ?? ''
+    const coverImage = persistableIncoming || persistableSource || persistableGallery || (incoming ? '' : fallback.coverImage)
 
     const updatedAt = typeof source?.updatedAt === 'string'
       ? source.updatedAt
@@ -2499,25 +2651,27 @@ export async function createOrder(order: Omit<AdminOrder, 'id' | 'createdAt'>, c
 
 const subscribeToHomepageShared = createSharedListener<{ content: HomepageContent; meta?: HomepageContentSnapshotMeta }>((emit) => {
   ensureSeedData()
-  const storedHomepage = normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage))
-  emit({
-    content: storedHomepage,
-    meta: {
-      source: 'local-seed',
-      path: 'settings/homepage',
-      receivedAt: new Date().toISOString(),
-    },
+  const liveFirestore = Boolean(firebaseDb) && !isLocalFirstDataMode()
+
+  console.info('[homepage] subscribe:init', {
+    hasFirebaseDb: Boolean(firebaseDb),
+    localFirstMode: isLocalFirstDataMode(),
+    projectId: firebaseProjectId || '(missing)',
+    path: 'settings/homepage',
+    liveFirestore,
   })
 
-  if (import.meta.env.DEV) {
-    console.info('[homepage] subscribe:init', {
-      hasFirebaseDb: Boolean(firebaseDb),
-      localFirstMode: isLocalFirstDataMode(),
-      heroImage: storedHomepage.heroImage ?? '',
-    })
-  }
-
   if (!firebaseDb || isLocalFirstDataMode()) {
+    const storedHomepage = normalizeHomepageContent(readStored(HOMEPAGE_KEY, defaultHomepage))
+    emit({
+      content: storedHomepage,
+      meta: {
+        source: 'local-seed',
+        path: 'settings/homepage',
+        receivedAt: new Date().toISOString(),
+      },
+    })
+
     return subscribeToStored(HOMEPAGE_KEY, defaultHomepage, (content) => emit({
       content: normalizeHomepageContent(content),
       meta: {
@@ -2532,12 +2686,17 @@ const subscribeToHomepageShared = createSharedListener<{ content: HomepageConten
   return onSnapshot(
     homeRef,
     (snapshot) => {
-      if (import.meta.env.DEV) {
-        console.info('[homepage] subscribe:snapshot', {
-          exists: snapshot.exists(),
-          path: 'settings/homepage',
-        })
-      }
+      const rawSareeCover = snapshot.exists()
+        ? readStoredCategoryCover(snapshot.data(), 'saree')
+        : ''
+
+      console.info('[homepage] subscribe:snapshot', {
+        exists: snapshot.exists(),
+        fromCache: snapshot.metadata.fromCache,
+        path: 'settings/homepage',
+        projectId: firebaseProjectId || '(missing)',
+        sareeCoverImage: rawSareeCover || '(empty)',
+      })
 
       if (!snapshot.exists()) {
         emit({
@@ -2551,8 +2710,9 @@ const subscribeToHomepageShared = createSharedListener<{ content: HomepageConten
         return
       }
 
+      const rawData = snapshot.data() as Partial<HomepageContent>
       emit({
-        content: normalizeHomepageContent(snapshot.data() as Partial<HomepageContent>),
+        content: applyIntendedCategoryCovers(normalizeHomepageContent(rawData), rawData),
         meta: {
           source: 'firestore',
           path: 'settings/homepage',
@@ -2564,11 +2724,12 @@ const subscribeToHomepageShared = createSharedListener<{ content: HomepageConten
       const details = describeFirebaseError(error)
       console.error('[homepage] subscribe:error', {
         path: 'settings/homepage',
+        projectId: firebaseProjectId || '(missing)',
         code: details.code,
         message: details.message,
       })
 
-      if (!shouldFallbackToLocal(error) && import.meta.env.DEV) {
+      if (!shouldFallbackToLocal(error)) {
         console.warn('[homepage] live subscription failed and will not silently fallback to local data')
       }
     },
@@ -2835,6 +2996,7 @@ export async function restoreCategory(id: string) {
 export async function updateHomepageContent(content: HomepageContent): Promise<HomepageSaveResult> {
   assertAdminCanWrite()
   const savedAt = new Date().toISOString()
+  const intendedSareeCover = readStoredCategoryCover(content, 'saree')
   const withSectionTimestamps: HomepageContent = {
     ...content,
     categorySections: content.categorySections
@@ -2846,19 +3008,28 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
       ) as HomepageCategorySections
       : content.categorySections,
   }
-  const normalized = omitUndefinedDeep(normalizeHomepageContent(withSectionTimestamps))
+  const normalized = omitUndefinedDeep(
+    applyIntendedCategoryCovers(normalizeHomepageContent(withSectionTimestamps), content),
+  )
   const heroImage = normalized.heroImage ?? ''
+  const sareeCoverImage = normalized.categorySections?.saree?.coverImage ?? ''
   const localFirstMode = isLocalFirstDataMode()
+  const projectId = firebaseProjectId || '(missing)'
 
-  if (import.meta.env.DEV) {
-    console.info('[homepage] save:start', {
-      hasFirebaseDb: Boolean(firebaseDb),
-      localFirstMode,
-      path: 'settings/homepage',
-      heroImage,
-      sections: normalized.sections.map((section) => ({ key: section.key, enabled: section.enabled, order: section.order })),
-    })
+  if (intendedSareeCover && !isPersistableMediaUrl(intendedSareeCover)) {
+    throw new Error('Cannot save the Saree image because it is not a permanent URL.')
   }
+
+  console.info('[homepage] save:start', {
+    hasFirebaseDb: Boolean(firebaseDb),
+    localFirstMode,
+    projectId,
+    path: 'settings/homepage',
+    field: 'categorySections.saree.coverImage',
+    intendedSareeCoverImage: intendedSareeCover || '(empty)',
+    sareeCoverImage: sareeCoverImage || '(empty)',
+    heroImage,
+  })
 
   if (!firebaseDb && !localFirstMode) {
     throw new Error('Firestore is not initialized. Homepage cannot be saved to live data.')
@@ -2871,18 +3042,19 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
       mode: 'local',
     })
 
-    if (import.meta.env.DEV) {
-      console.info('[homepage] save:local-complete', {
-        path: 'settings/homepage',
-        heroImage,
-      })
-    }
+    console.info('[homepage] save:local-complete', {
+      path: 'settings/homepage',
+      projectId,
+      sareeCoverImage: sareeCoverImage || '(empty)',
+    })
 
     return {
       content: normalized,
       mode: 'local',
       path: 'settings/homepage',
       heroImage,
+      sareeCoverImage,
+      firebaseProjectId: projectId,
       verified: true,
       savedAt,
     }
@@ -2891,48 +3063,64 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
   try {
     const ref = doc(firebaseDb, 'settings', 'homepage')
     const payload = omitUndefinedDeep(normalized)
-    const categoryCoverSnapshot = Object.fromEntries(
-      Object.entries(payload.categorySections ?? {}).map(([key, section]) => [key, section.coverImage ?? '']),
-    )
+    const payloadSareeCover = readStoredCategoryCover(payload, 'saree')
 
-    for (const [key, coverImage] of Object.entries(categoryCoverSnapshot)) {
-      if (coverImage.startsWith('blob:') || coverImage.startsWith('data:')) {
-        throw new Error(`Cannot save ${key} image because the upload did not return a persistable URL.`)
+    for (const layout of HOMEPAGE_CATEGORY_SECTION_LAYOUT) {
+      const coverImage = readStoredCategoryCover(payload, layout.key)
+      if (coverImage && !isPersistableMediaUrl(coverImage)) {
+        throw new Error(`Cannot save ${layout.key} image because the upload did not return a persistable URL.`)
       }
     }
 
+    if (intendedSareeCover && payloadSareeCover !== intendedSareeCover) {
+      throw new Error(`Saree image was dropped before write. Intended ${intendedSareeCover} but payload has ${payloadSareeCover || '(empty)'}.`)
+    }
+
     console.info('[homepage] save:before-setDoc', {
+      projectId,
       path: 'settings/homepage',
+      field: 'categorySections.saree.coverImage',
+      merge: true,
       heroImage,
-      sareeCoverImage: categoryCoverSnapshot.saree || '(empty)',
+      sareeCoverImage: payloadSareeCover || '(empty)',
     })
 
-    await setDoc(ref, payload)
+    await setDoc(ref, payload, { merge: true })
 
     console.info('[homepage] save:after-setDoc', {
+      projectId,
       path: 'settings/homepage',
-      heroImage,
-      sareeCoverImage: categoryCoverSnapshot.saree || '(empty)',
+      field: 'categorySections.saree.coverImage',
+      sareeCoverImage: payloadSareeCover || '(empty)',
     })
 
-    const verificationSnapshot = await getDoc(ref)
+    const verificationSnapshot = await getDocFromServer(ref)
     if (!verificationSnapshot.exists()) {
       throw new Error('Firestore write verification failed: settings/homepage does not exist after save.')
     }
 
-    const savedContent = normalizeHomepageContent(verificationSnapshot.data() as Partial<HomepageContent>)
+    const rawData = verificationSnapshot.data()
+    const rawSareeCover = readStoredCategoryCover(rawData, 'saree')
+    const savedContent = applyIntendedCategoryCovers(
+      normalizeHomepageContent(rawData as Partial<HomepageContent>),
+      rawData as Partial<HomepageContent>,
+    )
     const savedHeroImage = savedContent.heroImage ?? ''
     const savedSareeCover = savedContent.categorySections?.saree?.coverImage ?? ''
 
-    if ((categoryCoverSnapshot.saree || '') !== savedSareeCover) {
-      throw new Error('Firestore write verification failed: categorySections.saree.coverImage mismatch after save.')
-    }
-
-    console.info('[homepage] save:verified', {
+    console.info('[homepage] save:getDocFromServer', {
+      projectId,
       path: 'settings/homepage',
-      heroImage: savedHeroImage,
-      sareeCoverImage: savedSareeCover || '(empty)',
+      field: 'categorySections.saree.coverImage',
+      rawSareeCoverImage: rawSareeCover || '(empty)',
+      normalizedSareeCoverImage: savedSareeCover || '(empty)',
     })
+
+    if ((intendedSareeCover || payloadSareeCover) && rawSareeCover !== (intendedSareeCover || payloadSareeCover)) {
+      throw new Error(
+        `Firestore write verification failed: expected categorySections.saree.coverImage=${intendedSareeCover || payloadSareeCover} but getDocFromServer returned ${rawSareeCover || '(empty)'}.`,
+      )
+    }
 
     writeStored(HOMEPAGE_KEY, savedContent)
     await recordAdminAudit('homepage.update', 'homepage', 'settings/homepage', {
@@ -2940,27 +3128,33 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
       mode: 'live',
     })
 
-    if (import.meta.env.DEV) {
-      console.info('[homepage] save:complete', {
-        path: 'settings/homepage',
-        heroImage: savedHeroImage,
-      })
-    }
+    console.info('[homepage] save:verified', {
+      projectId,
+      path: 'settings/homepage',
+      field: 'categorySections.saree.coverImage',
+      heroImage: savedHeroImage,
+      sareeCoverImage: rawSareeCover || '(empty)',
+    })
 
     return {
       content: savedContent,
       mode: 'live',
       path: 'settings/homepage',
       heroImage: savedHeroImage,
+      sareeCoverImage: rawSareeCover || savedSareeCover,
+      firebaseProjectId: projectId,
       verified: true,
       savedAt,
     }
   } catch (error) {
     const details = describeFirebaseError(error)
     console.error('[homepage] save:error', {
+      projectId,
       path: 'settings/homepage',
+      field: 'categorySections.saree.coverImage',
       code: details.code,
       message: details.message,
+      intendedSareeCoverImage: intendedSareeCover || '(empty)',
       heroImage,
     })
 

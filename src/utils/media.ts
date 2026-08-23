@@ -24,6 +24,20 @@ function toTrimmedString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+export function isPersistableMediaUrl(value: unknown): value is string {
+  if (typeof value !== 'string') {
+    return false
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return false
+  }
+
+  const lower = trimmed.toLowerCase()
+  return !lower.startsWith('blob:') && !lower.startsWith('data:')
+}
+
 function uniqueNonEmpty(values: string[]) {
   const seen = new Set<string>()
   return values.filter((value) => {

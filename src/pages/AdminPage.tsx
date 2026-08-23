@@ -7,7 +7,7 @@ import Loading from '../components/ui/Loading'
 import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
 import ProductCsvPanel from '../components/admin/ProductCsvPanel'
-import { compactManagedImages, getManagedImageEntries } from '../utils/media'
+import { compactManagedImages, getManagedImageEntries, isPersistableMediaUrl } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import { buildOpsReport, defaultOpsReportRange, LOW_STOCK_THRESHOLD, shiftDayKey, toDayKey } from '../utils/opsReports'
@@ -258,6 +258,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     mode: 'local' | 'live' | 'unknown'
     path: string
     heroImage: string
+    sareeCoverImage: string
+    firebaseProjectId: string
     savedAt?: string
   }>({
     status: 'idle',
@@ -265,6 +267,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     mode: 'unknown',
     path: 'settings/homepage',
     heroImage: '',
+    sareeCoverImage: '',
+    firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
   })
   const [homepageSnapshotDebug, setHomepageSnapshotDebug] = useState<HomepageContentSnapshotMeta | null>(null)
   const [toast, setToast] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
@@ -882,13 +886,24 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         })
       } else if (target === 'category-section-image') {
         const persistableUrl = uploadedImages[0]?.trim() ?? ''
-        if (!persistableUrl || persistableUrl.startsWith('blob:') || persistableUrl.startsWith('data:')) {
+        if (!isPersistableMediaUrl(persistableUrl)) {
           throw new Error('Image upload did not return a persistable URL. Please retry the upload.')
         }
 
+        if (!sectionKey) {
+          throw new Error('Image upload succeeded but the category section key was missing. Please retry from the Saree section.')
+        }
+
+        console.info('[admin] category-section upload', {
+          sectionKey,
+          path: 'settings/homepage',
+          field: `categorySections.${sectionKey}.coverImage`,
+          persistableUrl,
+        })
+
         homepageDirtyRef.current = true
         setHomepageContent((current) => {
-          if (!current || !current.categorySections || !sectionKey) {
+          if (!current || !current.categorySections) {
             return current
           }
 
@@ -909,6 +924,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
               ...current.categorySections,
               [sectionKey]: nextSection,
             },
+            shopByCategories: (current.shopByCategories ?? []).map((item) => {
+              if (sectionKey !== 'saree') {
+                return item
+              }
+
+              const href = (item.href ?? '').toLowerCase()
+              const title = (item.title ?? '').toLowerCase()
+              if (!href.includes('saree') && title !== 'saree') {
+                return item
+              }
+
+              return { ...item, image: persistableUrl }
+            }),
           }
           homepageContentRef.current = nextContent
           return nextContent
@@ -945,6 +973,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const reason = error instanceof Error ? error.message : 'Asset upload failed. Please retry.'
       setUploadError(reason)
       setMessage(reason)
+      setToast({ kind: 'error', message: reason })
     } finally {
       setUploading(false)
       setUploadProgress(0)
@@ -1199,12 +1228,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setHomepageSaving(true)
     setLoading(true)
     try {
-      if (import.meta.env.DEV) {
-        console.info('[admin] homepage save payload', {
-          path: 'settings/homepage',
-          sareeCoverImage: contentToSave.categorySections?.saree?.coverImage || '(empty)',
-        })
+      const sareeCoverImage = contentToSave.categorySections?.saree?.coverImage?.trim() ?? ''
+      if (sareeCoverImage && !isPersistableMediaUrl(sareeCoverImage)) {
+        throw new Error('Saree image is not a permanent URL. Re-upload the image before saving.')
       }
+
+      console.info('[admin] homepage save click', {
+        projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
+        path: 'settings/homepage',
+        field: 'categorySections.saree.coverImage',
+        sareeCoverImage: sareeCoverImage || '(empty)',
+        hasState: Boolean(contentToSave),
+      })
+
       const result: HomepageSaveResult = await updateHomepageContent(contentToSave)
       homepageDirtyRef.current = false
       homepageContentRef.current = result.content
@@ -1213,11 +1249,21 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       setToast({ kind: 'success', message: 'Content saved successfully.' })
       setHomepageSaveDebug({
         status: 'success',
-        message: `Content saved successfully (${result.mode} mode).`,
+        message: `Content saved successfully (${result.mode} mode). Firestore getDoc confirmed categorySections.saree.coverImage.`,
         mode: result.mode,
         path: result.path,
         heroImage: result.heroImage,
+        sareeCoverImage: result.sareeCoverImage,
+        firebaseProjectId: result.firebaseProjectId,
         savedAt: result.savedAt,
+      })
+      console.info('[admin] homepage save success', {
+        projectId: result.firebaseProjectId,
+        path: result.path,
+        mode: result.mode,
+        verified: result.verified,
+        field: 'categorySections.saree.coverImage',
+        sareeCoverImage: result.sareeCoverImage || '(empty)',
       })
     } catch (error) {
       const reason = `Failed to save content: ${describeAdminWriteError(error, user?.uid)}`
@@ -1232,6 +1278,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         mode: 'unknown',
         path: 'settings/homepage',
         heroImage: contentToSave.heroImage ?? '',
+        sareeCoverImage: contentToSave.categorySections?.saree?.coverImage ?? '',
+        firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
         savedAt: new Date().toISOString(),
       })
       console.error('[admin] homepage save failed', error)
@@ -1256,6 +1304,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         mode: result.mode,
         path: result.path,
         heroImage: result.heroImage,
+        sareeCoverImage: result.sareeCoverImage,
+        firebaseProjectId: result.firebaseProjectId,
         savedAt: result.savedAt,
       })
       setToast({ kind: 'success', message: 'Firestore write test passed.' })
@@ -1268,6 +1318,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         mode: 'unknown',
         path: 'settings/homepage',
         heroImage: homepageContent.heroImage ?? '',
+        sareeCoverImage: homepageContent.categorySections?.saree?.coverImage ?? '',
+        firebaseProjectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)',
         savedAt: new Date().toISOString(),
       })
       setToast({ kind: 'error', message: `Firestore write test failed: ${reason}` })
@@ -2384,10 +2436,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                 <p><span className="font-semibold text-[var(--color-text)]">Snapshot time:</span> {homepageSnapshotDebug?.receivedAt ? new Date(homepageSnapshotDebug.receivedAt).toLocaleString('en-BD') : '-'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Local-first mode:</span> {isHomepageLocalFirstMode() ? 'enabled' : 'disabled'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Firebase configured:</span> {firebaseReady ? 'yes' : 'no'}</p>
-                <p><span className="font-semibold text-[var(--color-text)]">Firebase project:</span> {(import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'}</p>
+                <p><span className="font-semibold text-[var(--color-text)]">Firebase project:</span> {homepageSaveDebug.firebaseProjectId || (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || '(missing)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Auth email:</span> {user?.email ?? '(not signed in)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Auth uid:</span> {user?.uid ?? '(not signed in)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Hero URL snapshot:</span> {homepageSaveDebug.heroImage || '(empty)'}</p>
+                <p className="sm:col-span-2 break-all"><span className="font-semibold text-[var(--color-text)]">Saree coverImage:</span> {homepageSaveDebug.sareeCoverImage || homepageContent?.categorySections?.saree?.coverImage || '(empty)'}</p>
                 <p><span className="font-semibold text-[var(--color-text)]">Last save time:</span> {homepageSaveDebug.savedAt ? new Date(homepageSaveDebug.savedAt).toLocaleString('en-BD') : '-'}</p>
               </div>
             </div>
