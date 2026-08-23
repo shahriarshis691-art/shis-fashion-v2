@@ -102,7 +102,7 @@ export default function LuxuryImage({
         }}
         style={imageStyle}
         className={[
-          'gpu-media relative z-[1] h-full w-full object-cover',
+          'gpu-media absolute inset-0 z-[1] h-full w-full object-cover',
           objectPosition ? '' : 'object-center',
           hover ? 'media-hover' : '',
           loaded || priority ? 'opacity-100' : 'opacity-0',

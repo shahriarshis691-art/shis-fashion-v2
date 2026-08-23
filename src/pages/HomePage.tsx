@@ -41,10 +41,10 @@ const fallbackCategoryStrips = [
 ] as const
 
 const categoryStripCardImage = {
-  width: 1200,
-  height: 900,
-  aspectClassName: 'aspect-[4/3] sm:aspect-[16/10]',
-  imgClassName: '!object-contain',
+  width: 960,
+  height: 1200,
+  aspectClassName: 'aspect-[4/5] w-full sm:aspect-[3/4]',
+  imgClassName: 'h-full w-full object-cover object-center',
 } as const
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
@@ -348,7 +348,7 @@ export default function HomePage() {
           key: fallback.key,
           label: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
           href: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
-          image: normalizeCatalogImageUrl(resolvedCover, 1200, 900),
+          image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }
       })
@@ -513,29 +513,31 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             {categoryStrips.map((item, index) => (
-              <Reveal key={item.key} as="article" delayMs={index * 40}>
-                <Link to={item.href} className="group luxury-tap block">
-                  <div className="relative">
-                    <LuxuryImage
-                      src={item.image}
-                      alt={item.label}
-                      width={categoryStripCardImage.width}
-                      height={categoryStripCardImage.height}
-                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 25vw"
-                      widths={[480, 768, 960, 1200]}
-                      aspectClassName={categoryStripCardImage.aspectClassName}
-                      imgClassName={categoryStripCardImage.imgClassName}
-                      objectPosition={item.imagePosition}
-                      cinematicFill={item.key === 'saree'}
-                      hover
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                    <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
-                      <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.label}</span>
-                      <span aria-hidden className="text-base leading-none">→</span>
-                    </div>
+              <Reveal key={item.key} as="article" delayMs={index * 40} className="h-full">
+                <Link
+                  to={item.href}
+                  className="group luxury-tap relative block h-full overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+                  aria-label={`${item.label} collection`}
+                >
+                  <LuxuryImage
+                    src={item.image}
+                    alt={item.label}
+                    width={categoryStripCardImage.width}
+                    height={categoryStripCardImage.height}
+                    sizes="(max-width: 639px) 50vw, (max-width: 1023px) 48vw, 25vw"
+                    widths={[480, 768, 960, 1200]}
+                    className="h-full w-full"
+                    aspectClassName={categoryStripCardImage.aspectClassName}
+                    imgClassName={categoryStripCardImage.imgClassName}
+                    objectPosition={item.imagePosition}
+                    hover
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4 text-white sm:p-6">
+                    <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.label}</span>
+                    <span aria-hidden className="text-base leading-none">→</span>
                   </div>
                 </Link>
               </Reveal>

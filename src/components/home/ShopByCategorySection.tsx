@@ -26,23 +26,27 @@ function CategoryCard({
     <Reveal delayMs={index * 50} className="snap-start">
       <Link
         to={href}
-        className="group luxury-tap relative block overflow-hidden rounded-[1.15rem] bg-[#0a0a0a] shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-shadow duration-300 ease-out hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="group luxury-tap relative block h-full overflow-hidden bg-black shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-shadow duration-300 ease-out hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         aria-label={`${name} collection`}
       >
         <LuxuryImage
           src={imageSrc}
           alt={`${name} category`}
           width={960}
-          height={1280}
+          height={1200}
           sizes="(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw"
           widths={[320, 480, 768, 960]}
+          className="h-full w-full"
+          aspectClassName="aspect-[4/5] w-full sm:aspect-[3/4]"
+          imgClassName="h-full w-full object-cover object-center"
           hover
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_12%,rgba(0,0,0,0.1)_52%,rgba(0,0,0,0.52)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
-        <div className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-10 text-white">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4 text-white sm:p-6">
           <h3 className="font-sans text-[0.9rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
+          <span aria-hidden className="text-base leading-none">→</span>
         </div>
       </Link>
     </Reveal>
