@@ -472,6 +472,7 @@ export default function HomePage() {
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {categoryStrips.map((item, index) => {
               const isDenimCard = item.key === 'denim'
+              const isSareeCard = item.key === 'saree'
 
               return (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
@@ -480,12 +481,18 @@ export default function HomePage() {
                     <LuxuryImage
                       src={item.image}
                       alt={item.label}
-                      width={isDenimCard ? 736 : 1200}
-                      height={isDenimCard ? 1104 : 900}
+                      width={isDenimCard ? 736 : isSareeCard ? 941 : 1200}
+                      height={isDenimCard ? 1104 : isSareeCard ? 1672 : 900}
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 25vw"
                       widths={[480, 768, 960, 1200]}
-                      aspectClassName={isDenimCard ? 'aspect-[2/3] sm:aspect-[16/10]' : 'aspect-[4/3] sm:aspect-[16/10]'}
-                      imgClassName={isDenimCard ? 'max-sm:!object-contain' : ''}
+                      aspectClassName={
+                        isDenimCard
+                          ? 'aspect-[2/3] sm:aspect-[16/10]'
+                          : isSareeCard
+                            ? 'aspect-[941/1672] sm:aspect-[16/10]'
+                            : 'aspect-[4/3] sm:aspect-[16/10]'
+                      }
+                      imgClassName={isDenimCard || isSareeCard ? 'max-sm:!object-contain' : ''}
                       objectPosition={item.imagePosition}
                       hover
                     />
