@@ -488,32 +488,29 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {categoryStrips.map((item, index) => (
-              <Reveal key={item.key} as="article" delayMs={index * 40} className="h-full">
+              <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link
                   to={item.href}
-                  className="group luxury-tap relative block h-full overflow-hidden bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+                  className="group luxury-tap flex flex-col"
                   aria-label={`${item.label} collection`}
                 >
-                  <LuxuryImage
-                    src={item.image}
-                    alt={item.label}
-                    width={categoryStripCardImage.width}
-                    height={categoryStripCardImage.height}
-                    sizes="(max-width: 639px) 50vw, (max-width: 1023px) 48vw, 25vw"
-                    widths={[480, 768, 960, 1200]}
-                    className="h-full w-full"
-                    aspectClassName={categoryStripCardImage.aspectClassName}
-                    imgClassName={categoryStripCardImage.imgClassName}
-                    objectPosition={item.imagePosition}
-                    hover
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4 text-white sm:p-6">
-                    <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.label}</span>
-                    <span aria-hidden className="text-base leading-none">→</span>
+                  <div className="relative w-full aspect-square overflow-hidden rounded-md bg-neutral-100">
+                    <LuxuryImage
+                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
+                      alt={item.label}
+                      width={categoryStripCardImage.width}
+                      height={categoryStripCardImage.height}
+                      sizes="(max-width: 639px) 50vw, (max-width: 1029px) 48vw, 25vw"
+                      widths={[480, 768, 960, 1200]}
+                      className="h-full w-full"
+                      aspectClassName="aspect-square"
+                      imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                      objectPosition={item.imagePosition}
+                    />
                   </div>
+                  <h3 className="mt-2.5 text-center text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">{item.label}</h3>
                 </Link>
               </Reveal>
             ))}
