@@ -8,7 +8,7 @@ import TrustStrip from '../components/home/TrustStrip'
 import Reveal from '../components/common/Reveal'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { homeCategoryItems } from '../data/homeCategories'
-import { categoryStripCover, featuredCollectionCover } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers, featuredCollectionCover } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
@@ -19,10 +19,11 @@ import {
   subscribeToProducts,
   type AdminBrand,
   type HomepageCategorySection,
+  type HomepageCategorySections,
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredMediaUrl } from '../utils/media'
+import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { slugify } from '../utils/slugify'
@@ -32,16 +33,23 @@ const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'womens')?.imagePosition ?? 'center' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'saree')?.imagePosition ?? 'center 18%' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'mens')?.imagePosition ?? 'center' },
-  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'denim')?.imagePosition ?? 'center' },
+  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
   { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.imagePosition ?? 'center' },
   { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
 ] as const
 
-function categoryStripImagePosition(key: string) {
-  const fallback = fallbackCategoryStrips.find((item) => item.key === key)
-  return fallback?.imagePosition ?? 'center'
+function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const key = item.key.trim().toLowerCase()
+    if (!key || seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+    return true
+  })
 }
 
 const defaultHomepage: HomepageContent = {
@@ -112,7 +120,7 @@ const defaultHomepage: HomepageContent = {
       href: '/men?sub=denim',
       enabled: true,
       order: 25,
-      coverImage: homeCategoryItems.find((item) => item.key === 'denim')?.image ?? '',
+      coverImage: categoryStripCovers.denim,
       images: [],
       updatedAt: null,
     },
@@ -269,36 +277,37 @@ export default function HomePage() {
   }, [homepageContent.heroImage, homepageContent.heroImageTitle])
 
   const categoryStrips = useMemo(() => {
-    const sectionEntries = Object.values(homepageContent.categorySections ?? {})
+    const sections: Partial<HomepageCategorySections> = homepageContent.categorySections ?? {}
+    const hasLiveSections = Object.keys(sections).length > 0
 
-    if (!sectionEntries.length) {
-      return fallbackCategoryStrips.map((section) => ({
-        key: section.key,
-        label: section.label,
-        href: section.href,
-        image: normalizeCatalogImageUrl(categoryStripCover(section.key, section.image), 1200, 900),
-        imagePosition: section.imagePosition,
-      }))
-    }
+    return uniqueCategoryStrips([...fallbackCategoryStrips])
+      .filter((fallback) => {
+        if (!hasLiveSections) {
+          return true
+        }
 
-    return sectionEntries
-      .filter((section) => section.enabled)
-      .sort((left, right) => left.order - right.order)
-      .map((section) => {
-        const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const resolvedCover = pickPreferredMediaUrl(
-          section.coverImage,
-          section.images,
-          fallback?.image || categoryStripCover(section.key, ''),
+        const section = sections[fallback.key]
+        return section ? section.enabled : true
+      })
+      .sort((left, right) => {
+        const leftOrder = sections[left.key]?.order ?? left.order
+        const rightOrder = sections[right.key]?.order ?? right.order
+        return leftOrder - rightOrder
+      })
+      .map((fallback) => {
+        const section = sections[fallback.key]
+        const resolvedCover = pickPreferredCategoryCoverUrl(
+          section?.coverImage,
+          section?.images,
+          fallback.image || categoryStripCover(fallback.key, ''),
         )
-        const sectionImage = normalizeCatalogImageUrl(resolvedCover, 1200, 900)
 
         return {
-          key: section.key,
-          label: section.label,
-          href: section.href,
-          image: sectionImage,
-          imagePosition: fallback?.imagePosition ?? categoryStripImagePosition(section.key),
+          key: fallback.key,
+          label: section?.label || fallback.label,
+          href: section?.href || fallback.href,
+          image: normalizeCatalogImageUrl(resolvedCover, 1200, 900),
+          imagePosition: fallback.imagePosition,
         }
       })
   }, [homepageContent.categorySections])
@@ -460,7 +469,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {categoryStrips.map((item, index) => (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link to={item.href} className="group luxury-tap block">
@@ -470,7 +479,7 @@ export default function HomePage() {
                       alt={item.label}
                       width={1200}
                       height={900}
-                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
+                      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 25vw"
                       widths={[480, 768, 960, 1200]}
                       aspectClassName="aspect-[4/3] sm:aspect-[16/10]"
                       objectPosition={item.imagePosition}

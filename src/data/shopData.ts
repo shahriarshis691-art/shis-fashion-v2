@@ -31,7 +31,7 @@ export interface ShopProduct {
 export const shopCategories: ShopCategory[] = [
   { slug: 'oversized-tee', title: 'Oversized Tee', description: 'Relaxed silhouettes with elevated texture.', image: '/og-image.svg' },
   { slug: 'unisex-tee', title: 'Unisex Tee', description: 'Minimal staples for everyday layering.', image: '/og-image.svg' },
-  { slug: 'denim', title: 'Denim', description: 'Refined denim with a premium finish.', image: '/og-image.svg' },
+  { slug: 'denim', title: 'Denim', description: 'Refined denim with a premium finish.', image: '/collections/featured-denim-collection.jpg' },
   { slug: 'mens-shirt', title: "Men's Shirt", description: 'Polished structure in a relaxed fit.', image: '/og-image.svg' },
   { slug: 'womens-dresses', title: "Women's Dresses", description: 'Fluid forms with effortless movement.', image: '/og-image.svg' },
   { slug: 'saree', title: 'Saree', description: 'Refined weaves and fluid drapes for considered elegance.', image: '/collections/featured-saree-collection.jpg' },

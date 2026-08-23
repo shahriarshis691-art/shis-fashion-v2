@@ -57,6 +57,18 @@ export function isRemoteMediaUrl(value: unknown): value is string {
   return /^https?:\/\//i.test(value.trim())
 }
 
+export function isOutdatedHardcodedMediaUrl(value: string) {
+  const normalized = value.trim().toLowerCase()
+  if (!normalized) {
+    return true
+  }
+
+  return normalized.includes('og-image.svg')
+    || normalized.includes('/og-image.png')
+    || normalized.includes('images.unsplash.com')
+    || normalized.includes('plus.unsplash.com')
+}
+
 export function pickPreferredMediaUrl(
   primary: string | undefined,
   extras: Array<string | undefined> = [],
@@ -72,6 +84,33 @@ export function pickPreferredMediaUrl(
   }
 
   return typeof fallback === 'string' ? fallback.trim() : ''
+}
+
+export function pickPreferredCategoryCoverUrl(
+  primary: string | undefined,
+  extras: Array<string | undefined> = [],
+  fallback = '',
+) {
+  const candidates = [primary, ...extras]
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter((item) => isPersistableMediaUrl(item) && !isOutdatedHardcodedMediaUrl(item))
+
+  const remote = candidates.find((item) => isRemoteMediaUrl(item) && !isOutdatedHardcodedMediaUrl(item))
+  if (remote) {
+    return remote
+  }
+
+  const bundled = candidates.find((item) => isBundledFallbackMediaUrl(item))
+  if (bundled) {
+    return bundled
+  }
+
+  const fallbackUrl = typeof fallback === 'string' ? fallback.trim() : ''
+  if (fallbackUrl && !isOutdatedHardcodedMediaUrl(fallbackUrl)) {
+    return fallbackUrl
+  }
+
+  return candidates[0] ?? fallbackUrl
 }
 
 function uniqueNonEmpty(values: string[]) {

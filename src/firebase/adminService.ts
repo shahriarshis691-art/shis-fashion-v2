@@ -18,10 +18,10 @@ import {
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
-import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
+import { featuredCollectionCovers, categoryStripCovers } from '../data/featuredCollectionCovers'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
-import { compactManagedImages, isPersistableMediaUrl, isRemoteMediaUrl, pickPreferredMediaUrl } from '../utils/media'
+import { compactManagedImages, isOutdatedHardcodedMediaUrl, isPersistableMediaUrl, isRemoteMediaUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired, normalizeCouponCategories, resolveCouponAudience, resolveCouponDiscountType, quoteCouponDiscount, nextCouponUsage, type CouponAudience, type CouponDiscountType, type CouponQuoteItem } from '../utils/coupon'
@@ -912,6 +912,10 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
+  if (legacyImageKey === 'denim') {
+    return categoryStripCovers.denim
+  }
+
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
 }
 
@@ -1186,12 +1190,12 @@ function readStoredCategoryCover(content: unknown, key: HomepageCategorySectionK
   const section = resolveIncomingCategorySection(categorySections, key)
   const cover = typeof section?.coverImage === 'string' ? section.coverImage.trim() : ''
   const images = Array.isArray(section?.images) ? section.images : []
-  const preferred = pickPreferredMediaUrl(cover, images, '')
+  const preferred = pickPreferredCategoryCoverUrl(cover, images, '')
   if (preferred) {
     return preferred
   }
 
-  return isPersistableMediaUrl(cover) ? cover : ''
+  return isPersistableMediaUrl(cover) && !isOutdatedHardcodedMediaUrl(cover) ? cover : ''
 }
 
 function applyIntendedCategoryCovers(normalized: HomepageContent, original: Partial<HomepageContent>): HomepageContent {
@@ -1202,7 +1206,7 @@ function applyIntendedCategoryCovers(normalized: HomepageContent, original: Part
 
   for (const layout of HOMEPAGE_CATEGORY_SECTION_LAYOUT) {
     const intended = readStoredCategoryCover(original, layout.key)
-    if (!isPersistableMediaUrl(intended)) {
+    if (!isPersistableMediaUrl(intended) || isOutdatedHardcodedMediaUrl(intended)) {
       continue
     }
 
@@ -1278,10 +1282,10 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceImages = toUniqueImages(source?.images)
     const incomingCover = typeof incoming?.coverImage === 'string' ? incoming.coverImage.trim() : ''
     const sourceCover = typeof source?.coverImage === 'string' ? source.coverImage.trim() : ''
-    const coverImage = pickPreferredMediaUrl(
+    const coverImage = pickPreferredCategoryCoverUrl(
       incomingCover || sourceCover,
       sourceImages,
-      incoming ? '' : fallback.coverImage,
+      fallback.coverImage,
     )
 
     const updatedAt = typeof source?.updatedAt === 'string'

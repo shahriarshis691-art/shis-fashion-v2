@@ -14,10 +14,20 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
+  const bundled = categoryStripCovers[key] ?? ''
   const saved = fallback.trim()
+
   if (saved) {
-    return saved
+    const normalized = saved.toLowerCase()
+    const isOutdatedPlaceholder = normalized.includes('og-image.svg')
+      || normalized.includes('/og-image.png')
+      || normalized.includes('images.unsplash.com')
+      || normalized.includes('plus.unsplash.com')
+
+    if (!isOutdatedPlaceholder) {
+      return saved
+    }
   }
 
-  return categoryStripCovers[key] ?? ''
+  return bundled || saved
 }
