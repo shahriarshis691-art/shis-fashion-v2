@@ -30,7 +30,7 @@ import { useListingWishlist } from '../hooks/useListingWishlist'
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'womens')?.imagePosition ?? 'center' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'saree')?.imagePosition ?? 'center 18%' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'mens')?.imagePosition ?? 'center' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: '/collections/featured-men-collection.jpg', imagePosition: 'center' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
@@ -488,29 +488,31 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4">
             {categoryStrips.map((item, index) => (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link
                   to={item.href}
-                  className="group luxury-tap flex flex-col"
+                  className="group luxury-tap relative block w-full overflow-hidden rounded-none sm:rounded-lg aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/7] cursor-pointer"
                   aria-label={`${item.label} collection`}
                 >
-                  <div className="relative w-full aspect-square overflow-hidden rounded-md bg-neutral-100">
-                    <LuxuryImage
-                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
-                      alt={item.label}
-                      width={categoryStripCardImage.width}
-                      height={categoryStripCardImage.height}
-                      sizes="(max-width: 639px) 50vw, (max-width: 1029px) 48vw, 25vw"
-                      widths={[480, 768, 960, 1200]}
-                      className="h-full w-full"
-                      aspectClassName="aspect-square"
-                      imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                      objectPosition={item.imagePosition}
-                    />
+                  <LuxuryImage
+                    src={item.image || CATALOG_IMAGE_PLACEHOLDER}
+                    alt={item.label}
+                    width={categoryStripCardImage.width}
+                    height={categoryStripCardImage.height}
+                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 100vw, 100vw"
+                    widths={[480, 768, 960, 1200]}
+                    className="h-full w-full"
+                    aspectClassName="aspect-[16/9] sm:aspect-[21/9] md:aspect-[16/7]"
+                    imgClassName="h-full w-full object-cover object-top sm:object-center"
+                    objectPosition={item.imagePosition}
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 inset-x-0 flex items-center justify-between p-4 sm:p-6 z-10">
+                    <span className="text-white text-base sm:text-lg font-medium tracking-wider uppercase drop-shadow-sm">{item.label}</span>
+                    <span className="text-white text-lg transition-transform duration-300 group-hover:translate-x-1">→</span>
                   </div>
-                  <h3 className="mt-2.5 text-center text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">{item.label}</h3>
                 </Link>
               </Reveal>
             ))}
