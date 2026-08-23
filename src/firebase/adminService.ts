@@ -21,7 +21,7 @@ import { homeCategoryItems } from '../data/homeCategories'
 import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
-import { compactManagedImages, isPersistableMediaUrl } from '../utils/media'
+import { compactManagedImages, isPersistableMediaUrl, isRemoteMediaUrl, pickPreferredMediaUrl } from '../utils/media'
 import { slugify } from '../utils/slugify'
 import { normalizeSizes } from '../utils/sizes'
 import { isValidCouponCode, isCouponExpired, normalizeCouponCategories, resolveCouponAudience, resolveCouponDiscountType, quoteCouponDiscount, nextCouponUsage, type CouponAudience, type CouponDiscountType, type CouponQuoteItem } from '../utils/coupon'
@@ -1166,13 +1166,13 @@ function readStoredCategoryCover(content: unknown, key: HomepageCategorySectionK
   const categorySections = (content as { categorySections?: unknown }).categorySections
   const section = resolveIncomingCategorySection(categorySections, key)
   const cover = typeof section?.coverImage === 'string' ? section.coverImage.trim() : ''
-  if (isPersistableMediaUrl(cover)) {
-    return cover
+  const images = Array.isArray(section?.images) ? section.images : []
+  const preferred = pickPreferredMediaUrl(cover, images, '')
+  if (preferred) {
+    return preferred
   }
 
-  const images = Array.isArray(section?.images) ? section.images : []
-  const fromImages = images.find((item) => isPersistableMediaUrl(item))
-  return typeof fromImages === 'string' ? fromImages.trim() : ''
+  return isPersistableMediaUrl(cover) ? cover : ''
 }
 
 function applyIntendedCategoryCovers(normalized: HomepageContent, original: Partial<HomepageContent>): HomepageContent {
@@ -1192,6 +1192,10 @@ function applyIntendedCategoryCovers(normalized: HomepageContent, original: Part
       continue
     }
 
+    if (!isRemoteMediaUrl(intended) && isRemoteMediaUrl(current.coverImage)) {
+      continue
+    }
+
     sections[layout.key] = {
       ...current,
       coverImage: intended,
@@ -1206,7 +1210,7 @@ function applyIntendedCategoryCovers(normalized: HomepageContent, original: Part
     }
 
     const cover = sections[mappedKey]?.coverImage
-    if (!isPersistableMediaUrl(cover)) {
+    if (!isRemoteMediaUrl(cover)) {
       return item
     }
 
@@ -1255,10 +1259,11 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceImages = toUniqueImages(source?.images)
     const incomingCover = typeof incoming?.coverImage === 'string' ? incoming.coverImage.trim() : ''
     const sourceCover = typeof source?.coverImage === 'string' ? source.coverImage.trim() : ''
-    const persistableIncoming = isPersistableMediaUrl(incomingCover) ? incomingCover : ''
-    const persistableSource = isPersistableMediaUrl(sourceCover) ? sourceCover : ''
-    const persistableGallery = sourceImages.find((item) => isPersistableMediaUrl(item)) ?? ''
-    const coverImage = persistableIncoming || persistableSource || persistableGallery || (incoming ? '' : fallback.coverImage)
+    const coverImage = pickPreferredMediaUrl(
+      incomingCover || sourceCover,
+      sourceImages,
+      incoming ? '' : fallback.coverImage,
+    )
 
     const updatedAt = typeof source?.updatedAt === 'string'
       ? source.updatedAt

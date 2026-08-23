@@ -7,7 +7,7 @@ import Loading from '../components/ui/Loading'
 import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
 import ProductCsvPanel from '../components/admin/ProductCsvPanel'
-import { compactManagedImages, getManagedImageEntries, isPersistableMediaUrl } from '../utils/media'
+import { compactManagedImages, getManagedImageEntries, isPersistableMediaUrl, isRemoteMediaUrl } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import { buildOpsReport, defaultOpsReportRange, LOW_STOCK_THRESHOLD, shiftDayKey, toDayKey } from '../utils/opsReports'
@@ -940,11 +940,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           throw new Error('Image upload succeeded but the category section key was missing. Please retry from the Saree section.')
         }
 
-        console.info('[saree] uploaded URL', {
-          sectionKey,
-          field: `categorySections.${sectionKey}.coverImage`,
-          persistableUrl,
-        })
+        console.info(`[saree] uploaded URL: ${persistableUrl}`)
+        if (sectionKey === 'saree' && !isRemoteMediaUrl(persistableUrl)) {
+          throw new Error('Saree image upload did not return a permanent https URL. Please retry the upload.')
+        }
 
         homepageDirtyRef.current = true
         const current = homepageContentRef.current
@@ -993,12 +992,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         homepageContentRef.current = nextContent
         setHomepageContent(nextContent)
 
-        console.info('[saree] state updated', {
-          sectionKey,
-          field: `categorySections.${sectionKey}.coverImage`,
-          persistableUrl,
-          saveStateUrl: nextContent.categorySections?.saree?.coverImage || '(empty)',
-        })
+        console.info(`[saree] coverImage state updated: ${nextContent.categorySections?.saree?.coverImage || persistableUrl}`)
       } else if (target === 'featured-page-image') {
         setHomepageContent((current) => {
           if (!current || !current.featuredCollectionPages.length) {

@@ -38,6 +38,40 @@ export function isPersistableMediaUrl(value: unknown): value is string {
   return !lower.startsWith('blob:') && !lower.startsWith('data:')
 }
 
+export function isBundledFallbackMediaUrl(value: string) {
+  const normalized = value.trim().toLowerCase()
+  return normalized.includes('featured-saree-collection.jpg')
+}
+
+export function isRemoteMediaUrl(value: unknown): value is string {
+  if (!isPersistableMediaUrl(value)) {
+    return false
+  }
+
+  if (isBundledFallbackMediaUrl(value)) {
+    return false
+  }
+
+  return /^https?:\/\//i.test(value.trim())
+}
+
+export function pickPreferredMediaUrl(
+  primary: string | undefined,
+  extras: Array<string | undefined> = [],
+  fallback = '',
+) {
+  const candidates = [primary, ...extras]
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter((item) => isPersistableMediaUrl(item))
+
+  const remote = candidates.find((item) => isRemoteMediaUrl(item))
+  if (remote) {
+    return remote
+  }
+
+  return typeof fallback === 'string' ? fallback.trim() : ''
+}
+
 function uniqueNonEmpty(values: string[]) {
   const seen = new Set<string>()
   return values.filter((value) => {

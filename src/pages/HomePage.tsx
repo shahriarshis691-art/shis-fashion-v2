@@ -22,7 +22,7 @@ import {
   type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { CATALOG_IMAGE_PLACEHOLDER, isPersistableMediaUrl, normalizeCatalogImageUrl } from '../utils/media'
+import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredMediaUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { slugify } from '../utils/slugify'
@@ -86,7 +86,7 @@ const defaultHomepage: HomepageContent = {
       href: '/sarees',
       enabled: true,
       order: 15,
-      coverImage: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '',
+      coverImage: '',
       images: [],
       updatedAt: null,
     },
@@ -269,11 +269,11 @@ export default function HomePage() {
       .sort((left, right) => left.order - right.order)
       .map((section) => {
         const fallback = fallbackCategoryStrips.find((item) => item.key === section.key)
-        const savedCover = section.coverImage?.trim() ?? ''
-        const savedGallery = (section.images ?? []).find((item) => isPersistableMediaUrl(item)) ?? ''
-        const resolvedCover = isPersistableMediaUrl(savedCover)
-          ? savedCover
-          : savedGallery || fallback?.image || categoryStripCover(section.key, '')
+        const resolvedCover = pickPreferredMediaUrl(
+          section.coverImage,
+          section.images,
+          fallback?.image || categoryStripCover(section.key, ''),
+        )
         const sectionImage = normalizeCatalogImageUrl(resolvedCover, 1200, 900)
 
         return {
