@@ -59,6 +59,36 @@ function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
   })
 }
 
+function isDenimCategoryStrip(item: { key: string; label: string; href: string }) {
+  const key = item.key.trim().toLowerCase()
+  const label = item.label.trim().toLowerCase()
+  const href = item.href.trim().toLowerCase()
+  return key === 'denim' || label === 'denim' || href.includes('sub=denim')
+}
+
+function uniqueVisibleCategoryStrips<T extends { key: string; label: string; href: string }>(items: T[]) {
+  const uniqueByKey = uniqueCategoryStrips(items)
+  const hasCanonicalDenim = uniqueByKey.some((item) => item.key === 'denim')
+  let keptDenim = false
+
+  return uniqueByKey.filter((item) => {
+    if (!isDenimCategoryStrip(item)) {
+      return true
+    }
+
+    if (hasCanonicalDenim) {
+      return item.key === 'denim'
+    }
+
+    if (keptDenim) {
+      return false
+    }
+
+    keptDenim = true
+    return true
+  })
+}
+
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
   navbarBrandSecondary: 'Fashion',
@@ -287,7 +317,7 @@ export default function HomePage() {
     const sections: Partial<HomepageCategorySections> = homepageContent.categorySections ?? {}
     const hasLiveSections = Object.keys(sections).length > 0
 
-    return uniqueCategoryStrips([...fallbackCategoryStrips])
+    const strips = uniqueCategoryStrips([...fallbackCategoryStrips])
       .filter((fallback) => {
         if (!hasLiveSections) {
           return true
@@ -303,20 +333,27 @@ export default function HomePage() {
       })
       .map((fallback) => {
         const section = sections[fallback.key]
-        const resolvedCover = pickPreferredCategoryCoverUrl(
-          section?.coverImage,
-          section?.images,
-          fallback.image || categoryStripCover(fallback.key, ''),
-        )
+        const liveLabel = section?.label?.trim() || fallback.label
+        const liveHref = section?.href?.trim() || fallback.href
+        const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
+        const resolvedCover = fallback.key === 'denim'
+          ? categoryStripCovers.denim
+          : pickPreferredCategoryCoverUrl(
+            section?.coverImage,
+            section?.images,
+            fallback.image || categoryStripCover(fallback.key, ''),
+          )
 
         return {
           key: fallback.key,
-          label: section?.label || fallback.label,
-          href: section?.href || fallback.href,
+          label: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+          href: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, 1200, 900),
           imagePosition: fallback.imagePosition,
         }
       })
+
+    return uniqueVisibleCategoryStrips(strips)
   }, [homepageContent.categorySections])
 
   useEffect(() => {

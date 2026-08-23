@@ -14,6 +14,10 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
+  if (key === 'denim') {
+    return categoryStripCovers.denim
+  }
+
   const bundled = categoryStripCovers[key] ?? ''
   const saved = fallback.trim()
 

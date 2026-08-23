@@ -1282,11 +1282,13 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceImages = toUniqueImages(source?.images)
     const incomingCover = typeof incoming?.coverImage === 'string' ? incoming.coverImage.trim() : ''
     const sourceCover = typeof source?.coverImage === 'string' ? source.coverImage.trim() : ''
-    const coverImage = pickPreferredCategoryCoverUrl(
-      incomingCover || sourceCover,
-      sourceImages,
-      fallback.coverImage,
-    )
+    const coverImage = layout.key === 'denim'
+      ? categoryStripCovers.denim
+      : pickPreferredCategoryCoverUrl(
+        incomingCover || sourceCover,
+        sourceImages,
+        fallback.coverImage,
+      )
 
     const updatedAt = typeof source?.updatedAt === 'string'
       ? source.updatedAt
