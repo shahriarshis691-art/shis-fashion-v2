@@ -40,8 +40,8 @@ const fallbackCategoryStrips = [
 
 const categoryStripCardImage = {
   width: 960,
-  height: 800,
-  aspectClassName: 'aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8]',
+  height: 1200,
+  aspectClassName: 'aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4]',
   imgClassName: 'h-full w-full object-cover object-top',
 } as const
 
@@ -488,12 +488,12 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:gap-4">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categoryStrips.map((item, index) => (
               <Reveal key={item.key} as="article" delayMs={index * 40}>
                 <Link
                   to={item.href}
-                  className="group luxury-tap relative block w-full overflow-hidden rounded-none sm:rounded-lg aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8] cursor-pointer"
+                  className="group luxury-tap relative block w-full overflow-hidden rounded-xl aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4] cursor-pointer"
                   aria-label={`${item.label} collection`}
                 >
                   <LuxuryImage
@@ -501,10 +501,10 @@ export default function HomePage() {
                     alt={item.label}
                     width={categoryStripCardImage.width}
                     height={categoryStripCardImage.height}
-                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 100vw, 100vw"
+                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
                     widths={[480, 768, 960, 1200]}
                     className="h-full w-full"
-                    aspectClassName="aspect-[4/3] sm:aspect-[4/3] md:aspect-[16/8]"
+                    aspectClassName="aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4]"
                     imgClassName="h-full w-full object-cover object-top"
                     objectPosition="center top"
                   />
