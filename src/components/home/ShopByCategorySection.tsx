@@ -23,31 +23,27 @@ function CategoryCard({
   index: number
 }) {
   return (
-    <Reveal delayMs={index * 50} className="snap-start">
+    <Reveal delayMs={index * 50}>
       <Link
         to={href}
-        className="group luxury-tap relative block h-full overflow-hidden bg-black shadow-[0_12px_24px_rgba(0,0,0,0.3)] transition-shadow duration-300 ease-out hover:shadow-[0_18px_34px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="group luxury-tap flex flex-col"
         aria-label={`${name} collection`}
       >
-        <LuxuryImage
-          src={imageSrc}
-          alt={`${name} category`}
-          width={960}
-          height={1200}
-          sizes="(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw"
-          widths={[320, 480, 768, 960]}
-          className="h-full w-full"
-          aspectClassName="aspect-[4/5] w-full sm:aspect-[3/4]"
-          imgClassName="h-full w-full object-cover object-center"
-          hover
-        />
-
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4 text-white sm:p-6">
-          <h3 className="font-sans text-[0.9rem] font-semibold uppercase leading-[1.08] tracking-[0.08em] antialiased drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] transition-colors duration-300 group-hover:text-white/95">{name}</h3>
-          <span aria-hidden className="text-base leading-none">→</span>
+        <div className="relative w-full aspect-square overflow-hidden rounded-md bg-neutral-100">
+          <LuxuryImage
+            src={imageSrc}
+            alt={`${name} category`}
+            width={960}
+            height={1200}
+            sizes="(max-width: 767px) 46vw, (max-width: 1279px) 25vw, 16vw"
+            widths={[320, 480, 768, 960]}
+            className="h-full w-full"
+            aspectClassName="aspect-square"
+            imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
+
+        <h3 className="mt-2.5 text-center text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">{name}</h3>
       </Link>
     </Reveal>
   )
@@ -78,17 +74,9 @@ export default function ShopByCategorySection({ items }: { items?: ShopByCategor
           </Link>
         </div>
 
-        <div className="mt-5 hidden gap-4 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-4">
           {categoryItems.map((item, index) => (
             <CategoryCard key={item.key} name={item.name} href={item.href} image={item.image} index={index} />
-          ))}
-        </div>
-
-        <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {categoryItems.map((item, index) => (
-            <div key={item.key} className="min-w-[46%] max-w-[10.2rem] flex-none">
-              <CategoryCard name={item.name} href={item.href} image={item.image} index={index} />
-            </div>
           ))}
         </div>
 
