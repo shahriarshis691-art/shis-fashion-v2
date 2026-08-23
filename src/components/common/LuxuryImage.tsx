@@ -15,6 +15,7 @@ interface LuxuryImageProps {
   aspectClassName?: string
   className?: string
   imgClassName?: string
+  objectPosition?: string
   priority?: boolean
   hover?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
@@ -35,6 +36,7 @@ export default function LuxuryImage({
   aspectClassName = 'aspect-[4/5]',
   className = '',
   imgClassName = '',
+  objectPosition,
   priority = false,
   hover = false,
   onError,
@@ -44,7 +46,11 @@ export default function LuxuryImage({
   const imageSrc = image.src || CATALOG_IMAGE_PLACEHOLDER
   const lqip = !priority ? buildLqipUrl(src) : ''
   const wrapperStyle: CSSProperties | undefined = lqip
-    ? { backgroundImage: `url("${lqip}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    ? {
+      backgroundImage: `url("${lqip}")`,
+      backgroundSize: 'cover',
+      backgroundPosition: objectPosition || 'center',
+    }
     : undefined
 
   return (
@@ -71,8 +77,10 @@ export default function LuxuryImage({
           }
           handleFallback(event)
         }}
+        style={objectPosition ? { objectPosition } : undefined}
         className={[
-          'gpu-media h-full w-full object-cover object-center',
+          'gpu-media h-full w-full object-cover',
+          objectPosition ? '' : 'object-center',
           hover ? 'media-hover' : '',
           loaded || priority ? 'opacity-100' : 'opacity-0',
           priority ? '' : 'transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',

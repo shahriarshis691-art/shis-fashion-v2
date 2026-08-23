@@ -29,14 +29,19 @@ import { slugify } from '../utils/slugify'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 
 const fallbackCategoryStrips = [
-  { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '' },
-  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '' },
-  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '' },
-  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '' },
-  { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '' },
-  { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '' },
+  { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'womens')?.imagePosition ?? 'center' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'saree')?.imagePosition ?? 'center 18%' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'mens')?.imagePosition ?? 'center' },
+  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
+  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
+  { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.imagePosition ?? 'center' },
+  { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
 ] as const
+
+function categoryStripImagePosition(key: string) {
+  const fallback = fallbackCategoryStrips.find((item) => item.key === key)
+  return fallback?.imagePosition ?? 'center'
+}
 
 const defaultHomepage: HomepageContent = {
   navbarBrandPrimary: 'Shis',
@@ -261,6 +266,7 @@ export default function HomePage() {
         label: section.label,
         href: section.href,
         image: normalizeCatalogImageUrl(categoryStripCover(section.key, section.image), 1200, 900),
+        imagePosition: section.imagePosition,
       }))
     }
 
@@ -281,6 +287,7 @@ export default function HomePage() {
           label: section.label,
           href: section.href,
           image: sectionImage,
+          imagePosition: fallback?.imagePosition ?? categoryStripImagePosition(section.key),
         }
       })
   }, [homepageContent.categorySections])
@@ -454,7 +461,8 @@ export default function HomePage() {
                       height={900}
                       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 20vw"
                       widths={[480, 768, 960, 1200]}
-                      aspectClassName="aspect-[16/10]"
+                      aspectClassName="aspect-[4/3] sm:aspect-[16/10]"
+                      objectPosition={item.imagePosition}
                       hover
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />

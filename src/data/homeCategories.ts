@@ -3,6 +3,7 @@ export interface HomeCategoryItem {
   name: string
   href: string
   image: string
+  imagePosition?: string
 }
 
 export const homeCategoryItems: HomeCategoryItem[] = [
@@ -23,6 +24,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     name: 'Saree',
     href: '/sarees',
     image: '/collections/category-saree-blue.jpg',
+    imagePosition: 'center 18%',
   },
   {
     key: 'denim',
