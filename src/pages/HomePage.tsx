@@ -4,11 +4,10 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
-import TrustStrip from '../components/home/TrustStrip'
 import Reveal from '../components/common/Reveal'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { homeCategoryItems } from '../data/homeCategories'
-import { categoryStripCover, categoryStripCovers, featuredCollectionCover } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
@@ -26,7 +25,6 @@ import {
 import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
-import { slugify } from '../utils/slugify'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 
 const fallbackCategoryStrips = [
@@ -413,30 +411,9 @@ export default function HomePage() {
     [products],
   )
 
-  const featuredCollections = useMemo(() => {
-    if (homepageContent.featuredCollectionPages.length) {
-      return homepageContent.featuredCollectionPages.map((page) => ({
-        key: page.slug,
-        title: page.title,
-        href: page.href || `/collections/${page.slug}`,
-        image: normalizeCatalogImageUrl(featuredCollectionCover(page.slug, page.images[0] ?? ''), 1200, 900),
-      }))
-    }
-
-    return homepageContent.categories.map((category) => {
-      const slug = slugify(category.title)
-      return {
-        key: category.title,
-        title: category.title,
-        href: category.href || `/collections/${slug}`,
-        image: normalizeCatalogImageUrl(featuredCollectionCover(slug, category.image ?? ''), 1200, 900),
-      }
-    })
-  }, [homepageContent.categories, homepageContent.featuredCollectionPages])
-
   const contentSections = useMemo(
     () => [...homepageContent.sections]
-      .filter((section) => section.enabled && section.key !== 'hero')
+      .filter((section) => section.enabled && section.key !== 'hero' && section.key !== 'featuredCollection')
       .sort((left, right) => left.order - right.order),
     [homepageContent.sections],
   )
@@ -499,8 +476,6 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
-      <TrustStrip />
-
       <section className="py-7 sm:py-9">
         <Container>
           <div className="flex items-end justify-between gap-3">
@@ -547,52 +522,6 @@ export default function HomePage() {
       </section>
 
       {contentSections.map((section) => {
-        if (section.key === 'featuredCollection' && featuredCollections.length) {
-          return (
-            <section key={section.key} className="pb-8 sm:pb-10">
-              <Container>
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                      {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
-                    </p>
-                    <h2 className="mt-1 text-h2 text-black">{homepageContent.featuredCollectionTitle ?? 'Featured collections'}</h2>
-                  </div>
-                  <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
-                    View all
-                  </Link>
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {featuredCollections.map((item, index) => (
-                    <Reveal key={item.key} as="article" delayMs={index * 40}>
-                      <Link to={item.href} className="group luxury-tap block">
-                        <div className="relative">
-                          <LuxuryImage
-                            src={item.image}
-                            alt={item.title}
-                            width={1200}
-                            height={900}
-                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 48vw, 33vw"
-                            widths={[480, 768, 960, 1200]}
-                            aspectClassName="aspect-[16/10]"
-                            hover
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between text-white">
-                            <span className="text-sm font-semibold uppercase tracking-[0.08em]">{item.title}</span>
-                            <span aria-hidden className="text-base leading-none">→</span>
-                          </div>
-                        </div>
-                      </Link>
-                    </Reveal>
-                  ))}
-                </div>
-              </Container>
-            </section>
-          )
-        }
-
         if (section.key === 'newArrivals' && newArrivals.length) {
           return (
             <section key={section.key} className="pb-8 sm:pb-10">
