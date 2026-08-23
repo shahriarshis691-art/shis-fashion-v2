@@ -4,7 +4,6 @@ import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
-import Reveal from '../components/common/Reveal'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
@@ -476,43 +475,44 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
-      <section className="pt-7 pb-4 sm:pt-9 sm:pb-6">
-        <Container>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-center text-neutral-900 uppercase mb-6 sm:mb-8">
-            SHOP BY CATEGORY
-          </h2>
+      <section className="py-8 sm:py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
+          {/* Section Header */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-wider text-neutral-900 uppercase">
+              SHOP BY CATEGORY
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6">
-            {categoryStrips.map((item, index) => (
-              <Reveal key={item.key} as="article" delayMs={index * 40}>
-                <Link
-                  to={item.href}
-                  className="group luxury-tap flex flex-col items-center w-full cursor-pointer"
-                  aria-label={`${item.label} collection`}
-                >
-                  <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100">
-                    <LuxuryImage
-                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
-                      alt={item.label}
-                      width={categoryStripCardImage.width}
-                      height={categoryStripCardImage.height}
-                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                      widths={[480, 768, 960, 1200]}
-                      className="h-full w-full"
-                      aspectClassName={categoryStripCardImage.aspectClassName}
-                      imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="mt-3 text-center w-full">
-                    <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase group-hover:text-neutral-600 transition-colors">
-                      {item.label}
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
+          {/* Strict 2-Column Mobile Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
+            {categoryStrips.map((item) => (
+              <Link
+                key={item.key}
+                to={item.href}
+                className="flex flex-col items-center group w-full cursor-pointer"
+                aria-label={`${item.label} collection`}
+              >
+                {/* Square/Sharp Corner Image Box */}
+                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-none bg-neutral-100">
+                  <img
+                    src={item.image || CATALOG_IMAGE_PLACEHOLDER}
+                    alt={item.label}
+                    className="w-full h-full object-cover object-center rounded-none group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+
+                {/* Clean Bottom Label */}
+                <div className="mt-2 sm:mt-3 text-center w-full">
+                  <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase">
+                    {item.label}
+                  </span>
+                </div>
+              </Link>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false ? (
