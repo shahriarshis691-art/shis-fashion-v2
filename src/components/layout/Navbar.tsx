@@ -1,13 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import shisLogo from '../../assets/logo/shis-logo.svg'
 import { useCart } from '../../context/CartContext'
-import { useWishlist } from '../../context/WishlistContext'
 import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
 import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
-import { useRafScroll } from '../../hooks/useRafThrottle'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -56,19 +53,6 @@ const mobileMenuGroups = [
     links: [...primaryLinks.filter((link) => link.label !== 'Women' && link.label !== 'Men'), ...utilityLinks],
   },
 ] as const
-
-function IconButton({ label, children, onClick }: { label: string; children: ReactNode; onClick?: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="ui-interactive flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text)] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:h-9 sm:w-9"
-    >
-      {children}
-    </button>
-  )
-}
 
 function CategoryLink({ href, label, onNavigate }: { href: string; label: string; onNavigate?: () => void }) {
   return (
@@ -141,30 +125,22 @@ function MobileAccordionGroup({
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [openMegaMenu, setOpenMegaMenu] = useState<keyof typeof megaMenuGroups | null>(null)
   const [expandedMobileGroup, setExpandedMobileGroup] = useState<(typeof mobileMenuGroups)[number]['key'] | null>('women')
   const [searchTerm, setSearchTerm] = useState('')
   const lastSearchQueryRef = useRef<string | null>(null)
-  const [isScrolled, setIsScrolled] = useState(false)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { itemCount } = useCart()
-  const { itemCount: wishlistCount } = useWishlist()
   const navigate = useNavigate()
 
   const closeOverlays = () => {
     setIsSearchOpen(false)
     setIsMenuOpen(false)
-    setOpenMegaMenu(null)
   }
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
     return unsubscribe
   }, [])
-
-  useRafScroll((scrollY) => {
-    setIsScrolled(scrollY > 4)
-  })
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -191,151 +167,94 @@ export default function Navbar() {
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur-md transition-shadow duration-200 ${
-          isScrolled ? 'shadow-[0_8px_22px_rgba(0,0,0,0.08)]' : 'shadow-none'
-        }`}
-      >
-        <div className="mx-auto flex h-[4rem] sm:h-[3.7rem] w-full max-w-7xl items-center px-3.5 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSearchOpen(false)
-              setIsMenuOpen((value) => !value)
-            }}
-            className="ui-interactive flex h-8 w-8 items-center justify-center rounded-md text-black hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 md:hidden"
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {isMenuOpen ? (
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 6 18 18" />
-                <path d="M18 6 6 18" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 7h16" />
-                <path d="M4 12h16" />
-                <path d="M4 17h16" />
-              </svg>
-            )}
-          </button>
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/60 bg-white/95 backdrop-blur-md transition-all">
+        <div className="mx-auto flex h-16 sm:h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
+          {/* LEFT: Mobile Hamburger */}
+          <div className="flex items-center justify-start flex-1 md:hidden">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSearchOpen(false)
+                setIsMenuOpen((value) => !value)
+              }}
+              className="ui-interactive p-2 -ml-2 text-neutral-900 hover:text-neutral-600 transition"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isMenuOpen ? (
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 6 18 18" />
+                  <path d="M18 6 6 18" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h16" />
+                </svg>
+              )}
+            </button>
+          </div>
 
-          <Link to="/" onClick={closeOverlays} className="ml-2 md:ml-0" aria-label="SHIS Fashion home">
-            <img src={shisLogo} alt="SHIS Fashion" width={120} height={36} className="h-9 w-auto sm:h-8" loading="eager" decoding="async" />
-          </Link>
+          {/* CENTER: Brand */}
+          <div className="flex flex-shrink-0 items-center justify-center">
+            <Link to="/" onClick={closeOverlays} className="text-center">
+              <span className="font-display tracking-[0.25em] text-lg sm:text-2xl font-normal text-neutral-900 uppercase">
+                SHIS FASHION
+              </span>
+            </Link>
+          </div>
 
-          <nav className="ml-8 hidden min-w-0 flex-1 items-center gap-5 md:flex" aria-label="Primary navigation">
-            {primaryLinks.map((link) => {
-              const key = link.label.toLowerCase() as keyof typeof megaMenuGroups
-              const hasMegaMenu = key in megaMenuGroups
-
-              if (!hasMegaMenu) {
-                return <CategoryLink key={link.label} href={link.href} label={link.label} onNavigate={closeOverlays} />
-              }
-
-              const menu = megaMenuGroups[key]
-
-              return (
-                <div
-                  key={link.label}
-                  className="relative"
-                  onMouseEnter={() => setOpenMegaMenu(key)}
-                  onMouseLeave={() => setOpenMegaMenu((current) => (current === key ? null : current))}
-                >
-                  <CategoryLink href={menu.href} label={menu.label} onNavigate={closeOverlays} />
-
-                  {openMegaMenu === key ? (
-                    <div className="luxury-fade-in absolute left-0 top-full z-50 mt-2 w-56 border border-black/10 bg-white p-2 shadow-[0_14px_28px_rgba(0,0,0,0.12)]">
-                      <nav className="grid gap-1" aria-label={`${menu.label} dropdown`}>
-                        {menu.links.map((item) => (
-                          <NavLink
-                            key={`${menu.label}-${item.label}`}
-                            to={item.href}
-                            onClick={closeOverlays}
-                            className={({ isActive }) =>
-                              `ui-interactive flex items-center justify-between px-2 py-2 text-sm ${
-                                isActive ? 'bg-black text-white' : 'text-black hover:bg-black/5'
-                              }`
-                            }
-                          >
-                            <span>{item.label}</span>
-                            <span aria-hidden>→</span>
-                          </NavLink>
-                        ))}
-                      </nav>
-                    </div>
-                  ) : null}
-                </div>
-              )
-            })}
-          </nav>
-
-          <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5">
-            <IconButton
-              label="Search"
+          {/* RIGHT: Actions */}
+          <div className="flex items-center justify-end flex-1 gap-3 sm:gap-4">
+            <button
+              type="button"
               onClick={() => {
                 setIsMenuOpen(false)
                 setIsSearchOpen((value) => !value)
               }}
+              className="ui-interactive p-2 text-neutral-900 hover:text-neutral-600 transition"
+              aria-label="Search"
             >
-              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="5.5" />
-                <path d="M15.5 15.5 20 20" />
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
               </svg>
-            </IconButton>
-
-            <Link
-              to="/cart#wishlist"
-              onClick={closeOverlays}
-              title="Wishlist"
-              className="ui-interactive relative flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text)] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:h-9 sm:w-9"
-              aria-label="Wishlist"
-            >
-              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 19.5 5.6 13.4a4.2 4.2 0 0 1 5.9-6l.5.5.5-.5a4.2 4.2 0 0 1 5.9 6L12 19.5Z" />
-              </svg>
-              {wishlistCount > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-0.5 text-[8px] font-bold text-white">
-                  {wishlistCount}
-                </span>
-              ) : null}
-            </Link>
+            </button>
 
             <Link
               to="/cart"
               onClick={closeOverlays}
-              title="Cart"
-              className="ui-interactive relative flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text)] hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:h-9 sm:w-9"
-              aria-label="Cart"
+              className="ui-interactive relative p-2 -mr-2 text-neutral-900 hover:text-neutral-600 transition"
+              aria-label="Shopping Cart"
             >
-              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] sm:h-[15px] sm:w-[15px]" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3.5 4.5h2l1.7 8.4a1 1 0 0 0 .98.8h8.6a1 1 0 0 0 .97-.8l1.1-5.4H7.5" />
-                <circle cx="10" cy="18" r="1.2" />
-                <circle cx="17" cy="18" r="1.2" />
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                <path d="M3 6h18" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
-              {itemCount > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-0.5 text-[8px] font-bold text-white">
+              {itemCount > 0 && (
+                <span className="absolute top-1 right-0.5 min-w-[18px] h-[18px] bg-black text-white text-[10px] font-semibold flex items-center justify-center rounded-full px-1">
                   {itemCount}
                 </span>
-              ) : null}
+              )}
             </Link>
           </div>
         </div>
 
         {isSearchOpen ? (
           <div className="luxury-fade-in border-t border-black/10 bg-white">
-              <div className="mx-auto flex w-full max-w-7xl gap-2 px-3.5 py-3 sm:px-6 lg:px-8">
+              <div className="mx-auto flex w-full max-w-7xl gap-2 px-4 py-3 sm:px-6">
                 <label htmlFor="site-search" className="sr-only">
                   Search products
                 </label>
                 <input
                   id="site-search"
                   value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
+                  onChange={(event) => setSearchTerm((event.target as HTMLInputElement).value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
                       event.preventDefault()
-                      const query = searchTerm.trim()
+                      const query = (event.target as HTMLInputElement).value.trim()
                       if (query && lastSearchQueryRef.current !== query) {
                         lastSearchQueryRef.current = query
                         metaPixel.trackSearch({ search_string: query })
@@ -371,7 +290,7 @@ export default function Navbar() {
           ) : null}
 
         <nav className="border-t border-black/10 md:hidden" aria-label="Primary categories">
-          <div className="mx-auto flex w-full max-w-7xl items-center gap-4 overflow-x-auto px-3.5 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex w-full max-w-7xl items-center gap-4 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {primaryLinks.map((link) => (
               <CategoryLink key={link.label} href={link.href} label={link.label} onNavigate={closeOverlays} />
             ))}
