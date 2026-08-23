@@ -7,7 +7,7 @@ import Loading from '../components/ui/Loading'
 import SectionTitle from '../components/ui/SectionTitle'
 import BrandManagement from '../components/admin/BrandManagement'
 import ProductCsvPanel from '../components/admin/ProductCsvPanel'
-import { compactManagedImages, getManagedImageEntries, isPersistableMediaUrl, isRemoteMediaUrl } from '../utils/media'
+import { compactManagedImages, getManagedImageEntries, isPersistableMediaUrl } from '../utils/media'
 import { formatBDT } from '../utils/currency'
 import { getAdminCustomerNotifyHref } from '../utils/orderComms'
 import { buildOpsReport, defaultOpsReportRange, LOW_STOCK_THRESHOLD, shiftDayKey, toDayKey } from '../utils/opsReports'
@@ -900,37 +900,64 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           }
         }
       } else if (target === 'category-image') {
-        setHomepageContent((current) => {
-          if (!current) {
-            return current
-          }
-          const nextCategories = [...current.categories]
-          const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextCategories.length - 1) : 0
-          nextCategories[safeIndex] = { ...nextCategories[safeIndex], image: uploadedImages[0] ?? nextCategories[safeIndex].image }
-          return { ...current, categories: nextCategories }
-        })
+        const current = homepageContent
+        if (!current) {
+          console.error('[category-image] upload completed but homepageContent state is missing')
+          return
+        }
+
+        const nextCategories = [...current.categories]
+        const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextCategories.length - 1) : 0
+        const uploadedUrl = uploadedImages[0] ?? nextCategories[safeIndex].image
+        nextCategories[safeIndex] = { ...nextCategories[safeIndex], image: uploadedUrl }
+        const nextContent = { ...current, categories: nextCategories }
+
+        setHomepageContent(nextContent)
+
+        try {
+          await updateHomepageContent(nextContent)
+          console.info('[category-image] Firestore save succeeded', { categoryIndex: safeIndex, image: uploadedUrl })
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : 'Category image saved locally but failed to sync to Firestore.'
+          console.error('[category-image] Firestore save failed', { error, categoryIndex: safeIndex, image: uploadedUrl, reason })
+          setUploadError(reason)
+          setMessage(reason)
+        }
       } else if (target === 'shop-category-image') {
-        setHomepageContent((current) => {
-          if (!current) {
-            return current
-          }
+        const current = homepageContent
+        if (!current) {
+          console.error('[shop-category-image] upload completed but homepageContent state is missing')
+          return
+        }
 
-          const nextShopByCategories = [...(current.shopByCategories ?? [])]
-          if (!nextShopByCategories.length) {
-            return current
-          }
+        const nextShopByCategories = [...(current.shopByCategories ?? [])]
+        if (!nextShopByCategories.length) {
+          console.warn('[shop-category-image] no shopByCategories entries to update')
+          return
+        }
 
-          const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextShopByCategories.length - 1) : 0
-          nextShopByCategories[safeIndex] = {
-            ...nextShopByCategories[safeIndex],
-            image: uploadedImages[0] ?? nextShopByCategories[safeIndex].image,
-          }
+        const safeIndex = typeof categoryIndex === 'number' ? Math.min(categoryIndex, nextShopByCategories.length - 1) : 0
+        const uploadedUrl = uploadedImages[0] ?? nextShopByCategories[safeIndex].image
+        nextShopByCategories[safeIndex] = {
+          ...nextShopByCategories[safeIndex],
+          image: uploadedUrl,
+        }
 
-          return { ...current, shopByCategories: nextShopByCategories }
-        })
+        const nextContent = { ...current, shopByCategories: nextShopByCategories }
+        setHomepageContent(nextContent)
+
+        try {
+          await updateHomepageContent(nextContent)
+          console.info('[shop-category-image] Firestore save succeeded', { categoryIndex: safeIndex, image: uploadedUrl })
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : 'Shop category image saved locally but failed to sync to Firestore.'
+          console.error('[shop-category-image] Firestore save failed', { error, categoryIndex: safeIndex, image: uploadedUrl, reason })
+          setUploadError(reason)
+          setMessage(reason)
+        }
       } else if (target === 'category-section-image') {
         const persistableUrl = uploadedImages[0]?.trim() ?? ''
-        console.info('[saree] upload completed', {
+        console.info('[category-section-image] upload completed', {
           sectionKey: sectionKey ?? '(missing)',
           uploadedURL: persistableUrl || '(empty)',
         })
@@ -939,13 +966,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         }
 
         if (!sectionKey) {
-          throw new Error('Image upload succeeded but the category section key was missing. Please retry from the Saree section.')
+          throw new Error('Image upload succeeded but the category section key was missing. Please retry from the category section.')
         }
 
-        console.info(`[saree] uploaded URL: ${persistableUrl}`)
-        if (sectionKey === 'saree' && !isRemoteMediaUrl(persistableUrl)) {
-          throw new Error('Saree image upload did not return a permanent https URL. Please retry the upload.')
-        }
+        console.info(`[category-section-image] uploaded URL: ${persistableUrl}`)
 
         homepageDirtyRef.current = true
         const current = homepageContentRef.current
@@ -955,7 +979,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
         const resolved = resolveCategorySectionEntry(current.categorySections, sectionKey)
         if (!resolved) {
-          console.error('[saree] state not updated: section missing from homepageContent.categorySections', {
+          console.error('[category-section-image] state not updated: section missing from homepageContent.categorySections', {
             sectionKey,
             availableKeys: Object.keys(current.categorySections ?? {}),
           })
@@ -994,7 +1018,20 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         homepageContentRef.current = nextContent
         setHomepageContent(nextContent)
 
-        console.info(`[saree] coverImage state updated: ${nextContent.categorySections?.saree?.coverImage || persistableUrl}`)
+        try {
+          await updateHomepageContent(nextContent)
+          console.info(`[category-section-image] Firestore save succeeded: ${nextContent.categorySections?.[sectionKey]?.coverImage || persistableUrl}`)
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : 'Category section image saved locally but failed to sync to Firestore.'
+          console.error('[category-section-image] Firestore save failed', {
+            error,
+            sectionKey,
+            image: persistableUrl,
+            reason,
+          })
+          setUploadError(reason)
+          setMessage(reason)
+        }
       } else if (target === 'featured-page-image') {
         setHomepageContent((current) => {
           if (!current || !current.featuredCollectionPages.length) {
