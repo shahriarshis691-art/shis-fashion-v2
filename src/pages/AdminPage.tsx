@@ -226,6 +226,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   const [archivedBrands, setArchivedBrands] = useState<AdminBrand[]>([])
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const homepageSavingRef = useRef(false)
+  const homepageDirtyRef = useRef(false)
+  const homepageContentRef = useRef<HomepageContent | null>(null)
   const [homepageSaving, setHomepageSaving] = useState(false)
   const [form, setForm] = useState(emptyProductForm)
   const [isEditing, setIsEditing] = useState<string | null>(null)
@@ -322,6 +324,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
   }, [initialView, navigate])
 
   useEffect(() => {
+    homepageContentRef.current = homepageContent
+  }, [homepageContent])
+
+  useEffect(() => {
     if (!user || authMode !== 'dashboard') {
       return () => undefined
     }
@@ -329,7 +335,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => setProducts(nextProducts))
     const unsubscribeOrders = subscribeToOrders((nextOrders) => setOrders(nextOrders))
     const unsubscribeHomepage = subscribeToHomepageContent((nextContent, meta) => {
-      if (!homepageSavingRef.current) {
+      if (!homepageSavingRef.current && !homepageDirtyRef.current) {
+        homepageContentRef.current = nextContent
         setHomepageContent(nextContent)
       }
       if (meta) {
@@ -874,6 +881,12 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           return { ...current, shopByCategories: nextShopByCategories }
         })
       } else if (target === 'category-section-image') {
+        const persistableUrl = uploadedImages[0]?.trim() ?? ''
+        if (!persistableUrl || persistableUrl.startsWith('blob:') || persistableUrl.startsWith('data:')) {
+          throw new Error('Image upload did not return a persistable URL. Please retry the upload.')
+        }
+
+        homepageDirtyRef.current = true
         setHomepageContent((current) => {
           if (!current || !current.categorySections || !sectionKey) {
             return current
@@ -886,17 +899,19 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
           const nextSection: HomepageCategorySection = {
             ...section,
-            coverImage: uploadedImages[0] ?? section.coverImage,
-            images: Array.from(new Set([...(section.images ?? []), ...uploadedImages])).filter(Boolean),
+            coverImage: persistableUrl,
+            images: Array.from(new Set([persistableUrl, ...(section.images ?? [])])).filter(Boolean),
           }
 
-          return {
+          const nextContent = {
             ...current,
             categorySections: {
               ...current.categorySections,
               [sectionKey]: nextSection,
             },
           }
+          homepageContentRef.current = nextContent
+          return nextContent
         })
       } else if (target === 'featured-page-image') {
         setHomepageContent((current) => {
@@ -1153,7 +1168,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       return
     }
 
-    const contentToSave = homepageContent
+    const contentToSave = homepageContentRef.current ?? homepageContent
     if (!contentToSave) {
       const reason = 'Failed to save content: Homepage content is not loaded yet.'
       setMessage(reason)
@@ -1184,7 +1199,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     setHomepageSaving(true)
     setLoading(true)
     try {
+      if (import.meta.env.DEV) {
+        console.info('[admin] homepage save payload', {
+          path: 'settings/homepage',
+          sareeCoverImage: contentToSave.categorySections?.saree?.coverImage || '(empty)',
+        })
+      }
       const result: HomepageSaveResult = await updateHomepageContent(contentToSave)
+      homepageDirtyRef.current = false
+      homepageContentRef.current = result.content
       setHomepageContent(result.content)
       setMessage('Content saved successfully.')
       setToast({ kind: 'success', message: 'Content saved successfully.' })
@@ -1536,6 +1559,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     key: HomepageCategorySectionKey,
     updates: Partial<HomepageCategorySection>,
   ) => {
+    homepageDirtyRef.current = true
     setHomepageContent((current) => {
       if (!current?.categorySections) {
         return current
@@ -1546,7 +1570,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         return current
       }
 
-      return {
+      const nextContent = {
         ...current,
         categorySections: {
           ...current.categorySections,
@@ -1557,6 +1581,8 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
           },
         },
       }
+      homepageContentRef.current = nextContent
+      return nextContent
     })
   }
 

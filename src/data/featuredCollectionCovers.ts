@@ -13,5 +13,10 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
-  return categoryStripCovers[key] ?? fallback
+  const saved = fallback.trim()
+  if (saved) {
+    return saved
+  }
+
+  return categoryStripCovers[key] ?? ''
 }

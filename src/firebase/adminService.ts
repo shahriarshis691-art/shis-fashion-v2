@@ -2891,10 +2891,20 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
   try {
     const ref = doc(firebaseDb, 'settings', 'homepage')
     const payload = omitUndefinedDeep(normalized)
+    const categoryCoverSnapshot = Object.fromEntries(
+      Object.entries(payload.categorySections ?? {}).map(([key, section]) => [key, section.coverImage ?? '']),
+    )
+
+    for (const [key, coverImage] of Object.entries(categoryCoverSnapshot)) {
+      if (coverImage.startsWith('blob:') || coverImage.startsWith('data:')) {
+        throw new Error(`Cannot save ${key} image because the upload did not return a persistable URL.`)
+      }
+    }
 
     console.info('[homepage] save:before-setDoc', {
       path: 'settings/homepage',
       heroImage,
+      sareeCoverImage: categoryCoverSnapshot.saree || '(empty)',
     })
 
     await setDoc(ref, payload)
@@ -2902,6 +2912,7 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
     console.info('[homepage] save:after-setDoc', {
       path: 'settings/homepage',
       heroImage,
+      sareeCoverImage: categoryCoverSnapshot.saree || '(empty)',
     })
 
     const verificationSnapshot = await getDoc(ref)
@@ -2911,10 +2922,16 @@ export async function updateHomepageContent(content: HomepageContent): Promise<H
 
     const savedContent = normalizeHomepageContent(verificationSnapshot.data() as Partial<HomepageContent>)
     const savedHeroImage = savedContent.heroImage ?? ''
+    const savedSareeCover = savedContent.categorySections?.saree?.coverImage ?? ''
+
+    if ((categoryCoverSnapshot.saree || '') !== savedSareeCover) {
+      throw new Error('Firestore write verification failed: categorySections.saree.coverImage mismatch after save.')
+    }
 
     console.info('[homepage] save:verified', {
       path: 'settings/homepage',
       heroImage: savedHeroImage,
+      sareeCoverImage: savedSareeCover || '(empty)',
     })
 
     writeStored(HOMEPAGE_KEY, savedContent)
