@@ -453,20 +453,27 @@ export default function HomePage() {
 
   return (
     <div className="bg-white pb-12">
-      <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
+      <section className="relative w-full bg-[#f4f0eb] border-b border-neutral-200/60">
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6 py-0 sm:py-4">
           <Link
             to="/shop?category=women&sub=oversized-tee"
-            className="block relative w-full aspect-[9/16] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.4/1] overflow-hidden"
+            className="group block relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] max-h-[720px] overflow-hidden cursor-pointer"
           >
             <img
               src={heroImageFailed ? CATALOG_IMAGE_PLACEHOLDER : '/hero/timeless-oversize-hero.png'}
-              alt="Timeless Oversize Tee - Style Meets Comfort"
-              className="w-full h-full object-contain sm:object-cover object-center"
+              alt="Timeless Oversize Tee Collection"
+              className="h-full w-full object-cover object-[center_20%] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
               loading="eager"
               decoding="async"
               onError={() => setHeroImageFailed(true)}
             />
+
+            {/* Luxury Floating CTA Pill */}
+            <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 sm:bottom-10 sm:left-12 sm:translate-x-0">
+              <span className="inline-flex items-center justify-center bg-neutral-900/90 backdrop-blur-md text-white text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase shadow-xl hover:bg-black transition-all">
+                EXPLORE COLLECTION &rarr;
+              </span>
+            </div>
           </Link>
         </div>
       </section>
