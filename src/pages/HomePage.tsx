@@ -267,6 +267,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [brands, setBrands] = useState<AdminBrand[]>([])
   const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
+  const [heroImageFailed, setHeroImageFailed] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
   const { items: recentlyViewedItems } = useRecentlyViewed()
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
@@ -459,10 +460,12 @@ export default function HomePage() {
             className="block relative w-full aspect-[9/16] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.4/1] overflow-hidden"
           >
             <img
-              src="/hero/timeless-oversize-hero.png"
+              src={heroImageFailed ? CATALOG_IMAGE_PLACEHOLDER : '/hero/timeless-oversize-hero.png'}
               alt="Timeless Oversize Tee - Style Meets Comfort"
               className="w-full h-full object-contain sm:object-cover object-center"
               loading="eager"
+              decoding="async"
+              onError={() => setHeroImageFailed(true)}
             />
           </Link>
         </div>
