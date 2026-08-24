@@ -52,6 +52,17 @@ export const Hero: React.FC = () => {
     <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
       <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
         <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-[75vh] max-h-[720px] overflow-hidden">
+          {/* Blurred background layer for desktop — fills edge-to-edge */}
+          <div className="absolute inset-0 hidden md:block z-0">
+            <img
+              src={LOCAL_HERO_SLIDES[currentIndex]?.image ?? ''}
+              alt=""
+              className="h-full w-full object-cover object-center scale-110 blur-3xl opacity-40"
+              aria-hidden="true"
+            />
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+
           {LOCAL_HERO_SLIDES.map((slide, index) => {
             const isActive = index === currentIndex;
 
@@ -66,12 +77,13 @@ export const Hero: React.FC = () => {
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-cover md:object-contain object-[center_20%] md:object-center transition-transform duration-[3000ms] ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover object-[center_20%] md:object-contain md:object-center transition-transform duration-[3000ms] ease-out group-hover:scale-105"
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
 
-                  <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 sm:bottom-10 sm:left-10 sm:translate-x-0">
+                  {/* CTA — consistently centered at bottom */}
+                  <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 sm:bottom-10">
                     <span className="inline-flex items-center justify-center bg-neutral-900/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase px-6 py-3 shadow-xl hover:bg-black transition-all">
                       {slide.ctaText} &rarr;
                     </span>
