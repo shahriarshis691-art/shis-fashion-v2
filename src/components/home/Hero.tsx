@@ -5,10 +5,8 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 interface HeroSlide {
   id: string
   image: string
-  title: string
-  subtitle: string
   link: string
-  tag: string
+  alt: string
   objectPosition?: string
 }
 
@@ -16,37 +14,29 @@ const HERO_SLIDES: HeroSlide[] = [
   {
     id: 'effortless-elegance-tee',
     image: '/hero/effortless-elegance-tee.png',
-    title: 'EFFORTLESS ELEGANCE TEE',
-    subtitle: 'Premium Comfort. Everyday Confidence.',
     link: '/shop?category=women&sub=oversized-tee',
-    tag: 'NEW ARRIVAL',
+    alt: 'Effortless elegance oversized tee campaign',
     objectPosition: 'center top',
   },
   {
     id: 'casual-shirt',
     image: '/hero/hero-premium-casual-shirt.webp',
-    title: 'PREMIUM CASUAL SHIRTS',
-    subtitle: 'Refined Cotton Craftsmanship',
     link: '/shop?category=men&sub=casual-shirt',
-    tag: 'MEN EDITION',
+    alt: 'Premium casual shirt campaign',
     objectPosition: 'center center',
   },
   {
     id: 'regular-fit-denim',
     image: '/hero/hero-regular-fit-denim.webp',
-    title: 'SIGNATURE DENIM PANTS',
-    subtitle: 'Regular Fit • Everyday Durability',
     link: '/shop?category=men&sub=denim-pants',
-    tag: 'ESSENTIALS',
+    alt: 'Signature denim pants campaign',
     objectPosition: 'center center',
   },
   {
     id: 'soft-cotton-saree',
     image: '/hero/hero-soft-cotton-saree.webp',
-    title: 'TAT SOFT COTTON SAREE',
-    subtitle: 'Heritage Elegance & Modern Draping',
     link: '/shop?category=women&sub=saree',
-    tag: 'FESTIVE EDIT',
+    alt: 'Soft cotton saree campaign',
     objectPosition: 'center top',
   },
 ]
@@ -136,10 +126,14 @@ export const Hero: React.FC = () => {
               }`}
               aria-hidden={!isActive}
             >
-              <Link className="block relative w-full h-full group cursor-pointer" to={slide.link}>
+              <Link
+                className="block relative w-full h-full group cursor-pointer"
+                to={slide.link}
+                aria-label={slide.alt}
+              >
                 <img
                   src={slide.image}
-                  alt={slide.title}
+                  alt={slide.alt}
                   width={1600}
                   height={2000}
                   className="w-full h-full object-cover object-center transition-transform duration-[4000ms] ease-out group-hover:scale-105"
@@ -149,26 +143,6 @@ export const Hero: React.FC = () => {
                   decoding="async"
                   draggable={false}
                 />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-
-                <div className="absolute bottom-6 left-4 right-4 sm:bottom-10 sm:left-10 sm:right-auto z-20 flex flex-col items-start text-left max-w-lg">
-                  <span className="inline-block bg-white/20 text-white backdrop-blur-md border border-white/30 text-[9px] sm:text-[10px] font-bold tracking-[0.25em] px-2.5 py-1 uppercase mb-2">
-                    {slide.tag}
-                  </span>
-                  <h2
-                    className="text-lg sm:text-2xl md:text-3xl font-normal tracking-[0.15em] text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                    style={{ fontFamily: 'var(--font-brand)' }}
-                  >
-                    {slide.title}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-white/90 mt-1 line-clamp-1 font-light tracking-wider drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                    {slide.subtitle}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-2 bg-white text-black hover:bg-neutral-200 transition-colors font-semibold shadow-lg text-[10px] sm:text-xs tracking-[0.2em] uppercase px-5 py-2.5">
-                    SHOP COLLECTION &rarr;
-                  </span>
-                </div>
               </Link>
             </div>
           )
