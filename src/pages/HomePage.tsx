@@ -475,19 +475,19 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
-      <section className="py-8 sm:py-14 bg-white">
+      <section className="py-6 sm:py-14 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6">
-          {/* Luxury Centered Header */}
-          <div className="text-center mb-6 sm:mb-10">
+          {/* Header */}
+          <div className="text-center mb-5 sm:mb-10">
             <h2
-              className="text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] sm:tracking-[0.25em] text-neutral-900 uppercase"
+              className="text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
               style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
             >
               SHOP BY CATEGORY
             </h2>
           </div>
 
-          {/* Strict 2-Column Grid on Mobile, 4-Column on Desktop */}
+          {/* 2-Column Tall Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {categoryStrips.map((item) => {
               const displayLabel =
@@ -502,8 +502,8 @@ export default function HomePage() {
                   className="flex flex-col items-center group w-full cursor-pointer"
                   aria-label={`${displayLabel} collection`}
                 >
-                  {/* Uncropped Vertical Card Box */}
-                  <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
+                  {/* Tall Luxury Framing */}
+                  <div className="relative w-full aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
@@ -513,8 +513,8 @@ export default function HomePage() {
                     />
                   </div>
 
-                  {/* Clean Bottom Label */}
-                  <div className="mt-3 text-center w-full px-1">
+                  {/* Bottom Title */}
+                  <div className="mt-3 text-center w-full">
                     <span className="text-xs sm:text-sm font-semibold tracking-[0.15em] text-neutral-900 uppercase group-hover:text-neutral-600 transition-colors">
                       {displayLabel}
                     </span>
