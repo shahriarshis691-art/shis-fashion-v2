@@ -5,6 +5,7 @@ export const featuredCollectionCovers: Record<string, string> = {
 }
 
 export const categoryStripCovers: Record<string, string> = {
+  men: '/collections/men-category.webp',
   saree: '/collections/category-saree-blue.jpg',
   denim: '/collections/featured-denim-collection.jpg',
 }
@@ -14,11 +15,7 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
-  if (key === 'denim') {
-    return categoryStripCovers.denim
-  }
-
-  const bundled = categoryStripCovers[key] ?? ''
+  const bundled = categoryStripCovers[key] ?? (key === 'women' ? categoryStripCovers.saree : '')
   const saved = fallback.trim()
 
   if (saved) {
@@ -27,6 +24,7 @@ export function categoryStripCover(key: string, fallback = '') {
       || normalized.includes('/og-image.png')
       || normalized.includes('images.unsplash.com')
       || normalized.includes('plus.unsplash.com')
+      || normalized.includes('featured-men-collection.jpg')
 
     if (!isOutdatedPlaceholder) {
       return saved

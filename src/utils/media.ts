@@ -43,6 +43,8 @@ export function isBundledFallbackMediaUrl(value: string) {
   return normalized.includes('featured-saree-collection.jpg')
     || normalized.includes('category-saree-blue.jpg')
     || normalized.includes('featured-denim-collection.jpg')
+    || normalized.includes('men-category.webp')
+    || normalized.includes('featured-men-collection.jpg')
 }
 
 export function isRemoteMediaUrl(value: unknown): value is string {
@@ -67,6 +69,7 @@ export function isOutdatedHardcodedMediaUrl(value: string) {
     || normalized.includes('/og-image.png')
     || normalized.includes('images.unsplash.com')
     || normalized.includes('plus.unsplash.com')
+    || normalized.includes('featured-men-collection.jpg')
 }
 
 export function pickPreferredMediaUrl(

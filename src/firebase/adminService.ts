@@ -916,6 +916,14 @@ function getLegacyCategoryImage(legacyImageKey: string) {
     return categoryStripCovers.denim
   }
 
+  if (legacyImageKey === 'mens' || legacyImageKey === 'men') {
+    return categoryStripCovers.men
+  }
+
+  if (legacyImageKey === 'saree' || legacyImageKey === 'womens') {
+    return categoryStripCovers.saree
+  }
+
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
 }
 

@@ -38,14 +38,14 @@ export default function ShopByCategorySection({ items }: { items?: { key: string
                     widths={[320, 480, 768, 960]}
                     className="h-full w-full"
                     aspectClassName="aspect-[3/4]"
-                    imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    imgClassName="h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-                </div>
-
-                <div className="mt-3 text-center w-full">
-                  <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase group-hover:text-neutral-600 transition-colors">
-                    {item.name}
-                  </span>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-3 pt-8 text-center">
+                    <span className="text-xs sm:text-sm md:text-base font-bold text-white tracking-wide uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+                      {item.name}
+                    </span>
+                  </div>
                 </div>
               </Link>
             </Reveal>

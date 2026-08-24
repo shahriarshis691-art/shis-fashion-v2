@@ -27,10 +27,10 @@ import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 
 const fallbackCategoryStrips = [
-  { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'womens')?.imagePosition ?? 'center' },
-  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: homeCategoryItems.find((item) => item.key === 'saree')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'saree')?.imagePosition ?? 'center 18%' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: '/collections/featured-men-collection.jpg', imagePosition: 'center' },
-  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center' },
+  { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
+  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
   { key: 'sale', label: 'HALF SHIRT', href: '/men?sub=half-shirt', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.imagePosition ?? 'center' },
@@ -40,8 +40,8 @@ const fallbackCategoryStrips = [
 const categoryStripCardImage = {
   width: 960,
   height: 1200,
-  aspectClassName: 'aspect-[4/5]',
-  imgClassName: 'h-full w-full object-cover object-center',
+  aspectClassName: 'aspect-[3/4]',
+  imgClassName: 'h-full w-full object-cover object-[center_top]',
 } as const
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
@@ -124,7 +124,7 @@ const defaultHomepage: HomepageContent = {
       href: '/women',
       enabled: true,
       order: 10,
-      coverImage: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '',
+      coverImage: categoryStripCovers.saree,
       images: [],
       updatedAt: null,
     },
@@ -134,7 +134,7 @@ const defaultHomepage: HomepageContent = {
       href: '/sarees',
       enabled: true,
       order: 15,
-      coverImage: '',
+      coverImage: categoryStripCovers.saree,
       images: [],
       updatedAt: null,
     },
@@ -144,7 +144,7 @@ const defaultHomepage: HomepageContent = {
       href: '/men',
       enabled: true,
       order: 20,
-      coverImage: homeCategoryItems.find((item) => item.key === 'mens')?.image ?? '',
+      coverImage: categoryStripCovers.men,
       images: [],
       updatedAt: null,
     },
@@ -301,13 +301,11 @@ export default function HomePage() {
         const liveLabel = section?.label?.trim() || fallback.label
         const liveHref = section?.href?.trim() || fallback.href
         const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
-        const resolvedCover = fallback.key === 'denim'
-          ? categoryStripCovers.denim
-          : pickPreferredCategoryCoverUrl(
-            section?.coverImage,
-            section?.images,
-            fallback.image || categoryStripCover(fallback.key, ''),
-          )
+        const resolvedCover = pickPreferredCategoryCoverUrl(
+          section?.coverImage,
+          section?.images,
+          fallback.image || categoryStripCover(fallback.key, ''),
+        )
 
         return {
           key: fallback.key,
@@ -475,22 +473,24 @@ export default function HomePage() {
                   className="flex flex-col items-center group w-full cursor-pointer"
                   aria-label={`${displayLabel} collection`}
                 >
-                  {/* Tall Luxury Framing */}
-                  <div className="relative w-full aspect-[9/16] sm:aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
+                  <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
-                      className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-500 ease-out"
+                      width={categoryStripCardImage.width}
+                      height={categoryStripCardImage.height}
+                      className="w-full h-full object-cover object-[center_top] rounded-none group-hover:scale-105 transition-transform duration-500 ease-out"
+                      style={item.imagePosition ? { objectPosition: item.imagePosition } : undefined}
                       loading="lazy"
+                      decoding="async"
                       onError={handleImageError}
                     />
-                  </div>
-
-                  {/* Bottom Title */}
-                  <div className="mt-3 text-center w-full">
-                    <span className="text-xs sm:text-sm font-semibold tracking-[0.15em] text-neutral-900 uppercase group-hover:text-neutral-600 transition-colors">
-                      {displayLabel}
-                    </span>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-3 pt-8 text-center">
+                      <span className="text-xs sm:text-sm font-semibold tracking-[0.15em] text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+                        {displayLabel}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               )
