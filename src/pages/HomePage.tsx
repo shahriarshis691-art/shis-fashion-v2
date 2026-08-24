@@ -34,7 +34,7 @@ const fallbackCategoryStrips = [
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
   { key: 'sale', label: 'HALF SHIRT', href: '/men?sub=half-shirt', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.imagePosition ?? 'center' },
-  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
+  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
 ] as const
 
 const categoryStripCardImage = {
@@ -190,7 +190,7 @@ const defaultHomepage: HomepageContent = {
     },
     'new-arrivals': {
       key: 'new-arrivals',
-      label: 'OVERSIZED TEE',
+      label: 'OVERSIZE TEE',
       href: '/shop?category=men&sub=oversized-tee',
       enabled: true,
       order: 60,

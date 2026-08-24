@@ -908,7 +908,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'HALF SHIRT', href: '/men?sub=half-shirt', order: 50, legacyImageKey: 'oversized-tee' },
-  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, legacyImageKey: 'couples' },
+  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, legacyImageKey: 'couples' },
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
@@ -992,7 +992,7 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   'new-arrivals': {
     key: 'new-arrivals',
-    label: 'OVERSIZED TEE',
+    label: 'OVERSIZE TEE',
     href: '/shop?category=men&sub=oversized-tee',
     enabled: true,
     order: 60,
