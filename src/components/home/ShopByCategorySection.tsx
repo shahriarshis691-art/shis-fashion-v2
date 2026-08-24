@@ -28,7 +28,7 @@ export default function ShopByCategorySection({ items }: { items?: { key: string
                 className="group luxury-tap flex flex-col items-center w-full cursor-pointer"
                 aria-label={`${item.name} collection`}
               >
-                <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-100">
+                <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100">
                   <LuxuryImage
                     src={item.image}
                     alt={`${item.name} category`}
@@ -37,7 +37,7 @@ export default function ShopByCategorySection({ items }: { items?: { key: string
                     sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
                     widths={[320, 480, 768, 960]}
                     className="h-full w-full"
-                    aspectClassName="aspect-[4/5]"
+                    aspectClassName="aspect-[3/4]"
                     imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>

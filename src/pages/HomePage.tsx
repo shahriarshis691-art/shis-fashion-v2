@@ -494,11 +494,11 @@ export default function HomePage() {
                 aria-label={`${item.label} collection`}
               >
                 {/* Square/Sharp Corner Image Box */}
-                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-none bg-neutral-100">
+                <div className="relative w-full aspect-[3/4] overflow-hidden rounded-none bg-neutral-100">
                   <img
                     src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                     alt={item.label}
-                    className="w-full h-full object-cover object-center rounded-none group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>
