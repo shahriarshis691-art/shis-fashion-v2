@@ -180,8 +180,8 @@ const defaultHomepage: HomepageContent = {
     },
     sale: {
       key: 'sale',
-      label: 'Half Shirt',
-      href: '/men?sub=shirts',
+      label: 'HALF SHIRT',
+      href: '/shop?category=men&sub=half-shirt',
       enabled: true,
       order: 50,
       coverImage: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '',
@@ -190,8 +190,8 @@ const defaultHomepage: HomepageContent = {
     },
     'new-arrivals': {
       key: 'new-arrivals',
-      label: 'New Arrivals',
-      href: '/shop/new-arrivals',
+      label: 'OVERSIZED TEE',
+      href: '/shop?category=men&sub=oversized-tee',
       enabled: true,
       order: 60,
       coverImage: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '',

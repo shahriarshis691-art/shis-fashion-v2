@@ -907,8 +907,8 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
-  { key: 'sale', label: 'Half Shirt', href: '/men?sub=shirts', order: 50, legacyImageKey: 'oversized-tee' },
-  { key: 'new-arrivals', label: 'New Arrivals', href: '/shop/new-arrivals', order: 60, legacyImageKey: 'couples' },
+  { key: 'sale', label: 'HALF SHIRT', href: '/shop?category=men&sub=half-shirt', order: 50, legacyImageKey: 'oversized-tee' },
+  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, legacyImageKey: 'couples' },
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
@@ -982,8 +982,8 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   sale: {
     key: 'sale',
-    label: 'Half Shirt',
-    href: '/men?sub=shirts',
+    label: 'HALF SHIRT',
+    href: '/shop?category=men&sub=half-shirt',
     enabled: true,
     order: 50,
     coverImage: getLegacyCategoryImage('oversized-tee'),
@@ -992,8 +992,8 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   'new-arrivals': {
     key: 'new-arrivals',
-    label: 'New Arrivals',
-    href: '/shop/new-arrivals',
+    label: 'OVERSIZED TEE',
+    href: '/shop?category=men&sub=oversized-tee',
     enabled: true,
     order: 60,
     coverImage: getLegacyCategoryImage('couples'),
