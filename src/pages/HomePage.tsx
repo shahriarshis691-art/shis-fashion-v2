@@ -486,31 +486,38 @@ export default function HomePage() {
 
           {/* Strict 2-Column Mobile Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-            {categoryStrips.map((item) => (
-              <Link
-                key={item.key}
-                to={item.href}
-                className="flex flex-col items-center group w-full cursor-pointer"
-                aria-label={`${item.label} collection`}
-              >
-                {/* Square/Sharp Corner Image Box */}
-                <div className="relative w-full aspect-[3/4] overflow-hidden rounded-none bg-neutral-100">
-                  <img
-                    src={item.image || CATALOG_IMAGE_PLACEHOLDER}
-                    alt={item.label}
-                    className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
+            {categoryStrips.map((item) => {
+              const displayLabel =
+                item.key === 'sale' ? 'HALF SHIRT' :
+                item.key === 'new-arrivals' ? 'OVERSIZE TEE' :
+                item.label
 
-                {/* Clean Bottom Label */}
-                <div className="mt-2 sm:mt-3 text-center w-full">
-                  <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase">
-                    {item.label}
-                  </span>
-                </div>
-              </Link>
-            ))}
+              return (
+                <Link
+                  key={item.key}
+                  to={item.href}
+                  className="flex flex-col items-center group w-full cursor-pointer"
+                  aria-label={`${displayLabel} collection`}
+                >
+                  {/* Square/Sharp Corner Image Box */}
+                  <div className="relative w-full aspect-[3/4] overflow-hidden rounded-none bg-neutral-100">
+                    <img
+                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
+                      alt={displayLabel}
+                      className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Clean Bottom Label */}
+                  <div className="mt-2 sm:mt-3 text-center w-full">
+                    <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase">
+                      {displayLabel}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
