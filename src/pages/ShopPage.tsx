@@ -414,6 +414,18 @@ export default function ShopPage() {
     }
     : null
 
+  const isHalfShirtListing =
+    effectiveSegment === 'men' &&
+    effectiveSubcategory === 'shirts' &&
+    rawQuerySubcategory === 'half-shirt'
+
+  const halfShirtHeading = isHalfShirtListing
+    ? {
+      title: "MEN'S HALF SHIRTS",
+      description: 'Refined half-shirt edits focused on comfort, fit, and repeat wear.',
+    }
+    : null
+
   const bySegment = products.filter((product) => segmentMatchesProduct(effectiveSegment, product.category))
 
   const bySubcategory = effectiveSubcategory === 'all'
@@ -695,8 +707,8 @@ export default function ShopPage() {
         <div className="flex flex-col gap-5">
           <div>
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">{dedicatedListing?.eyebrow ?? 'SHIS Listing'}</p>
-            <h1 className="mt-1 text-h1 text-black">{dedicatedListing?.title ?? legacyHeading?.title ?? heading.title}</h1>
-            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? legacyHeading?.description ?? heading.description}</p>
+            <h1 className="mt-1 text-h1 text-black">{dedicatedListing?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
             {searchQuery ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>

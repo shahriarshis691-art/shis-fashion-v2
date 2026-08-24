@@ -22,7 +22,7 @@ interface SegmentConfig {
 }
 
 const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
-  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt'] },
+  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt', 'half-shirt', 'half-shirts'] },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'] },
