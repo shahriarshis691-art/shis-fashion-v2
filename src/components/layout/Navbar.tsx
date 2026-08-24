@@ -199,7 +199,13 @@ export default function Navbar() {
           <div className="flex flex-shrink-0 items-center justify-center">
             <Link to="/" onClick={closeOverlays} className="text-center">
               <span className="font-brand tracking-[0.3em] text-lg sm:text-2xl font-light text-neutral-900 uppercase antialiased">
-                SHIS FASHION
+                {[
+                  homepageContent?.navbarBrandPrimary?.trim(),
+                  homepageContent?.navbarBrandSecondary?.trim(),
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                  .toUpperCase() || 'SHIS FASHION'}
               </span>
             </Link>
           </div>

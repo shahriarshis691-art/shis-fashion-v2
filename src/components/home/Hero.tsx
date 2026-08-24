@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import type { HomepageContent } from '../../firebase/adminService'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
+import { normalizeCatalogImageUrl } from '../../utils/media'
 
-// ONLY verified local assets from public/hero/
+// Fallback carousel when CMS hero image is not set
 const LOCAL_HERO_SLIDES = [
   {
     id: 'slide-1',
@@ -30,30 +33,81 @@ const LOCAL_HERO_SLIDES = [
     title: 'Timeless Oversize Tee Collection',
     ctaText: 'EXPLORE COLLECTION',
     link: '/shop?category=women&sub=oversized-tee',
-  }
-  // Add additional local images here when available in /public/hero/
-];
+  },
+]
 
-export const Hero: React.FC = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const hasMultipleSlides = LOCAL_HERO_SLIDES.length > 1;
+type HeroSlide = {
+  id: string
+  image: string
+  title: string
+  ctaText: string
+  link: string
+}
+
+type HeroContent = Pick<
+  HomepageContent,
+  'heroEyebrow' | 'heroTitle' | 'heroSubtitle' | 'heroCta' | 'heroPrimaryLink' | 'heroImage' | 'heroImageTitle'
+>
+
+function isUsableCmsHeroImage(url?: string) {
+  const value = url?.trim() ?? ''
+  if (!value) {
+    return false
+  }
+
+  const normalized = value.toLowerCase()
+  return !normalized.endsWith('/og-image.svg') && !normalized.endsWith('/og-image.png') && normalized !== '/og-image.svg'
+}
+
+function buildHeroSlides(content?: HeroContent | null): HeroSlide[] {
+  if (!isUsableCmsHeroImage(content?.heroImage)) {
+    return LOCAL_HERO_SLIDES
+  }
+
+  const image = normalizeCatalogImageUrl(content!.heroImage!, 1600, 2000) || content!.heroImage!
+
+  return [
+    {
+      id: 'cms-hero',
+      image,
+      title: content?.heroTitle?.trim() || content?.heroImageTitle?.trim() || 'SHIS Fashion',
+      ctaText: content?.heroCta?.trim() || 'Shop collection',
+      link: content?.heroPrimaryLink?.trim() || '/shop',
+    },
+  ]
+}
+
+export const Hero: React.FC<{ content?: HeroContent | null }> = ({ content = null }) => {
+  const slides = useMemo(() => buildHeroSlides(content), [content])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const safeIndex = slides.length ? currentIndex % slides.length : 0
+  const hasMultipleSlides = slides.length > 1
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
-    if (!hasMultipleSlides) return;
+    if (!hasMultipleSlides || prefersReducedMotion) {
+      return
+    }
 
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % LOCAL_HERO_SLIDES.length);
-    }, 4000);
+    const timer = window.setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % slides.length)
+    }, 4000)
 
-    return () => clearInterval(timer);
-  }, [hasMultipleSlides]);
+    return () => window.clearInterval(timer)
+  }, [hasMultipleSlides, prefersReducedMotion, slides.length])
+
+  const heading = content?.heroTitle?.trim() || 'SHIS Fashion Bangladesh'
 
   return (
     <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
+      <h1 className="sr-only">{heading}</h1>
+      {content?.heroSubtitle?.trim() ? (
+        <p className="sr-only">{content.heroSubtitle.trim()}</p>
+      ) : null}
       <div className="w-full px-0 sm:px-4 md:px-6">
         <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-[75vh] max-h-[720px] overflow-hidden">
-          {LOCAL_HERO_SLIDES.map((slide, index) => {
-            const isActive = index === currentIndex;
+          {slides.map((slide, index) => {
+            const isActive = index === safeIndex
 
             return (
               <div
@@ -66,12 +120,14 @@ export const Hero: React.FC = () => {
                   <img
                     src={slide.image}
                     alt={slide.title}
+                    width={1600}
+                    height={2000}
                     className="w-full h-full object-cover object-[center_20%] md:object-center transition-transform duration-[3000ms] ease-out md:group-hover:scale-105"
                     loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
                     decoding="async"
                   />
 
-                  {/* CTA — consistently centered at bottom */}
                   <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 sm:bottom-10">
                     <span className="inline-flex items-center justify-center bg-neutral-900/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase px-6 py-3 shadow-xl hover:bg-black transition-all">
                       {slide.ctaText} &rarr;
@@ -79,17 +135,19 @@ export const Hero: React.FC = () => {
                   </div>
                 </Link>
               </div>
-            );
+            )
           })}
 
           {hasMultipleSlides && (
             <div className="absolute bottom-3 sm:bottom-4 right-4 sm:right-8 z-30 flex items-center gap-2 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full">
-              {LOCAL_HERO_SLIDES.map((_, dotIdx) => (
+              {slides.map((slide, dotIdx) => (
                 <button
-                  key={dotIdx}
+                  key={slide.id}
+                  type="button"
                   onClick={() => setCurrentIndex(dotIdx)}
+                  aria-current={dotIdx === safeIndex ? 'true' : undefined}
                   className={`transition-all duration-300 rounded-full ${
-                    dotIdx === currentIndex
+                    dotIdx === safeIndex
                       ? 'w-6 h-1.5 bg-white'
                       : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
                   }`}
@@ -101,5 +159,5 @@ export const Hero: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}

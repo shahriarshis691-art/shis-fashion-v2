@@ -4,6 +4,7 @@ import Card from '../ui/Card'
 import SectionTitle from '../ui/SectionTitle'
 import {
   createBrand,
+  deleteAsset,
   deleteBrand,
   restoreBrand,
   subscribeToAdminBrands,
@@ -147,9 +148,25 @@ export default function BrandManagement({ onDone }: BrandManagementProps) {
       }
 
       if (target === 'logo') {
+        const previous = form.logo
         setForm((current) => ({ ...current, logo: uploaded[0] }))
+        if (previous && previous !== uploaded[0]) {
+          try {
+            await deleteAsset(previous)
+          } catch {
+            // Replace succeeded; old CDN cleanup is best-effort.
+          }
+        }
       } else if (target === 'banner') {
+        const previous = form.bannerImage
         setForm((current) => ({ ...current, bannerImage: uploaded[0] }))
+        if (previous && previous !== uploaded[0]) {
+          try {
+            await deleteAsset(previous)
+          } catch {
+            // Replace succeeded; old CDN cleanup is best-effort.
+          }
+        }
       } else {
         setForm((current) => ({
           ...current,

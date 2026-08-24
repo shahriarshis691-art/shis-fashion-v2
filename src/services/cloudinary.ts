@@ -19,6 +19,7 @@ interface SignedUploadResponse {
 
 interface DeleteAssetResponse {
   ok: boolean
+  error?: string
 }
 
 function isSignedUploadEnabled() {
@@ -210,11 +211,12 @@ export async function deleteCloudinaryAssetByUrl(url: string, authToken?: string
   try {
     parsed = new URL(url)
   } catch {
-    return false
+    // Local / relative assets are not Cloudinary-managed — treat as already gone.
+    return true
   }
 
   if (!parsed.hostname.includes('res.cloudinary.com')) {
-    return false
+    return true
   }
 
   const response = await fetch('/api/cloudinary-destroy', {
@@ -227,9 +229,14 @@ export async function deleteCloudinaryAssetByUrl(url: string, authToken?: string
   })
 
   if (!response.ok) {
-    return false
+    const detail = await response.text().catch(() => '')
+    throw new Error(detail || `Cloudinary delete failed (${response.status}).`)
   }
 
   const payload = await response.json() as DeleteAssetResponse
-  return payload.ok
+  if (!payload.ok) {
+    throw new Error(payload.error || 'Cloudinary delete was rejected.')
+  }
+
+  return true
 }

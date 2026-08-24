@@ -394,9 +394,16 @@ export default function HomePage() {
   )
 
   const bestSellers = useMemo(
-    () => products.filter((product) => product.featured).slice(0, 8),
+    () => {
+      const heroItems = products.filter((product) => product.hero)
+      const featuredItems = products.filter((product) => product.featured && !product.hero)
+      return [...heroItems, ...featuredItems].slice(0, 8)
+    },
     [products],
   )
+
+  const heroEnabled = homepageContent.sections.find((section) => section.key === 'hero')?.enabled !== false
+  const shopByCategoryEnabled = homepageContent.sections.find((section) => section.key === 'featuredCollection')?.enabled !== false
 
   const contentSections = useMemo(
     () => [...homepageContent.sections]
@@ -406,27 +413,48 @@ export default function HomePage() {
   )
 
   const featuredBrands = useMemo(
-    () => ['xeroxii', 'ceravo', 'rangkutir']
-      .map((slug) => {
-        const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
-        if (liveBrand) {
-          return {
-            id: liveBrand.slug,
-            name: liveBrand.name,
-            tag: liveBrand.tag,
-            summary: liveBrand.summary,
-            details: liveBrand.description,
-            logo: liveBrand.logo,
-            contacts: {
-              website: liveBrand.website,
-              contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
-            },
+    () => {
+      const preferredSlugs = ['xeroxii', 'ceravo', 'rangkutir']
+      const fromLive = preferredSlugs
+        .map((slug) => {
+          const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
+          if (liveBrand) {
+            return {
+              id: liveBrand.slug,
+              name: liveBrand.name,
+              tag: liveBrand.tag,
+              summary: liveBrand.summary,
+              details: liveBrand.description,
+              logo: liveBrand.logo,
+              contacts: {
+                website: liveBrand.website,
+                contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
+              },
+            }
           }
-        }
 
-        return brandEntries.find((brand) => brand.id === slug) ?? null
-      })
-      .filter((brand): brand is NonNullable<typeof brand> => Boolean(brand)),
+          return brandEntries.find((brand) => brand.id === slug) ?? null
+        })
+        .filter((brand): brand is NonNullable<typeof brand> => Boolean(brand))
+
+      const extraLive = brands
+        .filter((brand) => !preferredSlugs.includes(brand.slug.trim().toLowerCase()))
+        .slice(0, Math.max(0, 6 - fromLive.length))
+        .map((liveBrand) => ({
+          id: liveBrand.slug,
+          name: liveBrand.name,
+          tag: liveBrand.tag,
+          summary: liveBrand.summary,
+          details: liveBrand.description,
+          logo: liveBrand.logo,
+          contacts: {
+            website: liveBrand.website,
+            contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
+          },
+        }))
+
+      return [...fromLive, ...extraLive]
+    },
     [brands],
   )
 
@@ -453,27 +481,33 @@ export default function HomePage() {
 
   return (
     <div className="bg-white pb-12">
-      <Hero />
+      {heroEnabled ? <Hero content={homepageContent} /> : null}
 
+      {shopByCategoryEnabled ? (
       <section className="py-6 sm:py-14 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6">
           {/* Header */}
           <div className="text-center mb-5 sm:mb-10">
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+              {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
+            </p>
             <h2
-              className="text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
-              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
+              className="mt-1 text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
+              style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
             >
-              SHOP BY CATEGORY
+              {homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
             </h2>
+            {homepageContent.featuredCollectionSubtitle?.trim() ? (
+              <p className="mt-2 mx-auto max-w-2xl text-sm text-black/65">
+                {homepageContent.featuredCollectionSubtitle}
+              </p>
+            ) : null}
           </div>
 
           {/* 2-Column Tall Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {categoryStrips.map((item) => {
-              const displayLabel =
-                item.key === 'sale' ? 'HALF SHIRT' :
-                item.key === 'new-arrivals' ? 'OVERSIZE TEE' :
-                item.label
+              const displayLabel = item.label
 
               return (
                 <Link
@@ -505,6 +539,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      ) : null}
 
       {homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false ? (
         <section className="py-12 sm:py-16">

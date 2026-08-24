@@ -118,7 +118,8 @@ function extractPublicId(url: string) {
 function getResourceType(url: string) {
   try {
     const parsed = new URL(url)
-    const match = parsed.pathname.match(/\/v\d+\/(image|video|raw)\/upload\//)
+    // Cloudinary URLs are typically /<resource_type>/upload/vN/...
+    const match = parsed.pathname.match(/\/(image|video|raw)\/upload\//)
     return match?.[1] ?? 'image'
   } catch {
     return 'image'

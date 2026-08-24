@@ -32,6 +32,12 @@ export default function Footer() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const contactEmail = homepageContent?.footerContactEmail ?? 'hello@shisfashion.com'
   const contactPhone = homepageContent?.footerContactPhone ?? '+88 01887848304'
+  const brandTitle = homepageContent?.footerBrandTitle?.trim() || 'SHIS Fashion'
+  const brandDescription =
+    homepageContent?.footerDescription?.trim() ||
+    'Clean, mobile-first shopping for modern wardrobes.'
+  const contactAddress = homepageContent?.footerContactAddress?.trim()
+  const bottomText = homepageContent?.footerBottomText?.trim() || '© 2026 SHIS Fashion'
   const whatsappHref = getWhatsAppHref(contactPhone)
 
   useEffect(() => {
@@ -44,10 +50,13 @@ export default function Footer() {
       <Container className="py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-3 md:gap-10">
           <div>
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">SHIS Fashion</p>
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">{brandTitle}</p>
             <p className="mt-3 max-w-sm text-sm leading-6 text-black/70">
-              Clean, mobile-first shopping for modern wardrobes.
+              {brandDescription}
             </p>
+            {contactAddress ? (
+              <p className="mt-3 text-sm text-black/60">{contactAddress}</p>
+            ) : null}
           </div>
 
           <div>
@@ -93,7 +102,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 border-t border-black/10 pt-4 text-caption uppercase tracking-[0.12em] text-black/55">
-          © 2026 SHIS Fashion
+          {bottomText}
         </div>
       </Container>
     </footer>

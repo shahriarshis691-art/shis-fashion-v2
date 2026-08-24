@@ -418,8 +418,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       try {
         const subscribers = await getNewsletterSubscribers()
         setNewsletterSubscribers(subscribers)
-      } catch {
-        // ignore
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'Unable to load newsletter subscribers.'
+        setMessage(reason)
+        setToast({ kind: 'error', message: reason })
       } finally {
         setNewsletterLoading(false)
       }
@@ -439,8 +441,10 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         const allCoupons = await getCoupons()
         setCoupons(allCoupons)
         setCouponStats(getCouponStats(allCoupons))
-      } catch {
-        // ignore
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'Unable to load coupons.'
+        setMessage(reason)
+        setToast({ kind: 'error', message: reason })
       } finally {
         setCouponLoading(false)
       }
@@ -819,17 +823,28 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     }
   }
 
-  const handleRemoveGalleryImage = (slotIndex: number) => {
-    setForm((current) => {
-      const nextImages = [...current.images]
-      const nextImageTitles = [...current.imageTitles]
-      const nextImageDescriptions = [...current.imageDescriptions]
-      nextImages[slotIndex] = ''
-      nextImageTitles[slotIndex] = ''
-      nextImageDescriptions[slotIndex] = ''
-      return { ...current, images: nextImages, imageTitles: nextImageTitles, imageDescriptions: nextImageDescriptions }
-    })
-    setMessage(`${galleryLabel(slotIndex)} removed.`)
+  const handleRemoveGalleryImage = async (slotIndex: number) => {
+    const url = form.images[slotIndex]?.trim() ?? ''
+    try {
+      if (url) {
+        await deleteAsset(url)
+      }
+      setForm((current) => {
+        const nextImages = [...current.images]
+        const nextImageTitles = [...current.imageTitles]
+        const nextImageDescriptions = [...current.imageDescriptions]
+        nextImages[slotIndex] = ''
+        nextImageTitles[slotIndex] = ''
+        nextImageDescriptions[slotIndex] = ''
+        return { ...current, images: nextImages, imageTitles: nextImageTitles, imageDescriptions: nextImageDescriptions }
+      })
+      setMessage(`${galleryLabel(slotIndex)} removed.`)
+      setToast({ kind: 'success', message: `${galleryLabel(slotIndex)} removed from CDN and form.` })
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unable to remove gallery image.'
+      setMessage(reason)
+      setToast({ kind: 'error', message: reason })
+    }
   }
 
   const handleUpload = async (
@@ -880,23 +895,57 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
         : []
 
       if (target === 'hero-image') {
-        const nextContent = homepageContent ? { ...homepageContent, heroImage: uploadedImages[0] ?? homepageContent.heroImage } : homepageContent
+        const previousHero = homepageContent?.heroImage?.trim() ?? ''
+        const nextHero = uploadedImages[0] ?? homepageContent?.heroImage
+        const nextContent = homepageContent ? { ...homepageContent, heroImage: nextHero } : homepageContent
         if (nextContent) {
           setHomepageContent(nextContent)
+          homepageDirtyRef.current = true
           try {
+            homepageSavingRef.current = true
             await updateHomepageContent(nextContent)
-          } catch {
-            // Upload succeeded; auto-save to Firestore is best-effort
+            homepageDirtyRef.current = false
+            if (previousHero && previousHero !== nextHero) {
+              try {
+                await deleteAsset(previousHero)
+              } catch {
+                // Old asset cleanup is best-effort after successful replace.
+              }
+            }
+            setToast({ kind: 'success', message: 'Hero image uploaded and saved.' })
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : 'Hero upload saved locally but Firestore save failed.'
+            setMessage(reason)
+            setToast({ kind: 'error', message: reason })
+          } finally {
+            homepageSavingRef.current = false
           }
         }
       } else if (target === 'banner-image') {
-        const nextContent = homepageContent ? { ...homepageContent, bannerImage: uploadedImages[0] ?? homepageContent.bannerImage } : homepageContent
+        const previousBanner = homepageContent?.bannerImage?.trim() ?? ''
+        const nextBanner = uploadedImages[0] ?? homepageContent?.bannerImage
+        const nextContent = homepageContent ? { ...homepageContent, bannerImage: nextBanner } : homepageContent
         if (nextContent) {
           setHomepageContent(nextContent)
+          homepageDirtyRef.current = true
           try {
+            homepageSavingRef.current = true
             await updateHomepageContent(nextContent)
-          } catch {
-            // Upload succeeded; auto-save to Firestore is best-effort
+            homepageDirtyRef.current = false
+            if (previousBanner && previousBanner !== nextBanner) {
+              try {
+                await deleteAsset(previousBanner)
+              } catch {
+                // Old asset cleanup is best-effort after successful replace.
+              }
+            }
+            setToast({ kind: 'success', message: 'Banner image uploaded and saved.' })
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : 'Banner upload saved locally but Firestore save failed.'
+            setMessage(reason)
+            setToast({ kind: 'error', message: reason })
+          } finally {
+            homepageSavingRef.current = false
           }
         }
       } else if (target === 'category-image') {
@@ -1125,10 +1174,25 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
       const nextImages = [...(nextPages[pageIndex].images ?? [])]
       nextImages[imageIndex] = ''
       nextPages[pageIndex] = { ...nextPages[pageIndex], images: nextImages }
-      setHomepageContent({ ...homepageContent, featuredCollectionPages: nextPages })
-      setMessage('Collection image removed.')
+      const nextContent = { ...homepageContent, featuredCollectionPages: nextPages }
+      setHomepageContent(nextContent)
+      homepageDirtyRef.current = true
+      homepageSavingRef.current = true
+      try {
+        await updateHomepageContent(nextContent)
+        homepageDirtyRef.current = false
+        setMessage('Collection image removed and saved.')
+        setToast({ kind: 'success', message: 'Collection image removed.' })
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'Image removed from CDN but homepage save failed.'
+        setMessage(reason)
+        setToast({ kind: 'error', message: reason })
+      } finally {
+        homepageSavingRef.current = false
+      }
     } catch {
       setMessage('Unable to remove collection image.')
+      setToast({ kind: 'error', message: 'Unable to remove collection image.' })
     }
   }
 
@@ -1518,9 +1582,13 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
     try {
       await updateOrderStatus(orderId, status)
       setMessage(status === 'returned' ? 'Order marked returned. Stock restocked.' : 'Order status updated.')
+      setToast({ kind: 'success', message: status === 'returned' ? 'Order marked returned. Stock restocked.' : 'Order status updated.' })
       const channel = notifyChannelForStatus(status)
       if (channel) {
-        void requestOrderStatusNotify(orderId, channel)
+        const notifyResult = await requestOrderStatusNotify(orderId, channel)
+        if (!notifyResult.notified && notifyResult.reason) {
+          setToast({ kind: 'error', message: `Status saved, but customer notify skipped: ${notifyResult.reason}` })
+        }
       }
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error
@@ -1529,9 +1597,11 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
 
       if (code === 'order/invalid-status-transition') {
         setMessage('Invalid status flow. Use forward lifecycle actions only.')
+        setToast({ kind: 'error', message: 'Invalid status flow. Use forward lifecycle actions only.' })
       } else {
         const reason = describeAdminWriteError(error, user?.uid)
         setMessage(reason)
+        setToast({ kind: 'error', message: reason })
         setBlockedAdminUid(user?.uid ?? null)
       }
     }
@@ -2871,11 +2941,27 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     <img src={homepageContent.heroImage} alt="Hero preview" className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
                     <button type="button" onClick={async () => {
                       try {
-                        await deleteAsset(homepageContent.heroImage!)
-                        setHomepageContent((current) => current ? { ...current, heroImage: '' } : current)
-                        setMessage('Hero image removed.')
+                        const imageUrl = homepageContent.heroImage!
+                        await deleteAsset(imageUrl)
+                        const nextContent = { ...homepageContent, heroImage: '' }
+                        setHomepageContent(nextContent)
+                        homepageDirtyRef.current = true
+                        homepageSavingRef.current = true
+                        try {
+                          await updateHomepageContent(nextContent)
+                          homepageDirtyRef.current = false
+                          setMessage('Hero image removed and saved.')
+                          setToast({ kind: 'success', message: 'Hero image removed.' })
+                        } catch (error) {
+                          const reason = error instanceof Error ? error.message : 'Hero cleared locally but Firestore save failed.'
+                          setMessage(reason)
+                          setToast({ kind: 'error', message: reason })
+                        } finally {
+                          homepageSavingRef.current = false
+                        }
                       } catch {
                         setMessage('Unable to remove hero image.')
+                        setToast({ kind: 'error', message: 'Unable to remove hero image.' })
                       }
                     }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
                   </div>
@@ -2895,11 +2981,27 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     <img src={homepageContent.bannerImage} alt="Banner preview" className="h-40 w-full rounded-[1.25rem] object-cover object-center" />
                     <button type="button" onClick={async () => {
                       try {
-                        await deleteAsset(homepageContent.bannerImage!)
-                        setHomepageContent((current) => current ? { ...current, bannerImage: '' } : current)
-                        setMessage('Banner image removed.')
+                        const imageUrl = homepageContent.bannerImage!
+                        await deleteAsset(imageUrl)
+                        const nextContent = { ...homepageContent, bannerImage: '' }
+                        setHomepageContent(nextContent)
+                        homepageDirtyRef.current = true
+                        homepageSavingRef.current = true
+                        try {
+                          await updateHomepageContent(nextContent)
+                          homepageDirtyRef.current = false
+                          setMessage('Banner image removed and saved.')
+                          setToast({ kind: 'success', message: 'Banner image removed.' })
+                        } catch (error) {
+                          const reason = error instanceof Error ? error.message : 'Banner cleared locally but Firestore save failed.'
+                          setMessage(reason)
+                          setToast({ kind: 'error', message: reason })
+                        } finally {
+                          homepageSavingRef.current = false
+                        }
                       } catch {
                         setMessage('Unable to remove banner image.')
+                        setToast({ kind: 'error', message: 'Unable to remove banner image.' })
                       }
                     }} className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
                   </div>
@@ -2934,10 +3036,25 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                               await deleteAsset(category.image!)
                               const nextCategories = [...homepageContent.categories]
                               nextCategories[index] = { ...nextCategories[index], image: '' }
-                              setHomepageContent({ ...homepageContent, categories: nextCategories })
-                              setMessage('Category image removed.')
+                              const nextContent = { ...homepageContent, categories: nextCategories }
+                              setHomepageContent(nextContent)
+                              homepageDirtyRef.current = true
+                              homepageSavingRef.current = true
+                              try {
+                                await updateHomepageContent(nextContent)
+                                homepageDirtyRef.current = false
+                                setMessage('Category image removed and saved.')
+                                setToast({ kind: 'success', message: 'Category image removed.' })
+                              } catch (error) {
+                                const reason = error instanceof Error ? error.message : 'Image removed from CDN but save failed.'
+                                setMessage(reason)
+                                setToast({ kind: 'error', message: reason })
+                              } finally {
+                                homepageSavingRef.current = false
+                              }
                             } catch {
                               setMessage('Unable to remove category image.')
+                              setToast({ kind: 'error', message: 'Unable to remove category image.' })
                             }
                           }} className="absolute right-3 top-1 rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent)]">Remove</button>
                         </div>
@@ -3120,12 +3237,43 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                 onClick={async (event) => {
                                   event.preventDefault()
                                   event.stopPropagation()
+                                  const current = homepageContentRef.current ?? homepageContent
+                                  if (!current?.categorySections?.[section.key]) {
+                                    return
+                                  }
+
                                   try {
                                     await deleteAsset(section.coverImage)
-                                    updateHomepageCategorySection(section.key, { coverImage: '', images: section.images.filter((image) => image !== section.coverImage) })
-                                    setMessage('Section image removed.')
+                                    const nextContent = {
+                                      ...current,
+                                      categorySections: {
+                                        ...current.categorySections,
+                                        [section.key]: {
+                                          ...current.categorySections[section.key],
+                                          coverImage: '',
+                                          images: current.categorySections[section.key].images.filter((image) => image !== section.coverImage),
+                                        },
+                                      },
+                                    }
+                                    homepageDirtyRef.current = true
+                                    homepageContentRef.current = nextContent
+                                    setHomepageContent(nextContent)
+                                    homepageSavingRef.current = true
+                                    try {
+                                      await updateHomepageContent(nextContent)
+                                      homepageDirtyRef.current = false
+                                      setMessage('Section image removed and saved.')
+                                      setToast({ kind: 'success', message: 'Section image removed.' })
+                                    } catch (error) {
+                                      const reason = error instanceof Error ? error.message : 'Image removed from CDN but save failed.'
+                                      setMessage(reason)
+                                      setToast({ kind: 'error', message: reason })
+                                    } finally {
+                                      homepageSavingRef.current = false
+                                    }
                                   } catch {
                                     setMessage('Unable to remove section image.')
+                                    setToast({ kind: 'error', message: 'Unable to remove section image.' })
                                   }
                                 }}
                                 className="absolute right-3 top-1 rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent)]"
@@ -3657,10 +3805,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    await updateCoupon(coupon.id, { status: 'disabled' })
-                                    const allCoupons = await getCoupons()
-                                    setCoupons(allCoupons)
-                                    setCouponStats(getCouponStats(allCoupons))
+                                    try {
+                                      await updateCoupon(coupon.id, { status: 'disabled' })
+                                      const allCoupons = await getCoupons()
+                                      setCoupons(allCoupons)
+                                      setCouponStats(getCouponStats(allCoupons))
+                                      setToast({ kind: 'success', message: `Coupon ${coupon.code} disabled.` })
+                                    } catch (error) {
+                                      setToast({ kind: 'error', message: error instanceof Error ? error.message : 'Failed to disable coupon.' })
+                                    }
                                   }}
                                   className="text-xs text-rose-600 hover:underline"
                                 >
@@ -3670,10 +3823,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    await updateCoupon(coupon.id, { status: 'active' })
-                                    const allCoupons = await getCoupons()
-                                    setCoupons(allCoupons)
-                                    setCouponStats(getCouponStats(allCoupons))
+                                    try {
+                                      await updateCoupon(coupon.id, { status: 'active' })
+                                      const allCoupons = await getCoupons()
+                                      setCoupons(allCoupons)
+                                      setCouponStats(getCouponStats(allCoupons))
+                                      setToast({ kind: 'success', message: `Coupon ${coupon.code} enabled.` })
+                                    } catch (error) {
+                                      setToast({ kind: 'error', message: error instanceof Error ? error.message : 'Failed to enable coupon.' })
+                                    }
                                   }}
                                   className="text-xs text-emerald-600 hover:underline"
                                 >
@@ -3683,10 +3841,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                               <button
                                 type="button"
                                 onClick={async () => {
-                                  await deleteCoupon(coupon.id)
-                                  const allCoupons = await getCoupons()
-                                  setCoupons(allCoupons)
-                                  setCouponStats(getCouponStats(allCoupons))
+                                  try {
+                                    await deleteCoupon(coupon.id)
+                                    const allCoupons = await getCoupons()
+                                    setCoupons(allCoupons)
+                                    setCouponStats(getCouponStats(allCoupons))
+                                    setToast({ kind: 'success', message: `Coupon ${coupon.code} deleted.` })
+                                  } catch (error) {
+                                    setToast({ kind: 'error', message: error instanceof Error ? error.message : 'Failed to delete coupon.' })
+                                  }
                                 }}
                                 className="text-xs text-rose-600 hover:underline"
                               >
@@ -3766,8 +3929,34 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   <p className="mt-2 text-sm text-[var(--color-text)]">{review.body}</p>
                   {review.status === 'pending' ? (
                     <div className="mt-3 flex gap-2">
-                      <button type="button" onClick={() => { void updateReviewStatus(review.id, 'approved') }} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold">Approve</button>
-                      <button type="button" onClick={() => { void updateReviewStatus(review.id, 'rejected') }} className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]">Reject</button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await updateReviewStatus(review.id, 'approved')
+                            setToast({ kind: 'success', message: 'Review approved.' })
+                          } catch (error) {
+                            setToast({ kind: 'error', message: describeAdminWriteError(error, user?.uid) })
+                          }
+                        }}
+                        className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await updateReviewStatus(review.id, 'rejected')
+                            setToast({ kind: 'success', message: 'Review rejected.' })
+                          } catch (error) {
+                            setToast({ kind: 'error', message: describeAdminWriteError(error, user?.uid) })
+                          }
+                        }}
+                        className="rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent)]"
+                      >
+                        Reject
+                      </button>
                     </div>
                   ) : null}
                 </div>
@@ -3791,7 +3980,15 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                   </div>
                   <select
                     value={account.role}
-                    onChange={(event) => { void updateAdminAccountRole(account.uid, event.target.value as AdminAccessRole) }}
+                    onChange={async (event) => {
+                      const nextRole = event.target.value as AdminAccessRole
+                      try {
+                        await updateAdminAccountRole(account.uid, nextRole)
+                        setToast({ kind: 'success', message: `Role updated to ${nextRole}.` })
+                      } catch (error) {
+                        setToast({ kind: 'error', message: describeAdminWriteError(error, user?.uid) })
+                      }
+                    }}
                     className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm outline-none"
                   >
                     {ADMIN_ACCESS_ROLE_OPTIONS.map((option) => (

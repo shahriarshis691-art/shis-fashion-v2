@@ -3265,11 +3265,20 @@ export async function uploadAssets(files: File[], folder: string, options: Uploa
 
 export async function deleteAsset(url: string) {
   if (typeof window === 'undefined') {
-    return
+    return true
+  }
+
+  const trimmed = url.trim()
+  if (!trimmed) {
+    return true
   }
 
   const authToken = await getCurrentAdminIdToken()
-  await deleteCloudinaryAssetByUrl(url, authToken)
+  if (!authToken && import.meta.env.PROD) {
+    throw new Error('Admin session expired. Sign in again before deleting media.')
+  }
+
+  return deleteCloudinaryAssetByUrl(trimmed, authToken)
 }
 
 export interface NewsletterSubscriber {
@@ -4038,11 +4047,11 @@ export async function updateAdminAccountRole(uid: string, role: AdminAccessRole)
 export async function requestOrderStatusNotify(orderId: string, channel: OrderNotifyChannel = 'order-shipped') {
   const token = await getCurrentAdminIdToken()
   if (!token) {
-    return
+    return { notified: false, reason: 'Missing admin auth token.' as const }
   }
 
   try {
-    await fetch('/api/notify-order', {
+    const response = await fetch('/api/notify-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -4050,8 +4059,15 @@ export async function requestOrderStatusNotify(orderId: string, channel: OrderNo
       },
       body: JSON.stringify({ orderId, channel }),
     })
+
+    if (!response.ok) {
+      return { notified: false, reason: `Notify failed (${response.status}).` as const }
+    }
+
+    return { notified: true as const }
   } catch {
     // Optional transactional notify must never block admin status updates.
+    return { notified: false, reason: 'Notify request failed.' as const }
   }
 }
 
