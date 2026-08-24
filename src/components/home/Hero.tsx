@@ -9,6 +9,13 @@ const LOCAL_HERO_SLIDES = [
     title: 'Timeless Oversize Tee Collection',
     ctaText: 'EXPLORE COLLECTION',
     link: '/shop?category=women&sub=oversized-tee',
+  },
+  {
+    id: 'slide-2',
+    image: '/hero/hero-regular-fit-denim.webp',
+    title: 'Regular Fit Denim',
+    ctaText: 'SHOP DENIM',
+    link: '/shop?category=men&sub=denim',
   }
   // Add additional local images here when available in /public/hero/
 ];
