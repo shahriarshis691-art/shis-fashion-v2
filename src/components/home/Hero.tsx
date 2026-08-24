@@ -145,22 +145,22 @@ export const Hero: React.FC = () => {
                     draggable={false}
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent sm:from-black/40 sm:via-black/5 sm:to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
 
                   <div className="absolute bottom-6 left-4 right-4 sm:bottom-10 sm:left-10 sm:right-auto z-20 flex flex-col items-start text-left max-w-lg">
-                    <span className="inline-block bg-white/90 backdrop-blur-md text-neutral-900 text-[9px] sm:text-[10px] font-bold tracking-[0.25em] px-2.5 py-1 uppercase mb-2">
+                    <span className="inline-block bg-white/20 text-white backdrop-blur-md border border-white/30 text-[9px] sm:text-[10px] font-bold tracking-[0.25em] px-2.5 py-1 uppercase mb-2">
                       {slide.tag}
                     </span>
                     <h2
-                      className="text-lg sm:text-2xl md:text-3xl font-normal tracking-[0.15em] text-white uppercase"
+                      className="text-lg sm:text-2xl md:text-3xl font-normal tracking-[0.15em] text-white uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                       style={{ fontFamily: 'var(--font-brand)' }}
                     >
                       {slide.title}
                     </h2>
-                    <p className="text-xs sm:text-sm text-neutral-200 mt-1 line-clamp-1 font-light tracking-wider">
+                    <p className="text-xs sm:text-sm text-white/90 mt-1 line-clamp-1 font-light tracking-wider drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                       {slide.subtitle}
                     </p>
-                    <span className="mt-3 inline-flex items-center gap-2 bg-neutral-900/90 text-white text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase px-5 py-2.5 backdrop-blur-md group-hover:bg-white group-hover:text-neutral-900 transition-all">
+                    <span className="mt-3 inline-flex items-center gap-2 bg-white text-black hover:bg-neutral-200 transition-colors font-semibold shadow-lg text-[10px] sm:text-xs tracking-[0.2em] uppercase px-5 py-2.5">
                       SHOP COLLECTION &rarr;
                     </span>
                   </div>
