@@ -25,8 +25,6 @@ import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredCateg
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { useListingWishlist } from '../hooks/useListingWishlist'
-import { usePromoPopup } from '../hooks/usePromoPopup'
-import PromoPopup from '../components/common/PromoPopup'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: homeCategoryItems.find((item) => item.key === 'womens')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'womens')?.imagePosition ?? 'center' },
@@ -100,7 +98,7 @@ const defaultHomepage: HomepageContent = {
   heroPrimaryLink: '/shop?category=women&sub=oversized-tee',
   heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
-  heroImage: '/hero/timeless-oversize-hero.png',
+  heroImage: '/hero/effortless-elegance-tee.png',
   heroImageTitle: 'Homepage hero image',
   heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
   heroVideo: '',
@@ -253,7 +251,6 @@ export default function HomePage() {
   const lastSectionIntegritySignalRef = useRef('')
   const { items: recentlyViewedItems } = useRecentlyViewed()
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
-  const { isOpen: isPromoPopupOpen, close: closePromoPopup } = usePromoPopup({ enabled: !isBrandPanelOpen })
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content, meta) => {
@@ -712,19 +709,6 @@ export default function HomePage() {
           </div>
         </div>
       ) : null}
-
-      <PromoPopup
-        isOpen={isPromoPopupOpen}
-        onClose={closePromoPopup}
-        bannerImage={normalizeCatalogImageUrl(
-          homepageContent.bannerImage?.trim() || homepageContent.heroImage?.trim() || '/hero/timeless-oversize-hero.png',
-          832,
-          1040,
-        )}
-        bannerAlt={homepageContent.bannerImageTitle?.trim() || homepageContent.heroImageTitle?.trim() || 'SHIS Fashion promotion'}
-        ctaLink={homepageContent.heroPrimaryLink?.trim() || '/shop'}
-        ctaLabel="SHOP NOW"
-      />
     </div>
   )
 }

@@ -15,32 +15,18 @@ if (!width || !height) {
   throw new Error('Unable to read hero image dimensions.')
 }
 
-// Feature callouts + circular icons (left column, mid-lower).
-const overlay = {
-  left: 0,
-  top: Math.round(height * 0.515),
-  width: Math.round(width * 0.44),
-  height: Math.round(height * 0.265),
+// Marketing copy + feature callouts live on the left ~44% of the composite.
+// Crop to the original studio photograph (model + arch background only).
+const crop = {
+  left: Math.round(width * 0.44),
+  top: 0,
+  width: Math.round(width * 0.56),
+  height,
 }
-
-// Plain arch wall on the right — no typography or subject.
-const sample = {
-  left: Math.round(width * 0.74),
-  top: overlay.top,
-  width: Math.round(width * 0.14),
-  height: overlay.height,
-}
-
-const wallPatch = await sharp(source)
-  .extract(sample)
-  .blur(0.8)
-  .resize(overlay.width, overlay.height, { fit: 'fill' })
-  .png()
-  .toBuffer()
 
 await sharp(source)
-  .composite([{ input: wallPatch, left: overlay.left, top: overlay.top }])
+  .extract(crop)
   .png({ compressionLevel: 9 })
   .toFile(inputPath)
 
-console.log(`Cleaned ${inputPath} (${width}x${height})`)
+console.log(`Cleaned ${inputPath} — cropped to ${crop.width}x${crop.height} (removed embedded callouts and left marketing column)`)
