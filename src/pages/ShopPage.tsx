@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
@@ -186,28 +186,6 @@ interface SubcategoryCarouselProps {
 }
 
 function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, isInWishlist }: SubcategoryCarouselProps) {
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const [activeDot, setActiveDot] = useState(0)
-  const visibleCount = 2
-  const dotCount = Math.max(1, Math.ceil(products.length / visibleCount))
-
-  const handleScroll = useCallback(() => {
-    const el = carouselRef.current
-    if (!el) return
-    const cardWidth = el.clientWidth / visibleCount
-    if (cardWidth <= 0) return
-    const leftmostCardIndex = Math.round(el.scrollLeft / cardWidth)
-    setActiveDot(() => Math.min(dotCount - 1, Math.max(0, Math.floor(leftmostCardIndex / visibleCount))))
-  }, [dotCount, visibleCount])
-
-  const scrollToDot = useCallback((index: number) => {
-    const el = carouselRef.current
-    if (!el) return
-    const cardWidth = el.clientWidth / visibleCount
-    const targetScroll = index * visibleCount * cardWidth
-    el.scrollBy({ left: targetScroll, behavior: 'smooth' })
-  }, [visibleCount])
-
   if (!products.length) return null
 
   return (
@@ -223,36 +201,7 @@ function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, i
         </div>
       )}
 
-      {/* Mobile Carousel */}
-      <div className="md:hidden">
-        <div
-          ref={carouselRef}
-          onScroll={handleScroll}
-          className="flex gap-3 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {products.map((product) => (
-            <div key={product.id} className="snap-start flex-none w-[calc(50%-0.375rem)]">
-              <ProductCard product={product} onToggleWishlist={onToggleWishlist} isInWishlist={isInWishlist(String(product.id))} />
-            </div>
-          ))}
-        </div>
-
-        {dotCount > 1 && (
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {Array.from({ length: dotCount }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => scrollToDot(i)}
-                className={`h-1.5 rounded-full transition-all ${i === activeDot ? 'w-4 bg-neutral-900' : 'w-1.5 bg-neutral-300 hover:bg-neutral-400'}`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Grid */}
-      <div className="hidden md:grid md:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isInWishlist={isInWishlist(String(product.id))} />
         ))}
