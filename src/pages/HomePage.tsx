@@ -243,27 +243,6 @@ function hasValidSectionHref(section: HomepageCategorySection) {
   return section.href.trim().startsWith('/')
 }
 
-function HomepageProductGrid({ products }: { products: AdminProduct[] }) {
-  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
-
-  return (
-    <ProductListingGrid className="mt-4 sm:mt-5">
-      {products.map((item) => {
-        const product = mapAdminProductToShopProduct(item)
-        return (
-          <ProductCard
-            key={item.id}
-            product={product}
-            onToggleWishlist={handleToggleWishlist}
-            isInWishlist={isInWishlist(String(product.id))}
-          />
-        )
-      })}
-    </ProductListingGrid>
-  )
-}
-
-export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [brands, setBrands] = useState<AdminBrand[]>([])
@@ -388,29 +367,8 @@ export default function HomePage() {
     })
   }, [homepageContent.categorySections])
 
-  const newArrivals = useMemo(
-    () => products.filter((product) => product.newArrival).slice(0, 8),
-    [products],
-  )
-
-  const bestSellers = useMemo(
-    () => {
-      const heroItems = products.filter((product) => product.hero)
-      const featuredItems = products.filter((product) => product.featured && !product.hero)
-      return [...heroItems, ...featuredItems].slice(0, 8)
-    },
-    [products],
-  )
-
   const heroEnabled = homepageContent.sections.find((section) => section.key === 'hero')?.enabled !== false
   const shopByCategoryEnabled = homepageContent.sections.find((section) => section.key === 'featuredCollection')?.enabled !== false
-
-  const contentSections = useMemo(
-    () => [...homepageContent.sections]
-      .filter((section) => section.enabled && section.key !== 'hero' && section.key !== 'featuredCollection' && section.key !== 'brandPromise')
-      .sort((left, right) => left.order - right.order),
-    [homepageContent.sections],
-  )
 
   const featuredBrands = useMemo(
     () => {
@@ -656,57 +614,6 @@ export default function HomePage() {
               </Container>
             </section>
       ) : null}
-
-      {contentSections.map((section) => {
-        if (section.key === 'newArrivals' && newArrivals.length) {
-          return (
-            <section key={section.key} className="pb-8 sm:pb-10">
-              <Container>
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                      {homepageContent.newArrivalsEyebrow ?? 'New arrivals'}
-                    </p>
-                    <h2 className="mt-1 text-h2 text-black">{homepageContent.newArrivalsTitle ?? 'New Arrivals'}</h2>
-                  </div>
-                  <Link
-                    to="/shop/new-arrivals"
-                    className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black"
-                  >
-                    Shop now
-                  </Link>
-                </div>
-
-                <HomepageProductGrid products={newArrivals} />
-              </Container>
-            </section>
-          )
-        }
-
-        if (section.key === 'bestSellers' && bestSellers.length) {
-          return (
-            <section key={section.key} className="pb-8 sm:pb-10">
-              <Container>
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                      {homepageContent.bestSellerEyebrow ?? 'Best sellers'}
-                    </p>
-                    <h2 className="mt-1 text-h2 text-black">{homepageContent.featuredTitle ?? 'Best sellers'}</h2>
-                  </div>
-                  <Link to="/shop" className="ui-interactive text-caption uppercase tracking-[0.14em] text-black/65 hover:text-black">
-                    Shop now
-                  </Link>
-                </div>
-
-                <HomepageProductGrid products={bestSellers} />
-              </Container>
-            </section>
-          )
-        }
-
-        return null
-      })}
 
       {recentlyViewedItems.length > 0 ? (
         <section className="px-3.5 pb-16 pt-6 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-10">
