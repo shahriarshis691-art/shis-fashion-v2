@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
-import HeroBanner, { type HeroMediaItem } from '../components/HeroBanner'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
@@ -95,10 +94,10 @@ const defaultHomepage: HomepageContent = {
   heroSubtitle:
     'Contemporary Bangladeshi wardrobe essentials with refined fabrics, calm silhouettes, and comfort you can wear from morning to midnight.',
   heroCta: 'Shop now',
-  heroPrimaryLink: '/shop',
+  heroPrimaryLink: '/shop?category=women&sub=oversized-tee',
   heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
-    heroImage: '',
+  heroImage: '/hero/timeless-oversize-hero.png',
   heroImageTitle: 'Homepage hero image',
   heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
   heroVideo: '',
@@ -298,18 +297,6 @@ export default function HomePage() {
     return unsubscribe
   }, [])
 
-  const heroMedia = useMemo(() => {
-    if (!homepageContent.heroImage) {
-      return [] as HeroMediaItem[]
-    }
-
-    return [{
-      type: 'image' as const,
-      src: homepageContent.heroImage,
-      alt: homepageContent.heroImageTitle || 'SHIS Fashion campaign image',
-    }]
-  }, [homepageContent.heroImage, homepageContent.heroImageTitle])
-
   const categoryStrips = useMemo(() => {
     const sections: Partial<HomepageCategorySections> = homepageContent.categorySections ?? {}
     const hasLiveSections = Object.keys(sections).length > 0
@@ -465,15 +452,21 @@ export default function HomePage() {
 
   return (
     <div className="bg-white pb-12">
-      <HeroBanner
-        media={heroMedia}
-        eyebrow={homepageContent.heroEyebrow}
-        title={homepageContent.heroTitle}
-        subtitle={homepageContent.heroSubtitle}
-        cta={homepageContent.heroCta}
-        primaryLink={homepageContent.heroPrimaryLink}
-        onSecondaryClick={() => setIsBrandPanelOpen(true)}
-      />
+      <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
+          <Link
+            to="/shop?category=women&sub=oversized-tee"
+            className="block relative w-full aspect-[9/16] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.4/1] overflow-hidden"
+          >
+            <img
+              src="/hero/timeless-oversize-hero.png"
+              alt="Timeless Oversize Tee - Style Meets Comfort"
+              className="w-full h-full object-contain sm:object-cover object-center"
+              loading="eager"
+            />
+          </Link>
+        </div>
+      </section>
 
       <section className="py-6 sm:py-14 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6">
