@@ -475,17 +475,20 @@ export default function HomePage() {
         onSecondaryClick={() => setIsBrandPanelOpen(true)}
       />
 
-      <section className="py-8 sm:py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
-          {/* Section Header */}
-          <div className="text-center mb-6">
-            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-wider text-neutral-900 uppercase">
+      <section className="py-8 sm:py-14 bg-white">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+          {/* Luxury Centered Header */}
+          <div className="text-center mb-6 sm:mb-10">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] sm:tracking-[0.25em] text-neutral-900 uppercase"
+              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
+            >
               SHOP BY CATEGORY
             </h2>
           </div>
 
-          {/* Strict 2-Column Mobile Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
+          {/* Strict 2-Column Grid on Mobile, 4-Column on Desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {categoryStrips.map((item) => {
               const displayLabel =
                 item.key === 'sale' ? 'HALF SHIRT' :
@@ -499,19 +502,20 @@ export default function HomePage() {
                   className="flex flex-col items-center group w-full cursor-pointer"
                   aria-label={`${displayLabel} collection`}
                 >
-                  {/* Square/Sharp Corner Image Box */}
-                  <div className="relative w-full aspect-[3/4] overflow-hidden rounded-none bg-neutral-100">
+                  {/* Uncropped Vertical Card Box */}
+                  <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
-                      className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-500 ease-out"
                       loading="lazy"
+                      onError={handleImageError}
                     />
                   </div>
 
                   {/* Clean Bottom Label */}
-                  <div className="mt-2 sm:mt-3 text-center w-full">
-                    <span className="text-xs sm:text-sm md:text-base font-bold text-neutral-900 tracking-wide uppercase">
+                  <div className="mt-3 text-center w-full px-1">
+                    <span className="text-xs sm:text-sm font-semibold tracking-[0.15em] text-neutral-900 uppercase group-hover:text-neutral-600 transition-colors">
                       {displayLabel}
                     </span>
                   </div>
