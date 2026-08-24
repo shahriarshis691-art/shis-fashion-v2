@@ -198,7 +198,7 @@ export default function Navbar() {
           {/* CENTER: Brand */}
           <div className="flex flex-shrink-0 items-center justify-center">
             <Link to="/" onClick={closeOverlays} className="text-center">
-              <span className="font-display tracking-[0.25em] text-lg sm:text-2xl font-normal text-neutral-900 uppercase">
+              <span className="font-brand tracking-[0.3em] text-lg sm:text-2xl font-light text-neutral-900 uppercase antialiased">
                 SHIS FASHION
               </span>
             </Link>
