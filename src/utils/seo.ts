@@ -141,6 +141,10 @@ function getCollectionTitle(slug: string) {
     return 'Collection'
   }
 
+  if (slug === 'half-shirt') {
+    return "Men's Half Shirt Collection"
+  }
+
   return `${toTitleCase(slug)} Collection`
 }
 

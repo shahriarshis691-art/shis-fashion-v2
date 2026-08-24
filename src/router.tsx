@@ -23,6 +23,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const OrderLookupPage = lazy(() => import('./pages/OrderLookupPage'))
 const SalePage = lazy(() => import('./pages/SalePage'))
+const HalfShirtCollectionPage = lazy(() => import('./pages/HalfShirtCollectionPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -113,6 +114,10 @@ export const router = createBrowserRouter([
       {
         path: 'shop/:category/:productSlug',
         element: withSuspense(<ProductDetailPage />),
+      },
+      {
+        path: 'collections/half-shirt',
+        element: withSuspense(<HalfShirtCollectionPage />),
       },
       {
         path: 'collections/:slug',

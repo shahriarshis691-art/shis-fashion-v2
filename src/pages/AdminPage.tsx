@@ -200,7 +200,7 @@ const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
   denim: 'Allowed: /men?sub=denim',
   kids: 'Allowed: /kids or /kids?sub=kids',
   western: 'Allowed: /women?sub=tunic',
-  sale: 'Allowed: /men?sub=shirts or /shop/mens-shirt',
+  sale: 'Allowed: /collections/half-shirt or /men?sub=half-shirt',
   'new-arrivals': 'Allowed: /shop/new-arrivals or /new-arrivals',
 }
 

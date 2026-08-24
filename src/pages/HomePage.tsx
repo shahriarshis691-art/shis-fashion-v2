@@ -33,7 +33,7 @@ const fallbackCategoryStrips = [
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
-  { key: 'sale', label: 'HALF SHIRT', href: '/men?sub=half-shirt', order: 50, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.imagePosition ?? 'center' },
+  { key: 'sale', label: 'HALF SHIRT', href: '/collections/half-shirt', order: 50, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
 ] as const
 
@@ -181,10 +181,10 @@ const defaultHomepage: HomepageContent = {
     sale: {
       key: 'sale',
       label: 'HALF SHIRT',
-      href: '/men?sub=half-shirt',
+      href: '/collections/half-shirt',
       enabled: true,
       order: 50,
-      coverImage: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image ?? '',
+      coverImage: categoryStripCovers.men,
       images: [],
       updatedAt: null,
     },
