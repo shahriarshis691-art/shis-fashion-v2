@@ -50,19 +50,8 @@ export const Hero: React.FC = () => {
 
   return (
     <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
+      <div className="w-full px-0 sm:px-4 md:px-6">
         <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-[75vh] max-h-[720px] overflow-hidden">
-          {/* Blurred background layer for desktop — fills edge-to-edge */}
-          <div className="absolute inset-0 hidden md:block z-0">
-            <img
-              src={LOCAL_HERO_SLIDES[currentIndex]?.image ?? ''}
-              alt=""
-              className="h-full w-full object-cover object-center scale-110 blur-3xl opacity-40"
-              aria-hidden="true"
-            />
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
-
           {LOCAL_HERO_SLIDES.map((slide, index) => {
             const isActive = index === currentIndex;
 
@@ -77,7 +66,7 @@ export const Hero: React.FC = () => {
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-cover object-[center_20%] md:object-contain md:object-center transition-transform duration-[3000ms] ease-out md:group-hover:scale-105"
+                    className="w-full h-full object-cover object-[center_20%] md:object-center transition-transform duration-[3000ms] ease-out md:group-hover:scale-105"
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
