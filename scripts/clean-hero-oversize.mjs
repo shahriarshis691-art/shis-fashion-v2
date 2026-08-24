@@ -18,28 +18,51 @@ if (!width || !height) {
 
 const overlay = {
   left: 0,
-  top: Math.round(height * 0.505),
-  width: Math.round(width * 0.44),
-  height: Math.round(height * 0.285),
+  top: Math.round(height * 0.518),
+  width: Math.round(width * 0.43),
+  height: Math.round(height * 0.255),
 }
 
-// Plain wall sample from the right background (no typography).
+// Neutral arch wall behind the model (no baked typography).
 const sample = {
-  left: Math.round(width * 0.78),
-  top: Math.round(height * 0.12),
-  width: Math.round(width * 0.16),
-  height: Math.round(height * 0.28),
+  left: Math.round(width * 0.52),
+  top: Math.round(height * 0.14),
+  width: Math.round(width * 0.18),
+  height: Math.round(height * 0.3),
 }
 
-const patch = await sharp(source)
+const sampleStats = await sharp(source).extract(sample).stats()
+const background = {
+  r: Math.round(sampleStats.channels[0]?.mean ?? 210),
+  g: Math.round(sampleStats.channels[1]?.mean ?? 198),
+  b: Math.round(sampleStats.channels[2]?.mean ?? 186),
+}
+
+const basePatch = await sharp({
+  create: {
+    width: overlay.width,
+    height: overlay.height,
+    channels: 3,
+    background,
+  },
+})
+  .blur(0.4)
+  .png()
+  .toBuffer()
+
+const texturePatch = await sharp(source)
   .extract(sample)
-  .modulate({ brightness: 1.03, saturation: 0.92 })
-  .blur(1.2)
+  .blur(2.4)
   .resize(overlay.width, overlay.height, { fit: 'fill' })
+  .linear(1, -8)
+  .png()
   .toBuffer()
 
 await sharp(source)
-  .composite([{ input: patch, left: overlay.left, top: overlay.top }])
+  .composite([
+    { input: basePatch, left: overlay.left, top: overlay.top },
+    { input: texturePatch, left: overlay.left, top: overlay.top, blend: 'soft-light' },
+  ])
   .png({ compressionLevel: 9 })
   .toFile(inputPath)
 
