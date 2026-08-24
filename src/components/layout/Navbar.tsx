@@ -173,7 +173,7 @@ export default function Navbar() {
       <header
         className={`left-0 top-0 z-50 w-full ${
           isHeroOverlay
-            ? 'absolute bg-transparent bg-gradient-to-b from-black/40 via-black/15 to-transparent'
+            ? 'absolute bg-transparent bg-gradient-to-b from-black/40 to-transparent'
             : 'sticky border-b border-neutral-200/60 bg-white/95 backdrop-blur-md'
         }`}
       >
@@ -185,13 +185,7 @@ export default function Navbar() {
               isHeroOverlay ? 'text-white' : 'text-neutral-900'
             }`}
           >
-            {[
-              homepageContent?.navbarBrandPrimary?.trim(),
-              homepageContent?.navbarBrandSecondary?.trim(),
-            ]
-              .filter(Boolean)
-              .join(' ')
-              .toUpperCase() || 'SHIS FASHION'}
+            le reve
           </Link>
 
           <div className="flex items-center gap-5 md:gap-6">
