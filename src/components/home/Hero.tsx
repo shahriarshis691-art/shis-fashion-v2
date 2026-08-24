@@ -5,17 +5,31 @@ import { Link } from 'react-router-dom';
 const LOCAL_HERO_SLIDES = [
   {
     id: 'slide-1',
-    image: '/hero/timeless-oversize-hero.png',
-    title: 'Timeless Oversize Tee Collection',
-    ctaText: 'EXPLORE COLLECTION',
-    link: '/shop?category=women&sub=oversized-tee',
+    image: '/hero/hero-soft-cotton-saree.webp',
+    title: 'Soft Cotton Saree',
+    ctaText: 'SHOP SAREE',
+    link: '/women?sub=saree',
   },
   {
     id: 'slide-2',
+    image: '/hero/hero-premium-casual-shirt.webp',
+    title: 'Premium Casual Shirt',
+    ctaText: 'SHOP SHIRTS',
+    link: '/men?sub=shirts',
+  },
+  {
+    id: 'slide-3',
     image: '/hero/hero-regular-fit-denim.webp',
     title: 'Regular Fit Denim',
     ctaText: 'SHOP DENIM',
     link: '/shop?category=men&sub=denim',
+  },
+  {
+    id: 'slide-4',
+    image: '/hero/timeless-oversize-hero.png',
+    title: 'Timeless Oversize Tee Collection',
+    ctaText: 'EXPLORE COLLECTION',
+    link: '/shop?category=women&sub=oversized-tee',
   }
   // Add additional local images here when available in /public/hero/
 ];
