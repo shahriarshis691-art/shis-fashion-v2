@@ -1,136 +1,167 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { HomepageContent } from '../../firebase/adminService'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
-import { normalizeCatalogImageUrl } from '../../utils/media'
 
-// Fallback carousel when CMS hero image is not set
-const LOCAL_HERO_SLIDES = [
-  {
-    id: 'slide-1',
-    image: '/hero/hero-soft-cotton-saree.webp',
-    title: 'Soft Cotton Saree',
-    ctaText: 'SHOP SAREE',
-    link: '/women?sub=saree',
-  },
-  {
-    id: 'slide-2',
-    image: '/hero/hero-premium-casual-shirt.webp',
-    title: 'Premium Casual Shirt',
-    ctaText: 'SHOP SHIRTS',
-    link: '/men?sub=shirts',
-  },
-  {
-    id: 'slide-3',
-    image: '/hero/hero-regular-fit-denim.webp',
-    title: 'Regular Fit Denim',
-    ctaText: 'SHOP DENIM',
-    link: '/shop?category=men&sub=denim',
-  },
-  {
-    id: 'slide-4',
-    image: '/hero/timeless-oversize-hero.png',
-    title: 'Timeless Oversize Tee Collection',
-    ctaText: 'EXPLORE COLLECTION',
-    link: '/shop?category=women&sub=oversized-tee',
-  },
-]
-
-type HeroSlide = {
+interface HeroSlide {
   id: string
   image: string
   title: string
-  ctaText: string
+  subtitle: string
   link: string
+  tag: string
 }
 
-type HeroContent = Pick<
-  HomepageContent,
-  'heroEyebrow' | 'heroTitle' | 'heroSubtitle' | 'heroCta' | 'heroPrimaryLink' | 'heroImage' | 'heroImageTitle'
->
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    id: 'oversize-tee',
+    image: '/hero/timeless-oversize-hero.png',
+    title: 'TIMELESS OVERSIZE TEE',
+    subtitle: 'Premium Comfort. Everyday Confidence.',
+    link: '/shop?category=women&sub=oversized-tee',
+    tag: 'NEW ARRIVAL',
+  },
+  {
+    id: 'casual-shirt',
+    image: '/hero/hero-premium-casual-shirt.webp',
+    title: 'PREMIUM CASUAL SHIRTS',
+    subtitle: 'Refined Cotton Craftsmanship',
+    link: '/shop?category=men&sub=casual-shirt',
+    tag: 'MEN EDITION',
+  },
+  {
+    id: 'regular-fit-denim',
+    image: '/hero/hero-regular-fit-denim.webp',
+    title: 'SIGNATURE DENIM PANTS',
+    subtitle: 'Regular Fit • Everyday Durability',
+    link: '/shop?category=men&sub=denim-pants',
+    tag: 'ESSENTIALS',
+  },
+  {
+    id: 'soft-cotton-saree',
+    image: '/hero/hero-soft-cotton-saree.webp',
+    title: 'TAT SOFT COTTON SAREE',
+    subtitle: 'Heritage Elegance & Modern Draping',
+    link: '/shop?category=women&sub=saree',
+    tag: 'FESTIVE EDIT',
+  },
+]
 
-function isUsableCmsHeroImage(url?: string) {
-  const value = url?.trim() ?? ''
-  if (!value) {
-    return false
-  }
+const AUTO_ROTATE_MS = 4500
+const SWIPE_THRESHOLD_PX = 48
 
-  const normalized = value.toLowerCase()
-  return !normalized.endsWith('/og-image.svg') && !normalized.endsWith('/og-image.png') && normalized !== '/og-image.svg'
-}
-
-function buildHeroSlides(content?: HeroContent | null): HeroSlide[] {
-  if (!isUsableCmsHeroImage(content?.heroImage)) {
-    return LOCAL_HERO_SLIDES
-  }
-
-  const image = normalizeCatalogImageUrl(content!.heroImage!, 1600, 2000) || content!.heroImage!
-
-  return [
-    {
-      id: 'cms-hero',
-      image,
-      title: content?.heroTitle?.trim() || content?.heroImageTitle?.trim() || 'SHIS Fashion',
-      ctaText: content?.heroCta?.trim() || 'Shop collection',
-      link: content?.heroPrimaryLink?.trim() || '/shop',
-    },
-  ]
-}
-
-export const Hero: React.FC<{ content?: HeroContent | null }> = ({ content = null }) => {
-  const slides = useMemo(() => buildHeroSlides(content), [content])
+export const Hero: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const safeIndex = slides.length ? currentIndex % slides.length : 0
-  const hasMultipleSlides = slides.length > 1
+  const [isPaused, setIsPaused] = useState(false)
+  const touchStartX = useRef<number | null>(null)
   const prefersReducedMotion = usePrefersReducedMotion()
+  const safeIndex = currentIndex % HERO_SLIDES.length
+
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % HERO_SLIDES.length)
+  }, [])
+
+  const prevSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+  }, [])
 
   useEffect(() => {
-    if (!hasMultipleSlides || prefersReducedMotion) {
+    if (isPaused || prefersReducedMotion) {
       return
     }
 
-    const timer = window.setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length)
-    }, 4000)
+    const interval = window.setInterval(nextSlide, AUTO_ROTATE_MS)
+    return () => window.clearInterval(interval)
+  }, [isPaused, nextSlide, prefersReducedMotion])
 
-    return () => window.clearInterval(timer)
-  }, [hasMultipleSlides, prefersReducedMotion, slides.length])
+  const onTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null
+  }
 
-  const heading = content?.heroTitle?.trim() || 'SHIS Fashion Bangladesh'
+  const onTouchEnd = (event: React.TouchEvent) => {
+    if (touchStartX.current === null) {
+      return
+    }
+
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current
+    const delta = endX - touchStartX.current
+    touchStartX.current = null
+
+    if (Math.abs(delta) < SWIPE_THRESHOLD_PX) {
+      return
+    }
+
+    if (delta < 0) {
+      nextSlide()
+    } else {
+      prevSlide()
+    }
+  }
 
   return (
-    <section className="relative w-full bg-[#EAE5DF] overflow-hidden">
-      <h1 className="sr-only">{heading}</h1>
-      {content?.heroSubtitle?.trim() ? (
-        <p className="sr-only">{content.heroSubtitle.trim()}</p>
-      ) : null}
-      <div className="w-full px-0 sm:px-4 md:px-6">
-        <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-[75vh] max-h-[720px] overflow-hidden">
-          {slides.map((slide, index) => {
+    <section
+      className="relative w-full bg-[#f6f4f0] border-b border-neutral-200/70 select-none overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsPaused(false)
+        }
+      }}
+      aria-roledescription="carousel"
+      aria-label="Campaign hero banners"
+    >
+      <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
+
+      <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
+        <div
+          className="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[2/1] lg:aspect-[2.3/1] max-h-[760px] overflow-hidden bg-[#ebe6df]"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          {HERO_SLIDES.map((slide, index) => {
             const isActive = index === safeIndex
 
             return (
               <div
                 key={slide.id}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${
+                  isActive
+                    ? 'opacity-100 scale-100 z-10'
+                    : 'opacity-0 scale-[1.02] z-0 pointer-events-none'
                 }`}
+                aria-hidden={!isActive}
               >
-                <Link className="block relative w-full h-full group" to={slide.link}>
+                <Link className="block relative w-full h-full group cursor-pointer" to={slide.link}>
                   <img
                     src={slide.image}
                     alt={slide.title}
                     width={1600}
                     height={2000}
-                    className="w-full h-full object-cover object-[center_20%] md:object-center transition-transform duration-[3000ms] ease-out md:group-hover:scale-105"
+                    className="w-full h-full object-cover object-[center_25%] sm:object-center transition-transform duration-[4000ms] ease-out group-hover:scale-105"
                     loading={index === 0 ? 'eager' : 'lazy'}
                     fetchPriority={index === 0 ? 'high' : 'auto'}
                     decoding="async"
+                    draggable={false}
                   />
 
-                  <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 sm:bottom-10">
-                    <span className="inline-flex items-center justify-center bg-neutral-900/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold tracking-[0.2em] uppercase px-6 py-3 shadow-xl hover:bg-black transition-all">
-                      {slide.ctaText} &rarr;
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent sm:from-black/40 sm:via-black/5 sm:to-transparent" />
+
+                  <div className="absolute bottom-6 left-4 right-4 sm:bottom-10 sm:left-10 sm:right-auto z-20 flex flex-col items-start text-left max-w-lg">
+                    <span className="inline-block bg-white/90 backdrop-blur-md text-neutral-900 text-[9px] sm:text-[10px] font-bold tracking-[0.25em] px-2.5 py-1 uppercase mb-2">
+                      {slide.tag}
+                    </span>
+                    <h2
+                      className="text-lg sm:text-2xl md:text-3xl font-normal tracking-[0.15em] text-white uppercase"
+                      style={{ fontFamily: 'var(--font-brand)' }}
+                    >
+                      {slide.title}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-neutral-200 mt-1 line-clamp-1 font-light tracking-wider">
+                      {slide.subtitle}
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-2 bg-neutral-900/90 text-white text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase px-5 py-2.5 backdrop-blur-md group-hover:bg-white group-hover:text-neutral-900 transition-all">
+                      SHOP COLLECTION &rarr;
                     </span>
                   </div>
                 </Link>
@@ -138,24 +169,47 @@ export const Hero: React.FC<{ content?: HeroContent | null }> = ({ content = nul
             )
           })}
 
-          {hasMultipleSlides && (
-            <div className="absolute bottom-3 sm:bottom-4 right-4 sm:right-8 z-30 flex items-center gap-2 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full">
-              {slides.map((slide, dotIdx) => (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => setCurrentIndex(dotIdx)}
-                  aria-current={dotIdx === safeIndex ? 'true' : undefined}
-                  className={`transition-all duration-300 rounded-full ${
-                    dotIdx === safeIndex
-                      ? 'w-6 h-1.5 bg-white'
-                      : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
-                  }`}
-                  aria-label={`Go to slide ${dotIdx + 1}`}
-                />
-              ))}
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              prevSlide()
+            }}
+            className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 items-center justify-center rounded-full bg-white/60 hover:bg-white text-neutral-900 backdrop-blur-md transition-all"
+            aria-label="Previous slide"
+          >
+            &#8592;
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              nextSlide()
+            }}
+            className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 items-center justify-center rounded-full bg-white/60 hover:bg-white text-neutral-900 backdrop-blur-md transition-all"
+            aria-label="Next slide"
+          >
+            &#8594;
+          </button>
+
+          <div className="absolute bottom-4 right-4 sm:right-8 z-30 flex items-center gap-2 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full">
+            {HERO_SLIDES.map((slide, dotIdx) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => setCurrentIndex(dotIdx)}
+                aria-current={dotIdx === safeIndex ? 'true' : undefined}
+                className={`transition-all duration-500 rounded-full h-1.5 ${
+                  dotIdx === safeIndex
+                    ? 'w-6 bg-white'
+                    : 'w-1.5 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${dotIdx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

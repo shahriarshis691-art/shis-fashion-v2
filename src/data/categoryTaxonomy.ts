@@ -22,12 +22,12 @@ interface SegmentConfig {
 }
 
 const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
-  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt', 'half-shirt', 'half-shirts'] },
+  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt', 'half-shirt', 'half-shirts', 'casual-shirt', 'casual-shirts'] },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'] },
   { slug: 't-shirts', label: 'T-Shirts', aliases: ['t-shirts', 'unisex-tee'] },
-  { slug: 'denim', label: 'Denim', aliases: ['denim'] },
+  { slug: 'denim', label: 'Denim', aliases: ['denim', 'denim-pants', 'denim-pant'] },
   { slug: 'pants', label: 'Pants', aliases: ['pants'] },
   { slug: 'jackets', label: 'Jackets', aliases: ['jackets'] },
   { slug: 'accessories', label: 'Accessories', aliases: ['accessories', 'gift', 'couples'] },

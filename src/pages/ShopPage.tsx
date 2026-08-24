@@ -231,7 +231,9 @@ export default function ShopPage() {
   const listingStateSnapshotRef = useRef('')
   const didTrackInitialListingStateRef = useRef(false)
 
-  const querySegment = normalizeSegmentFromQuery(searchParams.get('segment'))
+  const querySegment = normalizeSegmentFromQuery(
+    searchParams.get('segment') ?? searchParams.get('category'),
+  )
   const rawQuerySubcategory = searchParams.get('sub')
   const searchQuery = searchParams.get('q')?.trim() ?? ''
   const dedicatedListing = getDedicatedListingFromPath(location.pathname)
@@ -308,6 +310,15 @@ export default function ShopPage() {
         },
         { replace: true },
       )
+    }
+
+    const rawCategory = params.get('category')?.trim().toLowerCase() ?? ''
+    if (rawCategory) {
+      if (!params.get('segment') && (rawCategory === 'women' || rawCategory === 'men' || rawCategory === 'kids' || rawCategory === 'all')) {
+        params.set('segment', rawCategory)
+      }
+      params.delete('category')
+      shouldReplace = true
     }
 
     const rawSegment = params.get('segment')?.trim().toLowerCase() ?? ''
