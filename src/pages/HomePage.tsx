@@ -548,7 +548,92 @@ export default function HomePage() {
                       aspectClassName="aspect-[21/9]"
                     />
                   </div>
-                ) : null}
+      ) : null}
+
+      {products.length > 0 ? (
+        <section className="py-12 sm:py-16 bg-neutral-50/50">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6">
+            {/* Section Header */}
+            <div className="text-center mb-8 sm:mb-12">
+              <span className="text-xs tracking-[0.25em] text-neutral-500 uppercase block mb-2 font-medium">
+                Curated Selection
+              </span>
+              <h2
+                className="text-xl sm:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
+                style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
+              >
+                ALL PRODUCTS
+              </h2>
+            </div>
+
+            {/* Responsive Product Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {products.map((product) => {
+                const mapped = mapAdminProductToShopProduct(product)
+                const displayPrice = mapped.price || ''
+                const displayComparePrice = mapped.comparePrice || ''
+
+                return (
+                  <Link
+                    key={mapped.id}
+                    to={`/shop/${mapped.category}/${mapped.slug}`}
+                    className="group flex flex-col bg-white overflow-hidden border border-neutral-100 hover:shadow-md transition-all duration-300"
+                  >
+                    {/* Product Image Frame */}
+                    <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100">
+                      <LuxuryImage
+                        src={mapped.image || CATALOG_IMAGE_PLACEHOLDER}
+                        alt={mapped.name}
+                        width={960}
+                        height={1280}
+                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                        widths={[320, 480, 768, 960]}
+                        className="h-full w-full"
+                        aspectClassName="aspect-[3/4]"
+                        imgClassName="h-full w-full object-cover object-top rounded-none group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                      {mapped.newArrival && (
+                        <span className="absolute top-2 left-2 bg-neutral-900 text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase">
+                          NEW
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Product Details */}
+                    <div className="p-3 sm:p-4 flex flex-col flex-grow justify-between text-center">
+                      <div>
+                        <p className="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-widest mb-1">
+                          {mapped.category}
+                        </p>
+                        <h3 className="text-xs sm:text-sm font-medium text-neutral-900 line-clamp-1 group-hover:text-neutral-600 transition-colors">
+                          {mapped.name}
+                        </h3>
+                      </div>
+
+                      <div className="mt-2 flex items-center justify-center gap-2">
+                        <span className="text-xs sm:text-sm font-bold text-neutral-900">{displayPrice}</span>
+                        {displayComparePrice && (
+                          <span className="text-[10px] sm:text-xs text-neutral-400 line-through">{displayComparePrice}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* View All Button */}
+            <div className="mt-10 text-center">
+              <Link
+                to="/shop"
+                className="inline-block border border-neutral-900 text-neutral-900 px-8 py-3 text-xs sm:text-sm font-semibold tracking-widest uppercase hover:bg-neutral-900 hover:text-white transition-all duration-300"
+              >
+                VIEW FULL CATALOG
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
                 <p className="mt-4 text-sm text-black/70">
                   <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
                   {homepageContent.brandSignatureText}
