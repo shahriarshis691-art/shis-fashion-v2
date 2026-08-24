@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
@@ -16,7 +16,6 @@ import {
 import { parseBDT } from '../utils/currency'
 import {
   type ShopSegment,
-  SEGMENT_TABS,
   getSegmentDescription,
   getSubcategoriesForSegment,
   matchesSegmentByAlias,
@@ -27,13 +26,10 @@ import {
   isKnownListingSlug,
 } from '../data/categoryTaxonomy'
 import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdentity'
-import { pickCampaignSearch } from '../utils/attribution'
 import { applyNotFoundSeo } from '../utils/seo'
 import NotFoundPage from './NotFoundPage'
 
 type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
-
-const LISTING_PAGE_SIZE = 24
 
 interface ProductFilters {
   inStockOnly: boolean
@@ -181,6 +177,90 @@ function getSegmentForCanonicalSubcategory(subcategorySlug: string): Exclude<Sho
   return null
 }
 
+interface SubcategoryCarouselProps {
+  title?: string
+  viewAllHref?: string
+  products: ShopProduct[]
+  onToggleWishlist: (product: ShopProduct) => void
+  isInWishlist: (id: string) => boolean
+}
+
+function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, isInWishlist }: SubcategoryCarouselProps) {
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const [activeDot, setActiveDot] = useState(0)
+  const visibleCount = 2
+  const dotCount = Math.max(1, Math.ceil(products.length / visibleCount))
+
+  const handleScroll = useCallback(() => {
+    const el = carouselRef.current
+    if (!el) return
+    const cardWidth = el.clientWidth / visibleCount
+    if (cardWidth <= 0) return
+    const leftmostCardIndex = Math.round(el.scrollLeft / cardWidth)
+    setActiveDot(() => Math.min(dotCount - 1, Math.max(0, Math.floor(leftmostCardIndex / visibleCount))))
+  }, [dotCount, visibleCount])
+
+  const scrollToDot = useCallback((index: number) => {
+    const el = carouselRef.current
+    if (!el) return
+    const cardWidth = el.clientWidth / visibleCount
+    const targetScroll = index * visibleCount * cardWidth
+    el.scrollBy({ left: targetScroll, behavior: 'smooth' })
+  }, [visibleCount])
+
+  if (!products.length) return null
+
+  return (
+    <div className="mb-8 sm:mb-10">
+      {title && (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs sm:text-sm font-semibold tracking-[0.2em] text-neutral-900 uppercase">{title}</h3>
+          {viewAllHref && (
+            <Link to={viewAllHref} className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500 hover:text-neutral-900 underline underline-offset-4">
+              View All
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Mobile Carousel */}
+      <div className="md:hidden">
+        <div
+          ref={carouselRef}
+          onScroll={handleScroll}
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {products.map((product) => (
+            <div key={product.id} className="snap-start flex-none w-[calc(50%-0.375rem)]">
+              <ProductCard product={product} onToggleWishlist={onToggleWishlist} isInWishlist={isInWishlist(String(product.id))} />
+            </div>
+          ))}
+        </div>
+
+        {dotCount > 1 && (
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {Array.from({ length: dotCount }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollToDot(i)}
+                className={`h-1.5 rounded-full transition-all ${i === activeDot ? 'w-4 bg-neutral-900' : 'w-1.5 bg-neutral-300 hover:bg-neutral-400'}`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Grid */}
+      <div className="hidden md:grid md:grid-cols-4 gap-4 sm:gap-6">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isInWishlist={isInWishlist(String(product.id))} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function ShopPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -194,8 +274,7 @@ export default function ShopPage() {
   const [filters, setFilters] = useState<ProductFilters>({
     inStockOnly: false,
     newOnly: false,
-  })
-  const [loadedByKey, setLoadedByKey] = useState<Record<string, number>>({})
+   })
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
   const emptyStateKeysSeenRef = useRef<Set<string>>(new Set())
@@ -221,7 +300,6 @@ export default function ShopPage() {
   const segmentSubcategories = getSubcategoriesForSegment(effectiveSegment)
   const activeSubcategory = dedicatedListing?.subcategory ?? normalizeSubcategoryFromQuery(effectiveSegment, rawQuerySubcategory)
   const effectiveSubcategory = dedicatedListing?.subcategory ?? (legacySubcategory || activeSubcategory)
-  const listingKey = `${effectiveSegment}|${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery.toLowerCase()}|${location.pathname}`
   const isInvalidListing = Boolean(legacyCategorySlug && !isKnownListingSlug(legacyCategorySlug))
 
   useEffect(() => {
@@ -488,10 +566,6 @@ export default function ShopPage() {
     return sorted
   })()
 
-  const visibleCount = loadedByKey[listingKey] ?? LISTING_PAGE_SIZE
-  const pagedProducts = visibleProducts.slice(0, visibleCount)
-  const hasMoreProducts = visibleCount < visibleProducts.length
-
   useEffect(() => {
     if (!ready) {
       return
@@ -674,29 +748,6 @@ export default function ShopPage() {
     visibleProducts.length,
   ])
 
-  const navigateWithSubcategory = (subcategory: string) => {
-    const dedicatedPath = getDedicatedListingPath(effectiveSegment, subcategory)
-    if (dedicatedPath) {
-      navigate({
-        pathname: dedicatedPath,
-        search: pickCampaignSearch(location.search),
-      })
-      return
-    }
-
-    const params = new URLSearchParams(location.search)
-    if (subcategory === 'all') {
-      params.delete('sub')
-    } else {
-      params.set('sub', subcategory)
-    }
-
-    navigate({
-      pathname: dedicatedListing ? `/${effectiveSegment}` : location.pathname,
-      search: params.toString() ? `?${params.toString()}` : '',
-    })
-  }
-
   const clearSearch = () => {
     const params = new URLSearchParams(location.search)
     params.delete('q')
@@ -713,123 +764,82 @@ export default function ShopPage() {
   return (
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
       <Container>
-        <div className="flex flex-col gap-5">
-          <div>
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">{dedicatedListing?.eyebrow ?? 'SHIS Listing'}</p>
-            <h1 className="mt-1 text-h1 text-black">{dedicatedListing?.title ?? oversizedTeeHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? oversizedTeeHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
-            {searchQuery ? (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
-                >
-                  Clear search
-                </button>
-              </div>
-            ) : null}
-          </div>
+        {/* Breadcrumb */}
+        <nav className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55">
+          <Link to="/" className="hover:text-black">Home</Link>
+          <span>/</span>
+          <span className="text-black">{heading.title}</span>
+          {effectiveSubcategory !== 'all' ? (
+            <>
+              <span>/</span>
+              <span className="text-black">{segmentSubcategories.find((s) => s.slug === effectiveSubcategory)?.label ?? effectiveSubcategory}</span>
+            </>
+          ) : null}
+        </nav>
 
-          <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {SEGMENT_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => {
-                  setFilters({ inStockOnly: false, newOnly: false })
-                  navigate({
-                    pathname: tab.path,
-                    search: pickCampaignSearch(location.search),
-                  })
-                }}
-                className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                  effectiveSegment === tab.key
-                    ? 'border-black text-black'
-                    : 'border-transparent text-black/65 hover:text-black'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-            <Link
-              to={{ pathname: '/sale', search: pickCampaignSearch(location.search) }}
-              className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
-            >
-              Sale
-            </Link>
-            <Link
-              to={{ pathname: '/shop/new-arrivals', search: pickCampaignSearch(location.search) }}
-              className="ui-interactive whitespace-nowrap border-b border-transparent px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/65 hover:text-black"
-            >
-              New Arrivals
-            </Link>
-          </div>
-
-          {segmentSubcategories.length ? (
-            <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Header */}
+        <div>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? oversizedTeeHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? oversizedTeeHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          {searchQuery ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
               <button
                 type="button"
-                onClick={() => navigateWithSubcategory('all')}
-                className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                  activeSubcategory === 'all'
-                    ? 'border-black text-black'
-                    : 'border-transparent text-black/65 hover:text-black'
-                }`}
+                onClick={clearSearch}
+                className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
               >
-                All
+                Clear search
               </button>
-              {segmentSubcategories.map((subcategory) => (
-                <button
-                  key={subcategory.slug}
-                  type="button"
-                  onClick={() => navigateWithSubcategory(subcategory.slug)}
-                  className={`ui-interactive whitespace-nowrap border-b px-0.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                    activeSubcategory === subcategory.slug
-                      ? 'border-black text-black'
-                      : 'border-transparent text-black/65 hover:text-black'
-                  }`}
-                >
-                  {subcategory.label}
-                </button>
-              ))}
             </div>
           ) : null}
+        </div>
 
-          <div className="flex items-center justify-between border-b border-black/10 pb-2.5">
+        {/* Filter Header */}
+        <div className="flex items-center justify-between border-b border-black/10 pb-2.5">
+          <button
+            type="button"
+            onClick={() => setIsFilterSheetOpen(true)}
+            className="ui-interactive flex items-center gap-2 border border-black/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black sm:hidden"
+            aria-label="Filter & Sort"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M4 6h16" />
+              <path d="M4 12h10" />
+              <path d="M4 18h6" />
+            </svg>
+            Filter
+          </button>
+          <p className="text-caption uppercase tracking-[0.14em] text-black/55 sm:hidden">
+            {visibleProducts.length} products
+          </p>
+
+          <div className="hidden items-center gap-2 sm:flex">
+            <label htmlFor="desktop-sort" className="text-caption uppercase tracking-[0.12em] text-black/55">
+              Sort
+            </label>
+            <select
+              id="desktop-sort"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortOption)}
+              className="border border-black/20 px-2.5 py-1.5 text-xs text-black outline-none"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="hidden sm:block">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">
               {visibleProducts.length} products
             </p>
-
-            <div className="hidden items-center gap-2 sm:flex">
-              <label htmlFor="desktop-sort" className="text-caption uppercase tracking-[0.12em] text-black/55">
-                Sort
-              </label>
-              <select
-                id="desktop-sort"
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value as SortOption)}
-                className="border border-black/20 px-2.5 py-1.5 text-xs text-black outline-none"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsFilterSheetOpen(true)}
-              className="ui-interactive border border-black/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black sm:hidden"
-            >
-              Filter & Sort
-            </button>
           </div>
         </div>
 
+        {/* Subcategory Carousels */}
         {!ready ? (
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
@@ -841,32 +851,47 @@ export default function ShopPage() {
             ))}
           </ProductListingGrid>
         ) : (
-          <ProductListingGrid className="mt-4 sm:mt-5">
-            {pagedProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onToggleWishlist={handleToggleWishlist}
-                isInWishlist={isInWishlist(String(product.id))}
-              />
-            ))}
-          </ProductListingGrid>
-        )}
+          (() => {
+            const getSubcategoryMeta = (slug: string) => {
+              const sub = segmentSubcategories.find((s) => s.slug === slug)
+              if (sub) {
+                return {
+                  label: sub.label.toUpperCase(),
+                  href: sub.path ?? `/${effectiveSegment}?sub=${sub.slug}`,
+                }
+              }
+              return {
+                label: slug.toUpperCase(),
+                href: `/${effectiveSegment}`,
+              }
+            }
 
-        {ready && hasMoreProducts ? (
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setLoadedByKey((current) => ({
-                ...current,
-                [listingKey]: (current[listingKey] ?? LISTING_PAGE_SIZE) + LISTING_PAGE_SIZE,
-              }))}
-              className="ui-interactive border border-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
-            >
-              Load more
-            </button>
-          </div>
-        ) : null}
+            const productsBySubcategory: Record<string, ShopProduct[]> = {}
+            for (const product of visibleProducts) {
+              const normalizedCategory = resolveCanonicalSubcategorySlug(product.category)
+              const matchedSub = segmentSubcategories.find((sub) =>
+                sub.slug === normalizedCategory || sub.aliases.some((alias) => alias.toLowerCase() === normalizedCategory),
+              )
+              const key = matchedSub?.slug ?? (effectiveSubcategory === 'all' ? 'other' : effectiveSubcategory)
+              if (!productsBySubcategory[key]) productsBySubcategory[key] = []
+              productsBySubcategory[key].push(product)
+            }
+
+            return Object.entries(productsBySubcategory).map(([slug, products]) => {
+              const meta = getSubcategoryMeta(slug)
+              return (
+                <SubcategoryCarousel
+                  key={slug}
+                  title={effectiveSubcategory === 'all' ? meta.label : undefined}
+                  viewAllHref={effectiveSubcategory === 'all' ? meta.href : undefined}
+                  products={products}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist}
+                />
+              )
+            })
+          })()
+        )}
 
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8">
@@ -874,7 +899,7 @@ export default function ShopPage() {
               <p className="text-caption uppercase tracking-[0.14em] text-black/55">{searchQuery ? 'No matching products' : 'No products found'}</p>
               <p className="mt-2 text-sm text-black/70">
                 {searchQuery
-                  ? `Nothing matched “${searchQuery}”. Try another search or browse the full collection.`
+                  ? `Nothing matched “{searchQuery}”. Try another search or browse the full collection.`
                   : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination.'}
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-3">

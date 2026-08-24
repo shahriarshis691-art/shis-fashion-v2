@@ -13,17 +13,16 @@ interface ProductCardProps {
 
 const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInWishlist, onProductClick }: ProductCardProps) {
   const imageToneClass = isDemoImageUrl(product.image) ? 'shis-media-tone' : ''
-  const isSoldOut = (product.stock ?? 0) <= 0
 
   return (
     <article className="product-card luxury-tap min-w-0">
       <Link to={`/shop/${product.category}/${product.slug}`} className="group block" onClick={() => onProductClick?.(product)}>
-        <div className="relative">
+        <div className="relative w-full aspect-[3/4] bg-neutral-100 overflow-hidden">
           <LuxuryImage
             src={product.image}
             alt={product.name}
             width={960}
-            height={1200}
+            height={1280}
             sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
             widths={[320, 480, 768, 960]}
             hover
@@ -37,24 +36,23 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
                 event.stopPropagation()
                 onToggleWishlist(product)
               }}
-              className="absolute right-2 top-2 border border-black/15 bg-white/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black hover:bg-white"
+              className="absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 backdrop-blur-sm text-neutral-800 hover:text-black hover:bg-white transition-all shadow-sm sm:h-9 sm:w-9"
               aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-              {isInWishlist ? '♥' : '♡'}
+              <svg viewBox="0 0 24 24" className="h-4 w-4 sm:h-5 sm:w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
             </button>
           ) : null}
         </div>
-        {isSoldOut ? (
-          <p className="mt-2 text-center text-caption font-semibold uppercase tracking-[0.12em] text-black">
-            Sold out
-          </p>
-        ) : null}
-        <div className={`product-card-meta ${isSoldOut ? 'pt-1.5' : 'pt-2'}`}>
-          <h3 className="line-clamp-1 text-sm font-medium text-black">{product.name}</h3>
-          <div className="mt-0.5 flex items-center gap-2">
-            <p className="text-sm font-semibold text-black">{product.price}</p>
+        <div className="pt-2.5 sm:pt-3 text-left">
+          <h3 className="line-clamp-2 text-xs sm:text-sm font-bold text-neutral-900 leading-snug group-hover:text-neutral-600 transition-colors">
+            {product.name}
+          </h3>
+          <div className="mt-1 flex items-center gap-2">
+            <p className="text-xs sm:text-sm font-normal text-neutral-800">{product.price}</p>
             {product.comparePrice ? (
-              <p className="text-xs text-black/50 line-through">{product.comparePrice}</p>
+              <p className="text-[10px] sm:text-xs text-neutral-400 line-through">{product.comparePrice}</p>
             ) : null}
           </div>
         </div>
