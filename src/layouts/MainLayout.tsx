@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import NewsletterCard from '../components/layout/NewsletterCard'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
@@ -13,9 +14,8 @@ import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata, setRuntimeSeoOverrides } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
 import { captureCampaignAttribution } from '../utils/attribution'
-import { subscribeToHomepageContent } from '../firebase/adminService'
+import { subscribeToHomepageContent, subscribeNewsletter } from '../firebase/adminService'
 import { normalizeCatalogImageUrl } from '../utils/media'
-import { subscribeNewsletter } from '../firebase/adminService'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
@@ -242,6 +242,7 @@ export default function MainLayout() {
           <Outlet />
         </PageTransition>
       </main>
+      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? <NewsletterCard /> : null}
       <Footer />
       <DeferredChrome>
         <Suspense fallback={null}>
