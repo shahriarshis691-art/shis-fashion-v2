@@ -185,7 +185,7 @@ export default function Navbar() {
               isHeroOverlay ? 'text-white' : 'text-neutral-900'
             }`}
           >
-            le reve
+            SHIS FASHION
           </Link>
 
           <div className="flex items-center gap-5 md:gap-6">
