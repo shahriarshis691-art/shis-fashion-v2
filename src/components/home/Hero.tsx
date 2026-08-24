@@ -77,7 +77,7 @@ export const Hero: React.FC = () => {
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-cover object-[center_20%] md:object-contain md:object-center transition-transform duration-[3000ms] ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover object-[center_20%] md:object-contain md:object-center transition-transform duration-[3000ms] ease-out md:group-hover:scale-105"
                     loading={index === 0 ? 'eager' : 'lazy'}
                     decoding="async"
                   />

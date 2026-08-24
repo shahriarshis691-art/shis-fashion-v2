@@ -167,7 +167,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/60 bg-white/95 backdrop-blur-md transition-all">
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200/60 bg-white/95 md:backdrop-blur-md transition-all">
         <div className="mx-auto flex h-16 sm:h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
           {/* LEFT: Mobile Hamburger */}
           <div className="flex items-center justify-start flex-1 md:hidden">

@@ -15,7 +15,11 @@ export default function SmoothScroll() {
       const reduced = getPrefersReducedMotion()
       root.classList.toggle('luxury-scroll', !reduced)
       root.classList.toggle('reduce-motion', reduced)
-      root.style.scrollBehavior = reduced ? 'auto' : 'smooth'
+      if (reduced || window.innerWidth < 768) {
+        root.style.scrollBehavior = 'auto'
+      } else {
+        root.style.scrollBehavior = 'smooth'
+      }
     }
 
     apply()

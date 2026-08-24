@@ -207,3 +207,53 @@ button,
     gap: 0.5rem 0.25rem; /* row-gap column-gap */
   }
 }
+
+/* Prevent hover transforms on touch devices to avoid repaints */
+@media (hover: none) {
+  .group:hover .media-hover,
+  .group:active .media-hover,
+  .group:hover img,
+  .group:active img {
+    transform: none !important;
+  }
+}
+
+/* Mobile scroll performance */
+@supports (overscroll-behavior: none) {
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+/* Smooth horizontal scrolling for native momentum */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scroll-behavior: auto;
+}
+
+/* Hide scrollbar for horizontal sections while preserving scrollability */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Performance: GPU hint for hero slides */
+.luxury-reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-distance), 0);
+  transition:
+    opacity var(--reveal-duration) var(--ease-luxury),
+    transform var(--reveal-duration) var(--ease-luxury);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.luxury-reveal.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
