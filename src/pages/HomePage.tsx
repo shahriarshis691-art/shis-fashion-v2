@@ -98,9 +98,9 @@ const defaultHomepage: HomepageContent = {
   heroPrimaryLink: '/shop?category=women&sub=oversized-tee',
   heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
-  heroImage: '/hero/hero-premium-casual-shirt.webp',
-  heroImageTitle: 'Homepage hero image',
-  heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
+  heroImage: '/hero/main-hero-image.2.png',
+  heroImageTitle: 'The Monsoon Edit - SHIS Fashion',
+  heroImageDescription: 'Homepage hero banner for The Monsoon Edit campaign.',
   heroVideo: '',
   bannerImage: '',
   bannerImageTitle: 'Featured banner image',
@@ -440,7 +440,7 @@ export default function HomePage() {
       {heroEnabled ? <Hero /> : null}
 
       {shopByCategoryEnabled ? (
-      <section className="py-6 sm:py-14 bg-white">
+      <section id="featured-collections" className="scroll-mt-20 bg-white py-6 sm:py-14">
         <div className="max-w-7xl mx-auto px-3 sm:px-6">
           {/* Header */}
           <div className="text-center mb-5 sm:mb-10">
