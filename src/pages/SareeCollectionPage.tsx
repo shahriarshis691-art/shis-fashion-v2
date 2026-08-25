@@ -79,8 +79,40 @@ export default function SareeCollectionPage() {
   }, [])
 
   return (
-    <section className="bg-white px-3 pb-24 pt-6 sm:px-4 lg:px-8 lg:pb-20 lg:pt-10">
-      <Container>
+    <section className="bg-white pb-24">
+      {/* Poster already embeds brand typography — CTA only, no duplicate H1 overlay */}
+      <div className="relative flex h-[65dvh] w-full items-end justify-center overflow-hidden bg-neutral-950 pb-8 sm:h-[80vh] sm:pb-12">
+        <img
+          src="/hero/hero-soft-cotton-saree.webp"
+          alt="Tat Soft Cotton Saree - SHIS Fashion"
+          width={1920}
+          height={2400}
+          sizes="100vw"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-top sm:object-center"
+          onError={(event) => {
+            event.currentTarget.src = '/og-image.svg'
+          }}
+        />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
+
+        <div className="relative z-10 text-center">
+          <a
+            href="#saree-grid"
+            onClick={(event) => {
+              event.preventDefault()
+              document.getElementById('saree-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-xl transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:text-sm"
+          >
+            Shop Saree Collection
+          </a>
+        </div>
+      </div>
+
+      <Container className="pt-6 lg:pt-10">
         <nav aria-label="Breadcrumb" className="text-[12px] font-normal tracking-wide text-neutral-400">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
@@ -138,19 +170,21 @@ export default function SareeCollectionPage() {
           </label>
         </div>
 
-        <ProductListingGrid className="mt-8" id="saree-collection">
-          {visibleProducts.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              href={`/sarees/${product.slug}`}
-              prefetchModule={prefetchSareeProductDetail}
-              priority={index < 4}
-              onToggleWishlist={handleToggleWishlist}
-              isInWishlist={isInWishlist(String(product.id))}
-            />
-          ))}
-        </ProductListingGrid>
+        <div id="saree-grid">
+          <ProductListingGrid className="mt-8">
+            {visibleProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                href={`/sarees/${product.slug}`}
+                prefetchModule={prefetchSareeProductDetail}
+                priority={index < 4}
+                onToggleWishlist={handleToggleWishlist}
+                isInWishlist={isInWishlist(String(product.id))}
+              />
+            ))}
+          </ProductListingGrid>
+        </div>
       </Container>
     </section>
   )
