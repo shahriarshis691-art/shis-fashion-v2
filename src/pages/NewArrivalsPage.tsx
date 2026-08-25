@@ -37,15 +37,21 @@ export default function NewArrivalsPage() {
   const pagedProducts = newArrivals.slice(0, visibleCount)
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
-        <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-6 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">New arrivals</p>
-          <h1 className="mt-2 text-3xl font-semibold text-[var(--color-text)]">Fresh drops, just in</h1>
-          <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">The latest pieces from SHIS Fashion, curated for a premium, modern wardrobe.</p>
-        </div>
+        <header className="mt-2 sm:mt-4">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">New Arrivals</h1>
+            <span className="text-xs font-normal text-neutral-400">
+              {newArrivals.length} Product{newArrivals.length === 1 ? '' : 's'}
+            </span>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+            The latest pieces from SHIS Fashion, curated for a premium, modern wardrobe.
+          </p>
+        </header>
         {newArrivals.length ? (
-          <ProductListingGrid className="mt-6 md:mt-8">
+          <ProductListingGrid className="mt-8">
             {pagedProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -57,17 +63,17 @@ export default function NewArrivalsPage() {
             ))}
           </ProductListingGrid>
         ) : (
-          <div className="mt-8 border border-dashed border-black/20 px-4 py-8 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No new arrivals yet</p>
-            <p className="mt-2 text-sm text-black/70">Browse the full collection while the next drop is prepared.</p>
+          <div className="mt-16 py-10 text-center">
+            <p className="text-sm text-neutral-500">No new arrivals yet</p>
+            <p className="mt-2 text-sm text-neutral-400">Browse the full collection while the next drop is prepared.</p>
           </div>
         )}
         {newArrivals.length > visibleCount ? (
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <button
               type="button"
               onClick={() => setVisibleCount((current) => current + LISTING_PAGE_SIZE)}
-              className="ui-interactive border border-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              className="text-xs font-medium text-neutral-900 underline underline-offset-4"
             >
               Load more
             </button>

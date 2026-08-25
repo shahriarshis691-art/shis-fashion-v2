@@ -85,7 +85,7 @@ const GENDER_OPTIONS: Array<{ value: GenderFilter; label: string }> = [
 ]
 
 const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
-  { value: 'newest', label: 'Newest Arrivals' },
+  { value: 'newest', label: 'Newest' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
 ]
@@ -96,6 +96,8 @@ export default function KidsOversizedTeeCollectionPage() {
   const [sizeFilter, setSizeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
@@ -127,6 +129,8 @@ export default function KidsOversizedTeeCollectionPage() {
 
     return sorted
   }, [genderFilter, sizeFilter, sortBy, searchQuery])
+
+  const activeFilterCount = Number(sizeFilter !== 'all') + Number(Boolean(searchQuery.trim()))
 
   useEffect(() => {
     const canonicalPath = location.pathname.startsWith('/collections/')
@@ -176,7 +180,7 @@ export default function KidsOversizedTeeCollectionPage() {
   }, [location.pathname])
 
   useEffect(() => {
-    if (!sizeGuideOpen) {
+    if (!sizeGuideOpen && !filterDrawerOpen) {
       return
     }
 
@@ -185,39 +189,29 @@ export default function KidsOversizedTeeCollectionPage() {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [sizeGuideOpen])
+  }, [sizeGuideOpen, filterDrawerOpen])
 
   return (
-    <section className="bg-[var(--color-bg)] pb-24 pt-6 md:pb-20 md:pt-10">
+    <section className="bg-white pb-24 pt-6 md:pb-20 md:pt-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
-        <nav aria-label="Breadcrumb" className="text-[11px] uppercase tracking-[0.14em] text-black/55">
-          <ol className="flex flex-wrap items-center gap-2">
+        <nav aria-label="Breadcrumb" className="text-[12px] font-normal tracking-wide text-neutral-400">
+          <ol className="flex flex-wrap items-center gap-1.5">
             <li>
-              <Link to="/" className="hover:text-black">
+              <Link to="/" className="transition-colors hover:text-neutral-700">
                 Home
               </Link>
             </li>
-            <li aria-hidden>/</li>
-            <li>
-              <Link to="/kids" className="hover:text-black">
-                Kids
-              </Link>
+            <li aria-hidden className="text-neutral-300">
+              /
             </li>
-            <li aria-hidden>/</li>
-            <li className="text-black">Oversized Tees</li>
+            <li className="text-neutral-500">Kids</li>
           </ol>
         </nav>
 
-        <header className="relative z-10 mt-5 border-b border-black/10 pb-8 text-center">
-          <p className="text-caption uppercase tracking-[0.14em] text-black/55">Kids Edit</p>
-          <h1
-            className="mx-auto mt-1 max-w-3xl text-xl font-normal uppercase tracking-[0.16em] text-neutral-900 sm:text-2xl md:text-3xl"
-            style={{ fontFamily: 'var(--font-brand)' }}
-          >
-            Kids Oversized Collection
-          </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-black/70">
-            Premium heavy cotton, relaxed drop-shoulder fits designed for modern kids.
+        <header className="mt-8 text-center sm:mt-10">
+          <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Kids Collection</h1>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-neutral-500">
+            Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
           </p>
           <a
             href="#kids-collection"
@@ -225,133 +219,235 @@ export default function KidsOversizedTeeCollectionPage() {
               event.preventDefault()
               document.getElementById('kids-collection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="relative z-20 mt-6 inline-flex items-center justify-center rounded-full bg-[var(--color-text)] px-6 py-2.5 text-sm font-medium tracking-wide text-white uppercase transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--color-ink)] active:scale-[0.98] sm:px-8 sm:py-3 sm:text-base"
+            className="mt-6 inline-flex text-sm font-medium tracking-wide text-neutral-900 underline underline-offset-8 transition-opacity hover:opacity-70"
           >
             Shop Now
           </a>
         </header>
 
-        <div id="kids-collection" className="mt-6 scroll-mt-24 flex flex-col gap-4 border border-black/10 bg-white p-3 sm:p-4">
-          <label className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
-            Search
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search graphic tees, plain tees, colors..."
-              className="mt-2 w-full border border-black/15 bg-[#fdfbf9] px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-neutral-900 outline-none"
-            />
-          </label>
+        <div id="kids-collection" className="scroll-mt-24 py-8 sm:py-12">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">Kids Collection</h2>
+              <span className="text-xs font-normal text-neutral-400">
+                {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
+              </span>
+            </div>
 
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">Filter by Gender</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {GENDER_OPTIONS.map((option) => (
+            <div className="flex items-center gap-1 self-end sm:gap-2">
+              <button
+                type="button"
+                onClick={() => setSearchOpen((open) => !open)}
+                className={`inline-flex h-9 w-9 items-center justify-center text-neutral-500 transition-colors hover:text-neutral-900 ${
+                  searchOpen || searchQuery ? 'text-neutral-900' : ''
+                }`}
+                aria-label="Search"
+                aria-expanded={searchOpen}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+              </button>
+
+              <label className="sr-only" htmlFor="kids-sort">
+                Sort by
+              </label>
+              <select
+                id="kids-sort"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as SortOption)}
+                className="h-9 max-w-[9.5rem] appearance-none bg-transparent pr-5 text-xs font-medium text-neutral-600 outline-none hover:text-neutral-900"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%737373' stroke-width='1.5'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E\")",
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.15rem center',
+                }}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={() => setFilterDrawerOpen(true)}
+                className="relative inline-flex h-9 items-center gap-1.5 px-2 text-xs font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+                aria-label="Open filters"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M4 6h16" />
+                  <path d="M7 12h10" />
+                  <path d="M10 18h4" />
+                </svg>
+                Filter
+                {activeFilterCount > 0 ? (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-900 px-1 text-[10px] text-white">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSizeGuideOpen(true)}
+                className="hidden h-9 px-2 text-xs font-medium text-neutral-500 underline-offset-4 transition-colors hover:text-neutral-900 hover:underline sm:inline-flex sm:items-center"
+              >
+                Size Guide
+              </button>
+            </div>
+          </div>
+
+          {searchOpen ? (
+            <div className="mt-4">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search kids styles…"
+                autoFocus
+                className="w-full border-0 border-b border-neutral-200 bg-transparent py-2.5 text-[16px] text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-900"
+              />
+            </div>
+          ) : null}
+
+          <div className="mt-5 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+            {GENDER_OPTIONS.map((option) => {
+              const active = genderFilter === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setGenderFilter(option.value)}
+                  className={`shrink-0 px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
+                      : 'text-neutral-500 hover:text-neutral-800'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {visibleProducts.length ? (
+            <ProductListingGrid className="mt-8">
+              {visibleProducts.map((product, index) => (
+                <AarongProductCard
+                  key={product.id}
+                  product={product}
+                  href={`/kids/${product.slug}`}
+                  prefetchModule={prefetchKidsProductDetail}
+                  priority={index < 4}
+                  isInWishlist={isInWishlist(String(product.id))}
+                  onToggleWishlist={(item) => handleToggleWishlist(item as KidsOversizedTeeProduct)}
+                />
+              ))}
+            </ProductListingGrid>
+          ) : (
+            <div className="mt-16 py-10 text-center">
+              <p className="text-sm text-neutral-500">No matching styles</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setGenderFilter('all')
+                  setSizeFilter('all')
+                  setSortBy('newest')
+                  setSearchQuery('')
+                }}
+                className="mt-4 text-xs font-medium text-neutral-900 underline underline-offset-4"
+              >
+                Reset filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {filterDrawerOpen ? (
+        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Filters">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            aria-label="Close filters"
+            onClick={() => setFilterDrawerOpen(false)}
+          />
+          <aside className="luxury-sheet-up absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto overscroll-contain bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 sm:h-full sm:max-h-none sm:w-[min(22rem,100vw)] sm:border-l sm:border-neutral-100">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-neutral-900">Filters</p>
+              <button
+                type="button"
+                onClick={() => setFilterDrawerOpen(false)}
+                className="text-xs font-medium text-neutral-500 hover:text-neutral-900"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-xs font-medium tracking-wide text-neutral-500">Size</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSizeFilter('all')}
+                  className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
+                    sizeFilter === 'all' ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
+                  }`}
+                >
+                  All
+                </button>
+                {KIDS_OVERSIZED_SIZES.map((size) => (
                   <button
-                    key={option.value}
+                    key={size}
                     type="button"
-                    onClick={() => setGenderFilter(option.value)}
-                    className={`border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-                      genderFilter === option.value ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-black/15 text-neutral-800'
+                    onClick={() => setSizeFilter(size)}
+                    className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
+                      sizeFilter === size ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
                     }`}
                   >
-                    {option.label}
+                    {size}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-wrap items-end gap-2">
-              <button
-                type="button"
-                onClick={() => setSizeGuideOpen(true)}
-                className="border border-black/15 bg-[#fdfbf9] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-800 hover:border-neutral-900"
-              >
-                Size Guide
-              </button>
-
-              <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
-                Sort
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as SortOption)}
-                  className="border border-black/15 bg-[#fdfbf9] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-900 outline-none"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">Filter by Size</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setSizeFilter('all')}
-                className={`border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-                  sizeFilter === 'all' ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-black/15 text-neutral-800'
-                }`}
-              >
-                All
-              </button>
-              {KIDS_OVERSIZED_SIZES.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => setSizeFilter(size)}
-                  className={`border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-                    sizeFilter === size ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-black/15 text-neutral-800'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60">
-            {visibleProducts.length} products
-          </p>
-        </div>
-
-        {visibleProducts.length ? (
-          <ProductListingGrid className="mt-6">
-            {visibleProducts.map((product, index) => (
-              <AarongProductCard
-                key={product.id}
-                product={product}
-                href={`/kids/${product.slug}`}
-                prefetchModule={prefetchKidsProductDetail}
-                priority={index < 4}
-                isInWishlist={isInWishlist(String(product.id))}
-                onToggleWishlist={(item) => handleToggleWishlist(item as KidsOversizedTeeProduct)}
-              />
-            ))}
-          </ProductListingGrid>
-        ) : (
-          <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No matching styles</p>
             <button
               type="button"
               onClick={() => {
-                setGenderFilter('all')
-                setSizeFilter('all')
-                setSortBy('newest')
-                setSearchQuery('')
+                setFilterDrawerOpen(false)
+                setSizeGuideOpen(true)
               }}
-              className="ui-interactive mt-4 inline-flex border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              className="mt-6 text-xs font-medium text-neutral-700 underline underline-offset-4 sm:hidden"
             >
-              Reset filters
+              Size Guide
             </button>
-          </div>
-        )}
-      </div>
+
+            <div className="mt-8 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSizeFilter('all')
+                  setSearchQuery('')
+                }}
+                className="flex-1 py-3 text-xs font-medium text-neutral-600"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDrawerOpen(false)}
+                className="flex-1 bg-neutral-900 py-3 text-xs font-semibold text-white"
+              >
+                Show {visibleProducts.length} results
+              </button>
+            </div>
+          </aside>
+        </div>
+      ) : null}
 
       {sizeGuideOpen ? (
         <Suspense fallback={null}>

@@ -42,15 +42,21 @@ export default function SalePage() {
     <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
       <Container>
         <div>
-          <p className="text-caption uppercase tracking-[0.14em] text-black/55">Sale</p>
-          <h1 className="mt-1 text-h1 text-black">Sale pieces</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">
-            Reduced-price pieces from the current SHIS Fashion catalog. Only products with a marked compare-at price appear here.
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Sale</h1>
+            {ready ? (
+              <span className="text-xs font-normal text-neutral-400">
+                {saleProducts.length} Product{saleProducts.length === 1 ? '' : 's'}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+            Reduced-price pieces from the current SHIS Fashion catalog.
           </p>
         </div>
 
         {!ready ? (
-          <ProductListingGrid className="mt-6" aria-hidden="true">
+          <ProductListingGrid className="mt-8" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`sale-skeleton-${index}`}>
                 <div className="aspect-[3/4] animate-pulse bg-black/5" />
@@ -60,7 +66,7 @@ export default function SalePage() {
             ))}
           </ProductListingGrid>
         ) : saleProducts.length ? (
-          <ProductListingGrid className="mt-6">
+          <ProductListingGrid className="mt-8">
             {saleProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -72,12 +78,12 @@ export default function SalePage() {
             ))}
           </ProductListingGrid>
         ) : (
-          <div className="mt-8 border border-dashed border-black/20 px-4 py-8 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No sale items right now</p>
-            <p className="mt-2 text-sm text-black/70">Browse the full collection while the next marked-down pieces are prepared.</p>
+          <div className="mt-16 py-10 text-center">
+            <p className="text-sm text-neutral-500">No sale items right now</p>
+            <p className="mt-2 text-sm text-neutral-400">Browse the full collection while the next marked-down pieces are prepared.</p>
             <Link
               to="/shop"
-              className="ui-interactive mt-4 inline-flex border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              className="mt-4 inline-flex text-xs font-medium text-neutral-900 underline underline-offset-4"
             >
               Shop all
             </Link>

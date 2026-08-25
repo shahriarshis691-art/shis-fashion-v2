@@ -103,29 +103,31 @@ export default function SareeCollectionPage() {
           </ol>
         </nav>
 
-        <header className="mt-5 max-w-3xl border-b border-neutral-100 pb-6">
-          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">Women&apos;s Edit</p>
-          <h1
-            className="mt-1 text-xl font-normal uppercase tracking-[0.14em] text-neutral-900 sm:text-2xl md:text-3xl"
-            style={{ fontFamily: 'var(--font-brand)' }}
-          >
-            Saree Collection
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600">
+        <header className="mt-8 sm:mt-10">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Saree Collection</h1>
+            <span className="text-xs font-normal text-neutral-400">
+              {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
+            </span>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.
           </p>
         </header>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-            {visibleProducts.length} styles
-          </p>
-          <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            <span>Sort by</span>
+        <div className="mt-8 flex items-center justify-end border-b border-neutral-100 pb-3 sm:mt-10">
+          <label className="flex items-center gap-2 text-xs font-medium text-neutral-500">
+            <span className="sr-only sm:not-sr-only">Sort</span>
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="border border-neutral-200 bg-white px-3 py-2 text-[11px] font-medium uppercase tracking-[0.1em] text-neutral-900 outline-none"
+              className="appearance-none bg-transparent pr-5 text-xs font-medium text-neutral-700 outline-none hover:text-neutral-900"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%737373' stroke-width='1.5'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E\")",
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.15rem center',
+              }}
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -136,7 +138,7 @@ export default function SareeCollectionPage() {
           </label>
         </div>
 
-        <ProductListingGrid className="mt-6" id="saree-collection">
+        <ProductListingGrid className="mt-8" id="saree-collection">
           {visibleProducts.map((product, index) => (
             <ProductCard
               key={product.id}

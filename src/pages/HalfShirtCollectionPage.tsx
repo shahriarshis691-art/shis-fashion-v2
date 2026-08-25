@@ -108,30 +108,78 @@ export default function HalfShirtCollectionPage() {
           </ol>
         </nav>
 
-        <header className="mt-5 max-w-3xl border-b border-black/10 pb-6">
-          <p className="text-caption uppercase tracking-[0.14em] text-black/55">Men&apos;s Edit</p>
-          <h1
-            className="mt-1 text-xl font-normal uppercase tracking-[0.16em] text-neutral-900 sm:text-2xl md:text-3xl"
-            style={{ fontFamily: 'var(--font-brand)' }}
-          >
-            Men&apos;s Half Shirt Collection
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
+        <header className="mt-8 sm:mt-10">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">
+              Men&apos;s Half Shirt Collection
+            </h1>
+            <span className="text-xs font-normal text-neutral-400">
+              {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
+            </span>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Breathable fabrics, relaxed fits &amp; effortless everyday styling.
           </p>
         </header>
 
-        <div className="mt-6 flex flex-col gap-4 border border-black/10 bg-[#fafafa] p-3 sm:p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60">
-              {visibleProducts.length} styles
-            </p>
-            <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-black/65">
-              <span>Sort by</span>
+        <div className="mt-8 flex flex-col gap-4 border-b border-neutral-100 pb-4 sm:mt-10 sm:flex-row sm:items-center sm:justify-between">
+          <div className="-mx-4 flex gap-1 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+            {(['all', 'Regular', 'Oversized'] as const).map((fit) => {
+              const active = selectedFit === fit
+              return (
+                <button
+                  key={fit}
+                  type="button"
+                  onClick={() => setSelectedFit(fit)}
+                  className={`shrink-0 px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
+                      : 'text-neutral-500 hover:text-neutral-800'
+                  }`}
+                >
+                  {fit === 'all' ? 'All' : fit}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 self-end text-xs font-medium text-neutral-600">
+            <label className="flex items-center gap-1.5">
+              <span className="text-neutral-400">Size</span>
+              <select
+                value={selectedSize}
+                onChange={(event) => setSelectedSize(event.target.value)}
+                className="bg-transparent text-neutral-700 outline-none"
+              >
+                <option value="all">All</option>
+                {SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span className="text-neutral-400">Color</span>
+              <select
+                value={selectedColor}
+                onChange={(event) => setSelectedColor(event.target.value)}
+                className="max-w-[7rem] bg-transparent text-neutral-700 outline-none"
+              >
+                <option value="all">All</option>
+                {colorOptions.map((color) => (
+                  <option key={color} value={color}>
+                    {color}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span className="text-neutral-400">Sort</span>
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as SortOption)}
-                className="border border-black/15 bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-900 outline-none"
+                className="bg-transparent text-neutral-700 outline-none"
               >
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -141,57 +189,10 @@ export default function HalfShirtCollectionPage() {
               </select>
             </label>
           </div>
-
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
-              Size
-              <select
-                value={selectedSize}
-                onChange={(event) => setSelectedSize(event.target.value)}
-                className="border border-black/15 bg-white px-3 py-2 text-[11px] font-medium uppercase tracking-[0.1em] text-neutral-900 outline-none"
-              >
-                <option value="all">All sizes</option>
-                {SIZE_OPTIONS.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
-              Color
-              <select
-                value={selectedColor}
-                onChange={(event) => setSelectedColor(event.target.value)}
-                className="border border-black/15 bg-white px-3 py-2 text-[11px] font-medium uppercase tracking-[0.1em] text-neutral-900 outline-none"
-              >
-                <option value="all">All colors</option>
-                {colorOptions.map((color) => (
-                  <option key={color} value={color}>
-                    {color}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex flex-col gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
-              Fabric / Fit
-              <select
-                value={selectedFit}
-                onChange={(event) => setSelectedFit(event.target.value as FitFilter)}
-                className="border border-black/15 bg-white px-3 py-2 text-[11px] font-medium uppercase tracking-[0.1em] text-neutral-900 outline-none"
-              >
-                <option value="all">All fits</option>
-                <option value="Regular">Regular</option>
-                <option value="Oversized">Oversized</option>
-              </select>
-            </label>
-          </div>
         </div>
 
         {visibleProducts.length ? (
-          <ProductListingGrid className="mt-6">
+          <ProductListingGrid className="mt-8">
             {visibleProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -203,9 +204,9 @@ export default function HalfShirtCollectionPage() {
             ))}
           </ProductListingGrid>
         ) : (
-          <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">No matching half shirts</p>
-            <p className="mt-2 text-sm text-black/70">Try clearing a filter to see more styles.</p>
+            <div className="mt-16 py-10 text-center">
+            <p className="text-sm text-neutral-500">No matching half shirts</p>
+            <p className="mt-2 text-sm text-neutral-400">Try clearing a filter to see more styles.</p>
             <button
               type="button"
               onClick={() => {
@@ -214,7 +215,7 @@ export default function HalfShirtCollectionPage() {
                 setSelectedFit('all')
                 setSortBy('featured')
               }}
-              className="ui-interactive mt-4 inline-flex border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+              className="mt-4 text-xs font-medium text-neutral-900 underline underline-offset-4"
             >
               Reset filters
             </button>
