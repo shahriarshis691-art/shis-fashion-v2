@@ -122,6 +122,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     || pathname.startsWith('/product/')
     || pathname.startsWith('/brands/')
     || pathname.startsWith('/kids/')
+    || pathname.startsWith('/sarees/')
 }
 
 function createCanonicalUrl(pathname: string) {
@@ -232,6 +233,14 @@ function buildBreadcrumbItems(pathname: string) {
 
   if (segments[0] === 'kids') {
     items.push({ name: 'Kids', item: `${SITE_URL}/kids` })
+    if (segments[1]) {
+      items.push({ name: toTitleCase(segments[1].replace(/-/g, ' ')), item: `${SITE_URL}${normalizedPath}` })
+    }
+    return items
+  }
+
+  if (segments[0] === 'sarees' || segments[0] === 'saree') {
+    items.push({ name: 'Sarees', item: `${SITE_URL}/sarees` })
     if (segments[1]) {
       items.push({ name: toTitleCase(segments[1].replace(/-/g, ' ')), item: `${SITE_URL}${normalizedPath}` })
     }

@@ -6,6 +6,9 @@ function hasStickyMobileCta(pathname: string) {
   if (/^\/kids\/[^/]+\/?$/.test(pathname)) {
     return true
   }
+  if (/^\/sarees\/[^/]+\/?$/.test(pathname)) {
+    return true
+  }
   if (/^\/shop\/[^/]+\/[^/]+\/?$/.test(pathname)) {
     return true
   }

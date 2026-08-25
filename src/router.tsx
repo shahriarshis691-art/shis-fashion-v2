@@ -26,6 +26,8 @@ const SalePage = lazy(() => import('./pages/SalePage'))
 const HalfShirtCollectionPage = lazy(() => import('./pages/HalfShirtCollectionPage'))
 const KidsOversizedTeeCollectionPage = lazy(() => import('./pages/KidsOversizedTeeCollectionPage'))
 const KidsProductDetailPage = lazy(() => import('./pages/KidsProductDetailPage'))
+const SareeCollectionPage = lazy(() => import('./pages/SareeCollectionPage'))
+const SareeProductDetailPage = lazy(() => import('./pages/SareeProductDetailPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -95,7 +97,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'sarees',
-        element: withSuspense(<ShopPage />),
+        element: withSuspense(<SareeCollectionPage />),
+      },
+      {
+        path: 'sarees/:productSlug',
+        element: withSuspense(<SareeProductDetailPage />),
       },
       {
         path: 'saree',
