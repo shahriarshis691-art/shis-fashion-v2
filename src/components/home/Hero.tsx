@@ -15,6 +15,14 @@ interface HeroSlide {
 const heroSlides: HeroSlide[] = [
   {
     id: 1,
+    image: '/hero/kid-homepage.jpg',
+    title: 'Everyday Kids Edit',
+    btnText: 'Shop Kids',
+    link: '/kids',
+    alt: 'Kids Everyday Wear',
+  },
+  {
+    id: 2,
     image: '/hero/main-hero-image2.jpg',
     title: 'Monsoon Saree Collection',
     btnText: 'Shop Saree',
@@ -22,20 +30,12 @@ const heroSlides: HeroSlide[] = [
     alt: 'The Monsoon Saree Collection',
   },
   {
-    id: 2,
+    id: 3,
     image: '/hero/denim-homepage.jpg',
     title: 'Signature Denim Series',
     btnText: 'Shop Denim',
     link: '/men',
     alt: 'Premium Denim Collection',
-  },
-  {
-    id: 3,
-    image: '/hero/kid-homepage.jpg',
-    title: 'Everyday Kids Edit',
-    btnText: 'Shop Kids',
-    link: '/kids',
-    alt: 'Kids Everyday Wear',
   },
 ]
 
@@ -92,7 +92,7 @@ export const Hero: React.FC = () => {
 
   return (
     <section
-      className="relative w-full select-none overflow-hidden bg-neutral-950"
+      className="relative w-full max-w-[100vw] select-none overflow-x-hidden bg-neutral-950"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
@@ -106,8 +106,9 @@ export const Hero: React.FC = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
+      {/* Mobile: aspect-ratio (no fixed vh crop). Desktop: tall viewport cover. */}
       <div
-        className="relative min-h-[75dvh] w-full overflow-hidden bg-neutral-950 sm:h-[85vh] lg:h-[90vh]"
+        className="relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[85vh] lg:h-[90vh]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -128,15 +129,21 @@ export const Hero: React.FC = () => {
                 <img
                   src={slide.image}
                   alt={slide.alt}
-                  width={1920}
-                  height={2400}
+                  width={1200}
+                  height={1500}
                   sizes="100vw"
-                  className="absolute inset-0 h-full w-full object-cover object-top sm:object-[center_10%]"
+                  className="absolute inset-0 h-full w-full object-contain object-center sm:object-cover sm:object-[center_10%]"
+                  style={{ width: '100%' }}
                   loading={isLcpCandidate ? 'eager' : 'lazy'}
                   fetchPriority={isLcpCandidate ? 'high' : 'low'}
                   decoding={isLcpCandidate ? 'sync' : 'async'}
                   draggable={false}
                   onError={(event) => {
+                    const src = event.currentTarget.src
+                    if (src.includes('kid-homepage.jpg')) {
+                      event.currentTarget.src = '/hero/kid-homepage.jpeg'
+                      return
+                    }
                     event.currentTarget.src = '/og-image.svg'
                   }}
                 />
@@ -144,7 +151,7 @@ export const Hero: React.FC = () => {
                 <div className="h-full w-full bg-neutral-950" aria-hidden />
               )}
 
-              <div className="absolute inset-x-0 bottom-8 z-20 flex flex-col items-center justify-center sm:bottom-12">
+              <div className="absolute inset-x-0 bottom-6 z-20 flex flex-col items-center justify-center px-4 sm:bottom-12">
                 <Link
                   to={slide.link}
                   tabIndex={isActive ? 0 : -1}
@@ -158,7 +165,7 @@ export const Hero: React.FC = () => {
           )
         })}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-36 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-28 bg-gradient-to-t from-black/50 via-black/10 to-transparent sm:h-36 sm:from-black/70" />
 
         <button
           type="button"
@@ -185,7 +192,7 @@ export const Hero: React.FC = () => {
           &#8594;
         </button>
 
-        <div className="absolute right-4 bottom-4 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md sm:right-8">
+        <div className="absolute right-3 bottom-3 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md sm:right-8 sm:bottom-4">
           {heroSlides.map((slide, dotIdx) => (
             <button
               key={slide.id}
