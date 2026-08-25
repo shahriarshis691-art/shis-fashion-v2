@@ -192,9 +192,49 @@ export default function KidsOversizedTeeCollectionPage() {
   }, [sizeGuideOpen, filterDrawerOpen])
 
   return (
-    <section className="bg-white pb-24 pt-6 md:pb-20 md:pt-10">
+    <section className="bg-white pb-24">
+      <div className="relative flex h-[65vh] w-full items-end justify-center overflow-hidden bg-neutral-950 sm:h-[75vh] sm:items-center lg:h-[80vh]">
+        <img
+          src="/kids/kids-hero.jpg"
+          alt="Kids Collection"
+          width={1920}
+          height={2400}
+          sizes="100vw"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_20%]"
+          onError={(event) => {
+            event.currentTarget.src = '/og-image.svg'
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent sm:bg-black/30" />
+
+        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
+          <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/80 uppercase sm:text-xs">
+            Exclusive Launch
+          </span>
+          <h1 className="text-2xl font-bold tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
+            Kids Collection
+          </h1>
+          <p className="mt-2 max-w-md text-xs font-light text-neutral-200 sm:text-sm">
+            Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
+          </p>
+          <a
+            href="#kids-grid"
+            onClick={(event) => {
+              event.preventDefault()
+              document.getElementById('kids-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-md transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:py-3 sm:text-sm"
+          >
+            Shop Now
+          </a>
+        </div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
-        <nav aria-label="Breadcrumb" className="text-[12px] font-normal tracking-wide text-neutral-400">
+        <nav aria-label="Breadcrumb" className="pt-6 text-[12px] font-normal tracking-wide text-neutral-400">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
               <Link to="/" className="transition-colors hover:text-neutral-700">
@@ -208,27 +248,10 @@ export default function KidsOversizedTeeCollectionPage() {
           </ol>
         </nav>
 
-        <header className="mt-8 text-center sm:mt-10">
-          <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Kids Collection</h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-neutral-500">
-            Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
-          </p>
-          <a
-            href="#kids-collection"
-            onClick={(event) => {
-              event.preventDefault()
-              document.getElementById('kids-collection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
-            className="mt-6 inline-flex text-sm font-medium tracking-wide text-neutral-900 underline underline-offset-8 transition-opacity hover:opacity-70"
-          >
-            Shop Now
-          </a>
-        </header>
-
-        <div id="kids-collection" className="scroll-mt-24 py-8 sm:py-12">
+        <div id="kids-grid" className="scroll-mt-24 py-8 sm:py-12">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-baseline gap-3">
-              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">Kids Collection</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">Shop</h2>
               <span className="text-xs font-normal text-neutral-400">
                 {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
               </span>
