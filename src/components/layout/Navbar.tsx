@@ -119,7 +119,7 @@ function MobileAccordionGroup({
 }
 
 const iconButtonClass =
-  'ui-interactive inline-flex h-10 w-10 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500'
+  'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500 md:h-10 md:w-10'
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -181,9 +181,9 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-[#eeeeee] bg-white">
-        <div className="mx-auto grid w-full max-w-[1400px] grid-cols-3 items-center px-4 py-3 sm:px-6 md:px-10 md:py-4">
-          {/* Left — menu + desktop nav */}
-          <div className="flex items-center justify-start gap-1 md:gap-6">
+        <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-3 sm:h-[68px] sm:px-6 md:h-[70px] md:px-10">
+          {/* Left — hamburger (+ desktop nav) */}
+          <div className="relative z-10 flex min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
             <button
               type="button"
               onClick={() => {
@@ -195,12 +195,12 @@ export default function Navbar() {
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                   <path d="M6 6 18 18" />
                   <path d="M18 6 6 18" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                   <path d="M4 7h16" />
                   <path d="M4 12h16" />
                   <path d="M4 17h16" />
@@ -226,25 +226,28 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Center — brand logo (always horizontally centered) */}
-          <div className="flex items-center justify-center">
-            <Link to="/" onClick={closeOverlays} className="inline-flex items-center justify-center" aria-label="SHIS Fashion home">
-              <img
-                src={BRAND_LOGO}
-                alt="SHIS Fashion"
-                width={180}
-                height={48}
-                decoding="async"
-                className="h-8 w-auto object-contain sm:h-9 md:h-11 lg:h-12"
-                onError={(event) => {
-                  event.currentTarget.src = '/shis-logo.svg'
-                }}
-              />
-            </Link>
-          </div>
+          {/* Center — brand logo (absolute center on all breakpoints) */}
+          <Link
+            to="/"
+            onClick={closeOverlays}
+            className="absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+            aria-label="SHIS Fashion home"
+          >
+            <img
+              src={BRAND_LOGO}
+              alt="SHIS Fashion"
+              width={220}
+              height={52}
+              decoding="async"
+              className="h-[48px] w-auto max-h-[52px] origin-center scale-[1.25] object-contain object-center sm:h-[50px] md:h-12 md:max-h-12 md:scale-100 lg:h-[48px]"
+              onError={(event) => {
+                event.currentTarget.src = '/shis-logo.svg'
+              }}
+            />
+          </Link>
 
-          {/* Right — search, account, cart */}
-          <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+          {/* Right — compact utility icons */}
+          <div className="relative z-10 flex flex-1 items-center justify-end gap-3 md:gap-3.5">
             <button
               type="button"
               onClick={() => {
@@ -255,14 +258,14 @@ export default function Navbar() {
               aria-label="Search"
               aria-expanded={isSearchOpen}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </button>
 
             <Link to="/track-order" onClick={closeOverlays} className={iconButtonClass} aria-label="Account / track order">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
               </svg>
@@ -274,13 +277,13 @@ export default function Navbar() {
               className={`${iconButtonClass} relative`}
               aria-label={`Shopping bag, ${itemCount} items`}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                 <path d="M3 6h18" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {itemCount > 0 ? (
-                <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-950 px-1 text-[9px] font-semibold text-white">
+                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-950 px-1 text-[9px] font-semibold text-white">
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               ) : null}
@@ -328,7 +331,7 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4.25rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(5rem+env(safe-area-inset-top))]">
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] sm:top-[calc(4.25rem+env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
             <p className="px-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Menu</p>
             <div className="mt-2 grid gap-2" aria-label="Site menu">
               {mobileMenuGroups.map((group) => (
