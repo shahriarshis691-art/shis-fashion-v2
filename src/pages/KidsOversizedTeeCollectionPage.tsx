@@ -193,9 +193,9 @@ export default function KidsOversizedTeeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      <div className="relative flex h-[65vh] w-full items-end justify-center overflow-hidden bg-neutral-950 sm:h-[75vh] sm:items-center lg:h-[80vh]">
+      <div className="relative flex h-[60dvh] w-full items-end justify-center overflow-hidden bg-neutral-950 sm:h-[75vh] sm:items-center lg:h-[80vh]">
         <img
-          src="/kids/kids-hero.jpg"
+          src="/hero/kids/kids-hero2.jpg"
           alt="Kids Collection"
           width={1920}
           height={2400}
@@ -203,24 +203,24 @@ export default function KidsOversizedTeeCollectionPage() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_20%]"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           onError={(event) => {
             event.currentTarget.src = '/og-image.svg'
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent sm:bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
 
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
-          <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/80 uppercase sm:text-xs">
+          <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/90 uppercase sm:text-xs">
             Exclusive Launch
           </span>
           <h1
             style={{ color: '#ffffff' }}
-            className="!text-white text-center text-3xl font-serif font-bold tracking-[0.25em] uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-4xl md:text-5xl lg:text-6xl"
+            className="!text-white text-center text-3xl font-serif font-bold tracking-[0.2em] uppercase drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)] sm:text-5xl lg:text-6xl"
           >
             KIDS COLLECTION
           </h1>
-          <p className="mt-2 max-w-md text-xs font-light text-neutral-200 sm:text-sm">
+          <p className="mt-2 max-w-md text-center text-xs font-light text-neutral-200 sm:text-sm">
             Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
           </p>
           <a
@@ -229,7 +229,7 @@ export default function KidsOversizedTeeCollectionPage() {
               event.preventDefault()
               document.getElementById('kids-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-md transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:py-3 sm:text-sm"
+            className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-8 py-2.5 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-lg transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:py-3 sm:text-sm"
           >
             Shop Now
           </a>
