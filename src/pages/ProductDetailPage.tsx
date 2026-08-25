@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
@@ -800,8 +801,8 @@ export default function ProductDetailPage() {
               <span className="text-caption uppercase tracking-[0.12em] text-black/55">You may also like</span>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-x-1.5 gap-y-4 sm:grid-cols-3 sm:gap-x-2.5 sm:gap-y-5 lg:grid-cols-4 lg:gap-x-3.5">
-              {relatedProducts.map((item) => (
+            <ProductListingGrid className="mt-5">
+              {relatedProducts.map((item, index) => (
                 <ProductCard
                   key={item.id}
                   product={{
@@ -817,12 +818,13 @@ export default function ProductDetailPage() {
                     featured: item.featured,
                     newArrival: item.newArrival,
                   }}
+                  priority={index < 4}
                   onToggleWishlist={handleToggleWishlist}
                   isInWishlist={isInWishlist(String(item.id))}
                   onProductClick={() => handleRelatedProductClick(item)}
                 />
               ))}
-            </div>
+            </ProductListingGrid>
           </div>
         ) : null}
       </Container>

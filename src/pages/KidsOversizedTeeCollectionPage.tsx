@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import PrefetchLink from '../components/common/PrefetchLink'
+import AarongProductCard from '../components/shop/AarongProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
@@ -13,7 +14,6 @@ import { parseBDT } from '../utils/currency'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
-
 const prefetchKidsProductDetail = () => import('./KidsProductDetailPage')
 
 type GenderFilter = 'all' | KidsGenderCategory
@@ -89,78 +89,6 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
 ]
-
-function formatKidsListPrice(price: string) {
-  const amount = parseBDT(price)
-  return `Tk ${amount.toLocaleString('en-BD', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
-
-function KidsProductCard({
-  product,
-  priority,
-  onToggleWishlist,
-  wished,
-}: {
-  product: KidsOversizedTeeProduct
-  priority?: boolean
-  onToggleWishlist: (product: KidsOversizedTeeProduct) => void
-  wished: boolean
-}) {
-  const detailHref = `/kids/${product.slug}`
-
-  return (
-    <article className="product-card luxury-tap group relative min-w-0">
-      <PrefetchLink
-        to={detailHref}
-        prefetchModule={prefetchKidsProductDetail}
-        className="block"
-        aria-label={`View ${product.name}`}
-      >
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--color-studio)]">
-          <img
-            src={product.image}
-            alt={product.name}
-            width={640}
-            height={853}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : 'low'}
-            decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
-            onError={(event) => {
-              event.currentTarget.src = '/og-image.svg'
-            }}
-          />
-        </div>
-
-        <h3 className="mt-2 truncate text-left text-[13px] font-medium tracking-tight text-[var(--color-text)] sm:text-[14px]">
-          {product.name}
-        </h3>
-        <p className="text-left text-[12px] font-normal tracking-wide text-[var(--color-ink)] sm:text-[13px]">
-          {formatKidsListPrice(product.price)}
-        </p>
-      </PrefetchLink>
-
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          onToggleWishlist(product)
-        }}
-        className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-red-500"
-        aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
-      >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-      </button>
-    </article>
-  )
-}
 
 export default function KidsOversizedTeeCollectionPage() {
   const location = useLocation()
@@ -393,17 +321,19 @@ export default function KidsOversizedTeeCollectionPage() {
         </div>
 
         {visibleProducts.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
+          <ProductListingGrid className="mt-6">
             {visibleProducts.map((product, index) => (
-              <KidsProductCard
+              <AarongProductCard
                 key={product.id}
                 product={product}
-                priority={index === 0}
-                wished={isInWishlist(String(product.id))}
-                onToggleWishlist={handleToggleWishlist}
+                href={`/kids/${product.slug}`}
+                prefetchModule={prefetchKidsProductDetail}
+                priority={index < 4}
+                isInWishlist={isInWishlist(String(product.id))}
+                onToggleWishlist={(item) => handleToggleWishlist(item as KidsOversizedTeeProduct)}
               />
             ))}
-          </div>
+          </ProductListingGrid>
         ) : (
           <div className="mt-8 border border-dashed border-black/20 px-4 py-10 text-center">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">No matching styles</p>

@@ -46,10 +46,11 @@ export default function NewArrivalsPage() {
         </div>
         {newArrivals.length ? (
           <ProductListingGrid className="mt-6 md:mt-8">
-            {pagedProducts.map((product) => (
+            {pagedProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
+                priority={index < 4}
                 onToggleWishlist={handleToggleWishlist}
                 isInWishlist={isInWishlist(String(product.id))}
               />

@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import AarongProductCard from '../components/shop/AarongProductCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
 import {
   getKidsBadge,
@@ -22,6 +24,7 @@ import { parseBDT } from '../utils/currency'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
+const prefetchKidsProductDetail = () => import('./KidsProductDetailPage')
 const SITE_URL = 'https://www.shisfashion.com'
 
 function getStockLabel(stock: number) {
@@ -32,32 +35,6 @@ function getStockLabel(stock: number) {
     return `Only ${stock} left`
   }
   return 'In stock'
-}
-
-function RelatedKidsCard({ product }: { product: KidsOversizedTeeProduct }) {
-  return (
-    <Link
-      to={`/kids/${product.slug}`}
-      className="group min-w-0 block bg-[#fcfcfc]"
-    >
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#f8f8f8]">
-        <img
-          src={product.image}
-          alt={product.name}
-          width={480}
-          height={640}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]"
-          onError={(event) => {
-            event.currentTarget.src = '/og-image.svg'
-          }}
-        />
-      </div>
-      <h3 className="mt-2.5 line-clamp-1 text-xs font-semibold text-neutral-900 md:text-sm">{product.name}</h3>
-      <p className="mt-0.5 text-xs font-medium text-neutral-800 md:text-sm">{product.price}</p>
-    </Link>
-  )
 }
 
 export default function KidsProductDetailPage() {
@@ -83,15 +60,21 @@ export default function KidsProductDetailPage() {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const [didAddToBag, setDidAddToBag] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [activeProductId, setActiveProductId] = useState(product?.id)
 
-  useEffect(() => {
+  if (product && product.id !== activeProductId) {
+    setActiveProductId(product.id)
     setSelectedSize('')
     setSelectedColor(initialColor)
     setQuantity(1)
     setActiveImageIndex(0)
     setIsZoomOpen(false)
+    setDidAddToBag(false)
+  }
+
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [product?.id, initialColor])
+  }, [product?.id])
 
   useEffect(() => {
     if (!product) {
@@ -545,11 +528,19 @@ export default function KidsProductDetailPage() {
                 View all
               </Link>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-4 md:gap-x-6">
-              {relatedProducts.map((item) => (
-                <RelatedKidsCard key={item.id} product={item} />
+            <ProductListingGrid className="mt-6">
+              {relatedProducts.map((item, index) => (
+                <AarongProductCard
+                  key={item.id}
+                  product={item}
+                  href={`/kids/${item.slug}`}
+                  prefetchModule={prefetchKidsProductDetail}
+                  priority={index < 4}
+                  isInWishlist={isInWishlist(String(item.id))}
+                  onToggleWishlist={(product) => handleToggleWishlist(product as KidsOversizedTeeProduct)}
+                />
               ))}
-            </div>
+            </ProductListingGrid>
           </div>
         ) : null}
       </Container>

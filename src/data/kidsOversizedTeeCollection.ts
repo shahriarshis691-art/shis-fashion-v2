@@ -47,18 +47,17 @@ export const KIDS_SIZE_GUIDE_ROWS = [
  * Unique Kid-Hero designs only (duplicates removed from listing):
  * Alternates below are used only as hover/secondary gallery angles.
  */
-const UNIQUE_KIDS_HEROES = [
-  'Kid-Hero-01.png',
-  'Kid-Hero-03.png',
-  'Kid-Hero-05.png',
-  'Kid-Hero-06.png',
-  'Kid-Hero-07.png',
-  'Kid-Hero-08.png',
-  'Kid-Hero-10.png',
-  'Kid-Hero-11.png',
-] as const
+type UniqueKidsHero =
+  | 'Kid-Hero-01.png'
+  | 'Kid-Hero-03.png'
+  | 'Kid-Hero-05.png'
+  | 'Kid-Hero-06.png'
+  | 'Kid-Hero-07.png'
+  | 'Kid-Hero-08.png'
+  | 'Kid-Hero-10.png'
+  | 'Kid-Hero-11.png'
 
-const HOVER_ALTERNATES: Partial<Record<(typeof UNIQUE_KIDS_HEROES)[number], string>> = {
+const HOVER_ALTERNATES: Partial<Record<UniqueKidsHero, string>> = {
   'Kid-Hero-01.png': 'Kid-Hero-02.png',
   'Kid-Hero-03.png': 'Kid-Hero-04.png',
   'Kid-Hero-08.png': 'Kid-Hero-13.png',
@@ -68,7 +67,7 @@ const kidsHeroImage = (fileName: string) => `/images/products/kids/${fileName}`
 
 function tee(
   index: number,
-  fileName: (typeof UNIQUE_KIDS_HEROES)[number],
+  fileName: UniqueKidsHero,
   name: string,
   genderCategory: KidsGenderCategory,
   price: number,

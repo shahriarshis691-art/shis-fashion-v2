@@ -201,11 +201,17 @@ function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, i
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isInWishlist={isInWishlist(String(product.id))} />
+      <ProductListingGrid>
+        {products.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            priority={index < 4}
+            onToggleWishlist={onToggleWishlist}
+            isInWishlist={isInWishlist(String(product.id))}
+          />
         ))}
-      </div>
+      </ProductListingGrid>
     </div>
   )
 }
@@ -804,7 +810,7 @@ export default function ShopPage() {
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`listing-skeleton-${index}`}>
-                <div className="aspect-[4/5] animate-pulse bg-black/5" />
+                <div className="aspect-[3/4] animate-pulse bg-black/5" />
                 <div className="mt-2 h-3 w-3/4 animate-pulse bg-black/5" />
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>

@@ -217,10 +217,11 @@ export default function CollectionListingPage() {
 
           {collectionProducts.length ? (
             <ProductListingGrid>
-              {collectionProducts.map((product) => (
+              {collectionProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}
+                  priority={index < 4}
                   onToggleWishlist={handleToggleWishlist}
                   isInWishlist={isInWishlist(String(product.id))}
                 />
