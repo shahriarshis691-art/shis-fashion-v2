@@ -202,3 +202,15 @@ img.navbar-brand-logo {
     height: 46px !important;
   }
 }
+
+/* Homepage hero — mobile: natural aspect ratio, no stretch (overrides absolute fill) */
+@media (max-width: 767px) {
+  img.hero-slide-image {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+  }
+}

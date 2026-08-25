@@ -9,6 +9,9 @@ interface HeroSlide {
   btnText: string
   link: string
   alt: string
+  /** Native pixel dimensions — preserves aspect ratio on mobile (no stretch). */
+  width: number
+  height: number
 }
 
 /** Strictly the 3 campaign posters in /public/hero/ (clean filenames). */
@@ -20,6 +23,8 @@ const heroSlides: HeroSlide[] = [
     btnText: 'Shop Kids',
     link: '/kids',
     alt: 'Kids Everyday Wear',
+    width: 1122,
+    height: 1402,
   },
   {
     id: 2,
@@ -28,6 +33,8 @@ const heroSlides: HeroSlide[] = [
     btnText: 'Shop Saree',
     link: '/saree',
     alt: 'The Monsoon Saree Collection',
+    width: 900,
+    height: 1600,
   },
   {
     id: 3,
@@ -36,6 +43,8 @@ const heroSlides: HeroSlide[] = [
     btnText: 'Shop Denim',
     link: '/men',
     alt: 'Premium Denim Collection',
+    width: 1122,
+    height: 1402,
   },
 ]
 
@@ -106,9 +115,12 @@ export const Hero: React.FC = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      {/* Mobile: aspect-ratio (no fixed vh crop). Desktop: tall viewport cover. */}
+      {/*
+        Mobile: height follows the active image (w-full h-auto object-contain — zero skew).
+        Desktop (sm+): fixed viewport height with object-cover fill.
+      */}
       <div
-        className="relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[85vh] lg:h-[90vh]"
+        className="relative w-full overflow-hidden bg-neutral-950 md:h-[85vh] lg:h-[90vh]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -120,20 +132,21 @@ export const Hero: React.FC = () => {
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 h-full w-full transition-opacity duration-700 ease-in-out ${
-                isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
-              }`}
+              className={
+                isActive
+                  ? 'relative z-10 w-full md:absolute md:inset-0 md:h-full'
+                  : 'pointer-events-none absolute inset-0 z-0 opacity-0 max-md:hidden md:block'
+              }
               aria-hidden={!isActive}
             >
               {shouldLoad ? (
                 <img
                   src={slide.image}
                   alt={slide.alt}
-                  width={1200}
-                  height={1500}
+                  width={slide.width}
+                  height={slide.height}
                   sizes="100vw"
-                  className="absolute inset-0 h-full w-full object-contain object-center sm:object-cover sm:object-[center_10%]"
-                  style={{ width: '100%' }}
+                  className="hero-slide-image block h-auto w-full max-w-full object-contain object-center md:absolute md:inset-0 md:h-full md:w-full md:object-cover md:object-[center_10%]"
                   loading={isLcpCandidate ? 'eager' : 'lazy'}
                   fetchPriority={isLcpCandidate ? 'high' : 'low'}
                   decoding={isLcpCandidate ? 'sync' : 'async'}
@@ -144,28 +157,33 @@ export const Hero: React.FC = () => {
                       event.currentTarget.src = '/hero/kid-homepage.jpeg'
                       return
                     }
+                    if (src.includes('main-hero-image2.jpg')) {
+                      event.currentTarget.src = '/hero/main-hero-image2.jpg.jpeg'
+                      return
+                    }
                     event.currentTarget.src = '/og-image.svg'
                   }}
                 />
               ) : (
-                <div className="h-full w-full bg-neutral-950" aria-hidden />
+                <div className="hidden h-full w-full bg-neutral-950 md:block" aria-hidden />
               )}
 
-              <div className="absolute inset-x-0 bottom-6 z-20 flex flex-col items-center justify-center px-4 sm:bottom-12">
-                <Link
-                  to={slide.link}
-                  tabIndex={isActive ? 0 : -1}
-                  className="rounded-full bg-white px-8 py-3 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-xl transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:text-sm"
-                  aria-label={`${slide.btnText}: ${slide.title}`}
-                >
-                  {slide.btnText}
-                </Link>
-              </div>
+              {isActive ? (
+                <div className="absolute inset-x-0 bottom-6 z-20 flex flex-col items-center justify-center px-4 md:bottom-12">
+                  <Link
+                    to={slide.link}
+                    className="rounded-full bg-white px-8 py-3 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-xl transition-all duration-200 hover:bg-neutral-100 active:scale-95 md:text-sm"
+                    aria-label={`${slide.btnText}: ${slide.title}`}
+                  >
+                    {slide.btnText}
+                  </Link>
+                </div>
+              ) : null}
             </div>
           )
         })}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-28 bg-gradient-to-t from-black/50 via-black/10 to-transparent sm:h-36 sm:from-black/70" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-28 bg-gradient-to-t from-black/50 via-black/10 to-transparent md:h-36 md:from-black/70" />
 
         <button
           type="button"
@@ -174,7 +192,7 @@ export const Hero: React.FC = () => {
             event.stopPropagation()
             prevSlide()
           }}
-          className="absolute top-1/2 left-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white sm:flex"
+          className="absolute top-1/2 left-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
           aria-label="Previous slide"
         >
           &#8592;
@@ -186,13 +204,13 @@ export const Hero: React.FC = () => {
             event.stopPropagation()
             nextSlide()
           }}
-          className="absolute top-1/2 right-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white sm:flex"
+          className="absolute top-1/2 right-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
           aria-label="Next slide"
         >
           &#8594;
         </button>
 
-        <div className="absolute right-3 bottom-3 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md sm:right-8 sm:bottom-4">
+        <div className="absolute right-3 bottom-3 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md md:right-8 md:bottom-4">
           {heroSlides.map((slide, dotIdx) => (
             <button
               key={slide.id}
