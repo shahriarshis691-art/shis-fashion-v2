@@ -214,7 +214,7 @@ export default function KidsOversizedTeeCollectionPage() {
           <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/80 uppercase sm:text-xs">
             Exclusive Launch
           </span>
-          <h1 className="text-2xl font-bold tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
+          <h1 className="text-2xl font-semibold uppercase tracking-[0.2em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-4xl sm:tracking-[0.3em] lg:text-5xl">
             Kids Collection
           </h1>
           <p className="mt-2 max-w-md text-xs font-light text-neutral-200 sm:text-sm">
