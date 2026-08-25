@@ -31,27 +31,31 @@ export interface KidsOversizedTeeProduct extends ShopProduct {
   newest: boolean
 }
 
-/** Verified Unsplash kids fashion portraits (3:4). Each URL returns HTTP 200. */
-const KIDS_IMG = [
-  'https://images.unsplash.com/photo-1761475048694-816cf2823ae3?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1628345703968-6767aeea2728?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1592137525871-b22238c8e547?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1544776193-352d25ca82cd?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1602030028438-4cf153cbae9e?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=960&h=1280&q=80',
-  'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=960&h=1280&q=80',
+/**
+ * Local Kid-Hero assets from public/images/products/kids/
+ * Actual files on disk: Kid-Hero-01 … Kid-Hero-11, Kid-Hero-13 (.png)
+ */
+const KIDS_HERO_FILES = [
+  'Kid-Hero-01.png',
+  'Kid-Hero-02.png',
+  'Kid-Hero-03.png',
+  'Kid-Hero-04.png',
+  'Kid-Hero-05.png',
+  'Kid-Hero-06.png',
+  'Kid-Hero-07.png',
+  'Kid-Hero-08.png',
+  'Kid-Hero-09.png',
+  'Kid-Hero-10.png',
+  'Kid-Hero-11.png',
+  'Kid-Hero-13.png',
 ] as const
+
+const kidsHeroImage = (fileName: (typeof KIDS_HERO_FILES)[number]) =>
+  `/images/products/kids/${fileName}`
 
 function tee(
   index: number,
+  fileName: (typeof KIDS_HERO_FILES)[number],
   name: string,
   genderCategory: KidsGenderCategory,
   price: number,
@@ -59,7 +63,7 @@ function tee(
   colors: string[],
   newest = false,
 ): KidsOversizedTeeProduct {
-  const image = KIDS_IMG[index - 1]
+  const image = kidsHeroImage(fileName)
 
   return {
     id: `kids-oversized-tee-${index}`,
@@ -86,21 +90,18 @@ function tee(
 }
 
 export const kidsOversizedTeeProducts: KidsOversizedTeeProduct[] = [
-  tee(1, 'Kids Sage Green Oversized Tee', 'Unisex', 950, 1290, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.beige], true),
-  tee(2, 'Junior Midnight Navy Drop Tee', 'Kids Boy', 890, 1250, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.black], true),
-  tee(3, 'Kids Soft Beige Boxy Tee', 'Kids Girl', 850, 1190, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], true),
-  tee(4, 'Urban Charcoal Kids Oversized Tee', 'Kids Boy', 920, 1280, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy]),
-  tee(5, 'Petite Earth Brown Relaxed Tee', 'Kids Girl', 870, 1220, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.beige], true),
-  tee(6, 'Kids Golden Hour Graphic Tee', 'Unisex', 980, 1350, [KIDS_COLOR_PALETTE.gold, KIDS_COLOR_PALETTE.black], true),
-  tee(7, 'Junior Street Classic Drop Tee', 'Kids Boy', 910, 1270, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.beige]),
-  tee(8, 'Kids Cloud Soft Pastel Tee', 'Kids Girl', 860, 1200, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.sage], true),
-  tee(9, 'Modern Olive Mood Kids Tee', 'Unisex', 940, 1300, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.navy]),
-  tee(10, 'Junior Bold Contrast Oversized Tee', 'Kids Boy', 990, 1390, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], true),
-  tee(11, 'Kids Heritage Script Soft Tee', 'Unisex', 880, 1240, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.black]),
-  tee(12, 'Petite Urban Minimal Kids Tee', 'Kids Girl', 900, 1260, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.navy], true),
-  tee(13, 'Kids Acid Wash Shadow Tee', 'Kids Boy', 930, 1310, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.brown]),
-  tee(14, 'Junior Soft Luxe Studio Tee', 'Kids Girl', 960, 1330, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], true),
-  tee(15, 'Signature Kids Everyday Drop Tee', 'Unisex', 950, 1320, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.black], true),
+  tee(1, 'Kid-Hero-01.png', 'Kids Sage Green Oversized Tee', 'Unisex', 950, 1290, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.beige], true),
+  tee(2, 'Kid-Hero-02.png', 'Junior Midnight Navy Drop Tee', 'Kids Boy', 890, 1250, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.black], true),
+  tee(3, 'Kid-Hero-03.png', 'Kids Soft Beige Boxy Tee', 'Kids Girl', 850, 1190, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], true),
+  tee(4, 'Kid-Hero-04.png', 'Urban Charcoal Kids Oversized Tee', 'Kids Boy', 920, 1280, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy]),
+  tee(5, 'Kid-Hero-05.png', 'Petite Earth Brown Relaxed Tee', 'Kids Girl', 870, 1220, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.beige], true),
+  tee(6, 'Kid-Hero-06.png', 'Kids Golden Hour Graphic Tee', 'Unisex', 980, 1350, [KIDS_COLOR_PALETTE.gold, KIDS_COLOR_PALETTE.black], true),
+  tee(7, 'Kid-Hero-07.png', 'Junior Street Classic Drop Tee', 'Kids Boy', 910, 1270, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.beige]),
+  tee(8, 'Kid-Hero-08.png', 'Kids Cloud Soft Pastel Tee', 'Kids Girl', 860, 1200, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.sage], true),
+  tee(9, 'Kid-Hero-09.png', 'Modern Olive Mood Kids Tee', 'Unisex', 940, 1300, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.navy]),
+  tee(10, 'Kid-Hero-10.png', 'Junior Bold Contrast Oversized Tee', 'Kids Boy', 990, 1390, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], true),
+  tee(11, 'Kid-Hero-11.png', 'Kids Heritage Script Soft Tee', 'Unisex', 880, 1240, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.black]),
+  tee(12, 'Kid-Hero-13.png', 'Petite Urban Minimal Kids Tee', 'Kids Girl', 900, 1260, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.navy], true),
 ]
 
 export function getKidsDiscountPercent(product: KidsOversizedTeeProduct) {
