@@ -81,18 +81,23 @@ export default function SareeCollectionPage() {
   return (
     <section className="bg-white pb-24">
       {/* Poster already embeds brand typography — CTA only, no duplicate H1 overlay */}
-      <div className="relative flex h-[65dvh] w-full items-end justify-center overflow-hidden bg-neutral-950 pb-8 sm:h-[80vh] sm:pb-12">
+      <div className="relative flex w-full items-end justify-center overflow-hidden bg-neutral-950 aspect-[4/5] pb-8 sm:aspect-auto sm:h-[80vh] sm:pb-12">
         <img
-          src="/hero/hero-soft-cotton-saree.webp"
+          src="/hero/kids/hero-soft-cotton-saree.jpg"
           alt="Tat Soft Cotton Saree - SHIS Fashion"
-          width={1920}
-          height={2400}
+          width={1200}
+          height={1500}
           sizes="100vw"
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-top sm:object-center"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           onError={(event) => {
+            const src = event.currentTarget.src
+            if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {
+              event.currentTarget.src = '/hero/kids/hero-soft-cotton-saree.jpg.webp'
+              return
+            }
             event.currentTarget.src = '/og-image.svg'
           }}
         />
