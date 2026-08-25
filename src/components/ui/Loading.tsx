@@ -1,16 +1,14 @@
 export default function Loading() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4 py-10" aria-label="Loading content">
-      <div className="flex min-w-[260px] flex-col items-center gap-4 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-6 py-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:min-w-[320px]">
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 animate-bounce rounded-full bg-[var(--color-accent)] [animation-delay:-0.2s]" />
-          <span className="h-3 w-3 animate-bounce rounded-full bg-[var(--color-accent)] [animation-delay:-0.1s]" />
-          <span className="h-3 w-3 animate-bounce rounded-full bg-[var(--color-accent)]" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Loading</p>
-          <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">Preparing your premium experience…</p>
-        </div>
+    <div className="flex min-h-[60vh] items-center justify-center px-4 py-12" aria-label="Loading content" aria-busy="true">
+      <div className="w-full max-w-sm space-y-4">
+        <div className="luxury-skeleton mx-auto h-10 w-40 rounded-full" />
+        <div className="luxury-skeleton aspect-[4/5] w-full rounded-sm" />
+        <div className="luxury-skeleton h-3 w-3/4 rounded-sm" />
+        <div className="luxury-skeleton h-3 w-1/3 rounded-sm" />
+        <p className="pt-2 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--color-muted)]">
+          Preparing…
+        </p>
       </div>
     </div>
   )

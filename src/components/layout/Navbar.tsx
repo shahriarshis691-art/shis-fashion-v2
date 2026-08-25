@@ -174,7 +174,7 @@ export default function Navbar() {
         className={`left-0 top-0 z-50 w-full ${
           isHeroOverlay
             ? 'absolute bg-transparent bg-gradient-to-b from-black/40 to-transparent'
-            : 'sticky border-b border-neutral-200/60 bg-white/95 backdrop-blur-md'
+            : 'sticky luxury-glass'
         }`}
       >
         <div className="flex w-full items-center justify-between px-6 py-4 md:px-12 md:py-6">

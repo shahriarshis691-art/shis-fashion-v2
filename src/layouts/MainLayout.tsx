@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
-import Footer from '../components/layout/Footer'
-import NewsletterCard from '../components/layout/NewsletterCard'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
 import SmoothScroll from '../components/common/SmoothScroll'
+import Skeleton from '../components/ui/Skeleton'
 import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -20,6 +19,8 @@ import { normalizeCatalogImageUrl } from '../utils/media'
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
 const STABILIZATION_HEARTBEAT_SESSION_KEY = 'shis-stabilization-heartbeat-sent'
 
+const Footer = lazy(() => import('../components/layout/Footer'))
+const NewsletterCard = lazy(() => import('../components/layout/NewsletterCard'))
 const MiniCartConfirmation = lazy(() => import('../components/common/MiniCartConfirmation'))
 const WelcomePopup = lazy(() => import('../components/common/WelcomePopup'))
 const AbandonedCartBanner = lazy(() => import('../components/common/AbandonedCartBanner'))
@@ -242,8 +243,14 @@ export default function MainLayout() {
           <Outlet />
         </PageTransition>
       </main>
-      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? <NewsletterCard /> : null}
-      <Footer />
+      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (
+        <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-10 sm:px-8"><Skeleton className="h-28 w-full" /></div>}>
+          <NewsletterCard />
+        </Suspense>
+      ) : null}
+      <Suspense fallback={<div className="min-h-[12rem]"><Skeleton className="h-48 w-full rounded-none" /></div>}>
+        <Footer />
+      </Suspense>
       <DeferredChrome>
         <Suspense fallback={null}>
           <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import PrefetchLink from '../components/common/PrefetchLink'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
@@ -13,15 +14,13 @@ import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
 
+const prefetchKidsProductDetail = () => import('./KidsProductDetailPage')
+
 type GenderFilter = 'all' | KidsGenderCategory
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
 const SITE_URL = 'https://www.shisfashion.com'
 const ALL_KIDS_PRODUCTS = kidsOversizedTeeProducts
-
-function prefetchKidsProductDetail() {
-  void import('./KidsProductDetailPage')
-}
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
   if (genderFilter === 'all') {
@@ -113,15 +112,14 @@ function KidsProductCard({
   const detailHref = `/kids/${product.slug}`
 
   return (
-    <article className="group relative min-w-0">
-      <Link
+    <article className="product-card luxury-tap group relative min-w-0">
+      <PrefetchLink
         to={detailHref}
+        prefetchModule={prefetchKidsProductDetail}
         className="block"
         aria-label={`View ${product.name}`}
-        onMouseEnter={prefetchKidsProductDetail}
-        onFocus={prefetchKidsProductDetail}
       >
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f4f4f4]">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--color-studio)]">
           <img
             src={product.image}
             alt={product.name}
@@ -131,20 +129,20 @@ function KidsProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}
           />
         </div>
 
-        <h3 className="mt-2 truncate text-left text-[13px] font-medium text-gray-900 sm:text-[14px]">
+        <h3 className="mt-2 truncate text-left text-[13px] font-medium tracking-tight text-[var(--color-text)] sm:text-[14px]">
           {product.name}
         </h3>
-        <p className="text-left text-[12px] font-normal text-gray-700 sm:text-[13px]">
+        <p className="text-left text-[12px] font-normal tracking-wide text-[var(--color-ink)] sm:text-[13px]">
           {formatKidsListPrice(product.price)}
         </p>
-      </Link>
+      </PrefetchLink>
 
       <button
         type="button"
@@ -153,7 +151,7 @@ function KidsProductCard({
           event.stopPropagation()
           onToggleWishlist(product)
         }}
-        className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors hover:text-red-500"
+        className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-red-500"
         aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
@@ -262,8 +260,8 @@ export default function KidsOversizedTeeCollectionPage() {
   }, [sizeGuideOpen])
 
   return (
-    <section className="bg-[#fdfbf9] pb-24 pt-6 md:pb-20 md:pt-10">
-      <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-8">
+    <section className="bg-[var(--color-bg)] pb-24 pt-6 md:pb-20 md:pt-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <nav aria-label="Breadcrumb" className="text-[11px] uppercase tracking-[0.14em] text-black/55">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -299,7 +297,7 @@ export default function KidsOversizedTeeCollectionPage() {
               event.preventDefault()
               document.getElementById('kids-collection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="relative z-20 mt-6 inline-flex items-center justify-center rounded-full bg-black px-6 py-2.5 text-sm font-medium tracking-wide text-white uppercase transition-all duration-200 hover:bg-neutral-800 sm:px-8 sm:py-3 sm:text-base"
+            className="relative z-20 mt-6 inline-flex items-center justify-center rounded-full bg-[var(--color-text)] px-6 py-2.5 text-sm font-medium tracking-wide text-white uppercase transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--color-ink)] active:scale-[0.98] sm:px-8 sm:py-3 sm:text-base"
           >
             Shop Now
           </a>

@@ -1,4 +1,4 @@
-/* SHIS Design System Foundation - Step 2 */
+/* SHIS Design System — luxury Apple / ultra-premium foundation */
 :root {
   --font-sans: 'Manrope', 'Segoe UI', sans-serif;
   --font-display: 'Cormorant Garamond', Georgia, serif;
@@ -16,35 +16,41 @@
   --fw-semibold: 600;
   --fw-bold: 700;
 
-  /* Spacing rhythm: 4 / 8 / 12 / 16 / 24 */
+  /* Spacing rhythm: 4 / 8 / 12 / 16 / 24 / 32 */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
+  --space-8: 2rem;
 
-  /* UI color tokens */
-  --color-bg: #ffffff;
+  /* Luxury palette */
+  --color-bg: #f5f5f7;
   --color-surface: #ffffff;
-  --color-text: #000000;
-  --color-muted: #4a4a4a;
-  --color-border: #e6e6e6;
-  --color-accent: #000000;
+  --color-studio: #f9f9fb;
+  --color-text: #0a0a0a;
+  --color-ink: #1a1a1a;
+  --color-muted: #737373;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-accent: #0a0a0a;
+  --color-glass: rgba(255, 255, 255, 0.8);
 
   /* Radius: minimal */
   --radius-none: 0;
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
+  --radius-pill: 999px;
 
-  /* Border style: mostly none */
+  /* Border style */
   --border-none: none;
+  --border-hairline: 0.5px solid rgba(0, 0, 0, 0.08);
   --border-subtle: 1px solid var(--color-border);
 
-  /* Interaction style: subtle and clean */
+  /* Motion — 60fps hardware-friendly */
   --transition-fast: 180ms;
-  --transition-base: 220ms;
+  --transition-base: 300ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
   --reveal-duration: 620ms;
   --reveal-distance: 18px;
 
@@ -58,6 +64,8 @@
   font-size: var(--fs-h1);
   line-height: 0.94;
   font-weight: var(--fw-semibold);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
 }
 
 .text-h2 {
@@ -65,13 +73,16 @@
   font-size: var(--fs-h2);
   line-height: 0.98;
   font-weight: var(--fw-semibold);
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
 }
 
 .text-body {
   font-family: var(--font-sans);
   font-size: var(--fs-body);
-  line-height: 1.6;
+  line-height: 1.65;
   font-weight: var(--fw-regular);
+  color: var(--color-ink);
 }
 
 .text-caption {
@@ -79,22 +90,36 @@
   font-size: var(--fs-caption);
   line-height: 1.4;
   font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
 }
 
 .font-brand {
   font-family: var(--font-brand);
 }
 
+.luxury-glass {
+  background: var(--color-glass);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border-bottom: var(--border-hairline);
+}
+
+.luxury-hairline {
+  border: var(--border-hairline);
+}
+
 .ui-interactive {
   transition:
-    color var(--transition-fast) var(--ease-standard),
-    background-color var(--transition-fast) var(--ease-standard),
-    border-color var(--transition-fast) var(--ease-standard),
-    opacity var(--transition-fast) var(--ease-standard);
+    color var(--transition-base) var(--ease-luxury),
+    background-color var(--transition-base) var(--ease-luxury),
+    border-color var(--transition-base) var(--ease-luxury),
+    opacity var(--transition-base) var(--ease-luxury),
+    transform var(--transition-base) var(--ease-luxury);
 }
 
 .ui-interactive:hover {
-  opacity: 0.9;
+  opacity: 0.92;
 }
 
 .ui-interactive,
@@ -107,11 +132,11 @@ button,
 
 .luxury-tap {
   transform: translate3d(0, 0, 0);
-  transition: transform var(--transition-fast) var(--ease-luxury);
+  transition: transform var(--transition-base) var(--ease-luxury);
 }
 
 .luxury-tap:active {
-  transform: translate3d(0, 1px, 0) scale(0.98);
+  transform: translate3d(0, 0, 0) scale(0.98);
 }
 
 .gpu-media {
@@ -127,8 +152,19 @@ button,
   .group:hover .media-hover,
   .group:focus-visible .media-hover {
     will-change: transform;
-    transform: translate3d(0, 0, 0) scale(1.03);
+    transform: translate3d(0, 0, 0) scale(1.04);
   }
+
+  .product-card:hover .product-card-media,
+  .group:hover .product-card-media {
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+}
+
+.product-card-media {
+  transform: translate3d(0, 0, 0);
+  transition: transform 420ms var(--ease-luxury);
+  will-change: transform;
 }
 
 .luxury-reveal {
@@ -138,11 +174,13 @@ button,
     opacity var(--reveal-duration) var(--ease-luxury),
     transform var(--reveal-duration) var(--ease-luxury);
   transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
 .luxury-reveal.is-revealed {
   opacity: 1;
   transform: translate3d(0, 0, 0);
+  will-change: auto;
 }
 
 .luxury-fade-in {
@@ -150,7 +188,15 @@ button,
 }
 
 .luxury-sheet-up {
-  animation: luxurySheetUp 320ms var(--ease-luxury) both;
+  animation: luxurySheetUp 360ms var(--ease-luxury) both;
+}
+
+.luxury-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #ececef 0%, #f7f7f9 45%, #ececef 100%);
+  background-size: 200% 100%;
+  animation: luxuryShimmer 1.4s var(--ease-luxury) infinite;
 }
 
 @keyframes luxuryFadeIn {
@@ -166,8 +212,8 @@ button,
 
 @keyframes luxurySheetUp {
   from {
-    opacity: 0.6;
-    transform: translate3d(0, 18px, 0);
+    opacity: 0.55;
+    transform: translate3d(0, 22px, 0);
   }
   to {
     opacity: 1;
@@ -175,11 +221,22 @@ button,
   }
 }
 
+@keyframes luxuryShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .luxury-reveal,
   .luxury-fade-in,
   .luxury-sheet-up,
+  .luxury-skeleton,
   .media-hover,
+  .product-card-media,
   .luxury-tap {
     animation: none;
     transition: none;
@@ -191,7 +248,7 @@ button,
 /* Mobile micro-pass: tighter image gaps for <=420px screens */
 @media (max-width: 420px) {
   .product-card .product-card-meta {
-    padding-top: 0.25rem; /* reduce from default pt-2 */
+    padding-top: 0.25rem;
   }
 
   .product-card .product-card-meta h3 {
@@ -202,9 +259,8 @@ button,
     margin-top: 0.125rem;
   }
 
-  /* Reduce listing grid gaps on very small screens */
   .tight-mobile-grid {
-    gap: 0.5rem 0.25rem; /* row-gap column-gap */
+    gap: 0.5rem 0.25rem;
   }
 }
 
@@ -213,7 +269,9 @@ button,
   .group:hover .media-hover,
   .group:active .media-hover,
   .group:hover img,
-  .group:active img {
+  .group:active img,
+  .group:hover .product-card-media,
+  .product-card:hover .product-card-media {
     transform: none !important;
   }
 }
@@ -232,28 +290,10 @@ button,
   scroll-behavior: auto;
 }
 
-/* Hide scrollbar for horizontal sections while preserving scrollability */
 .overflow-x-auto::-webkit-scrollbar {
   display: none;
 }
 .overflow-x-auto {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* Performance: GPU hint for hero slides */
-.luxury-reveal {
-  opacity: 0;
-  transform: translate3d(0, var(--reveal-distance), 0);
-  transition:
-    opacity var(--reveal-duration) var(--ease-luxury),
-    transform var(--reveal-duration) var(--ease-luxury);
-  transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
-}
-
-.luxury-reveal.is-revealed {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-  will-change: auto;
 }
