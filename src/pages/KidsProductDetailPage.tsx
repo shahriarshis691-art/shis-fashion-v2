@@ -281,7 +281,7 @@ export default function KidsProductDetailPage() {
   }
 
   return (
-    <section className="bg-white pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-16">
+    <section className="bg-white pb-28 md:pb-16">
       <nav aria-label="Breadcrumb" className="px-4 py-3 sm:px-8">
         <ol className="mx-auto flex max-w-7xl flex-wrap items-center gap-1.5 text-[12px] font-normal tracking-wide text-neutral-400">
           <li>
@@ -403,7 +403,7 @@ export default function KidsProductDetailPage() {
             {product.name}
           </h1>
 
-          <div className="mt-4 flex min-h-[2rem] items-baseline gap-3">
+          <div className="mt-3 flex min-h-[2rem] items-baseline gap-3 md:mt-4">
             <p className="text-xl font-medium tracking-tight text-neutral-900 tabular-nums md:text-2xl">
               {formatDisplayPrice(product.price)}
             </p>
@@ -418,7 +418,7 @@ export default function KidsProductDetailPage() {
             {isSizeSelected && availableStock > 0 && availableStock <= 5 ? ` · ${availableStock} remaining` : ''}
           </p>
 
-          <div className="mt-7">
+          <div className="mt-4 md:mt-7">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">Size</p>
               <button
@@ -429,7 +429,7 @@ export default function KidsProductDetailPage() {
                 Size Guide
               </button>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2 md:mt-3">
               {sizes.map((size) => {
                 const active = selectedSize === size
                 return (
@@ -454,9 +454,9 @@ export default function KidsProductDetailPage() {
           </div>
 
           {hasColorOptions ? (
-            <div className="mt-6">
+            <div className="mt-4 md:mt-6">
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">Color</p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-2 md:mt-3">
                 {product.colorHexes.map((hex) => {
                   const label = KIDS_COLOR_LABELS[hex] ?? hex
                   const selected = selectedColor === label
@@ -482,9 +482,9 @@ export default function KidsProductDetailPage() {
             </div>
           ) : null}
 
-          <div className="mt-6">
+          <div className="mt-4 md:mt-6">
             <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500">Quantity</p>
-            <div className="mt-3 inline-flex items-center rounded-full bg-neutral-100">
+            <div className="mt-2 inline-flex items-center rounded-full bg-neutral-100 md:mt-3">
               <button
                 type="button"
                 className="px-4 py-2.5 text-sm text-neutral-700"
@@ -507,18 +507,18 @@ export default function KidsProductDetailPage() {
             </div>
           </div>
 
-          <div className="mt-8 hidden gap-2 sm:flex">
+          <div className="mt-5 hidden gap-3 md:flex">
             <button
               type="button"
               onClick={handleAddToBag}
-              className="flex-1 bg-neutral-900 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+              className="flex-1 rounded-sm border border-neutral-900 bg-white px-4 py-3.5 text-sm font-semibold tracking-wider text-neutral-900 uppercase transition-colors hover:bg-neutral-50"
             >
-              {didAddToBag ? 'Added to Bag' : 'Add to Bag'}
+              {didAddToBag ? 'Added' : 'Add to Cart'}
             </button>
             <button
               type="button"
               onClick={handleBuyNow}
-              className="flex-1 border border-neutral-900 px-4 py-3.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-900 hover:text-white"
+              className="flex-1 rounded-sm bg-neutral-950 px-4 py-3.5 text-sm font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800"
             >
               Buy Now
             </button>
@@ -536,7 +536,7 @@ export default function KidsProductDetailPage() {
             </button>
           </div>
           {actionError ? (
-            <p className="mt-2 hidden text-sm text-red-600 sm:block" role="alert">
+            <p className="mt-2 hidden text-sm text-red-600 md:block" role="alert">
               {actionError}
             </p>
           ) : null}
@@ -613,10 +613,9 @@ export default function KidsProductDetailPage() {
         didAddToBag={didAddToBag}
         actionError={actionError}
         shakeToken={shakeToken}
-        wished={wished}
         onAddToBag={handleAddToBag}
         onBuyNow={handleBuyNow}
-        onToggleWishlist={() => handleToggleWishlist(product)}
+        buyNowLabel="Order Now"
       />
 
       {instantCheckoutOpen ? (

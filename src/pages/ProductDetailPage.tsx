@@ -490,7 +490,7 @@ export default function ProductDetailPage() {
   const highlights = buildHighlights(product.description, product.sizes, availableStock)
 
   return (
-    <section className="bg-white px-3.5 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-3.5 pb-28 pt-4 sm:px-6 md:pb-24 lg:px-8 lg:pt-10">
       <Container>
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
           <div>
@@ -579,7 +579,7 @@ export default function ProductDetailPage() {
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Product details</p>
             <h1 className="mt-1 text-h2 text-black">{product.name}</h1>
 
-            <div className="mt-4 border border-black/15 p-4">
+            <div className="mt-3 border border-black/15 p-3 md:mt-4 md:p-4">
               <p className="text-caption uppercase tracking-[0.12em] text-black/55">Price</p>
               <div className="mt-1 flex items-center gap-3">
                 <p className="text-2xl font-semibold text-black">{product.price}</p>
@@ -587,13 +587,21 @@ export default function ProductDetailPage() {
                   <p className="text-base text-black/50 line-through">{product.comparePrice}</p>
                 ) : null}
               </div>
-              <p className={`mt-2 text-sm font-medium ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>
+              <p className={`mt-1.5 text-sm font-medium md:mt-2 ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>
                 {stockLabel}{isSizeSelected && isColorSelected && availableStock > 0 && availableStock <= 5 ? ` · ${availableStock} left in this size` : ''}
               </p>
             </div>
 
-            <div className="mt-4 border border-black/15 p-4">
-              <p className="text-caption uppercase tracking-[0.12em] text-black/55">Size</p>
+            <div className="mt-3 border border-black/15 p-3 md:mt-4 md:p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-caption uppercase tracking-[0.12em] text-black/55">Size</p>
+                <a
+                  href="#size-guide-details"
+                  className="text-[11px] font-medium tracking-wide text-black/70 underline underline-offset-4"
+                >
+                  Size Guide
+                </a>
+              </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {product.sizes.map((option) => (
                   <button
@@ -612,7 +620,7 @@ export default function ProductDetailPage() {
 
               {hasColorOptions ? (
                 <>
-                  <p className="mt-4 text-caption uppercase tracking-[0.12em] text-black/55">Color</p>
+                  <p className="mt-3 text-caption uppercase tracking-[0.12em] text-black/55 md:mt-4">Color</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {product.colors.map((option) => (
                       <button
@@ -631,7 +639,7 @@ export default function ProductDetailPage() {
                 </>
               ) : null}
 
-              <p className="mt-4 text-caption uppercase tracking-[0.12em] text-black/55">Quantity</p>
+              <p className="mt-3 text-caption uppercase tracking-[0.12em] text-black/55 md:mt-4">Quantity</p>
               <div className="mt-2 flex items-center gap-2">
                 <button
                   type="button"
@@ -653,18 +661,18 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="mt-4 hidden gap-2 sm:flex">
+            <div className="mt-4 hidden gap-3 md:flex">
               <button
                 type="button"
                 onClick={handleAddToBag}
-                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-5 py-3.5 text-[1.02rem] font-semibold text-white transition-colors hover:bg-[#121212]"
+                className="ui-interactive flex-1 rounded-[2px] border border-neutral-900 bg-white px-5 py-3.5 text-sm font-semibold tracking-wider text-neutral-900 uppercase transition-colors hover:bg-neutral-50"
               >
-                {didAddToBag ? 'Added' : 'Add to Bag'}
+                {didAddToBag ? 'Added' : 'Add to Cart'}
               </button>
               <button
                 type="button"
                 onClick={handleBuyNow}
-                className="ui-interactive flex-1 border border-black px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+                className="ui-interactive flex-1 rounded-[2px] bg-neutral-950 px-5 py-3.5 text-sm font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800"
               >
                 Buy Now
               </button>
@@ -678,7 +686,7 @@ export default function ProductDetailPage() {
               </button>
             </div>
             {actionError ? (
-              <p className="mt-2 hidden text-sm text-red-600 sm:block" role="alert">
+              <p className="mt-2 hidden text-sm text-red-600 md:block" role="alert">
                 {actionError}
               </p>
             ) : null}
@@ -712,7 +720,7 @@ export default function ProductDetailPage() {
             </ul>
           </div>
 
-          <details className="border border-black/15 p-4">
+          <details id="size-guide-details" className="scroll-mt-24 border border-black/15 p-4">
             <summary className="cursor-pointer text-sm font-semibold uppercase tracking-[0.12em] text-black">Size Guide</summary>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[240px] text-left text-sm text-black/75">
@@ -866,10 +874,8 @@ export default function ProductDetailPage() {
         didAddToBag={didAddToBag}
         actionError={actionError}
         shakeToken={shakeToken}
-        wished={isInWishlist(String(product.id))}
         onAddToBag={handleAddToBag}
         onBuyNow={handleBuyNow}
-        onToggleWishlist={toggleProductWishlist}
       />
 
       {instantCheckoutOpen ? (

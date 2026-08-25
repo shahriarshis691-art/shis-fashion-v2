@@ -30,8 +30,8 @@ export default function WhatsAppWidget() {
       aria-label="Chat with SHIS Fashion on WhatsApp"
       className={`fixed z-40 flex h-14 w-14 items-center justify-center rounded-full border border-black/10 bg-black text-white shadow-[0_10px_28px_rgba(0,0,0,0.22)] transition hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black right-[max(1rem,env(safe-area-inset-right))] touch-manipulation ${
         liftForCta
-          ? 'bottom-[calc(6.25rem+env(safe-area-inset-bottom))] sm:bottom-[max(1.15rem,env(safe-area-inset-bottom))]'
-          : 'bottom-[max(1.15rem,env(safe-area-inset-bottom))]'
+          ? 'bottom-20 md:bottom-6'
+          : 'bottom-[max(1.15rem,env(safe-area-inset-bottom))] md:bottom-6'
       }`}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 fill-current">

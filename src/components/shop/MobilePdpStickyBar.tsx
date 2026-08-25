@@ -2,29 +2,27 @@ interface MobilePdpStickyBarProps {
   didAddToBag: boolean
   actionError?: string
   shakeToken?: number
-  wished?: boolean
   onAddToBag: () => void
   onBuyNow: () => void
-  onToggleWishlist?: () => void
   buyNowLabel?: string
+  addToCartLabel?: string
 }
 
-/** Fixed mobile PDP CTA — sits above WhatsApp; never silently swallows taps. */
+/** Fixed mobile PDP CTA — size/color gated via parent handlers; never silently disabled. */
 export default function MobilePdpStickyBar({
   didAddToBag,
   actionError = '',
   shakeToken = 0,
-  wished = false,
   onAddToBag,
   onBuyNow,
-  onToggleWishlist,
-  buyNowLabel = 'Order Now',
+  buyNowLabel = 'Buy Now',
+  addToCartLabel = 'Add to Cart',
 }: MobilePdpStickyBarProps) {
   return (
-    <div className="pointer-events-auto fixed inset-x-0 bottom-0 z-50 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur-md sm:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-3 shadow-lg md:hidden">
       <div
         key={shakeToken}
-        className={`pb-[max(0.25rem,env(safe-area-inset-bottom))] ${actionError ? 'ui-shake' : ''}`}
+        className={`pb-[max(0px,env(safe-area-inset-bottom))] ${actionError ? 'ui-shake' : ''}`}
       >
         {actionError ? (
           <p className="mb-2 text-center text-xs font-medium text-red-600" role="alert">
@@ -32,35 +30,21 @@ export default function MobilePdpStickyBar({
           </p>
         ) : null}
 
-        <div className="flex items-center gap-2">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={onAddToBag}
-            className="flex-1 rounded-xl border border-neutral-300 bg-neutral-100 px-4 py-3 text-sm font-semibold text-neutral-900 transition-transform active:scale-95"
+            className="flex-1 rounded-sm border border-neutral-900 bg-white px-3 py-3 text-xs font-semibold tracking-wider text-neutral-900 uppercase transition-transform active:scale-[0.98]"
           >
-            {didAddToBag ? 'Added' : 'Add to Bag'}
+            {didAddToBag ? 'Added' : addToCartLabel}
           </button>
           <button
             type="button"
             onClick={onBuyNow}
-            className="flex-1 rounded-xl bg-neutral-950 px-4 py-3 text-sm font-semibold text-white shadow-lg transition-transform active:scale-95"
+            className="flex-1 rounded-sm bg-neutral-950 px-3 py-3 text-xs font-semibold tracking-wider text-white uppercase shadow-md transition-transform active:scale-[0.98]"
           >
             {buyNowLabel}
           </button>
-          {onToggleWishlist ? (
-            <button
-              type="button"
-              onClick={onToggleWishlist}
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-colors ${
-                wished ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 text-neutral-700'
-              }`}
-              aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-          ) : null}
         </div>
       </div>
     </div>
