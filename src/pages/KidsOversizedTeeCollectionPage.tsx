@@ -114,6 +114,9 @@ function KidsProductCard({
           loading="lazy"
           decoding="async"
           className="h-full w-full object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-105"
+          onError={(event) => {
+            event.currentTarget.src = '/og-image.svg'
+          }}
         />
 
         {discount > 0 ? (

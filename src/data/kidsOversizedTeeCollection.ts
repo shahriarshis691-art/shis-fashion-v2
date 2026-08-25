@@ -6,19 +6,21 @@ export type KidsGenderCategory = 'Kids Boy' | 'Kids Girl' | 'Unisex'
 export const KIDS_OVERSIZED_SIZES = ['4-5Y', '6-7Y', '8-9Y', '10-11Y', '12-13Y'] as const
 
 export const KIDS_COLOR_PALETTE = {
-  navy: '#2C3E50',
   gold: '#D4AF37',
-  brown: '#5D4037',
-  black: '#1F1F1F',
+  navy: '#2C3E50',
   beige: '#F5F5DC',
+  black: '#1F1F1F',
+  brown: '#5D4037',
+  sage: '#9CAF88',
 } as const
 
 export const KIDS_COLOR_LABELS: Record<string, string> = {
-  '#2C3E50': 'Navy',
   '#D4AF37': 'Gold',
-  '#5D4037': 'Earth Brown',
-  '#1F1F1F': 'Black',
+  '#2C3E50': 'Navy',
   '#F5F5DC': 'Beige',
+  '#1F1F1F': 'Black',
+  '#5D4037': 'Earth Brown',
+  '#9CAF88': 'Sage',
 }
 
 export interface KidsOversizedTeeProduct extends ShopProduct {
@@ -29,12 +31,8 @@ export interface KidsOversizedTeeProduct extends ShopProduct {
   newest: boolean
 }
 
-const IMG = {
-  a: 'https://res.cloudinary.com/oynk45cl/image/upload/f_auto,q_auto,c_fill,g_auto,w_960,h_1280/733499845_122185741844748051_3566784808270551668_n_2_z9zzsr',
-  b: '/hero/effortless-elegance-tee.png',
-  c: '/collections/men-category.webp',
-  d: '/hero/hero-premium-casual-shirt.webp',
-} as const
+/** Local kids oversized tee assets: public/images/products/kids/kids-tee-1.jpg … kids-tee-15.jpg */
+const kidsTeeImage = (index: number) => `/images/products/kids/kids-tee-${index}.jpg`
 
 function tee(
   index: number,
@@ -43,9 +41,10 @@ function tee(
   price: number,
   originalPrice: number,
   colors: string[],
-  image: string,
   newest = false,
 ): KidsOversizedTeeProduct {
+  const image = kidsTeeImage(index)
+
   return {
     id: `kids-oversized-tee-${index}`,
     slug: `kids-oversized-tee-${index}`,
@@ -58,7 +57,7 @@ function tee(
     brand: 'SHIS Fashion',
     image,
     galleryImages: [image],
-    description: 'Premium heavy cotton oversized drop-shoulder tee for modern kids.',
+    description: 'Premium heavy cotton oversized drop-shoulder tee designed for modern kids.',
     sizes: [...KIDS_OVERSIZED_SIZES],
     colors: colors.map((hex) => KIDS_COLOR_LABELS[hex] ?? hex),
     colorHexes: colors,
@@ -71,22 +70,21 @@ function tee(
 }
 
 export const kidsOversizedTeeProducts: KidsOversizedTeeProduct[] = [
-  tee(1, 'Kids Vintage Acid Wash Oversized Tee', 'Unisex', 790, 1150, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige], IMG.a, true),
-  tee(2, 'Junior Retro Graphic Drop-Shoulder Tee', 'Kids Boy', 850, 1190, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.gold], IMG.b, true),
-  tee(3, 'Kids Relaxed Fit Earth Brown Tee', 'Unisex', 720, 1090, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.beige], IMG.c),
-  tee(4, 'Urban Minimalist Oversized Tee - Olive Mood', 'Kids Boy', 780, 1120, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.black], IMG.d, true),
-  tee(5, 'Kids Soft Pastel Drop-Shoulder Tee', 'Kids Girl', 690, 1050, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], IMG.a),
-  tee(6, 'Street Classic Boxy Kids Tee', 'Kids Boy', 760, 1100, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.beige], IMG.b, true),
-  tee(7, 'Kids Heritage Script Oversized Tee', 'Unisex', 810, 1180, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.black], IMG.c),
-  tee(8, 'Junior Cloud Soft Heavy Cotton Tee', 'Kids Girl', 740, 1110, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.navy], IMG.d, true),
-  tee(9, 'Kids Acid Wash Shadow Oversized Tee', 'Kids Boy', 880, 1250, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.brown], IMG.a),
-  tee(10, 'Modern Kids Everyday Drop Tee', 'Unisex', 650, 990, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.beige], IMG.b),
-  tee(11, 'Kids Golden Hour Graphic Tee', 'Kids Girl', 830, 1200, [KIDS_COLOR_PALETTE.gold, KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige], IMG.c, true),
-  tee(12, 'Junior Structured Soft Box Tee', 'Kids Boy', 770, 1130, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.brown], IMG.d),
-  tee(13, 'Kids Minimal Line Art Oversized Tee', 'Unisex', 710, 1080, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige], IMG.a, true),
-  tee(14, 'Petite Urban Relaxed Kids Tee', 'Kids Girl', 730, 1095, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.brown], IMG.b),
-  tee(15, 'Kids Bold Contrast Drop-Shoulder Tee', 'Kids Boy', 890, 1290, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.gold, KIDS_COLOR_PALETTE.black], IMG.c, true),
-  tee(16, 'Signature Kids Soft Luxe Oversized Tee', 'Unisex', 950, 1350, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.brown], IMG.d, true),
+  tee(1, 'Kids Sage Green Oversized Tee', 'Unisex', 950, 1290, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.beige], true),
+  tee(2, 'Junior Midnight Navy Drop Tee', 'Kids Boy', 890, 1250, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.black], true),
+  tee(3, 'Kids Soft Beige Boxy Tee', 'Kids Girl', 850, 1190, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], true),
+  tee(4, 'Urban Charcoal Kids Oversized Tee', 'Kids Boy', 920, 1280, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy]),
+  tee(5, 'Petite Earth Brown Relaxed Tee', 'Kids Girl', 870, 1220, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.beige], true),
+  tee(6, 'Kids Golden Hour Graphic Tee', 'Unisex', 980, 1350, [KIDS_COLOR_PALETTE.gold, KIDS_COLOR_PALETTE.black], true),
+  tee(7, 'Junior Street Classic Drop Tee', 'Kids Boy', 910, 1270, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.beige]),
+  tee(8, 'Kids Cloud Soft Pastel Tee', 'Kids Girl', 860, 1200, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.sage], true),
+  tee(9, 'Modern Olive Mood Kids Tee', 'Unisex', 940, 1300, [KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.navy]),
+  tee(10, 'Junior Bold Contrast Oversized Tee', 'Kids Boy', 990, 1390, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], true),
+  tee(11, 'Kids Heritage Script Soft Tee', 'Unisex', 880, 1240, [KIDS_COLOR_PALETTE.brown, KIDS_COLOR_PALETTE.black]),
+  tee(12, 'Petite Urban Minimal Kids Tee', 'Kids Girl', 900, 1260, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.navy], true),
+  tee(13, 'Kids Acid Wash Shadow Tee', 'Kids Boy', 930, 1310, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.brown]),
+  tee(14, 'Junior Soft Luxe Studio Tee', 'Kids Girl', 960, 1330, [KIDS_COLOR_PALETTE.beige, KIDS_COLOR_PALETTE.gold], true),
+  tee(15, 'Signature Kids Everyday Drop Tee', 'Unisex', 950, 1320, [KIDS_COLOR_PALETTE.navy, KIDS_COLOR_PALETTE.sage, KIDS_COLOR_PALETTE.black], true),
 ]
 
 export function getKidsDiscountPercent(product: KidsOversizedTeeProduct) {
