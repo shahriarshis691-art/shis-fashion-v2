@@ -32,13 +32,6 @@ const HERO_SLIDES: HeroSlide[] = [
     alt: 'Signature denim pants campaign',
     objectPosition: 'center center',
   },
-  {
-    id: 'soft-cotton-saree',
-    image: '/hero/hero-soft-cotton-saree.webp',
-    link: '/shop?category=women&sub=saree',
-    alt: 'Soft cotton saree campaign',
-    objectPosition: 'center top',
-  },
 ]
 
 const AUTO_ROTATE_MS = 3500
