@@ -18,6 +18,7 @@ import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { parseBDT } from '../utils/currency'
+import { getVariantStock } from '../utils/variantStock'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
@@ -54,8 +55,8 @@ export default function SareeProductDetailPage() {
 
   const sizes = product?.sizes ?? ['Free Size']
   const colors = product?.colors ?? []
-  const defaultSize = sizes[0] ?? 'Free Size'
-  const defaultColor = colors[0] ?? 'Default'
+  const defaultSize = sizes.length === 1 ? (sizes[0] ?? '') : ''
+  const defaultColor = colors.length === 1 ? (colors[0] ?? '') : ''
 
   const [selectedSize, setSelectedSize] = useState(defaultSize)
   const [selectedColor, setSelectedColor] = useState(defaultColor)
@@ -70,8 +71,8 @@ export default function SareeProductDetailPage() {
 
   if (product && product.id !== activeProductId) {
     setActiveProductId(product.id)
-    setSelectedSize(product.sizes?.[0] ?? 'Free Size')
-    setSelectedColor(product.colors?.[0] ?? 'Default')
+    setSelectedSize(product.sizes?.length === 1 ? (product.sizes[0] ?? '') : '')
+    setSelectedColor(product.colors?.length === 1 ? (product.colors[0] ?? '') : '')
     setQuantity(1)
     setActiveImageIndex(0)
     setIsZoomOpen(false)
@@ -149,12 +150,16 @@ export default function SareeProductDetailPage() {
 
   const gallery = product?.galleryImages?.length ? product.galleryImages : product ? [product.image] : []
   const activeImage = gallery[activeImageIndex] ?? product?.image ?? '/og-image.svg'
-  const availableStock = product?.inStock === false ? 0 : (product?.stock ?? 0)
   const hasColorOptions = colors.length > 0
   const isSizeSelected = Boolean(selectedSize && sizes.includes(selectedSize))
   const isColorSelected = !hasColorOptions || Boolean(selectedColor && colors.includes(selectedColor))
-  const safeSize = isSizeSelected ? selectedSize : defaultSize
-  const safeColor = isColorSelected ? selectedColor : defaultColor
+  const safeSize = isSizeSelected ? selectedSize : defaultSize || (sizes[0] ?? 'Free Size')
+  const safeColor = isColorSelected ? selectedColor : defaultColor || (colors[0] ?? 'Default')
+  const availableStock = product
+    ? Math.max(0, isSizeSelected && isColorSelected
+      ? getVariantStock(product, selectedSize, selectedColor)
+      : (product.inStock === false ? 0 : (product.stock ?? 0)))
+    : 0
   const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
   const stockLabel = getStockLabel(availableStock)
@@ -163,6 +168,8 @@ export default function SareeProductDetailPage() {
     isSizeSelected,
     isColorSelected,
     availableStock,
+    sizeHint: 'Please select a size / দয়া করে সাইজ সিলেক্ট করুন',
+    colorHint: 'Please select a color / দয়া করে কালার সিলেক্ট করুন',
   })
 
   const relatedProducts = useMemo(() => {
@@ -430,10 +437,13 @@ export default function SareeProductDetailPage() {
                     >
                       {size}
                     </button>
-                  )
-                })}
-              </div>
+                )
+              })}
             </div>
+            {!isSizeSelected ? (
+              <p className="mt-2 text-xs text-neutral-400">Select a size to continue.</p>
+            ) : null}
+          </div>
           ) : (
             <p className="mt-4 text-sm text-neutral-600 md:mt-6">
               Size: <span className="font-medium text-neutral-900">{safeSize}</span>
@@ -461,6 +471,9 @@ export default function SareeProductDetailPage() {
                   )
                 })}
               </div>
+              {!isColorSelected ? (
+                <p className="mt-2 text-xs text-neutral-400">Select a color to continue.</p>
+              ) : null}
             </div>
           ) : null}
 

@@ -31,13 +31,15 @@ export default function FounderDetailPage() {
           <Button to="/brands" variant="secondary" className="mb-4">← Back to brands</Button>
 
           <div className="mt-4 grid gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
-            <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[#0e0e0e]">
+            <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[#0e0e0e]">
               <img
                 src={displayFounder.image}
                 alt={displayFounder.name}
+                width={900}
+                height={1100}
                 loading="eager"
                 decoding="async"
-                className="h-full min-h-[18rem] w-full object-cover"
+                className="h-full w-full object-cover"
               />
             </div>
 

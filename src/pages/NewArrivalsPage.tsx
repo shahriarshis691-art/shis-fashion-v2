@@ -37,7 +37,7 @@ export default function NewArrivalsPage() {
   const pagedProducts = newArrivals.slice(0, visibleCount)
 
   return (
-    <section className="bg-white px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white pb-20 pt-6 lg:pb-24 lg:pt-10">
       <Container>
         <header className="mt-2 sm:mt-4">
           <div className="flex flex-wrap items-baseline gap-3">

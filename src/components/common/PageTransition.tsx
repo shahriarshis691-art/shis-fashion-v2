@@ -9,7 +9,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation()
 
   return (
-    <div key={location.pathname} className="gpu-media">
+    <div key={location.pathname}>
       {children}
     </div>
   )

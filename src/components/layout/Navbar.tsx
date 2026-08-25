@@ -268,7 +268,7 @@ export default function Navbar() {
               </svg>
             </button>
 
-            <Link to="/track-order" onClick={closeOverlays} className={iconButtonClass} aria-label="Account / track order">
+            <Link to="/track-order" onClick={closeOverlays} className={iconButtonClass} aria-label="Track order" title="Track order">
               <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />

@@ -88,7 +88,7 @@ export default function HalfShirtCollectionPage() {
   }, [])
 
   return (
-    <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
+    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
       <Container>
         <nav aria-label="Breadcrumb" className="text-[11px] uppercase tracking-[0.14em] text-black/55">
           <ol className="flex flex-wrap items-center gap-2">

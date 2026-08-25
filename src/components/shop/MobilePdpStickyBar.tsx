@@ -19,10 +19,10 @@ export default function MobilePdpStickyBar({
   addToCartLabel = 'Add to Cart',
 }: MobilePdpStickyBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-3 shadow-lg md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-[55] border-t border-gray-200 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg md:hidden">
       <div
         key={shakeToken}
-        className={`pb-[max(0px,env(safe-area-inset-bottom))] ${actionError ? 'ui-shake' : ''}`}
+        className={actionError ? 'ui-shake' : ''}
       >
         {actionError ? (
           <p className="mb-2 text-center text-xs font-medium text-red-600" role="alert">

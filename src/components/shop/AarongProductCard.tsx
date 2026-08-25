@@ -86,15 +86,18 @@ const AarongProductCard = memo(function AarongProductCard({
       {onToggleWishlist ? (
         <button
           type="button"
+          onPointerDown={(event) => {
+            event.stopPropagation()
+          }}
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-red-500"
+          className="absolute top-1.5 right-1.5 z-10 inline-flex h-11 w-11 items-center justify-center text-neutral-600 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-red-500"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>

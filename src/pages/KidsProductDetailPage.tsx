@@ -22,6 +22,7 @@ import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { parseBDT } from '../utils/currency'
+import { getVariantStock } from '../utils/variantStock'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
@@ -57,10 +58,9 @@ export default function KidsProductDetailPage() {
   const product = useMemo(() => getKidsProductBySlug(productSlug ?? ''), [productSlug])
 
   const colorFromQuery = searchParams.get('color')?.trim() ?? ''
-  const initialColor =
-    product?.colors?.find((color) => color.toLowerCase() === colorFromQuery.toLowerCase())
-    ?? product?.colors?.[0]
-    ?? 'Default'
+  const initialColor = colorFromQuery
+    ? (product?.colors?.find((color) => color.toLowerCase() === colorFromQuery.toLowerCase()) ?? '')
+    : ''
 
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState(initialColor)
@@ -155,12 +155,16 @@ export default function KidsProductDetailPage() {
   const activeImage = gallery[activeImageIndex] ?? product?.image ?? '/og-image.svg'
   const sizes = product?.sizes ?? []
   const colors = product?.colors ?? []
-  const availableStock = product?.stock ?? 0
   const isSizeSelected = Boolean(selectedSize && sizes.includes(selectedSize))
   const hasColorOptions = colors.length > 0
   const isColorSelected = !hasColorOptions || Boolean(selectedColor && colors.includes(selectedColor))
   const safeSize = isSizeSelected ? selectedSize : sizes[0] ?? '8-9Y'
   const safeColor = isColorSelected ? selectedColor : colors[0] ?? 'Default'
+  const availableStock = product
+    ? Math.max(0, isSizeSelected && isColorSelected
+      ? getVariantStock(product, selectedSize, selectedColor)
+      : (product.stock ?? 0))
+    : 0
   const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
   const stockLabel = getStockLabel(availableStock)
@@ -169,6 +173,8 @@ export default function KidsProductDetailPage() {
     isSizeSelected,
     isColorSelected,
     availableStock,
+    sizeHint: 'Please select a size / দয়া করে সাইজ সিলেক্ট করুন',
+    colorHint: 'Please select a color / দয়া করে কালার সিলেক্ট করুন',
   })
 
   const relatedProducts = useMemo(() => {
@@ -479,6 +485,9 @@ export default function KidsProductDetailPage() {
                   )
                 })}
               </div>
+              {!isColorSelected ? (
+                <p className="mt-2 text-xs text-neutral-400">Select a color to continue.</p>
+              ) : null}
             </div>
           ) : null}
 

@@ -39,7 +39,7 @@ export default function SalePage() {
   )
 
   return (
-    <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
+    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
       <Container>
         <div>
           <div className="flex flex-wrap items-baseline gap-3">

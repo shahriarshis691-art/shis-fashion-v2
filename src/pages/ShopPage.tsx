@@ -728,7 +728,7 @@ export default function ShopPage() {
   }
 
   return (
-    <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
+    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
       <Container>
         {/* Breadcrumb */}
         <nav className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55">
@@ -928,11 +928,11 @@ function AnimateMobileSheet({
           <button
             type="button"
             aria-label="Close filter panel"
-            className="luxury-fade-in fixed inset-0 z-40 bg-black/40 sm:hidden"
+            className="luxury-fade-in fixed inset-0 z-[50] bg-black/40 sm:hidden"
             onClick={onClose}
           />
 
-          <aside className="luxury-sheet-up gpu-media fixed inset-x-0 bottom-0 z-50 rounded-t-xl border-t border-black/15 bg-white px-4 pb-6 pt-4 sm:hidden">
+          <aside className="luxury-sheet-up gpu-media fixed inset-x-0 bottom-0 z-[55] rounded-t-xl border-t border-black/15 bg-white px-4 pt-4 pb-[max(5.5rem,calc(4.5rem+env(safe-area-inset-bottom)))] sm:hidden">
             <div className="mx-auto max-w-7xl">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Filter & Sort</h2>

@@ -193,7 +193,7 @@ export default function KidsOversizedTeeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      <div className="relative flex h-[60dvh] w-full items-end justify-center overflow-hidden bg-neutral-950 sm:h-[75vh] sm:items-center lg:h-[80vh]">
+      <div className="relative flex w-full items-end justify-center overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[75vh] sm:items-center lg:h-[80vh]">
         <img
           src="/hero/kids/kids-hero2.jpg"
           alt="Kids Collection"
@@ -402,7 +402,7 @@ export default function KidsOversizedTeeCollectionPage() {
             aria-label="Close filters"
             onClick={() => setFilterDrawerOpen(false)}
           />
-          <aside className="luxury-sheet-up absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto overscroll-contain bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 sm:h-full sm:max-h-none sm:w-[min(22rem,100vw)] sm:border-l sm:border-neutral-100">
+          <aside className="luxury-sheet-up absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto overscroll-contain bg-white px-4 pb-[max(5.5rem,calc(4.5rem+env(safe-area-inset-bottom)))] pt-4 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 sm:h-full sm:max-h-none sm:w-[min(22rem,100vw)] sm:border-l sm:border-neutral-100 sm:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-neutral-900">Filters</p>
               <button

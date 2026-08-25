@@ -238,6 +238,11 @@ export default function MainLayout() {
       <SmoothScroll />
       <ScrollToTop />
       <Navbar />
+      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (
+        <Suspense fallback={null}>
+          <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
+        </Suspense>
+      ) : null}
       <main className="page-shell min-h-screen">
         <PageTransition>
           <Outlet />
@@ -253,7 +258,6 @@ export default function MainLayout() {
       </Suspense>
       <DeferredChrome>
         <Suspense fallback={null}>
-          <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />
           <MiniCartConfirmation />
           {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? <WhatsAppWidget /> : null}
           {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (

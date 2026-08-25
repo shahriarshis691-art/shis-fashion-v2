@@ -1,22 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import { SUPPORT_WHATSAPP_HREF } from '../../data/storePolicy'
-
-/** Routes with a sticky mobile CTA bar — lift the bubble so it never covers Buy Now / Add to Bag. */
-function hasStickyMobileCta(pathname: string) {
-  if (/^\/kids\/[^/]+\/?$/.test(pathname)) {
-    return true
-  }
-  if (/^\/sarees\/[^/]+\/?$/.test(pathname)) {
-    return true
-  }
-  if (/^\/shop\/[^/]+\/[^/]+\/?$/.test(pathname)) {
-    return true
-  }
-  if (pathname === '/cart' || pathname === '/checkout') {
-    return true
-  }
-  return false
-}
+import { hasStickyMobileCta } from '../../utils/stickyMobileCta'
 
 export default function WhatsAppWidget() {
   const { pathname } = useLocation()
@@ -28,9 +12,9 @@ export default function WhatsAppWidget() {
       target="_blank"
       rel="noreferrer"
       aria-label="Chat with SHIS Fashion on WhatsApp"
-      className={`fixed z-40 flex h-14 w-14 items-center justify-center rounded-full border border-black/10 bg-black text-white shadow-[0_10px_28px_rgba(0,0,0,0.22)] transition hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black right-[max(1rem,env(safe-area-inset-right))] touch-manipulation ${
+      className={`fixed z-[45] flex h-14 w-14 items-center justify-center rounded-full border border-black/10 bg-black text-white shadow-[0_10px_28px_rgba(0,0,0,0.22)] transition hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black right-[max(1rem,env(safe-area-inset-right))] touch-manipulation ${
         liftForCta
-          ? 'bottom-20 md:bottom-6'
+          ? 'bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-6'
           : 'bottom-[max(1.15rem,env(safe-area-inset-bottom))] md:bottom-6'
       }`}
     >

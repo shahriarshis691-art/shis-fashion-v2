@@ -6,10 +6,12 @@ import { formatCouponDiscountLabel, quoteCouponDiscount } from '../../utils/coup
 
 interface CouponApplyFieldProps {
   customerEmail?: string
+  quoteSourceItems?: Array<{ category: string; price: string; quantity: number }>
 }
 
-export default function CouponApplyField({ customerEmail = '' }: CouponApplyFieldProps) {
-  const { items, appliedCoupon, applyCoupon, removeCoupon, discountAmount } = useCart()
+export default function CouponApplyField({ customerEmail = '', quoteSourceItems }: CouponApplyFieldProps) {
+  const { items: cartItems, appliedCoupon, applyCoupon, removeCoupon, discountAmount } = useCart()
+  const items = quoteSourceItems ?? cartItems
   const [couponCode, setCouponCode] = useState(appliedCoupon?.code ?? '')
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponMessage, setCouponMessage] = useState('')

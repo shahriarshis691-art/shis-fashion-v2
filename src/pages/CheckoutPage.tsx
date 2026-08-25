@@ -540,7 +540,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
-              <CouponApplyField customerEmail={form.email} />
+              <CouponApplyField customerEmail={form.email} quoteSourceItems={items} />
             </div>
 
             <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
@@ -672,7 +672,7 @@ export default function CheckoutPage() {
               ) : null}
             </div>
 
-            <div className="sticky bottom-3 z-20 bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+            <div className="sticky bottom-3 z-[55] bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
               <Button type="submit" className="w-full justify-center rounded-full bg-black px-5 py-4 text-[16px] font-semibold text-white shadow-none hover:bg-black/90 disabled:bg-black/25 disabled:text-white/70" disabled={!canSubmit}>
                 {isSubmitting ? 'Placing order...' : 'Place Order'}
               </Button>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { subscribeToHomepageContent } from '../../firebase/adminService'
 import { formatBDT } from '../../utils/currency'
 import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../../utils/bangladeshAddress'
+import { hasStickyMobileCta } from '../../utils/stickyMobileCta'
 
 const IMAGE_PLACEHOLDER =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f4f4f4"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="%23777777"%3ESHIS Fashion%3C/text%3E%3C/svg%3E'
@@ -57,8 +58,10 @@ function triggerHapticAndTone() {
 }
 
 export default function MiniCartConfirmation() {
+  const { pathname } = useLocation()
   const { recentAddition, dismissRecentAddition } = useCart()
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
+  const liftForCta = hasStickyMobileCta(pathname)
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => {
@@ -105,7 +108,9 @@ export default function MiniCartConfirmation() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 18, scale: 0.98 }}
           transition={{ duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
-          className="pointer-events-none fixed inset-x-0 bottom-3 z-[70] px-3 sm:bottom-5 sm:px-5"
+          className={`pointer-events-none fixed inset-x-0 z-[70] px-3 sm:bottom-5 sm:px-5 ${
+            liftForCta ? 'bottom-[5.5rem]' : 'bottom-3'
+          }`}
         >
           <div className="pointer-events-auto mx-auto w-full max-w-xl rounded-[1.2rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:rounded-[1.5rem] sm:p-4">
             <div className="flex items-start justify-between gap-3">
