@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import LuxuryImage from '../components/common/LuxuryImage'
 import {
@@ -23,6 +23,45 @@ type PaymentMethod = 'cod' | 'bkash' | 'nagad'
 
 const INSIDE_DHAKA_FEE = 60
 const OUTSIDE_DHAKA_FEE = 120
+
+/** Always start from the full static catalog (16 items). */
+const ALL_KIDS_PRODUCTS = kidsOversizedTeeProducts
+
+function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
+  if (genderFilter === 'all') {
+    return true
+  }
+
+  const selected = genderFilter.trim().toLowerCase()
+  const productGender = product.genderCategory.trim().toLowerCase()
+  const productCategory = String(product.category ?? '').trim().toLowerCase()
+
+  if (productGender === selected) {
+    return true
+  }
+
+  if (selected === 'kids boy' || selected === 'boys') {
+    return productGender.includes('boy') || productCategory.includes('boy')
+  }
+
+  if (selected === 'kids girl' || selected === 'girls') {
+    return productGender.includes('girl') || productCategory.includes('girl')
+  }
+
+  if (selected === 'unisex') {
+    return productGender.includes('unisex') || productCategory.includes('unisex') || productCategory === 'kids'
+  }
+
+  return false
+}
+
+function matchesSizeFilter(product: KidsOversizedTeeProduct, sizeFilter: string) {
+  if (sizeFilter === 'all') {
+    return true
+  }
+
+  return (product.sizes ?? []).some((size) => size.trim().toLowerCase() === sizeFilter.trim().toLowerCase())
+}
 
 const GENDER_OPTIONS: Array<{ value: GenderFilter; label: string }> = [
   { value: 'all', label: 'All' },
@@ -467,6 +506,7 @@ function SuccessPopup({ result, onClose }: { result: SuccessState; onClose: () =
 }
 
 export default function KidsOversizedTeeCollectionPage() {
+  const location = useLocation()
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
   const [sizeFilter, setSizeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
@@ -475,16 +515,16 @@ export default function KidsOversizedTeeCollectionPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   const visibleProducts = useMemo(() => {
-    const filtered = kidsOversizedTeeProducts.filter((product) => {
-      if (genderFilter !== 'all' && product.genderCategory !== genderFilter) {
+    const filtered = ALL_KIDS_PRODUCTS.filter((product) => {
+      if (!matchesGenderFilter(product, genderFilter)) {
         return false
       }
 
-      if (sizeFilter !== 'all' && !(product.sizes ?? []).includes(sizeFilter)) {
+      if (!matchesSizeFilter(product, sizeFilter)) {
         return false
       }
 
-      return product.inStock
+      return product.inStock !== false
     })
 
     const sorted = [...filtered]
@@ -500,14 +540,18 @@ export default function KidsOversizedTeeCollectionPage() {
   }, [genderFilter, sizeFilter, sortBy])
 
   useEffect(() => {
-    applySeoMetadata('/collections/kids-oversized-tee', {
+    const canonicalPath = location.pathname.startsWith('/collections/')
+      ? location.pathname
+      : '/kids'
+
+    applySeoMetadata(canonicalPath, {
       title: "Kids Oversized Tee Collection | SHIS Fashion Bangladesh",
       description:
         'Premium heavy cotton kids oversized drop-shoulder tees for boys, girls, and unisex styles. Shop SHIS Fashion Bangladesh.',
-      canonicalPath: '/collections/kids-oversized-tee',
+      canonicalPath,
       keywords: 'kids oversized tee, kids t-shirt Bangladesh, SHIS Fashion kids',
     })
-  }, [])
+  }, [location.pathname])
 
   useEffect(() => {
     if (!quickOrder && !success) {
@@ -618,11 +662,13 @@ export default function KidsOversizedTeeCollectionPage() {
             </div>
           </div>
 
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60">{visibleProducts.length} styles</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60">
+            {visibleProducts.length} products
+          </p>
         </div>
 
         {visibleProducts.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {visibleProducts.map((product) => (
               <KidsProductCard
                 key={product.id}

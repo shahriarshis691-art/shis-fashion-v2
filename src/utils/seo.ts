@@ -145,7 +145,7 @@ function getCollectionTitle(slug: string) {
     return "Men's Half Shirt Collection"
   }
 
-  if (slug === 'kids-oversized-tee') {
+  if (slug === 'kids-oversized-tee' || slug === 'kids') {
     return 'Kids Oversized Collection'
   }
 
