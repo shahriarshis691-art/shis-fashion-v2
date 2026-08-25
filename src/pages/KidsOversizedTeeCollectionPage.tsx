@@ -113,7 +113,7 @@ function KidsProductCard({
       tabIndex={0}
       aria-label={`Quick order ${product.name}`}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-white">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#f8f8f8]">
         <img
           src={product.image}
           alt={product.name}
@@ -121,7 +121,7 @@ function KidsProductCard({
           height={1280}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+          className="h-full w-full object-contain p-2 transition-transform duration-300 ease-out group-hover:scale-[1.02]"
           onError={(event) => {
             event.currentTarget.src = '/og-image.svg'
           }}
@@ -259,7 +259,7 @@ function QuickOrderDrawer({
         </div>
 
         <div className="mt-4 flex gap-3">
-          <div className="h-28 w-20 shrink-0 overflow-hidden bg-neutral-100">
+          <div className="h-28 w-20 shrink-0 overflow-hidden bg-[#f8f8f8]">
             <LuxuryImage
               src={order.product.image}
               alt={order.product.name}
@@ -268,7 +268,7 @@ function QuickOrderDrawer({
               sizes="80px"
               widths={[160, 320]}
               aspectClassName="aspect-[3/4]"
-              imgClassName="h-full w-full object-cover object-[center_top]"
+              imgClassName="h-full w-full object-contain p-1"
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -543,7 +543,7 @@ export default function KidsOversizedTeeCollectionPage() {
 
   return (
     <section className="bg-white pb-24 pt-6 md:pb-20 md:pt-10">
-      <div className="mx-auto max-w-7xl px-3 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
         <nav aria-label="Breadcrumb" className="text-[11px] uppercase tracking-[0.14em] text-black/55">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
