@@ -185,3 +185,20 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   outline: none;
 }
+
+/* Navbar brand mark — override Tailwind img preflight (height: auto) that stretches logos */
+img.navbar-brand-logo {
+  display: block;
+  height: 36px !important;
+  width: auto !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  aspect-ratio: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  img.navbar-brand-logo {
+    height: 44px !important;
+  }
+}
