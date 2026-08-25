@@ -121,6 +121,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     || pathname.startsWith('/collections/')
     || pathname.startsWith('/product/')
     || pathname.startsWith('/brands/')
+    || pathname.startsWith('/kids/')
 }
 
 function createCanonicalUrl(pathname: string) {
@@ -231,6 +232,9 @@ function buildBreadcrumbItems(pathname: string) {
 
   if (segments[0] === 'kids') {
     items.push({ name: 'Kids', item: `${SITE_URL}/kids` })
+    if (segments[1]) {
+      items.push({ name: toTitleCase(segments[1].replace(/-/g, ' ')), item: `${SITE_URL}${normalizedPath}` })
+    }
     return items
   }
 

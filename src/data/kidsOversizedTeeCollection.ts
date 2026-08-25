@@ -159,3 +159,29 @@ export function getKidsBadge(product: KidsOversizedTeeProduct): string | null {
   }
   return null
 }
+
+export function getKidsProductBySlug(slug: string): KidsOversizedTeeProduct | undefined {
+  const normalized = decodeURIComponent(slug).trim().toLowerCase()
+  if (!normalized) {
+    return undefined
+  }
+
+  return kidsOversizedTeeProducts.find((product) => product.slug.toLowerCase() === normalized)
+}
+
+export const KIDS_PRODUCT_FABRIC = 'Premium heavy cotton (soft hand-feel, breathable, everyday durable)'
+export const KIDS_PRODUCT_CARE = [
+  'Machine wash cold, gentle cycle',
+  'Wash inside out with similar colours',
+  'Do not bleach',
+  'Tumble dry low or hang dry',
+  'Warm iron inside out if needed',
+] as const
+
+export const KIDS_TRUST_BADGES = [
+  'Cash on Delivery',
+  'Easy Exchange',
+  '24–72h Delivery',
+  'Phone Confirmation',
+] as const
+

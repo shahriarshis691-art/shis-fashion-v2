@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import KidsSizeGuideModal from '../components/kids/KidsSizeGuideModal'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { useCart } from '../context/CartContext'
 import {
   getKidsBadge,
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
-  KIDS_SIZE_GUIDE_ROWS,
   kidsOversizedTeeProducts,
   type KidsGenderCategory,
   type KidsOversizedTeeProduct,
@@ -26,6 +26,10 @@ const INSIDE_DHAKA_FEE = 60
 const OUTSIDE_DHAKA_FEE = 120
 const SITE_URL = 'https://www.shisfashion.com'
 const ALL_KIDS_PRODUCTS = kidsOversizedTeeProducts
+
+function prefetchKidsProductDetail() {
+  void import('./KidsProductDetailPage')
+}
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
   if (genderFilter === 'all') {
@@ -126,18 +130,21 @@ function KidsProductCard({
   const badge = getKidsBadge(product)
   const secondaryImage = product.galleryImages?.[1]
   const sizesPreview = (product.sizes ?? []).slice(0, 4)
+  const colorLabel = KIDS_COLOR_LABELS[activeColorHex] ?? activeColorHex
+  const detailHref = `/kids/${product.slug}?color=${encodeURIComponent(colorLabel)}`
 
   return (
     <article className="group min-w-0 bg-[#fcfcfc]">
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f8f8f8]">
-        <button
-          type="button"
-          onClick={() => onQuickAdd(product, activeColorHex)}
-          className="absolute inset-0 z-0 block h-full w-full cursor-pointer text-left"
-          aria-label={`Quick add ${product.name}`}
+        <Link
+          to={detailHref}
+          className="absolute inset-0 z-0 block h-full w-full"
+          aria-label={`View ${product.name}`}
+          onMouseEnter={prefetchKidsProductDetail}
+          onFocus={prefetchKidsProductDetail}
         >
           <span className="sr-only">{product.name}</span>
-        </button>
+        </Link>
 
         <img
           src={product.image}
@@ -214,14 +221,15 @@ function KidsProductCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onQuickAdd(product, activeColorHex)}
+      <Link
+        to={detailHref}
         className="mt-2.5 block w-full text-left"
+        onMouseEnter={prefetchKidsProductDetail}
+        onFocus={prefetchKidsProductDetail}
       >
         <h2 className="line-clamp-1 text-xs font-semibold text-neutral-900 md:text-sm">{product.name}</h2>
         <p className="mt-0.5 text-xs font-medium text-neutral-800 md:text-sm">{product.price}</p>
-      </button>
+      </Link>
 
       <div className="mt-1.5 flex flex-wrap gap-1 md:hidden">
         {sizesPreview.slice(0, 3).map((size) => (
@@ -253,58 +261,6 @@ function KidsProductCard({
         </div>
       ) : null}
     </article>
-  )
-}
-
-function SizeGuideModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-[96] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Kids size guide">
-      <button type="button" className="absolute inset-0 bg-black/55" aria-label="Close size guide" onClick={onClose} />
-      <div className="relative z-10 max-h-[88vh] w-full overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:max-w-2xl sm:rounded-2xl sm:p-6">
-        <div className="flex items-start justify-between gap-3 border-b border-black/10 pb-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-black/55">Fit Reference</p>
-            <h2 className="mt-1 text-base font-semibold text-neutral-900">Kids Oversized Tee Size Guide</h2>
-          </div>
-          <button type="button" onClick={onClose} className="border border-black/15 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]">
-            Close
-          </button>
-        </div>
-
-        <p className="mt-3 text-sm leading-6 text-neutral-600">
-          Soft oversized fit. Measure height and chest, then choose the closest age band. Prefer the larger size for a roomier drop-shoulder look.
-        </p>
-
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-collapse text-left text-xs text-neutral-800 md:text-sm">
-            <thead>
-              <tr className="border-b border-black/10 text-[10px] uppercase tracking-[0.12em] text-neutral-500">
-                <th className="px-2 py-2 font-semibold">Size</th>
-                <th className="px-2 py-2 font-semibold">Age</th>
-                <th className="px-2 py-2 font-semibold">Height</th>
-                <th className="px-2 py-2 font-semibold">Chest</th>
-              </tr>
-            </thead>
-            <tbody>
-              {KIDS_SIZE_GUIDE_ROWS.map((row) => (
-                <tr key={row.size} className="border-b border-black/5">
-                  <td className="px-2 py-2.5 font-semibold">{row.size}</td>
-                  <td className="px-2 py-2.5">{row.age}</td>
-                  <td className="px-2 py-2.5">
-                    {row.heightIn}
-                    <span className="block text-neutral-500">{row.heightCm}</span>
-                  </td>
-                  <td className="px-2 py-2.5">
-                    {row.chestIn}
-                    <span className="block text-neutral-500">{row.chestCm}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -826,7 +782,7 @@ export default function KidsOversizedTeeCollectionPage() {
       itemListElement: ALL_KIDS_PRODUCTS.map((product, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        url: `${SITE_URL}/kids#${product.slug}`,
+        url: `${SITE_URL}/kids/${product.slug}`,
         name: product.name,
         image: product.image.startsWith('http') ? product.image : `${SITE_URL}${product.image}`,
       })),
@@ -845,7 +801,7 @@ export default function KidsOversizedTeeCollectionPage() {
           brand: product.brand,
           stock: product.stock ?? 0,
         },
-        `/kids#${product.slug}`,
+        `/kids/${product.slug}`,
       ),
     )
 
@@ -1076,7 +1032,7 @@ export default function KidsOversizedTeeCollectionPage() {
         />
       ) : null}
 
-      {sizeGuideOpen ? <SizeGuideModal onClose={() => setSizeGuideOpen(false)} /> : null}
+      {sizeGuideOpen ? <KidsSizeGuideModal onClose={() => setSizeGuideOpen(false)} /> : null}
 
       {success ? <SuccessPopup result={success} onClose={() => setSuccess(null)} /> : null}
     </section>
