@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import Container from '../components/ui/Container'
 import LuxuryImage from '../components/common/LuxuryImage'
 import {
-  getKidsDiscountPercent,
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
   kidsOversizedTeeProducts,
@@ -24,7 +22,7 @@ type PaymentMethod = 'cod' | 'bkash' | 'nagad'
 const INSIDE_DHAKA_FEE = 60
 const OUTSIDE_DHAKA_FEE = 120
 
-/** Always start from the full static catalog (16 items). */
+/** Always start from the full static kids catalog. */
 const ALL_KIDS_PRODUCTS = kidsOversizedTeeProducts
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
@@ -101,11 +99,21 @@ function KidsProductCard({
   onToggleWishlist: (product: KidsOversizedTeeProduct) => void
   wished: boolean
 }) {
-  const discount = getKidsDiscountPercent(product)
-
   return (
-    <article className="group min-w-0">
-      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
+    <article
+      className="group min-w-0 cursor-pointer bg-[#fcfcfc]"
+      onClick={() => onOrder(product)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOrder(product)
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Quick order ${product.name}`}
+    >
+      <div className="relative aspect-[3/4] overflow-hidden bg-white">
         <img
           src={product.image}
           alt={product.name}
@@ -113,64 +121,29 @@ function KidsProductCard({
           height={1280}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition-transform duration-300 ease-out group-hover:scale-[1.02]"
           onError={(event) => {
             event.currentTarget.src = '/og-image.svg'
           }}
         />
 
-        {discount > 0 ? (
-          <span className="absolute left-2 top-2 bg-neutral-900 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-white">
-            {discount}% OFF
-          </span>
-        ) : null}
-
         <button
           type="button"
-          onClick={() => onToggleWishlist(product)}
-          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-neutral-800 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleWishlist(product)
+          }}
+          className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors hover:text-red-500"
           aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-black/50 via-black/15 to-transparent px-2 pb-2 pt-8 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:block">
-          <div className="flex flex-wrap gap-1">
-            {product.sizes?.slice(0, 5).map((size) => (
-              <span key={size} className="bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-neutral-900">
-                {size}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
 
-      <div className="pt-2.5 text-left sm:pt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-500">{product.genderCategory}</p>
-        <h2 className="mt-1 line-clamp-2 text-xs font-bold leading-snug text-neutral-900 sm:text-sm">{product.name}</h2>
-        <div className="mt-1.5 flex items-center gap-2">
-          <p className="text-xs font-semibold text-neutral-900 sm:text-sm">{product.price}</p>
-          <p className="text-[10px] text-neutral-400 line-through sm:text-xs">{product.originalPrice}</p>
-        </div>
-
-        <div className="mt-2 flex flex-wrap gap-1 md:hidden">
-          {product.sizes?.slice(0, 3).map((size) => (
-            <span key={size} className="border border-black/10 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.08em] text-neutral-600">
-              {size}
-            </span>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onOrder(product)}
-          className="mt-3 inline-flex w-full items-center justify-center border border-neutral-900 bg-neutral-900 px-3 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-neutral-900"
-        >
-          Order Now
-        </button>
-      </div>
+      <h2 className="mt-2.5 line-clamp-1 text-xs font-semibold text-neutral-900 md:text-sm">{product.name}</h2>
+      <p className="mt-0.5 text-xs font-medium text-neutral-800 md:text-sm">{product.price}</p>
     </article>
   )
 }
@@ -569,8 +542,8 @@ export default function KidsOversizedTeeCollectionPage() {
   }, [quickOrder, success])
 
   return (
-    <section className="bg-white px-3.5 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-20 lg:pt-10">
-      <Container>
+    <section className="bg-white pb-24 pt-6 md:pb-20 md:pt-10">
+      <div className="mx-auto max-w-7xl px-3 md:px-8">
         <nav aria-label="Breadcrumb" className="text-[11px] uppercase tracking-[0.14em] text-black/55">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -671,7 +644,7 @@ export default function KidsOversizedTeeCollectionPage() {
         </div>
 
         {visibleProducts.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 md:grid-cols-4 md:gap-x-6 md:gap-y-10">
             {visibleProducts.map((product) => (
               <KidsProductCard
                 key={product.id}
@@ -705,7 +678,7 @@ export default function KidsOversizedTeeCollectionPage() {
             </button>
           </div>
         )}
-      </Container>
+      </div>
 
       {quickOrder ? (
         <QuickOrderDrawer
