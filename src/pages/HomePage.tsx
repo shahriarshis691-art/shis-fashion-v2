@@ -201,8 +201,7 @@ const defaultHomepage: HomepageContent = {
   },
   featuredCollectionEyebrow: 'Featured collections',
   featuredCollectionTitle: 'Designed for modern Bangladeshi wardrobes',
-  featuredCollectionSubtitle:
-    'Minimal, refined, and wearable edits that fit daily life and special moments alike.',
+  featuredCollectionSubtitle: '',
   newArrivalsEyebrow: 'Latest edit',
   newArrivalsTitle: 'New arrivals, curated weekly',
   newArrivalsSubtitle: 'Fresh additions selected for comfort, quality, and a polished finish.',
@@ -454,11 +453,6 @@ export default function HomePage() {
             >
               {homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
             </h2>
-            {homepageContent.featuredCollectionSubtitle?.trim() ? (
-              <p className="mt-2 mx-auto max-w-2xl text-sm text-black/65">
-                {homepageContent.featuredCollectionSubtitle}
-              </p>
-            ) : null}
           </div>
 
           {/* 2-Column Tall Grid */}

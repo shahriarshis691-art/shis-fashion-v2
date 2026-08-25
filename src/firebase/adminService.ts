@@ -1381,7 +1381,7 @@ const defaultHomepage: HomepageContent = {
   categorySections: defaultCategorySections,
   featuredCollectionEyebrow: 'Featured collection',
   featuredCollectionTitle: 'Premium categories for every moment',
-  featuredCollectionSubtitle: 'A calm, editorial approach to wardrobe essentials designed to feel as luxurious as they look.',
+  featuredCollectionSubtitle: '',
   newArrivalsEyebrow: 'New arrivals',
   newArrivalsTitle: 'Freshly composed for the season',
   newArrivalsSubtitle: 'Newly released pieces with an effortless, sculpted feel.',
