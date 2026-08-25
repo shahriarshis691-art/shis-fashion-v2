@@ -31,8 +31,24 @@ export interface KidsOversizedTeeProduct extends ShopProduct {
   newest: boolean
 }
 
-/** Local kids oversized tee assets: public/images/products/kids/kids-tee-1.jpg … kids-tee-15.jpg */
-const kidsTeeImage = (index: number) => `/images/products/kids/kids-tee-${index}.jpg`
+/** Verified Unsplash kids fashion portraits (3:4). Each URL returns HTTP 200. */
+const KIDS_IMG = [
+  'https://images.unsplash.com/photo-1761475048694-816cf2823ae3?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1628345703968-6767aeea2728?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1592137525871-b22238c8e547?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1544776193-352d25ca82cd?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1602030028438-4cf153cbae9e?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=960&h=1280&q=80',
+  'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=960&h=1280&q=80',
+] as const
 
 function tee(
   index: number,
@@ -43,7 +59,7 @@ function tee(
   colors: string[],
   newest = false,
 ): KidsOversizedTeeProduct {
-  const image = kidsTeeImage(index)
+  const image = KIDS_IMG[index - 1]
 
   return {
     id: `kids-oversized-tee-${index}`,
