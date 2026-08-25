@@ -90,6 +90,14 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
   { value: 'price-high', label: 'Price: High to Low' },
 ]
 
+function formatKidsListPrice(price: string) {
+  const amount = parseBDT(price)
+  return `Tk ${amount.toLocaleString('en-BD', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
 function KidsProductCard({
   product,
   priority,
@@ -112,28 +120,29 @@ function KidsProductCard({
         onMouseEnter={prefetchKidsProductDetail}
         onFocus={prefetchKidsProductDetail}
       >
-        <div className="relative aspect-[3/4] overflow-hidden bg-[#f6f6f6]">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f4f4f4]">
           <img
             src={product.image}
             alt={product.name}
             width={960}
             height={1280}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : undefined}
             decoding="async"
-            className="h-full w-full object-contain p-1 transition-transform duration-300 ease-out group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}
           />
         </div>
 
-        <div className="pt-2.5 text-left sm:pt-3">
-          <h2 className="line-clamp-1 text-left text-[13px] font-semibold tracking-tight text-gray-900 sm:text-[14px]">
-            {product.name}
-          </h2>
-          <p className="mt-0.5 text-left text-[12px] font-normal text-gray-800 sm:text-[13px]">{product.price}</p>
-        </div>
+        <h3 className="mt-2 truncate text-left text-[13px] font-medium text-gray-900 sm:text-[14px]">
+          {product.name}
+        </h3>
+        <p className="text-left text-[12px] font-normal text-gray-700 sm:text-[13px]">
+          {formatKidsListPrice(product.price)}
+        </p>
       </Link>
 
       <button
@@ -143,7 +152,7 @@ function KidsProductCard({
           event.stopPropagation()
           onToggleWishlist(product)
         }}
-        className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors hover:text-red-500 sm:top-3 sm:right-3"
+        className="absolute top-2.5 right-2.5 z-10 text-neutral-600 transition-colors hover:text-red-500"
         aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
@@ -375,7 +384,7 @@ export default function KidsOversizedTeeCollectionPage() {
         </div>
 
         {visibleProducts.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6">
             {visibleProducts.map((product, index) => (
               <KidsProductCard
                 key={product.id}
