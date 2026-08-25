@@ -214,8 +214,11 @@ export default function KidsOversizedTeeCollectionPage() {
           <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/80 uppercase sm:text-xs">
             Exclusive Launch
           </span>
-          <h1 className="text-2xl font-semibold uppercase tracking-[0.2em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-4xl sm:tracking-[0.3em] lg:text-5xl">
-            Kids Collection
+          <h1
+            style={{ color: '#ffffff' }}
+            className="!text-white text-center text-3xl font-serif font-bold tracking-[0.25em] uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-4xl md:text-5xl lg:text-6xl"
+          >
+            KIDS COLLECTION
           </h1>
           <p className="mt-2 max-w-md text-xs font-light text-neutral-200 sm:text-sm">
             Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
