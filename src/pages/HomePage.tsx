@@ -98,7 +98,7 @@ const defaultHomepage: HomepageContent = {
   heroPrimaryLink: '/shop?category=women&sub=oversized-tee',
   heroSecondaryCta: 'See new arrivals',
   heroSecondaryLink: '/shop/new-arrivals',
-  heroImage: '/hero/effortless-elegance-tee.png',
+  heroImage: '/hero/hero-premium-casual-shirt.webp',
   heroImageTitle: 'Homepage hero image',
   heroImageDescription: 'Main hero visual used for the opening section of the homepage.',
   heroVideo: '',

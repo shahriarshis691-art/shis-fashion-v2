@@ -12,13 +12,6 @@ interface HeroSlide {
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    id: 'effortless-elegance-tee',
-    image: '/hero/effortless-elegance-tee.png',
-    link: '/shop?category=women&sub=oversized-tee',
-    alt: 'Effortless elegance oversized tee campaign',
-    objectPosition: 'center top',
-  },
-  {
     id: 'casual-shirt',
     image: '/hero/hero-premium-casual-shirt.webp',
     link: '/shop?category=men&sub=casual-shirt',
