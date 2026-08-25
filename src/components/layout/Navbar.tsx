@@ -6,7 +6,7 @@ import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
 import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
 
-const BRAND_LOGO = '/hero/shis-fashion-logo.png'
+const BRAND_LOGO = '/hero/shis-brand-logo-v2.png'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -181,9 +181,9 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-[#eeeeee] bg-white">
-        <div className="relative mx-auto flex w-full max-w-[1400px] items-center px-4 py-3 sm:px-6 md:px-10 md:py-3.5">
+        <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-4 sm:px-6 md:h-[70px] md:px-10">
           {/* Left — hamburger (+ desktop nav) */}
-          <div className="relative z-10 flex min-w-0 flex-1 items-center justify-start gap-1 self-center md:gap-6">
+          <div className="relative z-10 flex h-full min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
             <button
               type="button"
               onClick={() => {
@@ -226,19 +226,24 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Center — brand logo (dead-center; no stretch) */}
+          {/* Center — brand logo (dead-center; no stretch / flicker) */}
           <Link
             to="/"
             onClick={closeOverlays}
-            className="absolute top-1/2 left-1/2 z-20 flex shrink-0 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+            className="absolute inset-y-0 left-1/2 z-20 flex h-full -translate-x-1/2 items-center justify-center"
             aria-label="SHIS Fashion home"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
           >
             <img
               src={BRAND_LOGO}
               alt="SHIS Fashion"
-              decoding="async"
+              width={180}
+              height={36}
+              decoding="sync"
+              loading="eager"
+              fetchPriority="high"
               className="navbar-brand-logo"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
               onError={(event) => {
                 event.currentTarget.src = '/shis-logo.svg'
               }}
@@ -246,7 +251,7 @@ export default function Navbar() {
           </Link>
 
           {/* Right — utility icons (balanced gap; does not shift logo) */}
-          <div className="relative z-10 flex flex-1 items-center justify-end gap-3.5 self-center">
+          <div className="relative z-10 flex h-full flex-1 items-center justify-end gap-3.5">
             <button
               type="button"
               onClick={() => {
@@ -330,7 +335,7 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(3.75rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.5rem+env(safe-area-inset-top))]">
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
             <p className="px-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Menu</p>
             <div className="mt-2 grid gap-2" aria-label="Site menu">
               {mobileMenuGroups.map((group) => (
