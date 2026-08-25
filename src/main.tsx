@@ -14,14 +14,36 @@ import { sessionReplay } from './services/sessionReplay'
 import { errorMonitoring } from './services/errorMonitoring'
 import { incidentAlerts } from './services/incidentAlerts'
 
-// Initialize analytics only in production builds
-if (import.meta.env.PROD) {
-  googleAnalytics.initialize()
-  metaPixel.initialize()
-  sessionReplay.initialize()
-  incidentAlerts.initialize()
-  errorMonitoring.initialize()
+/**
+ * Defer third-party analytics boot so LCP/INP on first paint is not blocked
+ * by gtag / pixel / clarity script injection.
+ */
+function scheduleAnalyticsBoot() {
+  if (!import.meta.env.PROD) {
+    return
+  }
+
+  const boot = () => {
+    googleAnalytics.initialize()
+    metaPixel.initialize()
+    sessionReplay.initialize()
+    incidentAlerts.initialize()
+    errorMonitoring.initialize()
+  }
+
+  const win = window as Window & {
+    requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number
+  }
+
+  if (typeof win.requestIdleCallback === 'function') {
+    win.requestIdleCallback(boot, { timeout: 3500 })
+    return
+  }
+
+  window.setTimeout(boot, 1800)
 }
+
+scheduleAnalyticsBoot()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

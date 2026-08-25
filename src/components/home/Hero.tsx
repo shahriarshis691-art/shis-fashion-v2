@@ -115,6 +115,9 @@ export const Hero: React.FC = () => {
       >
         {HERO_SLIDES.map((slide, index) => {
           const isActive = index === safeIndex
+          // Only decode the active slide + neighbors to cut mobile bandwidth/CPU.
+          const shouldLoad = index === 0 || Math.abs(index - safeIndex) <= 1
+          const isLcpCandidate = index === 0
 
           return (
             <div
@@ -130,19 +133,25 @@ export const Hero: React.FC = () => {
                 className="block relative w-full h-full group cursor-pointer"
                 to={slide.link}
                 aria-label={slide.alt}
+                tabIndex={isActive ? 0 : -1}
               >
-                <img
-                  src={slide.image}
-                  alt={slide.alt}
-                  width={1600}
-                  height={2000}
-                  className="w-full h-full object-cover object-center transition-transform duration-[4000ms] ease-out group-hover:scale-105"
-                  style={slide.objectPosition ? { objectPosition: slide.objectPosition } : undefined}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
-                  decoding="async"
-                  draggable={false}
-                />
+                {shouldLoad ? (
+                  <img
+                    src={slide.image}
+                    alt={slide.alt}
+                    width={1200}
+                    height={1600}
+                    sizes="100vw"
+                    className="w-full h-full object-cover object-center transition-transform duration-[4000ms] ease-out group-hover:scale-105"
+                    style={slide.objectPosition ? { objectPosition: slide.objectPosition } : undefined}
+                    loading={isLcpCandidate ? 'eager' : 'lazy'}
+                    fetchPriority={isLcpCandidate ? 'high' : 'low'}
+                    decoding={isLcpCandidate ? 'sync' : 'async'}
+                    draggable={false}
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[#ebe6df]" aria-hidden />
+                )}
               </Link>
             </div>
           )

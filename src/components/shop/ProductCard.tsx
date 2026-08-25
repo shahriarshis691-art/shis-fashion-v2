@@ -23,8 +23,8 @@ const ProductCard = memo(function ProductCard({ product, onToggleWishlist, isInW
             alt={product.name}
             width={960}
             height={1280}
-            sizes="(max-width: 419px) 50vw, (max-width: 1023px) 33vw, 25vw"
-            widths={[320, 480, 768, 960]}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
+            widths={[320, 480, 640, 768]}
             hover
             imgClassName={imageToneClass}
           />

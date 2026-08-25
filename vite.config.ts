@@ -6,16 +6,17 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     sourcemap: false,
+    cssCodeSplit: true,
+    modulePreload: {
+      polyfill: true,
+    },
     chunkSizeWarningLimit: 1000,
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) {
             return undefined
-          }
-
-          if (id.includes('react')) {
-            return 'react'
           }
 
           if (id.includes('firebase')) {
@@ -26,7 +27,11 @@ export default defineConfig({
             return 'motion'
           }
 
-          return 'vendor'
+          if (id.includes('react-dom') || id.includes('react-router') || id.includes('/react/')) {
+            return 'react'
+          }
+
+          return undefined
         },
       },
     },

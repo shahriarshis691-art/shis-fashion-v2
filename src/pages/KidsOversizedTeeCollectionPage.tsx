@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import KidsSizeGuideModal from '../components/kids/KidsSizeGuideModal'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
@@ -11,6 +10,8 @@ import {
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { parseBDT } from '../utils/currency'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
+
+const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
 
 type GenderFilter = 'all' | KidsGenderCategory
 type SortOption = 'newest' | 'price-low' | 'price-high'
@@ -124,11 +125,11 @@ function KidsProductCard({
           <img
             src={product.image}
             alt={product.name}
-            width={960}
-            height={1280}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            width={640}
+            height={853}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 250px"
             loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : undefined}
+            fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
             onError={(event) => {
@@ -399,7 +400,7 @@ export default function KidsOversizedTeeCollectionPage() {
               <KidsProductCard
                 key={product.id}
                 product={product}
-                priority={index < 4}
+                priority={index === 0}
                 wished={isInWishlist(String(product.id))}
                 onToggleWishlist={handleToggleWishlist}
               />
@@ -424,7 +425,11 @@ export default function KidsOversizedTeeCollectionPage() {
         )}
       </div>
 
-      {sizeGuideOpen ? <KidsSizeGuideModal onClose={() => setSizeGuideOpen(false)} /> : null}
+      {sizeGuideOpen ? (
+        <Suspense fallback={null}>
+          <KidsSizeGuideModal onClose={() => setSizeGuideOpen(false)} />
+        </Suspense>
+      ) : null}
     </section>
   )
 }

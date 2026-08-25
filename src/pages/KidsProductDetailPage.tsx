@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import KidsSizeGuideModal from '../components/kids/KidsSizeGuideModal'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import { useCart, writeBuyNowCheckout } from '../context/CartContext'
@@ -22,6 +21,7 @@ import { getCatalogContentId } from '../utils/catalogIdentity'
 import { parseBDT } from '../utils/currency'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
+const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
 const SITE_URL = 'https://www.shisfashion.com'
 
 function getStockLabel(stock: number) {
@@ -629,7 +629,11 @@ export default function KidsProductDetailPage() {
         </div>
       ) : null}
 
-      {sizeGuideOpen ? <KidsSizeGuideModal onClose={() => setSizeGuideOpen(false)} /> : null}
+      {sizeGuideOpen ? (
+        <Suspense fallback={null}>
+          <KidsSizeGuideModal onClose={() => setSizeGuideOpen(false)} />
+        </Suspense>
+      ) : null}
     </section>
   )
 }

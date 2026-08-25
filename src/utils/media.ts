@@ -241,7 +241,7 @@ export function normalizeCatalogImageUrl(url: string, width: number, height: num
   return normalizeDemoImageUrl(cloudinaryUrl, width, height)
 }
 
-const DEFAULT_SRCSET_WIDTHS = [480, 768, 960, 1400]
+const DEFAULT_SRCSET_WIDTHS = [320, 480, 640, 768, 960]
 
 export function buildCatalogSrcSet(
   url: string,
