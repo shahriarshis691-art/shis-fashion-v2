@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
+import MobilePdpStickyBar from '../components/shop/MobilePdpStickyBar'
 import { useListingWishlist } from '../hooks/useListingWishlist'
+import { usePdpActionGate } from '../hooks/usePdpActionGate'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
-import { useCart, writeBuyNowCheckout } from '../context/CartContext'
+import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
 import { subscribeToApprovedProductReviews, subscribeToProducts, type AdminProduct, type ProductReview } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
 import { parseBDT } from '../utils/currency'
@@ -18,6 +20,8 @@ import { DELIVERY_RETURN_BULLETS, EXCHANGE_WINDOW_DAYS } from '../data/storePoli
 import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
+
+const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
 
 function toProduct(product: AdminProduct) {
   const imageEntries = getManagedImageEntries(product, 1)
@@ -104,6 +108,8 @@ export default function ProductDetailPage() {
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
+  const [instantCheckoutOpen, setInstantCheckoutOpen] = useState(false)
+  const [instantCheckoutItems, setInstantCheckoutItems] = useState<CartItem[]>([])
   const [reviews, setReviews] = useState<ProductReview[]>([])
   const [reviewName, setReviewName] = useState('')
   const [reviewRating, setReviewRating] = useState(5)
@@ -329,12 +335,30 @@ export default function ProductDetailPage() {
   const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
   const stockLabel = getStockLabel(availableStock)
-  const canAddToBag = product != null && availableStock > 0 && isSizeSelected && isColorSelected
-  const canBuyNow = canAddToBag
   const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, safeColor, effectiveQuantity) : getWhatsAppHref()
+  const { actionError, shakeToken, clearActionError, requireReadyToPurchase } = usePdpActionGate({
+    isSizeSelected,
+    isColorSelected,
+    availableStock,
+  })
+
+  const buildCheckoutLine = (): CartItem | null => {
+    if (!product) {
+      return null
+    }
+
+    return {
+      ...product,
+      id: `${product.slug}-${safeSize}-${safeColor}`,
+      size: safeSize,
+      color: safeColor,
+      quantity: effectiveQuantity,
+      stock: availableStock,
+    }
+  }
 
   const handleAddToBag = () => {
-    if (!product || !canAddToBag) {
+    if (!requireReadyToPurchase() || !product) {
       return
     }
 
@@ -357,25 +381,31 @@ export default function ProductDetailPage() {
       brand: product.brand,
     }, 'BDT')
 
+    clearActionError()
     setDidAddToBag(true)
     setTimeout(() => setDidAddToBag(false), 1500)
   }
 
   const handleBuyNow = () => {
-    if (!product || !canBuyNow) {
+    if (!requireReadyToPurchase() || !product) {
       return
     }
 
-    writeBuyNowCheckout([
-      {
-        ...product,
-        id: `${product.slug}-${safeSize}-${safeColor}`,
-        size: safeSize,
-        color: safeColor,
-        quantity: effectiveQuantity,
-        stock: availableStock,
-      },
-    ])
+    const line = buildCheckoutLine()
+    if (!line) {
+      return
+    }
+
+    writeBuyNowCheckout([line])
+    clearActionError()
+
+    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+    if (isMobileViewport) {
+      setInstantCheckoutItems([line])
+      setInstantCheckoutOpen(true)
+      return
+    }
+
     googleAnalytics.beginCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
       currency: 'BDT',
@@ -627,16 +657,14 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToBag}
-                disabled={!canAddToBag}
-                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-5 py-3.5 text-[1.02rem] font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
+                className="ui-interactive flex-1 rounded-[2px] border border-black bg-black px-5 py-3.5 text-[1.02rem] font-semibold text-white transition-colors hover:bg-[#121212]"
               >
                 {didAddToBag ? 'Added' : 'Add to Bag'}
               </button>
               <button
                 type="button"
                 onClick={handleBuyNow}
-                disabled={!canBuyNow}
-                className="ui-interactive flex-1 border border-black px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
+                className="ui-interactive flex-1 border border-black px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
               >
                 Buy Now
               </button>
@@ -649,6 +677,11 @@ export default function ProductDetailPage() {
                 {isInWishlist(String(product.id)) ? '♥' : '♡'}
               </button>
             </div>
+            {actionError ? (
+              <p className="mt-2 hidden text-sm text-red-600 sm:block" role="alert">
+                {actionError}
+              </p>
+            ) : null}
 
             <a
               href={quickOrderHref}
@@ -829,34 +862,25 @@ export default function ProductDetailPage() {
         ) : null}
       </Container>
 
-      <div className="fixed inset-x-3 bottom-3 z-40 sm:hidden">
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 border border-black/20 bg-white p-2 shadow-[0_10px_24px_rgba(0,0,0,0.14)]">
-          <button
-            type="button"
-            onClick={handleAddToBag}
-            disabled={!canAddToBag}
-            className="ui-interactive rounded-[2px] border border-black bg-black px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#121212] disabled:cursor-not-allowed disabled:bg-black/35 disabled:border-black/35"
-          >
-            {didAddToBag ? 'Added' : 'Add to Bag'}
-          </button>
-          <button
-            type="button"
-            onClick={handleBuyNow}
-            disabled={!canBuyNow}
-            className="ui-interactive border border-black px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/40"
-          >
-            Buy Now
-          </button>
-          <button
-            type="button"
-            onClick={toggleProductWishlist}
-            className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black'}`}
-            aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            {isInWishlist(String(product.id)) ? '♥' : '♡'}
-          </button>
-        </div>
-      </div>
+      <MobilePdpStickyBar
+        didAddToBag={didAddToBag}
+        actionError={actionError}
+        shakeToken={shakeToken}
+        wished={isInWishlist(String(product.id))}
+        onAddToBag={handleAddToBag}
+        onBuyNow={handleBuyNow}
+        onToggleWishlist={toggleProductWishlist}
+      />
+
+      {instantCheckoutOpen ? (
+        <Suspense fallback={null}>
+          <InstantCheckoutSheet
+            open={instantCheckoutOpen}
+            onClose={() => setInstantCheckoutOpen(false)}
+            items={instantCheckoutItems}
+          />
+        </Suspense>
+      ) : null}
 
       {isZoomOpen ? (
         <div className="fixed inset-0 z-[70] bg-black/90 px-3 py-6" onClick={() => setIsZoomOpen(false)}>

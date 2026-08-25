@@ -4,7 +4,8 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import AarongProductCard from '../components/shop/AarongProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
-import { useCart, writeBuyNowCheckout } from '../context/CartContext'
+import MobilePdpStickyBar from '../components/shop/MobilePdpStickyBar'
+import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
 import {
   getKidsProductBySlug,
   KIDS_COLOR_LABELS,
@@ -16,6 +17,7 @@ import {
 } from '../data/kidsOversizedTeeCollection'
 import { DELIVERY_RETURN_BULLETS, STORE_POLICY } from '../data/storePolicy'
 import { useListingWishlist } from '../hooks/useListingWishlist'
+import { usePdpActionGate } from '../hooks/usePdpActionGate'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 import { getCatalogContentId } from '../utils/catalogIdentity'
@@ -23,6 +25,7 @@ import { parseBDT } from '../utils/currency'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
+const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
 const prefetchKidsProductDetail = () => import('./KidsProductDetailPage')
 const SITE_URL = 'https://www.shisfashion.com'
 
@@ -66,6 +69,8 @@ export default function KidsProductDetailPage() {
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const [didAddToBag, setDidAddToBag] = useState(false)
+  const [instantCheckoutOpen, setInstantCheckoutOpen] = useState(false)
+  const [instantCheckoutItems, setInstantCheckoutItems] = useState<CartItem[]>([])
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [activeProductId, setActiveProductId] = useState(product?.id)
 
@@ -158,9 +163,13 @@ export default function KidsProductDetailPage() {
   const safeColor = isColorSelected ? selectedColor : colors[0] ?? 'Default'
   const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
-  const canPurchase = Boolean(product && availableStock > 0 && isSizeSelected && isColorSelected)
   const stockLabel = getStockLabel(availableStock)
   const wished = product ? isInWishlist(String(product.id)) : false
+  const { actionError, shakeToken, clearActionError, requireReadyToPurchase } = usePdpActionGate({
+    isSizeSelected,
+    isColorSelected,
+    availableStock,
+  })
 
   const relatedProducts = useMemo(() => {
     if (!product) {
@@ -181,7 +190,7 @@ export default function KidsProductDetailPage() {
   }
 
   const handleAddToBag = () => {
-    if (!product || !canPurchase) {
+    if (!requireReadyToPurchase() || !product) {
       return
     }
 
@@ -205,25 +214,34 @@ export default function KidsProductDetailPage() {
       brand: product.brand,
     }, 'BDT')
 
+    clearActionError()
     setDidAddToBag(true)
     window.setTimeout(() => setDidAddToBag(false), 1500)
   }
 
   const handleBuyNow = () => {
-    if (!product || !canPurchase) {
+    if (!requireReadyToPurchase() || !product) {
       return
     }
 
-    writeBuyNowCheckout([
-      {
-        ...product,
-        id: `${product.slug}-${safeSize}-${safeColor}`,
-        size: safeSize,
-        color: safeColor,
-        quantity: effectiveQuantity,
-        stock: availableStock,
-      },
-    ])
+    const line: CartItem = {
+      ...product,
+      id: `${product.slug}-${safeSize}-${safeColor}`,
+      size: safeSize,
+      color: safeColor,
+      quantity: effectiveQuantity,
+      stock: availableStock,
+    }
+
+    writeBuyNowCheckout([line])
+    clearActionError()
+
+    const isMobileViewport = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+    if (isMobileViewport) {
+      setInstantCheckoutItems([line])
+      setInstantCheckoutOpen(true)
+      return
+    }
 
     googleAnalytics.beginCheckout({
       value: parseBDT(product.price) * effectiveQuantity,
@@ -493,16 +511,14 @@ export default function KidsProductDetailPage() {
             <button
               type="button"
               onClick={handleAddToBag}
-              disabled={!canPurchase}
-              className="flex-1 bg-neutral-900 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 bg-neutral-900 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
             >
               {didAddToBag ? 'Added to Bag' : 'Add to Bag'}
             </button>
             <button
               type="button"
               onClick={handleBuyNow}
-              disabled={!canPurchase}
-              className="flex-1 border border-neutral-900 px-4 py-3.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 border border-neutral-900 px-4 py-3.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-900 hover:text-white"
             >
               Buy Now
             </button>
@@ -519,6 +535,11 @@ export default function KidsProductDetailPage() {
               </svg>
             </button>
           </div>
+          {actionError ? (
+            <p className="mt-2 hidden text-sm text-red-600 sm:block" role="alert">
+              {actionError}
+            </p>
+          ) : null}
 
           <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {KIDS_TRUST_BADGES.map((item) => (
@@ -588,39 +609,25 @@ export default function KidsProductDetailPage() {
         ) : null}
       </Container>
 
-      {/* Sticky mobile CTA — above WhatsApp offset */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-100 bg-white/90 backdrop-blur-md sm:hidden">
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <button
-            type="button"
-            onClick={handleAddToBag}
-            disabled={!canPurchase}
-            className="bg-neutral-900 px-3 py-3.5 text-sm font-medium text-white disabled:opacity-40"
-          >
-            {didAddToBag ? 'Added' : 'Add to Bag'}
-          </button>
-          <button
-            type="button"
-            onClick={handleBuyNow}
-            disabled={!canPurchase}
-            className="border border-neutral-900 px-3 py-3.5 text-sm font-medium text-neutral-900 disabled:opacity-40"
-          >
-            Buy Now
-          </button>
-          <button
-            type="button"
-            onClick={() => handleToggleWishlist(product)}
-            className={`flex w-12 items-center justify-center border ${
-              wished ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-700'
-            }`}
-            aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <MobilePdpStickyBar
+        didAddToBag={didAddToBag}
+        actionError={actionError}
+        shakeToken={shakeToken}
+        wished={wished}
+        onAddToBag={handleAddToBag}
+        onBuyNow={handleBuyNow}
+        onToggleWishlist={() => handleToggleWishlist(product)}
+      />
+
+      {instantCheckoutOpen ? (
+        <Suspense fallback={null}>
+          <InstantCheckoutSheet
+            open={instantCheckoutOpen}
+            onClose={() => setInstantCheckoutOpen(false)}
+            items={instantCheckoutItems}
+          />
+        </Suspense>
+      ) : null}
 
       {isZoomOpen ? (
         <div className="fixed inset-0 z-[70] bg-black/90 px-3 py-6" onClick={() => setIsZoomOpen(false)}>

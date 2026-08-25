@@ -114,7 +114,7 @@ interface HomepageRecord {
 
 const isRateLimited = createRateLimiter(8, 60_000, 'create-order')
 const DHAKA_DELIVERY_CHARGE = 80
-const OUTSIDE_DHAKA_DELIVERY_CHARGE = 130
+const OUTSIDE_DHAKA_DELIVERY_CHARGE = 150
 const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
 const LOW_STOCK_THRESHOLD = 5
 const VALID_DIVISIONS = ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'] as const

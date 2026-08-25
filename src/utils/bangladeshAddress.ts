@@ -98,7 +98,7 @@ export function getUpazilasForDistrict(district: string) {
 
 export const DEFAULT_FREE_DELIVERY_THRESHOLD = 3000
 export const DHAKA_DELIVERY_CHARGE = 80
-export const OUTSIDE_DHAKA_DELIVERY_CHARGE = 130
+export const OUTSIDE_DHAKA_DELIVERY_CHARGE = 150
 
 export function normalizeFreeDeliveryThreshold(value: unknown) {
   const numericValue = typeof value === 'number' ? value : Number(value)
