@@ -181,7 +181,7 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-[#eeeeee] bg-white">
-        <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-3 sm:h-[68px] sm:px-6 md:h-[70px] md:px-10">
+        <div className="relative mx-auto flex h-[62px] w-full max-w-[1400px] items-center px-3 sm:px-6 md:h-[70px] md:px-10">
           {/* Left — hamburger (+ desktop nav) */}
           <div className="relative z-10 flex min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
             <button
@@ -226,11 +226,11 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Center — brand logo (absolute center on all breakpoints) */}
+          {/* Center — brand logo (dead-center on all viewports) */}
           <Link
             to="/"
             onClick={closeOverlays}
-            className="absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
             aria-label="SHIS Fashion home"
           >
             <img
@@ -239,15 +239,15 @@ export default function Navbar() {
               width={220}
               height={52}
               decoding="async"
-              className="h-[48px] w-auto max-h-[52px] origin-center scale-[1.25] object-contain object-center sm:h-[50px] md:h-12 md:max-h-12 md:scale-100 lg:h-[48px]"
+              className="h-[40px] w-auto object-contain object-center md:h-[50px] lg:h-[52px]"
               onError={(event) => {
                 event.currentTarget.src = '/shis-logo.svg'
               }}
             />
           </Link>
 
-          {/* Right — compact utility icons */}
-          <div className="relative z-10 flex flex-1 items-center justify-end gap-3 md:gap-3.5">
+          {/* Right — utility icons (balanced gap; does not shift logo) */}
+          <div className="relative z-10 flex flex-1 items-center justify-end gap-3.5">
             <button
               type="button"
               onClick={() => {
@@ -331,7 +331,7 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] sm:top-[calc(4.25rem+env(safe-area-inset-top))] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(3.875rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
             <p className="px-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Menu</p>
             <div className="mt-2 grid gap-2" aria-label="Site menu">
               {mobileMenuGroups.map((group) => (
