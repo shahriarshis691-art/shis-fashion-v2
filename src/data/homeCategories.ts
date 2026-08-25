@@ -24,14 +24,14 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'womens',
     name: "Women's Collection",
     href: '/women',
-    image: '/collections/category-saree-blue.jpg',
+    image: '/collections/saree-category-new.jpg',
     imagePosition: 'center top',
   },
   {
     key: 'saree',
     name: 'Saree',
     href: '/sarees',
-    image: '/collections/category-saree-blue.jpg',
+    image: '/collections/saree-category-new.jpg',
     imagePosition: 'center top',
   },
   {

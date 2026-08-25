@@ -6,7 +6,7 @@ export const featuredCollectionCovers: Record<string, string> = {
 
 export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.webp',
-  saree: '/collections/category-saree-blue.jpg',
+  saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
 }
 
@@ -25,6 +25,7 @@ export function categoryStripCover(key: string, fallback = '') {
       || normalized.includes('images.unsplash.com')
       || normalized.includes('plus.unsplash.com')
       || normalized.includes('featured-men-collection.jpg')
+      || normalized.includes('category-saree-blue.jpg')
 
     if (!isOutdatedPlaceholder) {
       return saved
