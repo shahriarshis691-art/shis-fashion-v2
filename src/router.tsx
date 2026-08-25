@@ -24,6 +24,7 @@ const TermsPage = lazy(() => import('./pages/TermsPage'))
 const OrderLookupPage = lazy(() => import('./pages/OrderLookupPage'))
 const SalePage = lazy(() => import('./pages/SalePage'))
 const HalfShirtCollectionPage = lazy(() => import('./pages/HalfShirtCollectionPage'))
+const KidsOversizedTeeCollectionPage = lazy(() => import('./pages/KidsOversizedTeeCollectionPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
@@ -118,6 +119,10 @@ export const router = createBrowserRouter([
       {
         path: 'collections/half-shirt',
         element: withSuspense(<HalfShirtCollectionPage />),
+      },
+      {
+        path: 'collections/kids-oversized-tee',
+        element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },
       {
         path: 'collections/:slug',
