@@ -441,22 +441,22 @@ export default function HomePage() {
 
       {shopByCategoryEnabled ? (
       <section id="featured-collections" className="scroll-mt-20 bg-white py-6 sm:py-14">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-5 sm:mb-10">
+          <div className="mb-5 text-center sm:mb-10">
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">
               {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
             </p>
             <h2
-              className="mt-1 text-xl sm:text-2xl md:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
+              className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase sm:text-2xl md:text-3xl"
               style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
             >
               {homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
             </h2>
           </div>
 
-          {/* 2-Column Tall Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+          {/* 2-column tall cards on mobile; 4-column on md+ */}
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-6">
             {categoryStrips.map((item) => {
               const displayLabel = item.label
 
@@ -464,24 +464,24 @@ export default function HomePage() {
                 <Link
                   key={item.key}
                   to={item.href}
-                  className="flex flex-col items-center group w-full cursor-pointer"
+                  className="group flex min-w-0 w-full cursor-pointer flex-col"
                   aria-label={`${displayLabel} collection`}
                 >
-                  <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100 rounded-none">
+                  <div className="relative h-[min(70svh,420px)] min-h-[380px] w-full overflow-hidden bg-neutral-100 md:aspect-[3/4] md:h-auto md:min-h-0">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
                       width={categoryStripCardImage.width}
                       height={categoryStripCardImage.height}
-                      className="w-full h-full object-cover object-[center_top] rounded-none group-hover:scale-105 transition-transform duration-500 ease-out"
+                      className="absolute inset-0 h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
                       style={item.imagePosition ? { objectPosition: item.imagePosition } : undefined}
                       loading="lazy"
                       decoding="async"
                       onError={handleImageError}
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-3 pt-8 text-center">
-                      <span className="text-xs sm:text-sm font-semibold tracking-[0.15em] text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 z-10 px-2.5 pb-3 pt-10 text-left sm:px-3 sm:text-center">
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] sm:text-sm sm:tracking-[0.18em]">
                         {displayLabel}
                       </span>
                     </div>
