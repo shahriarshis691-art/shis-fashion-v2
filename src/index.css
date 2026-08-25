@@ -203,14 +203,22 @@ img.navbar-brand-logo {
   }
 }
 
-/* Homepage hero — mobile: natural aspect ratio, no stretch (overrides absolute fill) */
-@media (max-width: 767px) {
+/* Homepage hero — locked frame + cover fill (no height jump between slides) */
+.hero-slider-frame {
+  overflow: hidden;
+}
+
+img.hero-slide-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  display: block;
+}
+
+@media (min-width: 768px) {
   img.hero-slide-image {
-    position: relative !important;
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    max-width: 100% !important;
-    object-fit: contain !important;
+    object-position: center 10% !important;
   }
 }
