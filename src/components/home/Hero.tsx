@@ -169,10 +169,10 @@ export const Hero: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-32 bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-36" />
 
         {/* Shared CTA — same bottom-center spot on every slide */}
-        <div className="hero-slide-cta absolute bottom-5 left-1/2 z-20 -translate-x-1/2 md:bottom-12">
+        <div className="hero-slide-cta absolute bottom-8 left-1/2 z-20 -translate-x-1/2">
           <Link
             to={activeSlide.link}
-            className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-xl transition-all duration-200 hover:bg-neutral-100 active:scale-95 md:text-sm"
+            className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/70 px-8 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-white/90 hover:shadow-md active:scale-95 sm:text-sm"
             aria-label={`${activeSlide.btnText}: ${activeSlide.title}`}
           >
             {activeSlide.btnText}
