@@ -281,20 +281,30 @@ export default function KidsOversizedTeeCollectionPage() {
           </ol>
         </nav>
 
-        <header className="mt-5 max-w-3xl border-b border-black/10 pb-6">
+        <header className="relative z-10 mt-5 border-b border-black/10 pb-8 text-center">
           <p className="text-caption uppercase tracking-[0.14em] text-black/55">Kids Edit</p>
           <h1
-            className="mt-1 text-xl font-normal uppercase tracking-[0.16em] text-neutral-900 sm:text-2xl md:text-3xl"
+            className="mx-auto mt-1 max-w-3xl text-xl font-normal uppercase tracking-[0.16em] text-neutral-900 sm:text-2xl md:text-3xl"
             style={{ fontFamily: 'var(--font-brand)' }}
           >
             Kids Oversized Collection
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-black/70">
             Premium heavy cotton, relaxed drop-shoulder fits designed for modern kids.
           </p>
+          <a
+            href="#kids-collection"
+            onClick={(event) => {
+              event.preventDefault()
+              document.getElementById('kids-collection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className="relative z-20 mt-6 inline-flex items-center justify-center rounded-full bg-black px-6 py-2.5 text-sm font-medium tracking-wide text-white uppercase transition-all duration-200 hover:bg-neutral-800 sm:px-8 sm:py-3 sm:text-base"
+          >
+            Shop Now
+          </a>
         </header>
 
-        <div className="mt-6 flex flex-col gap-4 border border-black/10 bg-white p-3 sm:p-4">
+        <div id="kids-collection" className="mt-6 scroll-mt-24 flex flex-col gap-4 border border-black/10 bg-white p-3 sm:p-4">
           <label className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-black/55">
             Search
             <input
