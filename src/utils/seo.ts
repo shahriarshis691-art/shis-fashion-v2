@@ -71,7 +71,11 @@ function getRuntimeOverride(pathname: string): RuntimeSeoEntry | undefined {
     return runtimeSeoOverrides.shop
   }
 
-  if (normalizedPath === '/shop/oversized-tee') {
+  if (
+    normalizedPath === '/shop/oversized-tee'
+    || normalizedPath === '/collections/oversized-tee'
+    || normalizedPath === '/oversized-tee'
+  ) {
     return runtimeSeoOverrides.oversized
   }
 
@@ -107,6 +111,8 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/sarees',
     '/men',
     '/men/half-shirts',
+    '/collections/oversized-tee',
+    '/oversized-tee',
     '/kids',
     '/cart',
     '/checkout',
@@ -146,6 +152,10 @@ function getCollectionTitle(slug: string) {
 
   if (slug === 'half-shirt' || slug === 'half-shirts') {
     return "Men's Half Shirt Collection"
+  }
+
+  if (slug === 'oversized-tee' || slug === 'oversize-tee') {
+    return 'Oversized Tee Collection'
   }
 
   if (slug === 'kids-oversized-tee' || slug === 'kids') {
@@ -253,6 +263,11 @@ function buildBreadcrumbItems(pathname: string) {
 
   if (segments[0] === 'new-arrivals') {
     items.push({ name: 'New Arrivals', item: `${SITE_URL}/shop/new-arrivals` })
+    return items
+  }
+
+  if (segments[0] === 'oversized-tee') {
+    items.push({ name: 'Oversized Tee', item: `${SITE_URL}/collections/oversized-tee` })
     return items
   }
 
@@ -599,6 +614,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Shop men\'s half shirts from SHIS Fashion Bangladesh — breathable everyday edits with fast delivery and cash on delivery.',
       keywords: 'half shirt Bangladesh, mens half shirt, SHIS half shirts, casual shirt Dhaka',
       canonicalPath: '/men/half-shirts',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/collections/oversized-tee' || normalizedPath === '/oversized-tee' || normalizedPath === '/shop/oversized-tee') {
+    return {
+      title: 'Oversized Tee Collection | SHIS Fashion Bangladesh',
+      description: 'Shop unisex oversized tees for men, women, and all adults. Graphic, vintage, and heavyweight cuts in S–XXL boxy fit from SHIS Fashion Bangladesh.',
+      keywords: 'oversized tee Bangladesh, unisex oversized t-shirt, SHIS oversized tee, boxy tee Dhaka',
+      canonicalPath: '/collections/oversized-tee',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',

@@ -6,6 +6,7 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
+import { mergeOversizedTeeCatalog } from '../data/oversizedTeeCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
@@ -233,7 +234,7 @@ export default function ShopPage() {
   const searchParams = new URLSearchParams(location.search)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
-  const [products, setProducts] = useState<ShopProduct[]>(() => mergeHalfShirtCatalog([]))
+  const [products, setProducts] = useState<ShopProduct[]>(() => mergeOversizedTeeCatalog(mergeHalfShirtCatalog([])))
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('popular')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
@@ -280,7 +281,7 @@ export default function ShopPage() {
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
-      setProducts(mergeHalfShirtCatalog(nextProducts.map(mapProduct)))
+      setProducts(mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))))
       setReady(true)
     })
 
@@ -483,8 +484,8 @@ export default function ShopPage() {
 
   const oversizedTeeHeading = isOversizedTeeListing
     ? {
-      title: "MEN'S OVERSIZED TEES",
-      description: 'Relaxed silhouettes with elevated texture for everyday impact.',
+      title: 'OVERSIZED TEE',
+      description: 'An all-inclusive adult collection for Unisex, Men, and Women. Oversized Boxy Fit in S, M, L, XL, and XXL.',
     }
     : null
 

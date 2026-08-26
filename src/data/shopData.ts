@@ -29,7 +29,7 @@ export interface ShopProduct {
 }
 
 export const shopCategories: ShopCategory[] = [
-  { slug: 'oversized-tee', title: 'Oversized Tee', description: 'Relaxed silhouettes with elevated texture.', image: '/og-image.svg' },
+  { slug: 'oversized-tee', title: 'Oversized Tee', description: 'Relaxed silhouettes with elevated texture.', image: '/hero/kids/timeless-oversize-hero.source.png' },
   { slug: 'unisex-tee', title: 'Unisex Tee', description: 'Minimal staples for everyday layering.', image: '/og-image.svg' },
   { slug: 'denim', title: 'Denim', description: 'Refined denim with a premium finish.', image: '/collections/featured-denim-collection.jpg' },
   { slug: 'mens-shirt', title: "Men's Shirt", description: 'Polished structure in a relaxed fit.', image: '/og-image.svg' },

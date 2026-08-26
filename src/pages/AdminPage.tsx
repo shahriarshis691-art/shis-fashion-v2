@@ -201,7 +201,7 @@ const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
   kids: 'Allowed: /kids or /kids?sub=kids',
   western: 'Allowed: /women?sub=tunic',
   sale: 'Allowed: /men/half-shirts or /men?sub=half-shirts',
-  'new-arrivals': 'Allowed: /shop/new-arrivals or /new-arrivals',
+  'new-arrivals': 'Allowed: /collections/oversized-tee or /oversized-tee',
 }
 
 function resolveCategorySectionEntry(
@@ -2779,7 +2779,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                     </div>
 
                     <div className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)]/70 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Oversized listing SEO (/shop/oversized-tee)</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">Oversized listing SEO (/collections/oversized-tee)</p>
                       <div className="mt-3 grid gap-3">
                         <input
                           value={homepageContent.seo?.oversized?.title ?? ''}

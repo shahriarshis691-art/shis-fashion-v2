@@ -31,7 +31,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
   },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
-  { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'] },
+  { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'], path: '/collections/oversized-tee' },
   { slug: 't-shirts', label: 'T-Shirts', aliases: ['t-shirts', 'unisex-tee'] },
   { slug: 'denim', label: 'Denim', aliases: ['denim', 'denim-pants', 'denim-pant'] },
   { slug: 'pants', label: 'Pants', aliases: ['pants'] },
@@ -43,6 +43,7 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'kurti', label: 'Kurti', aliases: ['kurti'] },
   { slug: 'tops', label: 'Tops', aliases: ['tops'] },
   { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts', 'western-outfits', 'tunic'] },
+  { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee'], path: '/collections/oversized-tee' },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree', 'sarees', 'sari', 'saris', 'womens-saree', 'women-saree', 'womens-sarees'], path: '/sarees' },
   { slug: 'tunic', label: 'Tunic', aliases: ['western'] },
@@ -196,6 +197,10 @@ export function getDedicatedListingPath(segment: ShopSegment, subcategory: strin
 
   if (segment === 'men' && (subcategory === 'half-shirts' || subcategory === 'half-shirt')) {
     return '/men/half-shirts'
+  }
+
+  if (subcategory === 'oversized-tee' || subcategory === 'oversize-tee') {
+    return '/collections/oversized-tee'
   }
 
   return null

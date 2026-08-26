@@ -35,7 +35,7 @@ const fallbackCategoryStrips = [
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers.men, imagePosition: 'center top' },
-  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: 'center top' },
+  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image || '/hero/kids/timeless-oversize-hero.source.png', imagePosition: 'center top' },
 ] as const
 
 const categoryStripCardImage = {
@@ -191,11 +191,11 @@ const defaultHomepage: HomepageContent = {
     },
     'new-arrivals': {
       key: 'new-arrivals',
-      label: 'OVERSIZE TEE',
-      href: '/shop?category=men&sub=oversized-tee',
+      label: 'OVERSIZED TEE',
+      href: '/collections/oversized-tee',
       enabled: true,
       order: 60,
-      coverImage: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '',
+      coverImage: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image || '/hero/kids/timeless-oversize-hero.source.png',
       images: [],
       updatedAt: null,
     },
@@ -302,6 +302,7 @@ export default function HomePage() {
         const liveHref = section?.href?.trim() || fallback.href
         const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
         const isHalfShirtsCard = fallback.key === 'sale'
+        const isOversizedTeeCard = fallback.key === 'new-arrivals'
         const resolvedCover = pickPreferredCategoryCoverUrl(
           section?.coverImage,
           section?.images,
@@ -312,10 +313,14 @@ export default function HomePage() {
           key: fallback.key,
           label: isHalfShirtsCard
             ? 'HALF SHIRTS'
-            : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+            : isOversizedTeeCard
+              ? 'OVERSIZED TEE'
+              : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
           href: isHalfShirtsCard
             ? '/men/half-shirts'
-            : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
+            : isOversizedTeeCard
+              ? '/collections/oversized-tee'
+              : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }

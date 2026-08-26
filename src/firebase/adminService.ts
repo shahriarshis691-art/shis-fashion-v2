@@ -908,7 +908,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'mens' },
-  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, legacyImageKey: 'couples' },
+  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, legacyImageKey: 'oversized-tee' },
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
@@ -922,6 +922,11 @@ function getLegacyCategoryImage(legacyImageKey: string) {
 
   if (legacyImageKey === 'saree' || legacyImageKey === 'womens') {
     return categoryStripCovers.saree
+  }
+
+  if (legacyImageKey === 'oversized-tee' || legacyImageKey === 'oversized') {
+    return homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image
+      || '/hero/kids/timeless-oversize-hero.source.png'
   }
 
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
@@ -1000,11 +1005,11 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   'new-arrivals': {
     key: 'new-arrivals',
-    label: 'OVERSIZE TEE',
-    href: '/shop?category=men&sub=oversized-tee',
+    label: 'OVERSIZED TEE',
+    href: '/collections/oversized-tee',
     enabled: true,
     order: 60,
-    coverImage: getLegacyCategoryImage('couples'),
+    coverImage: getLegacyCategoryImage('oversized-tee'),
     images: [],
     updatedAt: null,
   },
@@ -1049,7 +1054,11 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
     return 'sale'
   }
 
-  if (normalizedHref.includes('new-arrivals')) {
+  if (
+    normalizedHref.includes('oversized-tee')
+    || normalizedHref.includes('oversize-tee')
+    || normalizedHref.includes('new-arrivals')
+  ) {
     return 'new-arrivals'
   }
 
@@ -1138,6 +1147,16 @@ function aliasToSectionKey(value: string): HomepageCategorySectionKey | null {
 
   if (normalized === 'half-shirt' || normalized === 'half-shirts' || normalized === 'half shirts') {
     return 'sale'
+  }
+
+  if (
+    normalized === 'oversized-tee'
+    || normalized === 'oversize-tee'
+    || normalized === 'oversized tee'
+    || normalized === 'oversize tee'
+    || normalized === 'oversized'
+  ) {
+    return 'new-arrivals'
   }
 
   return null
@@ -1309,8 +1328,16 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
 
     const normalizedSection: HomepageCategorySection = {
       key: layout.key,
-      label: layout.key === 'sale' ? 'HALF SHIRTS' : (source?.label?.trim() || fallback.label),
-      href: layout.key === 'sale' ? '/men/half-shirts' : (source?.href?.trim() || fallback.href),
+      label: layout.key === 'sale'
+        ? 'HALF SHIRTS'
+        : layout.key === 'new-arrivals'
+          ? 'OVERSIZED TEE'
+          : (source?.label?.trim() || fallback.label),
+      href: layout.key === 'sale'
+        ? '/men/half-shirts'
+        : layout.key === 'new-arrivals'
+          ? '/collections/oversized-tee'
+          : (source?.href?.trim() || fallback.href),
       enabled: source?.enabled ?? fallback.enabled,
       order: typeof source?.order === 'number' ? source.order : fallback.order,
       coverImage,

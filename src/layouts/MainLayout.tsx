@@ -67,11 +67,16 @@ function getOversizedCampaignLandingPath(pathname: string, search: string) {
     return null
   }
 
-  if (pathname === '/shop/oversized-tee' || pathname === '/shop/oversized-tee/') {
+  if (
+    pathname === '/collections/oversized-tee'
+    || pathname === '/collections/oversized-tee/'
+    || pathname === '/oversized-tee'
+    || pathname === '/oversized-tee/'
+  ) {
     return null
   }
 
-  return { pathname: '/shop/oversized-tee', search }
+  return { pathname: '/collections/oversized-tee', search }
 }
 
 function shouldSendStabilizationHeartbeat() {
