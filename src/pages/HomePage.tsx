@@ -31,10 +31,10 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'kids')?.imagePosition ?? 'center' },
-  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'western')?.imagePosition ?? 'center' },
+  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
+  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRT', href: '/collections/half-shirt', order: 50, image: categoryStripCovers.men, imagePosition: 'center top' },
-  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: homeCategoryItems.find((item) => item.key === 'couples')?.imagePosition ?? 'center' },
+  { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: 'center top' },
 ] as const
 
 const categoryStripCardImage = {
@@ -467,14 +467,14 @@ export default function HomePage() {
                   className="group flex min-w-0 w-full cursor-pointer flex-col"
                   aria-label={`${displayLabel} collection`}
                 >
-                  <div className="relative h-[min(70svh,420px)] min-h-[380px] w-full overflow-hidden bg-neutral-100 md:aspect-[3/4] md:h-auto md:min-h-0">
+                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
                       width={categoryStripCardImage.width}
                       height={categoryStripCardImage.height}
                       className="absolute inset-0 h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
-                      style={item.imagePosition ? { objectPosition: item.imagePosition } : undefined}
+                      style={{ objectPosition: 'center top' }}
                       loading="lazy"
                       decoding="async"
                       onError={handleImageError}

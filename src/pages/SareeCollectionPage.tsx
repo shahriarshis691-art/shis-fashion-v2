@@ -91,7 +91,7 @@ export default function SareeCollectionPage() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
           onError={(event) => {
             const src = event.currentTarget.src
             if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {

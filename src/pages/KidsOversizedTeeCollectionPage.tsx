@@ -203,7 +203,7 @@ export default function KidsOversizedTeeCollectionPage() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
           onError={(event) => {
             event.currentTarget.src = '/og-image.svg'
           }}

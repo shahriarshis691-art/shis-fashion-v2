@@ -52,7 +52,7 @@ export default function LuxuryImage({
     ? {
       backgroundImage: `url("${lqip}")`,
       backgroundSize: 'cover',
-      backgroundPosition: objectPosition || 'center',
+      backgroundPosition: objectPosition || 'center top',
     }
     : undefined
 
@@ -74,7 +74,7 @@ export default function LuxuryImage({
             style={imageStyle}
             className={[
               'pointer-events-none absolute inset-0 h-full w-full scale-[1.2] object-cover blur-[32px]',
-              objectPosition ? '' : 'object-center',
+              objectPosition ? '' : 'object-[center_top]',
               hover ? 'media-hover' : '',
             ].filter(Boolean).join(' ')}
           />
@@ -102,8 +102,7 @@ export default function LuxuryImage({
         }}
         style={imageStyle}
         className={[
-          'gpu-media absolute inset-0 z-[1] h-full w-full object-cover',
-          objectPosition ? '' : 'object-center',
+          'gpu-media absolute inset-0 z-[1] h-full w-full object-cover object-[center_top]',
           hover ? 'media-hover' : '',
           loaded || priority ? 'opacity-100' : 'opacity-0',
           priority ? '' : 'transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',

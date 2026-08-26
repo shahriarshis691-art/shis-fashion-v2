@@ -217,8 +217,19 @@ img.hero-slide-image {
   display: block;
 }
 
+/* PDP main gallery — full garment visible on mobile; cover fill from desktop. */
+img.pdp-main-image {
+  object-fit: contain !important;
+  object-position: center top !important;
+}
+
 @media (min-width: 768px) {
   img.hero-slide-image {
-    object-position: center 10% !important;
+    object-position: center top !important;
+  }
+
+  img.pdp-main-image {
+    object-fit: cover !important;
+    object-position: center top !important;
   }
 }

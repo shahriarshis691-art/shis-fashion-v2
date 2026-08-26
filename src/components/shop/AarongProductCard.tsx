@@ -68,7 +68,7 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-105"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}

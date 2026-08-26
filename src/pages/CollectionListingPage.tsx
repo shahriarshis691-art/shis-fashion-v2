@@ -202,6 +202,8 @@ export default function CollectionListingPage() {
                 sizes="(max-width: 639px) 50vw, 25vw"
                 widths={[320, 480, 768, 960]}
                 className="min-w-0"
+                aspectClassName="aspect-[3/4]"
+                objectPosition="center top"
                 hover
                 imgClassName={isDemoImageUrl(image) ? 'shis-media-tone' : ''}
               />

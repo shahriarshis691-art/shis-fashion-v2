@@ -495,11 +495,11 @@ export default function ProductDetailPage() {
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
           <div>
             <div
-              className="relative overflow-hidden bg-black/5"
+              className="relative bg-[#f7f7f8]"
               onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
               onTouchEnd={handleTouchEnd}
             >
-              <div className="aspect-[4/5]">
+              <div className="aspect-[3/4] bg-[#f7f7f8]">
                 <img
                   src={heroImage.src || activeImage}
                   srcSet={heroImage.srcSet}
@@ -509,10 +509,10 @@ export default function ProductDetailPage() {
                   decoding="async"
                   fetchPriority="high"
                   width="1200"
-                  height="1500"
+                  height="1600"
                   onError={handleImageError}
                   onClick={() => setIsZoomOpen(true)}
-                  className={`gpu-media h-full w-full cursor-zoom-in object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
+                  className={`pdp-main-image gpu-media h-full w-full cursor-zoom-in object-contain object-[center_top] md:object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
                 />
               </div>
 
@@ -557,7 +557,7 @@ export default function ProductDetailPage() {
                   className={`luxury-tap overflow-hidden border ${index === activeImageIndex ? 'border-black' : 'border-black/15'}`}
                   aria-label={`Image ${index + 1}`}
                 >
-                  <div className="aspect-[4/5] bg-black/5">
+                  <div className="aspect-[3/4] bg-black/5">
                     <img
                       src={thumb.src || image}
                       srcSet={thumb.srcSet}
@@ -566,7 +566,7 @@ export default function ProductDetailPage() {
                       loading="lazy"
                       decoding="async"
                       onError={handleImageError}
-                      className={`gpu-media h-full w-full object-cover ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover object-[center_top] ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
                     />
                   </div>
                 </button>

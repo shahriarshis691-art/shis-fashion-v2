@@ -129,7 +129,7 @@ export const Hero: React.FC = () => {
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-700 ease-in-out ${
+              className={`absolute inset-0 h-full w-full transition-opacity duration-700 ease-in-out ${
                 isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
               }`}
               aria-hidden={!isActive}

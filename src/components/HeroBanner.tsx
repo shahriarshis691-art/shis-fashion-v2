@@ -97,7 +97,7 @@ export default function HeroBanner({
   return (
     <section className="border-b border-black/10">
       <div className="relative overflow-hidden bg-black">
-        <div className="relative aspect-[4/5] min-h-[23rem] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
+        <div className="relative aspect-[4/5] sm:aspect-[16/9] sm:min-h-[28rem] lg:min-h-[34rem]">
           {hasMedia ? (
             media.map((item, index) => {
               const isActive = index === currentIndex
@@ -152,7 +152,7 @@ export default function HeroBanner({
                           }
                         }
                       }}
-                      className={`gpu-media h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover object-[center_top] ${isDemo ? 'shis-media-tone' : ''}`}
                     />
                   ) : (
                     <img
@@ -169,7 +169,7 @@ export default function HeroBanner({
                         e.currentTarget.removeAttribute('srcset')
                         e.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
                       }}
-                      className={`gpu-media h-full w-full object-cover ${isDemo ? 'shis-media-tone' : ''}`}
+                      className={`gpu-media h-full w-full object-cover object-[center_top] ${isDemo ? 'shis-media-tone' : ''}`}
                     />
                   )}
                 </div>

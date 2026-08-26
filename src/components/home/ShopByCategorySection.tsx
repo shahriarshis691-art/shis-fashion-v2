@@ -38,6 +38,7 @@ export default function ShopByCategorySection({ items }: { items?: { key: string
                     widths={[320, 480, 768, 960]}
                     className="h-full w-full"
                     aspectClassName="aspect-[3/4]"
+                    objectPosition="center top"
                     imgClassName="h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

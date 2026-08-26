@@ -308,7 +308,7 @@ export default function SareeProductDetailPage() {
       <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-2">
         <div>
           <div
-            className="relative aspect-[3/4] w-full overflow-hidden bg-[#f7f7f8]"
+            className="relative aspect-[3/4] w-full bg-[#f7f7f8]"
             onTouchStart={(event) => setTouchStartX(event.changedTouches[0]?.clientX ?? null)}
             onTouchEnd={(event) => {
               if (touchStartX == null || gallery.length < 2) {
@@ -339,7 +339,7 @@ export default function SareeProductDetailPage() {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 ease-out hover:scale-[1.02]"
+                className="pdp-main-image absolute inset-0 h-full w-full object-contain object-[center_top] md:object-cover"
                 onError={(event) => {
                   event.currentTarget.src = '/og-image.svg'
                 }}
@@ -375,7 +375,7 @@ export default function SareeProductDetailPage() {
                   key={`${image}-${index}`}
                   type="button"
                   onClick={() => setActiveImageIndex(index)}
-                  className={`relative h-20 w-16 shrink-0 overflow-hidden bg-[#f7f7f8] ring-1 transition-shadow ${
+                  className={`relative aspect-[3/4] w-16 shrink-0 overflow-hidden bg-[#f7f7f8] ring-1 transition-shadow ${
                     activeImageIndex === index ? 'ring-neutral-900' : 'ring-transparent'
                   }`}
                   aria-label={`View image ${index + 1}`}
@@ -383,7 +383,9 @@ export default function SareeProductDetailPage() {
                   <img
                     src={image}
                     alt=""
-                    className="absolute inset-0 h-full w-full object-cover object-top"
+                    width={64}
+                    height={85}
+                    className="absolute inset-0 h-full w-full object-cover object-[center_top]"
                     loading="lazy"
                     decoding="async"
                   />
