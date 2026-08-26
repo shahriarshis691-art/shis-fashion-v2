@@ -2,7 +2,8 @@ import type { ShopProduct } from './shopData'
 
 export const WOMENS_BAGGY_DENIM_SIZES = ['26', '28', '30', '32', '34'] as const
 export const WOMENS_BAGGY_DENIM_LISTING_PATH = '/collections/womens-baggy'
-export const WOMENS_BAGGY_COVER_IMAGE = '/collections/featured-denim-collection.jpg'
+export const WOMENS_BAGGY_HERO_IMAGE = '/hero/womens-baggy/womens-jeans-listing.png'
+export const WOMENS_BAGGY_COVER_IMAGE = WOMENS_BAGGY_HERO_IMAGE
 
 export interface WomensBaggyDenimProduct extends ShopProduct {
   sku: string

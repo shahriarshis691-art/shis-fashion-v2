@@ -11,6 +11,7 @@ import {
   mergeMensBaggyDenimCatalog,
 } from '../data/mensBaggyDenimCollection'
 import {
+  WOMENS_BAGGY_HERO_IMAGE,
   isWomensBaggyDenimProduct,
   mergeWomensBaggyDenimCatalog,
 } from '../data/womensBaggyDenimCollection'
@@ -1057,10 +1058,50 @@ export default function ShopPage() {
   }
 
   return (
-    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
-      <Container>
+    <section className={`bg-white pb-24 ${isWomensBaggyListing ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
+      {isWomensBaggyListing ? (
+        <div className="listing-hero-frame relative flex w-full max-w-[100vw] items-end justify-center overflow-hidden bg-white aspect-[3/2] sm:aspect-[2/1] lg:aspect-[2.15/1]">
+          <img
+            src={WOMENS_BAGGY_HERO_IMAGE}
+            alt="Women's Baggy Jeans — SHIS Fashion"
+            width={1536}
+            height={1024}
+            sizes="100vw"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            draggable={false}
+            className="listing-hero-motion gpu-media absolute inset-0 h-full w-full object-cover object-center"
+            onError={(event) => {
+              const src = event.currentTarget.src
+              if (src.includes('womens-jeans-listing.png') && !src.endsWith('.jpeg')) {
+                event.currentTarget.src = '/hero/womens-baggy/womens-jeans-listing.png.jpeg'
+                return
+              }
+              event.currentTarget.src = '/og-image.svg'
+            }}
+          />
+          <div className="relative z-10 pb-5 sm:pb-8">
+            <a
+              href="#womens-baggy-grid"
+              onClick={(event) => {
+                event.preventDefault()
+                document.getElementById('womens-baggy-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+              className="btn-glass-cta"
+            >
+              Shop Women&apos;s Baggy
+            </a>
+          </div>
+        </div>
+      ) : null}
+
+      <Container className={isWomensBaggyListing ? 'pt-6 lg:pt-10' : undefined}>
         {/* Breadcrumb */}
-        <nav className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55">
+        <nav
+          id={isWomensBaggyListing ? 'womens-baggy-grid' : undefined}
+          className="mb-4 flex scroll-mt-[calc(var(--nav-offset,3.5rem)+0.5rem)] items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55"
+        >
           <Link to="/" className="hover:text-black">Home</Link>
           <span>/</span>
           <span className="text-black">{heading.title}</span>

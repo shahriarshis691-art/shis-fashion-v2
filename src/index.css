@@ -233,3 +233,46 @@ img.pdp-main-image {
     object-position: center top !important;
   }
 }
+
+/* Listing heroes — locked frame + Ken Burns drift (compositor-only) */
+.listing-hero-frame {
+  overflow: hidden;
+}
+
+img.listing-hero-motion {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: 42% 50%;
+  will-change: transform;
+  backface-visibility: hidden;
+  animation: listing-hero-kenburns 22s ease-in-out infinite alternate;
+}
+
+@media (min-width: 768px) {
+  img.listing-hero-motion {
+    transform-origin: 48% 50%;
+    animation-duration: 26s;
+  }
+}
+
+@keyframes listing-hero-kenburns {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.8%, -0.6%, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img.listing-hero-motion {
+    animation: none;
+    will-change: auto;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}

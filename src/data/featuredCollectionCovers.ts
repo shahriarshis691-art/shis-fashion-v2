@@ -9,7 +9,7 @@ export const categoryStripCovers: Record<string, string> = {
   saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
   western: '/collections/featured-denim-collection.jpg',
-  'womens-baggy': '/collections/featured-denim-collection.jpg',
+  'womens-baggy': '/hero/womens-baggy/womens-jeans-listing.png',
   'half-shirts': '/hero/half-shirt-1.jpg',
   'oversized-tee': '/hero/oversized-tee.jpg',
 }
