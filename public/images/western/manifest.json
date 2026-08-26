@@ -1,0 +1,360 @@
+{
+  "generatedAt": "2026-08-26T10:16:11.626Z",
+  "outputDir": "public/images/western",
+  "count": 50,
+  "saved": 9,
+  "skipped": 41,
+  "failed": [],
+  "files": [
+    {
+      "index": 1,
+      "file": "western-1.webp",
+      "publicPath": "/images/western/western-1.webp",
+      "unsplashId": "1521572163474-6864f9cf17ab",
+      "label": "white tee product"
+    },
+    {
+      "index": 2,
+      "file": "western-2.webp",
+      "publicPath": "/images/western/western-2.webp",
+      "unsplashId": "1583743814966-8936f5b7be1a",
+      "label": "black tee flat"
+    },
+    {
+      "index": 3,
+      "file": "western-3.webp",
+      "publicPath": "/images/western/western-3.webp",
+      "unsplashId": "1576566588028-4147f3842f27",
+      "label": "stripe shirt"
+    },
+    {
+      "index": 4,
+      "file": "western-4.webp",
+      "publicPath": "/images/western/western-4.webp",
+      "unsplashId": "1596755094514-f87e34085b2c",
+      "label": "folded shirt"
+    },
+    {
+      "index": 5,
+      "file": "western-5.webp",
+      "publicPath": "/images/western/western-5.webp",
+      "unsplashId": "1620799140408-edc6dcb6d633",
+      "label": "white blouse"
+    },
+    {
+      "index": 6,
+      "file": "western-6.webp",
+      "publicPath": "/images/western/western-6.webp",
+      "unsplashId": "1523381210434-271e8be1f52b",
+      "label": "casual apparel hang"
+    },
+    {
+      "index": 7,
+      "file": "western-7.webp",
+      "publicPath": "/images/western/western-7.webp",
+      "unsplashId": "1562157873-818bc0726f68",
+      "label": "stacked tees"
+    },
+    {
+      "index": 8,
+      "file": "western-8.webp",
+      "publicPath": "/images/western/western-8.webp",
+      "unsplashId": "1618354691373-d851c5c3a990",
+      "label": "black tee hang"
+    },
+    {
+      "index": 9,
+      "file": "western-9.webp",
+      "publicPath": "/images/western/western-9.webp",
+      "unsplashId": "1602810318383-e386cc2a3ccf",
+      "label": "casual shirts rack"
+    },
+    {
+      "index": 10,
+      "file": "western-10.webp",
+      "publicPath": "/images/western/western-10.webp",
+      "unsplashId": "1489987707025-afc232f7ea0f",
+      "label": "shirts hanging"
+    },
+    {
+      "index": 11,
+      "file": "western-11.webp",
+      "publicPath": "/images/western/western-11.webp",
+      "unsplashId": "1529374255404-311a2a4f1fd9",
+      "label": "graphic tee stack"
+    },
+    {
+      "index": 12,
+      "file": "western-12.webp",
+      "publicPath": "/images/western/western-12.webp",
+      "unsplashId": "1503342217505-b0a15ec3261c",
+      "label": "tee flat detail"
+    },
+    {
+      "index": 13,
+      "file": "western-13.webp",
+      "publicPath": "/images/western/western-13.webp",
+      "unsplashId": "1571945153237-4929e783af4a",
+      "label": "white cotton tee"
+    },
+    {
+      "index": 14,
+      "file": "western-14.webp",
+      "publicPath": "/images/western/western-14.webp",
+      "unsplashId": "1544441893-675973e31985",
+      "label": "white shirt fold"
+    },
+    {
+      "index": 15,
+      "file": "western-15.webp",
+      "publicPath": "/images/western/western-15.webp",
+      "unsplashId": "1554568218-0f1715e72254",
+      "label": "pastel shirts"
+    },
+    {
+      "index": 16,
+      "file": "western-16.webp",
+      "publicPath": "/images/western/western-16.webp",
+      "unsplashId": "1434389677669-e08b4cac3105",
+      "label": "clothes hangers"
+    },
+    {
+      "index": 17,
+      "file": "western-17.webp",
+      "publicPath": "/images/western/western-17.webp",
+      "unsplashId": "1479064555552-3ef4979f8908",
+      "label": "folded knit top"
+    },
+    {
+      "index": 18,
+      "file": "western-18.webp",
+      "publicPath": "/images/western/western-18.webp",
+      "unsplashId": "1556905055-8f358a7a47b2",
+      "label": "rail of tops"
+    },
+    {
+      "index": 19,
+      "file": "western-19.webp",
+      "publicPath": "/images/western/western-19.webp",
+      "unsplashId": "1490481651871-ab68de25d43d",
+      "label": "fashion flat arrangement"
+    },
+    {
+      "index": 20,
+      "file": "western-20.webp",
+      "publicPath": "/images/western/western-20.webp",
+      "unsplashId": "1512436991641-6745cdb1723f",
+      "label": "apparel store rack"
+    },
+    {
+      "index": 21,
+      "file": "western-21.webp",
+      "publicPath": "/images/western/western-21.webp",
+      "unsplashId": "1441986300917-64674bd600d8",
+      "label": "folded shirts shelf"
+    },
+    {
+      "index": 22,
+      "file": "western-22.webp",
+      "publicPath": "/images/western/western-22.webp",
+      "unsplashId": "1558171813-4c088753af8f",
+      "label": "denim shirt hang"
+    },
+    {
+      "index": 23,
+      "file": "western-23.webp",
+      "publicPath": "/images/western/western-23.webp",
+      "unsplashId": "1469334031218-e382a71b716b",
+      "label": "blouse detail"
+    },
+    {
+      "index": 24,
+      "file": "western-24.webp",
+      "publicPath": "/images/western/western-24.webp",
+      "unsplashId": "1515372039744-b8f02a3ae446",
+      "label": "white top hang"
+    },
+    {
+      "index": 25,
+      "file": "western-25.webp",
+      "publicPath": "/images/western/western-25.webp",
+      "unsplashId": "1539109136881-3be0616acf4b",
+      "label": "denim short detail"
+    },
+    {
+      "index": 26,
+      "file": "western-26.webp",
+      "publicPath": "/images/western/western-26.webp",
+      "unsplashId": "1541099649105-f69ad21f3246",
+      "label": "denim close"
+    },
+    {
+      "index": 27,
+      "file": "western-27.webp",
+      "publicPath": "/images/western/western-27.webp",
+      "unsplashId": "1549298916-b41d501d3772",
+      "label": "footwear denim pairing"
+    },
+    {
+      "index": 28,
+      "file": "western-28.webp",
+      "publicPath": "/images/western/western-28.webp",
+      "unsplashId": "1582418702059-97ebafb35d09",
+      "label": "denim jacket"
+    },
+    {
+      "index": 29,
+      "file": "western-29.webp",
+      "publicPath": "/images/western/western-29.webp",
+      "unsplashId": "1611312449408-fcece27cdbb7",
+      "label": "denim jacket flat"
+    },
+    {
+      "index": 30,
+      "file": "western-30.webp",
+      "publicPath": "/images/western/western-30.webp",
+      "unsplashId": "1604176354204-9268737828e4",
+      "label": "denim detail"
+    },
+    {
+      "index": 31,
+      "file": "western-31.webp",
+      "publicPath": "/images/western/western-31.webp",
+      "unsplashId": "1483985988355-763728e1935b",
+      "label": "shopping bag denim edit"
+    },
+    {
+      "index": 32,
+      "file": "western-32.webp",
+      "publicPath": "/images/western/western-32.webp",
+      "unsplashId": "1565084888279-aca607ecce0c",
+      "label": "denim wash"
+    },
+    {
+      "index": 33,
+      "file": "western-33.webp",
+      "publicPath": "/images/western/western-33.webp",
+      "unsplashId": "1594750823491-e493d067ce3e",
+      "label": "tee and denim shorts flatlay"
+    },
+    {
+      "index": 34,
+      "file": "western-34.webp",
+      "publicPath": "/images/western/western-34.webp",
+      "unsplashId": "1608147152875-b0eb0c53d491",
+      "label": "denim shirt product"
+    },
+    {
+      "index": 35,
+      "file": "western-35.webp",
+      "publicPath": "/images/western/western-35.webp",
+      "unsplashId": "1617178388553-a9d022974a5c",
+      "label": "jeans belt flatlay"
+    },
+    {
+      "index": 36,
+      "file": "western-36.webp",
+      "publicPath": "/images/western/western-36.webp",
+      "unsplashId": "1593030761757-71fae45fa0e7",
+      "label": "jeans shoes flatlay"
+    },
+    {
+      "index": 37,
+      "file": "western-37.webp",
+      "publicPath": "/images/western/western-37.webp",
+      "unsplashId": "1509631179647-0177331693ae",
+      "label": "tailored pants"
+    },
+    {
+      "index": 38,
+      "file": "western-38.webp",
+      "publicPath": "/images/western/western-38.webp",
+      "unsplashId": "1462392246754-28dfa2df8e6b",
+      "label": "wardrobe trousers hang"
+    },
+    {
+      "index": 39,
+      "file": "western-39.webp",
+      "publicPath": "/images/western/western-39.webp",
+      "unsplashId": "1539533018447-63fcce2678e3",
+      "label": "coat trousers edit"
+    },
+    {
+      "index": 40,
+      "file": "western-40.webp",
+      "publicPath": "/images/western/western-40.webp",
+      "unsplashId": "1487222477894-8943e31ef7b2",
+      "label": "black pants hang"
+    },
+    {
+      "index": 41,
+      "file": "western-41.webp",
+      "publicPath": "/images/western/western-41.webp",
+      "unsplashId": "1552374196-1ab2a1c593e8",
+      "label": "tailored pant texture"
+    },
+    {
+      "index": 42,
+      "file": "western-42.webp",
+      "publicPath": "/images/western/western-42.webp",
+      "unsplashId": "1549298916-f52d724204b4",
+      "label": "sneaker pant flat"
+    },
+    {
+      "index": 43,
+      "file": "western-43.webp",
+      "publicPath": "/images/western/western-43.webp",
+      "unsplashId": "1574180566232-aaad1b5b8450",
+      "label": "linen pant hang"
+    },
+    {
+      "index": 44,
+      "file": "western-44.webp",
+      "publicPath": "/images/western/western-44.webp",
+      "unsplashId": "1556906781-9a412961c28c",
+      "label": "sneakers pants flat"
+    },
+    {
+      "index": 45,
+      "file": "western-45.webp",
+      "publicPath": "/images/western/western-45.webp",
+      "unsplashId": "1551028719-00167b16eac5",
+      "label": "jacket bottoms edit"
+    },
+    {
+      "index": 46,
+      "file": "western-46.webp",
+      "publicPath": "/images/western/western-46.webp",
+      "unsplashId": "1591047139829-d91aecb6caea",
+      "label": "bomber pant pairing"
+    },
+    {
+      "index": 47,
+      "file": "western-47.webp",
+      "publicPath": "/images/western/western-47.webp",
+      "unsplashId": "1594938298603-c8148c4dae35",
+      "label": "suit pant texture"
+    },
+    {
+      "index": 48,
+      "file": "western-48.webp",
+      "publicPath": "/images/western/western-48.webp",
+      "unsplashId": "1475180098004-ca77a66827be",
+      "label": "skirt fabric fold"
+    },
+    {
+      "index": 49,
+      "file": "western-49.webp",
+      "publicPath": "/images/western/western-49.webp",
+      "unsplashId": "1560243563-062bfc001d68",
+      "label": "clothes rail bottoms"
+    },
+    {
+      "index": 50,
+      "file": "western-50.webp",
+      "publicPath": "/images/western/western-50.webp",
+      "unsplashId": "1496747611176-843222e1e57c",
+      "label": "white dress skirt hang"
+    }
+  ]
+}

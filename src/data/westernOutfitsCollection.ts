@@ -3,7 +3,7 @@ import type { ShopProduct } from './shopData'
 
 export const WESTERN_OUTFITS_LISTING_PATH = '/women?sub=western-outfits'
 export const WESTERN_OUTFIT_SIZES = ['S', 'M', 'L', 'XL'] as const
-export const WESTERN_OUTFIT_IMAGE_DIR = '/western'
+export const WESTERN_OUTFIT_IMAGE_DIR = '/images/western'
 
 export type WesternOutfitGroup = 'tops-blouses' | 'shorts-denim' | 'bottoms-skirts'
 export type WesternListingFilter = 'all' | WesternOutfitGroup
@@ -11,7 +11,10 @@ export type WesternListingFilter = 'all' | WesternOutfitGroup
 export interface WesternOutfitProduct extends ShopProduct {
   sku: string
   westernGroup: WesternOutfitGroup
+  /** Storefront sub-label: Tops | Shirts | Shorts | Bottoms */
+  subcategory: 'Tops' | 'Shirts' | 'Shorts' | 'Bottoms'
   tags: string[]
+  inStock: boolean
 }
 
 type WesternOutfitFields = ShopProduct & {
@@ -37,9 +40,18 @@ function westernImage(index: number) {
   return `${WESTERN_OUTFIT_IMAGE_DIR}/western-${index}.webp`
 }
 
+function resolveSubcategory(group: WesternOutfitGroup, name: string): WesternOutfitProduct['subcategory'] {
+  if (group === 'shorts-denim') return 'Shorts'
+  if (group === 'bottoms-skirts') return 'Bottoms'
+  if (/\bshirt\b|\bblouse\b|\boxford\b|\bcamp collar\b/i.test(name)) return 'Shirts'
+  return 'Tops'
+}
+
 function createWesternOutfit(seed: WesternOutfitSeed): WesternOutfitProduct {
   const image = westernImage(seed.index)
   const sku = `WST-${String(seed.index).padStart(3, '0')}`
+  const stock = seed.stock ?? 14
+  const subcategory = resolveSubcategory(seed.group, seed.name)
 
   return {
     id: `western-${seed.index}`,
@@ -53,12 +65,14 @@ function createWesternOutfit(seed: WesternOutfitSeed): WesternOutfitProduct {
     description: seed.description,
     sizes: [...WESTERN_OUTFIT_SIZES],
     colors: seed.colors,
-    stock: seed.stock ?? 14,
+    stock,
     featured: seed.featured ?? false,
     newArrival: seed.newArrival ?? true,
     sku,
     westernGroup: seed.group,
-    tags: ['western-outfits', 'western', seed.group, 'women'],
+    subcategory,
+    inStock: stock > 0,
+    tags: ['western-outfits', 'western', seed.group, subcategory.toLowerCase(), 'women'],
   }
 }
 

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "verify:launch": "node scripts/verify-launch-env.mjs",
+    "fetch:western-images": "node scripts/fetch-western-images.mjs",
     "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
