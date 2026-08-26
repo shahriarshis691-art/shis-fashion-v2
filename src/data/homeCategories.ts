@@ -50,9 +50,10 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   },
   {
     key: 'western',
-    name: 'Western Outfits',
-    href: '/women?sub=western-outfits',
-    image: '/og-image.svg',
+    name: "Women's Baggy",
+    href: '/collections/womens-baggy',
+    image: '/collections/featured-denim-collection.jpg',
+    imagePosition: 'center top',
   },
   {
     key: 'couples',

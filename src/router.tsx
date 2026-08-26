@@ -160,6 +160,10 @@ export const router = createBrowserRouter([
         element: withSuspense(<OversizedTeeCollectionPage />),
       },
       {
+        path: 'collections/womens-baggy',
+        element: withSuspense(<ShopPage />),
+      },
+      {
         path: 'collections/kids',
         element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },

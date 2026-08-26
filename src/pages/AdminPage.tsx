@@ -194,12 +194,12 @@ const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string
 }
 
 const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
-  women: 'Allowed: /women or /women?sub=western-outfits',
+  women: 'Allowed: /women or /women?sub=womens-baggy',
   saree: 'Allowed: /sarees or /women?sub=saree',
   men: 'Allowed: /men or /men?sub=shirts',
   denim: 'Allowed: /men?sub=denim',
   kids: 'Allowed: /kids or /kids?sub=kids',
-  western: 'Allowed: /women?sub=western-outfits',
+  western: 'Allowed: /collections/womens-baggy or /women?sub=womens-baggy',
   sale: 'Allowed: /men/half-shirts or /men?sub=half-shirts',
   'new-arrivals': 'Allowed: /collections/oversized-tee or /oversized-tee',
 }

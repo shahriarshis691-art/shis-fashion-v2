@@ -33,6 +33,7 @@ import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
 import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
+import { womensBaggyDenimCollectionProducts } from '../data/womensBaggyDenimCollection'
 import type { ShopProduct } from '../data/shopData'
 
 const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
@@ -123,7 +124,7 @@ export default function ProductDetailPage() {
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>(() =>
-    [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts].map(fromCatalogProduct),
+    [...halfShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts].map(fromCatalogProduct),
   )
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
@@ -151,6 +152,7 @@ export default function ProductDetailPage() {
       const local = [
         ...halfShirtCollectionProducts,
         ...mensBaggyDenimCollectionProducts,
+        ...womensBaggyDenimCollectionProducts,
         ...oversizedTeeCollectionProducts,
         ...westernOutfitsCollectionProducts,
       ]

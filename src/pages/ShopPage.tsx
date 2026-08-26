@@ -11,6 +11,10 @@ import {
   mergeMensBaggyDenimCatalog,
 } from '../data/mensBaggyDenimCollection'
 import {
+  isWomensBaggyDenimProduct,
+  mergeWomensBaggyDenimCatalog,
+} from '../data/womensBaggyDenimCollection'
+import {
   isOversizedTeeProduct,
   mergeOversizedTeeCatalog,
   shouldExcludeOversizedTeeFromMenListing,
@@ -400,8 +404,10 @@ export default function ShopPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   const [products, setProducts] = useState<ShopProduct[]>(() =>
-    mergeMensBaggyDenimCatalog(
-      mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+    mergeWomensBaggyDenimCatalog(
+      mergeMensBaggyDenimCatalog(
+        mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+      ),
     ),
   )
   const [ready, setReady] = useState(false)
@@ -457,9 +463,11 @@ export default function ShopPage() {
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
       setProducts(
-        mergeMensBaggyDenimCatalog(
-          mergeWesternOutfitsCatalog(
-            mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+        mergeWomensBaggyDenimCatalog(
+          mergeMensBaggyDenimCatalog(
+            mergeWesternOutfitsCatalog(
+              mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+            ),
           ),
         ),
       )
@@ -670,6 +678,16 @@ export default function ShopPage() {
     }
     : null
 
+  const isWomensBaggyListing = dedicatedListing?.subcategory === 'womens-baggy' ||
+    (effectiveSegment === 'women' && effectiveSubcategory === 'womens-baggy')
+
+  const womensBaggyHeading = isWomensBaggyListing
+    ? {
+      title: "WOMEN'S BAGGY",
+      description: 'Loose and wide-leg baggy jeans for women — premium denim with an easy everyday drape.',
+    }
+    : null
+
   const isWesternOutfitsListing = effectiveSegment === 'women' && effectiveSubcategory === 'western-outfits'
 
   const westernHeading = isWesternOutfitsListing
@@ -708,9 +726,11 @@ export default function ShopPage() {
       ? bySegment.filter(isHalfShirtProduct)
       : isDenimListing
         ? bySegment.filter(isDenimProduct)
-        : bySegment.filter((product) =>
-          matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
-        )
+        : isWomensBaggyListing
+          ? bySegment.filter(isWomensBaggyDenimProduct)
+          : bySegment.filter((product) =>
+            matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
+          )
 
   const byWesternGroup = isWesternOutfitsListing
     ? bySubcategory.filter((product) => matchesWesternListingFilter(product, westernFilter))
@@ -1054,8 +1074,8 @@ export default function ShopPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
           {searchQuery ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
@@ -1323,6 +1343,32 @@ export default function ShopPage() {
                     className="inline-flex min-h-11 items-center justify-center border border-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-black transition-colors hover:bg-black hover:text-white"
                   >
                     Explore Women
+                  </Link>
+                </div>
+              </div>
+            ) : isWomensBaggyListing && !searchQuery ? (
+              <div className="border border-neutral-200 bg-[#f9f9f9] px-6 py-14 text-center sm:px-10">
+                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
+                  Women&apos;s Baggy
+                </p>
+                <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight text-neutral-900 sm:text-3xl">
+                  Women&apos;s Baggy Jeans Coming Soon
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-neutral-600">
+                  We&apos;re preparing a fresh edit of loose and wide-leg baggy jeans for women. Explore the rest of the store while we finish styling.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/"
+                    className="inline-flex min-h-11 items-center justify-center bg-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-neutral-800"
+                  >
+                    Back to Home
+                  </Link>
+                  <Link
+                    to="/men?sub=denim"
+                    className="inline-flex min-h-11 items-center justify-center border border-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-black transition-colors hover:bg-black hover:text-white"
+                  >
+                    Shop Men&apos;s Baggy
                   </Link>
                 </div>
               </div>

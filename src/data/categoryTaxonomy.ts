@@ -48,6 +48,19 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
     label: 'Western Outfits',
     aliases: ['western-outfits', 'western', 'western-outfit', 'womens-western', 'women-western'],
   },
+  {
+    slug: 'womens-baggy',
+    label: "Women's Baggy",
+    aliases: [
+      'womens-baggy',
+      'women-baggy',
+      "women's-baggy",
+      'womens-baggy-jeans',
+      'women-baggy-jeans',
+      'ladies-baggy',
+    ],
+    path: '/collections/womens-baggy',
+  },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee'], path: '/collections/oversized-tee' },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree', 'sarees', 'sari', 'saris', 'womens-saree', 'women-saree', 'womens-sarees'], path: '/sarees' },
@@ -192,6 +205,19 @@ export function getDedicatedListingFromPath(pathname: string) {
     }
   }
 
+  if (
+    normalized === '/collections/womens-baggy' ||
+    normalized === '/collections/womens-baggy-jeans'
+  ) {
+    return {
+      segment: 'women' as const,
+      subcategory: 'womens-baggy',
+      eyebrow: "Women's Baggy Denim",
+      title: "WOMEN'S BAGGY",
+      description: 'Loose and wide-leg baggy jeans for women — premium denim with an easy everyday drape.',
+    }
+  }
+
   return null
 }
 
@@ -202,6 +228,10 @@ export function getDedicatedListingPath(segment: ShopSegment, subcategory: strin
 
   if (segment === 'men' && (subcategory === 'half-shirts' || subcategory === 'half-shirt')) {
     return '/men/half-shirts'
+  }
+
+  if (segment === 'women' && (subcategory === 'womens-baggy' || subcategory === 'womens-baggy-jeans')) {
+    return '/collections/womens-baggy'
   }
 
   if (subcategory === 'oversized-tee' || subcategory === 'oversize-tee') {

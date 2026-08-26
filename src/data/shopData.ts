@@ -36,6 +36,7 @@ export const shopCategories: ShopCategory[] = [
   { slug: 'womens-dresses', title: "Women's Dresses", description: 'Fluid forms with effortless movement.', image: '/og-image.svg' },
   { slug: 'saree', title: 'Saree', description: 'Refined weaves and fluid drapes for considered elegance.', image: '/collections/featured-saree-collection.jpg' },
   { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge — crop tops, shirts, denim shorts, trousers, and skirts.', image: '/og-image.svg' },
+  { slug: 'womens-baggy', title: "Women's Baggy", description: 'Loose and wide-leg baggy jeans for women with a premium denim finish.', image: '/collections/featured-denim-collection.jpg' },
   { slug: 'couples', title: 'Couples Collection', description: 'Coordinated pieces for shared moments.', image: '/og-image.svg' },
   { slug: 'gift', title: 'Gift Collection', description: 'Thoughtful pieces with a premium finish.', image: '/og-image.svg' },
   { slug: 'kids', title: 'Kids Collection', description: 'Soft tailoring for little style legends.', image: '/og-image.svg' },

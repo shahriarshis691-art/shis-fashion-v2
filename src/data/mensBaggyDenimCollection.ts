@@ -205,11 +205,22 @@ export function isDenimProduct(
   product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & { tags?: string[] },
 ) {
   const tags = (product.tags ?? []).map((tag) => tag.trim().toLowerCase())
+  if (
+    tags.includes('womens-baggy')
+    || (tags.includes('baggy') && (tags.includes('women') || tags.includes("women's")))
+  ) {
+    return false
+  }
+
+  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
+  if (/womens?-?baggy|women'?s\s+baggy|ladies?\s+baggy/.test(text)) {
+    return false
+  }
+
   if (tags.includes('denim') || tags.includes('baggy')) {
     return true
   }
 
-  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
   return /\bdenim\b|\bjeans?\b|\bbaggy\b/.test(text)
 }
 

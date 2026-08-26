@@ -32,7 +32,7 @@ const fallbackCategoryStrips = [
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
-  { key: 'western', label: 'Western', href: '/women?sub=western-outfits', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
+  { key: 'western', label: "WOMEN'S BAGGY", href: '/collections/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
 ] as const
@@ -170,11 +170,11 @@ const defaultHomepage: HomepageContent = {
     },
     western: {
       key: 'western',
-      label: 'Western',
-      href: '/women?sub=western-outfits',
+      label: "WOMEN'S BAGGY",
+      href: '/collections/womens-baggy',
       enabled: true,
       order: 40,
-      coverImage: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '',
+      coverImage: categoryStripCovers.western,
       images: [],
       updatedAt: null,
     },
@@ -302,15 +302,18 @@ export default function HomePage() {
         const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
         const isHalfShirtsCard = fallback.key === 'sale'
         const isOversizedTeeCard = fallback.key === 'new-arrivals'
+        const isWomensBaggyCard = fallback.key === 'western'
         const resolvedCover = isHalfShirtsCard
           ? categoryStripCovers['half-shirts']
           : isOversizedTeeCard
             ? categoryStripCovers['oversized-tee']
-            : pickPreferredCategoryCoverUrl(
-              section?.coverImage,
-              section?.images,
-              fallback.image || categoryStripCover(fallback.key, ''),
-            )
+            : isWomensBaggyCard
+              ? categoryStripCovers.western
+              : pickPreferredCategoryCoverUrl(
+                section?.coverImage,
+                section?.images,
+                fallback.image || categoryStripCover(fallback.key, ''),
+              )
 
         return {
           key: fallback.key,
@@ -318,12 +321,16 @@ export default function HomePage() {
             ? 'HALF SHIRTS'
             : isOversizedTeeCard
               ? 'OVERSIZED TEE'
-              : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+              : isWomensBaggyCard
+                ? "WOMEN'S BAGGY"
+                : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
           href: isHalfShirtsCard
             ? '/men/half-shirts'
             : isOversizedTeeCard
               ? '/collections/oversized-tee'
-              : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
+              : isWomensBaggyCard
+                ? '/collections/womens-baggy'
+                : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }

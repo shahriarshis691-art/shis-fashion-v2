@@ -906,7 +906,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
-  { key: 'western', label: 'Western', href: '/women?sub=western-outfits', order: 40, legacyImageKey: 'western' },
+  { key: 'western', label: "WOMEN'S BAGGY", href: '/collections/womens-baggy', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'half-shirts' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, legacyImageKey: 'oversized-tee' },
 ]
@@ -930,6 +930,10 @@ function getLegacyCategoryImage(legacyImageKey: string) {
 
   if (legacyImageKey === 'oversized-tee' || legacyImageKey === 'oversized') {
     return categoryStripCovers['oversized-tee']
+  }
+
+  if (legacyImageKey === 'western' || legacyImageKey === 'womens-baggy') {
+    return categoryStripCovers.western
   }
 
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
@@ -988,8 +992,8 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   western: {
     key: 'western',
-    label: 'Western',
-    href: '/women?sub=western-outfits',
+    label: "WOMEN'S BAGGY",
+    href: '/collections/womens-baggy',
     enabled: true,
     order: 40,
     coverImage: getLegacyCategoryImage('western'),
@@ -1029,8 +1033,12 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
     return 'saree'
   }
 
-  if (normalizedHref.startsWith('/women')) {
-    if (normalizedHref.includes('sub=western') || normalizedHref.includes('sub=tunic')) {
+  if (normalizedHref.startsWith('/women') || normalizedHref.includes('womens-baggy')) {
+    if (
+      normalizedHref.includes('womens-baggy')
+      || normalizedHref.includes('sub=western')
+      || normalizedHref.includes('sub=tunic')
+    ) {
       return 'western'
     }
     if (normalizedHref.includes('sub=saree')) {
@@ -1146,6 +1154,16 @@ function aliasToSectionKey(value: string): HomepageCategorySectionKey | null {
 
   if (normalized === 'denims' || normalized === 'jeans') {
     return 'denim'
+  }
+
+  if (
+    normalized === 'womens-baggy'
+    || normalized === 'women-baggy'
+    || normalized === "women's baggy"
+    || normalized === "women's-baggy"
+    || normalized === 'womens baggy'
+  ) {
+    return 'western'
   }
 
   if (normalized === 'half-shirt' || normalized === 'half-shirts' || normalized === 'half shirts') {
