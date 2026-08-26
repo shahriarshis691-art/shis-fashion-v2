@@ -31,7 +31,7 @@ import {
 } from '../data/westernOutfitsCollection'
 import {
   KURTI_PAGE_SIZE,
-  isKurtiProduct,
+  getKurtiListingProducts,
   mergeKurtisCatalog,
 } from '../data/kurtisCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -732,27 +732,32 @@ export default function ShopPage() {
 
   const isWomenListing = effectiveSegment === 'women'
   const isMenListing = effectiveSegment === 'men'
+  const kurtiCatalogProducts = getKurtiListingProducts()
 
-  const bySegment = products.filter((product) => {
-    if (isWomenListing) {
-      return isWomenListingProduct(product)
-    }
-    if (isMenListing) {
-      return isMenListingProduct(product)
-    }
-    return segmentMatchesProduct(effectiveSegment, product.category)
-  })
+  const listingPool = isKurtiListing ? kurtiCatalogProducts : products
 
-  const bySubcategory = effectiveSubcategory === 'all'
-    ? bySegment
-    : isHalfShirtListing
-      ? bySegment.filter(isHalfShirtProduct)
-      : isDenimListing
-        ? bySegment.filter(isDenimProduct)
-        : isWomensBaggyListing
-          ? bySegment.filter(isWomensBaggyDenimProduct)
-          : isKurtiListing
-            ? bySegment.filter(isKurtiProduct)
+  const bySegment = isKurtiListing
+    ? listingPool
+    : products.filter((product) => {
+      if (isWomenListing) {
+        return isWomenListingProduct(product)
+      }
+      if (isMenListing) {
+        return isMenListingProduct(product)
+      }
+      return segmentMatchesProduct(effectiveSegment, product.category)
+    })
+
+  const bySubcategory = isKurtiListing
+    ? listingPool
+    : effectiveSubcategory === 'all'
+      ? bySegment
+      : isHalfShirtListing
+        ? bySegment.filter(isHalfShirtProduct)
+        : isDenimListing
+          ? bySegment.filter(isDenimProduct)
+          : isWomensBaggyListing
+            ? bySegment.filter(isWomensBaggyDenimProduct)
             : bySegment.filter((product) =>
               matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
             )
@@ -1321,7 +1326,7 @@ export default function ShopPage() {
         ) : null}
 
         {/* Product Grid */}
-        {!ready && products.length === 0 ? (
+        {!ready && !isKurtiListing && products.length === 0 ? (
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`listing-skeleton-${index}`}>

@@ -86,9 +86,29 @@ export function getKurtiProductBySlug(slug: string): KurtiProduct | undefined {
   )
 }
 
+export function isGeneratedKurtiCatalogProduct(
+  product: Pick<ShopProduct, 'id' | 'image'>,
+): boolean {
+  const image = product.image.trim()
+  if (image.includes(`${KURTI_IMAGE_DIR}/`)) {
+    return true
+  }
+
+  return /^kurti-\d{3}$/i.test(String(product.id).trim())
+}
+
+/** Authoritative Kurti listing source — every image under public/images/products/kurtis/. */
+export function getKurtiListingProducts(): KurtiProduct[] {
+  return kurtisCollectionProducts
+}
+
 export function isKurtiProduct(
-  product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & { tags?: string[] },
+  product: Pick<ShopProduct, 'name' | 'slug' | 'category' | 'id' | 'image'> & { tags?: string[] },
 ) {
+  if (isGeneratedKurtiCatalogProduct(product)) {
+    return true
+  }
+
   const tags = (product.tags ?? []).map((tag) => tag.trim().toLowerCase())
   if (tags.includes('kurti') || tags.includes('kurtis')) {
     return true
@@ -103,13 +123,17 @@ export function isKurtiProduct(
 }
 
 export function mergeKurtisCatalog(liveProducts: ShopProduct[]): ShopProduct[] {
+  const withoutLegacyKurtis = liveProducts.filter(
+    (product) => !isKurtiProduct(product) || isGeneratedKurtiCatalogProduct(product),
+  )
+
   const taken = new Set(
-    liveProducts.map((product) => product.slug.trim().toLowerCase()).filter(Boolean),
+    withoutLegacyKurtis.map((product) => product.slug.trim().toLowerCase()).filter(Boolean),
   )
 
   const extras = kurtisCollectionProducts.filter(
     (product) => !taken.has(product.slug.toLowerCase()),
   )
 
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return extras.length ? [...withoutLegacyKurtis, ...extras] : withoutLegacyKurtis
 }
