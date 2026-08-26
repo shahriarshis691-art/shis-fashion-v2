@@ -22,6 +22,13 @@ function sareeImage(index: number) {
   return `/saree/saree.${index}.${ext}`
 }
 
+function sareeDetailImages(index: number) {
+  return [
+    `/saree/saree.${index}-texture.jpg`,
+    `/saree/saree.${index}-border.jpg`,
+  ] as const
+}
+
 function createSaree(
   index: number,
   slug: string,
@@ -47,7 +54,7 @@ function createSaree(
     category: 'Saree',
     brand: 'SHIS Fashion',
     image,
-    galleryImages: [image],
+    galleryImages: [image, ...sareeDetailImages(index)],
     fabric,
     blousePiece: 'Included (Unstitched)',
     inStock: true,

@@ -144,6 +144,18 @@ export default function SareeProductDetailPage() {
 
   const gallery = product?.galleryImages?.length ? product.galleryImages : product ? [product.image] : []
   const activeImage = gallery[activeImageIndex] ?? product?.image ?? '/og-image.svg'
+  const galleryAlt = (index: number) => {
+    if (!product) {
+      return 'Saree'
+    }
+    if (index === 1) {
+      return `${product.name} fabric texture`
+    }
+    if (index === 2) {
+      return `${product.name} border and zari detail`
+    }
+    return product.name
+  }
   const hasColorOptions = colors.length > 0
   const isSizeSelected = Boolean(selectedSize && sizes.includes(selectedSize))
   const isColorSelected = !hasColorOptions || Boolean(selectedColor && colors.includes(selectedColor))
@@ -330,7 +342,7 @@ export default function SareeProductDetailPage() {
             >
               <img
                 src={activeImage}
-                alt={product.name}
+                alt={galleryAlt(activeImageIndex)}
                 width={960}
                 height={1280}
                 sizes="(max-width: 1023px) 100vw, 50vw"
