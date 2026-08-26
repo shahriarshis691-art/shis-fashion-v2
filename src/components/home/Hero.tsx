@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
-import { isOutdatedHardcodedMediaUrl, isPersistableMediaUrl } from '../../utils/media'
+import { isOutdatedHardcodedMediaUrl, isRemoteMediaUrl } from '../../utils/media'
 
 interface HeroSlide {
   id: number
@@ -24,11 +24,11 @@ export interface HeroContentInput {
   heroImageDescription?: string
 }
 
-/** Fallback campaign carousel when admin has not uploaded a custom hero image. */
+/** Campaign carousel — images point at current collection banners. */
 const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
-    image: '/hero/main-hero-image2.jpg',
+    image: '/hero/kids/hero-soft-cotton-saree.jpg',
     title: 'THE MONSOON',
     btnText: 'SHOP SAREE',
     link: '/sarees',
@@ -39,7 +39,7 @@ const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: 2,
-    image: '/hero/kid-homepage.jpg',
+    image: '/hero/kids/kids-hero2.jpg',
     title: 'Everyday Kids Edit',
     btnText: 'Shop Kids',
     link: '/kids',
@@ -49,10 +49,10 @@ const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: 3,
-    image: '/hero/denim-homepage.jpg',
+    image: '/collections/mens-baggy/mens-baggy1.jpg',
     title: 'Signature Denim Series',
     btnText: 'Shop Denim',
-    link: '/men',
+    link: '/men?sub=denim',
     alt: 'Premium Denim Collection',
     width: 1122,
     height: 1402,
@@ -91,7 +91,9 @@ function hasCustomHeroImage(image: string | undefined) {
     return false
   }
 
-  return isPersistableMediaUrl(trimmed) && !isOutdatedHardcodedMediaUrl(trimmed)
+  // Only remote CMS uploads replace the campaign carousel. Local /hero and
+  // /collections paths always use FALLBACK_HERO_SLIDES so homepage banners stay current.
+  return isRemoteMediaUrl(trimmed) && !isOutdatedHardcodedMediaUrl(trimmed)
 }
 
 function buildHeroSlides(content?: HeroContentInput): HeroSlide[] {
@@ -116,21 +118,7 @@ function buildHeroSlides(content?: HeroContentInput): HeroSlide[] {
     ]
   }
 
-  return FALLBACK_HERO_SLIDES.map((slide, index) => {
-    if (index !== 0) {
-      return slide
-    }
-
-    return {
-      ...slide,
-      title: content?.heroTitle?.trim() || slide.title,
-      btnText: content?.heroCta?.trim() || slide.btnText,
-      link: normalizeHeroLink(content?.heroPrimaryLink, slide.link),
-      alt: content?.heroImageTitle?.trim()
-        || content?.heroTitle?.trim()
-        || slide.alt,
-    }
-  })
+  return FALLBACK_HERO_SLIDES
 }
 
 interface HeroProps {
@@ -284,16 +272,16 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                 draggable={false}
                 onError={(event) => {
                   const src = event.currentTarget.src
-                  if (src.includes('kid-homepage.jpg')) {
-                    event.currentTarget.src = '/hero/kid-homepage.jpeg'
+                  if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {
+                    event.currentTarget.src = '/hero/kids/hero-soft-cotton-saree.jpg.webp'
                     return
                   }
-                  if (src.includes('main-hero-image2.jpg')) {
-                    event.currentTarget.src = '/hero/main-hero-image2.jpg.jpeg'
+                  if (src.includes('kids-hero2.jpg')) {
+                    event.currentTarget.src = '/hero/kids/kids-hero2.jpg.jpg'
                     return
                   }
-                  if (src.includes('denim-homepage.jpg')) {
-                    event.currentTarget.src = '/hero/denim-homepage.jpg.png'
+                  if (src.includes('mens-baggy1.jpg')) {
+                    event.currentTarget.src = '/collections/featured-denim-collection.jpg'
                     return
                   }
                   event.currentTarget.src = DEFAULT_OG_IMAGE
