@@ -1058,7 +1058,7 @@ export default function ShopPage() {
               : '-mx-4 px-4 sm:-mx-8 sm:px-8'
           }`}>
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {isWesternOutfitsListing ? (
+              {isWesternOutfitsListing && westernOutfitsCollectionProducts.length > 0 ? (
                 WESTERN_LISTING_FILTER_OPTIONS.map((option) => {
                   const active = westernFilter === option.value
                   const label = option.countLabel
@@ -1079,6 +1079,14 @@ export default function ShopPage() {
                     </button>
                   )
                 })
+              ) : isWesternOutfitsListing ? (
+                <button
+                  type="button"
+                  className="shrink-0 rounded-sm bg-black px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase text-white"
+                  disabled
+                >
+                  Western Outfits
+                </button>
               ) : (
                 <>
                   <button
@@ -1201,19 +1209,21 @@ export default function ShopPage() {
             ))}
           </ProductListingGrid>
         ) : isWesternOutfitsListing ? (
-          <div className="-mx-4 mt-6 grid grid-cols-2 gap-4 px-4 md:-mx-8 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4">
-            {visibleProducts.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                href={`/product/${product.slug}`}
-                variant="studio"
-                priority={index < 4}
-                onToggleWishlist={handleToggleWishlist}
-                isInWishlist={isInWishlist(String(product.id))}
-              />
-            ))}
-          </div>
+          visibleProducts.length > 0 ? (
+            <div className="-mx-4 mt-6 grid grid-cols-2 gap-4 px-4 md:-mx-8 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4">
+              {visibleProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  href={`/product/${product.slug}`}
+                  variant="studio"
+                  priority={index < 4}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(product.id))}
+                />
+              ))}
+            </div>
+          ) : null
         ) : isWomenListing ? (
           <ProductListingGrid className="mt-6">
             {visibleProducts.map((product, index) => (
@@ -1271,32 +1281,60 @@ export default function ShopPage() {
 
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8">
-            <div className="border border-dashed border-black/20 px-4 py-10 text-center">
-              <p className="text-caption uppercase tracking-[0.14em] text-black/55">{searchQuery ? 'No matching products' : 'No products found'}</p>
-              <p className="mt-2 text-sm text-black/70">
-                {searchQuery
-                  ? `Nothing matched “${searchQuery}”. Try another search or browse the full collection.`
-                  : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination or clear all filters.'}
-              </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-3">
-                {searchQuery ? (
+            {isWesternOutfitsListing && !searchQuery ? (
+              <div className="border border-neutral-200 bg-[#f9f9f9] px-6 py-14 text-center sm:px-10">
+                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
+                  Western Outfits
+                </p>
+                <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight text-neutral-900 sm:text-3xl">
+                  New Western Collection Coming Soon
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-neutral-600">
+                  We&apos;re preparing a fresh edit of crop tops, shirts, denim, and tailored bottoms. Explore the rest of the store while we finish styling.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    to="/"
+                    className="inline-flex min-h-11 items-center justify-center bg-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-neutral-800"
+                  >
+                    Back to Home
+                  </Link>
+                  <Link
+                    to="/women"
+                    className="inline-flex min-h-11 items-center justify-center border border-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-black transition-colors hover:bg-black hover:text-white"
+                  >
+                    Explore Women
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="border border-dashed border-black/20 px-4 py-10 text-center">
+                <p className="text-caption uppercase tracking-[0.14em] text-black/55">{searchQuery ? 'No matching products' : 'No products found'}</p>
+                <p className="mt-2 text-sm text-black/70">
+                  {searchQuery
+                    ? `Nothing matched “${searchQuery}”. Try another search or browse the full collection.`
+                    : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination or clear all filters.'}
+                </p>
+                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={clearSearch}
+                      className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
+                    >
+                      Clear search
+                    </button>
+                  ) : null}
                   <button
                     type="button"
-                    onClick={clearSearch}
+                    onClick={resetAllFilters}
                     className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
                   >
-                    Clear search
+                    Clear All Filters
                   </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
-                >
-                  Clear All Filters
-                </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ) : null}
       </Container>

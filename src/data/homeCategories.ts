@@ -52,7 +52,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'western',
     name: 'Western Outfits',
     href: '/women?sub=western-outfits',
-    image: '/images/western/western-1.webp',
+    image: '/og-image.svg',
   },
   {
     key: 'couples',

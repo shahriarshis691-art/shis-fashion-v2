@@ -35,7 +35,7 @@ export const shopCategories: ShopCategory[] = [
   { slug: 'mens-shirt', title: "Men's Shirt", description: 'Polished structure in a relaxed fit.', image: '/og-image.svg' },
   { slug: 'womens-dresses', title: "Women's Dresses", description: 'Fluid forms with effortless movement.', image: '/og-image.svg' },
   { slug: 'saree', title: 'Saree', description: 'Refined weaves and fluid drapes for considered elegance.', image: '/collections/featured-saree-collection.jpg' },
-  { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge — crop tops, shirts, denim shorts, trousers, and skirts.', image: '/images/western/western-1.webp' },
+  { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge — crop tops, shirts, denim shorts, trousers, and skirts.', image: '/og-image.svg' },
   { slug: 'couples', title: 'Couples Collection', description: 'Coordinated pieces for shared moments.', image: '/og-image.svg' },
   { slug: 'gift', title: 'Gift Collection', description: 'Thoughtful pieces with a premium finish.', image: '/og-image.svg' },
   { slug: 'kids', title: 'Kids Collection', description: 'Soft tailoring for little style legends.', image: '/og-image.svg' },
