@@ -7,6 +7,11 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import PdpAccordion from '../components/shop/PdpAccordion'
 import PdpActionButtons from '../components/shop/PdpActionButtons'
 import PdpGalleryNav from '../components/shop/PdpGalleryNav'
+import PdpCssCropGallery, {
+  HALF_SHIRT_CROP_VIEWS,
+  getHalfShirtCropView,
+  halfShirtCropImageClass,
+} from '../components/shop/PdpCssCropGallery'
 import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
 import PdpShareButton from '../components/shop/PdpShareButton'
 import { useListingWishlist } from '../hooks/useListingWishlist'
@@ -167,16 +172,20 @@ export default function ProductDetailPage() {
   const sourceImages = product?.galleryImages?.length ? product.galleryImages : fallbackImages
   const galleryImages = sourceImages.filter(Boolean)
   const resolvedGalleryImages = galleryImages.length ? galleryImages : [getPlaceholderDataUri()]
+  const isHalfShirtPdp = Boolean(product && /half-shirt/i.test(product.category))
+  const galleryCount = isHalfShirtPdp ? HALF_SHIRT_CROP_VIEWS.length : resolvedGalleryImages.length
+  const safeGalleryIndex = Math.min(activeImageIndex, Math.max(galleryCount - 1, 0))
 
   const activeImage = resolvedGalleryImages[Math.min(activeImageIndex, resolvedGalleryImages.length - 1)] ?? resolvedGalleryImages[0]
+  const halfShirtHeroSrc = product?.image || activeImage
   const heroImage = catalogImageAttrs(
-    activeImage,
+    isHalfShirtPdp ? halfShirtHeroSrc : activeImage,
     1400,
     1700,
     '(max-width: 639px) 100vw, (max-width: 1279px) 58vw, 50vw',
     [640, 960, 1400],
   )
-  const zoomImage = catalogImageAttrs(activeImage, 1600, 2000, '100vw', [960, 1400, 1600])
+  const zoomImage = catalogImageAttrs(isHalfShirtPdp ? halfShirtHeroSrc : activeImage, 1600, 2000, '100vw', [960, 1400, 1600])
 
   const relatedProducts = (() => {
     if (!product) {
@@ -262,6 +271,10 @@ export default function ProductDetailPage() {
   }, [location.pathname, product, ready])
 
   useEffect(() => {
+    setActiveImageIndex(0)
+  }, [decodedSlug])
+
+  useEffect(() => {
     if (!isZoomOpen) {
       return
     }
@@ -311,11 +324,11 @@ export default function ProductDetailPage() {
   }
 
   const setPreviousImage = () => {
-    setActiveImageIndex((current) => (current <= 0 ? resolvedGalleryImages.length - 1 : current - 1))
+    setActiveImageIndex((current) => (current <= 0 ? galleryCount - 1 : current - 1))
   }
 
   const setNextImage = () => {
-    setActiveImageIndex((current) => (current >= resolvedGalleryImages.length - 1 ? 0 : current + 1))
+    setActiveImageIndex((current) => (current >= galleryCount - 1 ? 0 : current + 1))
   }
 
   const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
@@ -516,6 +529,22 @@ export default function ProductDetailPage() {
     <section className="bg-white pb-16">
       <div className="mx-auto grid max-w-7xl lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-2">
         <div>
+          {isHalfShirtPdp ? (
+            <PdpCssCropGallery
+              src={heroImage.src || halfShirtHeroSrc}
+              srcSet={heroImage.srcSet}
+              sizes={heroImage.sizes}
+              name={product.name}
+              activeIndex={safeGalleryIndex}
+              onSelect={setActiveImageIndex}
+              onPrev={setPreviousImage}
+              onNext={setNextImage}
+              onZoom={() => setIsZoomOpen(true)}
+              onError={handleImageError}
+              onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
+              onTouchEnd={handleTouchEnd}
+            />
+          ) : (
           <div
             className="relative aspect-[3/4] w-full bg-[#f7f7f8]"
             onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
@@ -545,6 +574,7 @@ export default function ProductDetailPage() {
               onSelect={setActiveImageIndex}
             />
           </div>
+          )}
         </div>
 
         <div className="px-4 pt-5 sm:px-6 lg:px-0 lg:pt-0">
@@ -779,17 +809,21 @@ export default function ProductDetailPage() {
 
             <div className="relative flex-1 overflow-hidden bg-black/25">
               <img
-                src={zoomImage.src || activeImage}
+                src={zoomImage.src || (isHalfShirtPdp ? halfShirtHeroSrc : activeImage)}
                 srcSet={zoomImage.srcSet}
                 sizes={zoomImage.sizes}
-                alt={`${product.name} zoom image`}
+                alt={`${product.name} zoom image${isHalfShirtPdp ? ` — ${getHalfShirtCropView(safeGalleryIndex).label}` : ''}`}
                 loading="eager"
                 decoding="async"
                 onError={handleImageError}
-                className={`h-full w-full object-contain ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
+                className={`h-full w-full ${
+                  isHalfShirtPdp
+                    ? `object-cover transition-transform duration-500 ease-out ${halfShirtCropImageClass(safeGalleryIndex)}`
+                    : `object-contain ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`
+                }`}
               />
 
-              {resolvedGalleryImages.length > 1 ? (
+              {galleryCount > 1 ? (
                 <>
                   <button
                     type="button"
