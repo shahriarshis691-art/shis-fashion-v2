@@ -6,7 +6,12 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
-import { mergeOversizedTeeCatalog } from '../data/oversizedTeeCollection'
+import {
+  isOversizedTeeProduct,
+  mergeOversizedTeeCatalog,
+  shouldExcludeOversizedTeeFromMenListing,
+  shouldExcludeOversizedTeeFromWomenListing,
+} from '../data/oversizedTeeCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
@@ -119,6 +124,15 @@ function isWomenListingProduct(product: ShopProduct) {
     return false
   }
 
+  if (normalizedGender === 'unisex' || normalizedCategory === 'unisex') {
+    return false
+  }
+
+  // Unisex / generic oversized tees live only on `/collections/oversized-tee`.
+  if (shouldExcludeOversizedTeeFromWomenListing(product)) {
+    return false
+  }
+
   if (normalizedCategory === 'men' || normalizedGender === 'men' || normalizedGender === 'male') {
     return false
   }
@@ -136,17 +150,52 @@ function isWomenListingProduct(product: ShopProduct) {
 
   const isExplicitWomenByCategory = normalizedCategory === 'women' || normalizedCategory === 'woman'
   const isExplicitWomenByGender = normalizedGender === 'women' || normalizedGender === 'female'
-  const isWomenSubcategory = womenSlugs.has(canonical)
-  const isWomenByAlias = matchesSegmentByAlias('women', product.category)
+  const isWomenSubcategory = womenSlugs.has(canonical) && canonical !== 'oversized-tee'
+  const isDedicatedWomenOversizedTee = isOversizedTeeProduct(product) && !shouldExcludeOversizedTeeFromWomenListing(product)
+  const isWomenByAlias = matchesSegmentByAlias('women', product.category) && !isOversizedTeeProduct(product)
   const isWomenByKeyword = WOMEN_INCLUSION_KEYWORDS.some((keyword) => searchableText.includes(keyword))
 
   return (
     isExplicitWomenByCategory ||
     isExplicitWomenByGender ||
     isWomenSubcategory ||
+    isDedicatedWomenOversizedTee ||
     isWomenByAlias ||
     isWomenByKeyword
   )
+}
+
+function isMenListingProduct(product: ShopProduct) {
+  const extendedProduct = product as ShopProduct & {
+    gender?: string
+    tags?: string[]
+  }
+  const normalizedCategory = product.category.trim().toLowerCase()
+  const normalizedGender = (extendedProduct.gender ?? '').trim().toLowerCase()
+
+  if (matchesSegmentByAlias('kids', product.category)) {
+    return false
+  }
+
+  if (normalizedGender === 'unisex' || normalizedCategory === 'unisex') {
+    return false
+  }
+
+  // Generic unisex oversized tees belong only on the dedicated oversized tee page.
+  if (shouldExcludeOversizedTeeFromMenListing(product)) {
+    return false
+  }
+
+  if (normalizedCategory === 'women' || normalizedGender === 'women' || normalizedGender === 'female') {
+    return false
+  }
+
+  const isExplicitMenByCategory = normalizedCategory === 'men' || normalizedCategory === 'man'
+  const isExplicitMenByGender = normalizedGender === 'men' || normalizedGender === 'male'
+  const isDedicatedMenOversizedTee = isOversizedTeeProduct(product) && !shouldExcludeOversizedTeeFromMenListing(product)
+  const isMenByAlias = matchesSegmentByAlias('men', product.category) && !isOversizedTeeProduct(product)
+
+  return isExplicitMenByCategory || isExplicitMenByGender || isDedicatedMenOversizedTee || isMenByAlias
 }
 
 function normalizeProductCategory(category: string) {
@@ -599,12 +648,17 @@ export default function ShopPage() {
     : null
 
   const isWomenListing = effectiveSegment === 'women'
+  const isMenListing = effectiveSegment === 'men'
 
-  const bySegment = products.filter((product) =>
-    isWomenListing
-      ? isWomenListingProduct(product)
-      : segmentMatchesProduct(effectiveSegment, product.category),
-  )
+  const bySegment = products.filter((product) => {
+    if (isWomenListing) {
+      return isWomenListingProduct(product)
+    }
+    if (isMenListing) {
+      return isMenListingProduct(product)
+    }
+    return segmentMatchesProduct(effectiveSegment, product.category)
+  })
 
   const bySubcategory = effectiveSubcategory === 'all'
     ? bySegment

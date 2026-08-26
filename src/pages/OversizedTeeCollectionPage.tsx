@@ -7,9 +7,9 @@ import {
   OVERSIZED_TEE_FIT,
   OVERSIZED_TEE_LISTING_PATH,
   isOversizedTeeProduct,
-  matchesOversizedTeeAudience,
+  matchesOversizedTeeListingFilter,
   mergeOversizedTeeCatalog,
-  type OversizedTeeAudienceFilter,
+  type OversizedTeeListingFilter,
 } from '../data/oversizedTeeCollection'
 import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
@@ -23,11 +23,13 @@ const prefetchProductDetail = () => import('./ProductDetailPage')
 
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
-const AUDIENCE_OPTIONS: Array<{ value: OversizedTeeAudienceFilter; label: string }> = [
+const LISTING_FILTER_OPTIONS: Array<{ value: OversizedTeeListingFilter; label: string }> = [
   { value: 'all', label: 'All' },
+  { value: 'Unisex', label: 'Unisex' },
   { value: 'Men', label: 'Men' },
   { value: 'Women', label: 'Women' },
-  { value: 'Unisex', label: 'Unisex' },
+  { value: 'Graphic', label: 'Graphic' },
+  { value: 'Solid', label: 'Solid' },
 ]
 
 const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
@@ -40,7 +42,7 @@ export default function OversizedTeeCollectionPage() {
   const location = useLocation()
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
   const [products, setProducts] = useState<ShopProduct[]>(() => mergeOversizedTeeCatalog([]))
-  const [audienceFilter, setAudienceFilter] = useState<OversizedTeeAudienceFilter>('all')
+  const [listingFilter, setListingFilter] = useState<OversizedTeeListingFilter>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function OversizedTeeCollectionPage() {
   }, [])
 
   const visibleProducts = useMemo(() => {
-    const filtered = products.filter((product) => matchesOversizedTeeAudience(product, audienceFilter))
+    const filtered = products.filter((product) => matchesOversizedTeeListingFilter(product, listingFilter))
     const sorted = [...filtered]
 
     if (sortBy === 'price-low') {
@@ -67,7 +69,7 @@ export default function OversizedTeeCollectionPage() {
     }
 
     return sorted
-  }, [audienceFilter, products, sortBy])
+  }, [listingFilter, products, sortBy])
 
   useEffect(() => {
     const canonicalPath = location.pathname === '/oversized-tee'
@@ -135,29 +137,31 @@ export default function OversizedTeeCollectionPage() {
 
         {products.length ? (
           <>
-            <div className="mt-6 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-              {AUDIENCE_OPTIONS.map((option) => {
-                const active = audienceFilter === option.value
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setAudienceFilter(option.value)}
-                    className={`shrink-0 px-3 py-1.5 text-xs font-medium transition-colors ${
-                      active
-                        ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
-                        : 'text-neutral-500 hover:text-neutral-800'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                )
-              })}
+            <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 -mx-4 mt-6 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+              <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {LISTING_FILTER_OPTIONS.map((option) => {
+                  const active = listingFilter === option.value
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setListingFilter(option.value)}
+                      className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                        active
+                          ? 'bg-black text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             <div className="mt-5 flex items-center justify-between border-b border-neutral-100 pb-3">
               <p className="text-xs font-normal text-neutral-400">
-                {visibleProducts.length} product{visibleProducts.length === 1 ? '' : 's'}
+                Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
               </p>
               <div className="flex items-center gap-2">
                 <label htmlFor="oversized-tee-sort" className="text-xs font-medium text-neutral-400">
@@ -204,7 +208,7 @@ export default function OversizedTeeCollectionPage() {
             {products.length ? (
               <button
                 type="button"
-                onClick={() => setAudienceFilter('all')}
+                onClick={() => setListingFilter('all')}
                 className="btn-glass-cta mt-5"
               >
                 View all
@@ -215,7 +219,7 @@ export default function OversizedTeeCollectionPage() {
 
         {products.length ? (
           <p className="mt-8 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
-            Tags: Unisex / All Adults · {OVERSIZED_TEE_FIT}
+            Unisex oversized tees are exclusive to this collection · {OVERSIZED_TEE_FIT}
           </p>
         ) : null}
       </Container>
