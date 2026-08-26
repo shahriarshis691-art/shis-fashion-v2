@@ -29,7 +29,6 @@ const STATIC_PATHS = [
   '/kids',
   '/sarees',
   '/sarees/crimson-red-georgette-saree',
-  '/sarees/royal-blue-pleated-saree',
   '/sarees/olive-green-silk-saree',
   '/sarees/mustard-olive-batik-saree',
   '/sarees/maroon-satin-silver-zari-saree',

@@ -9,7 +9,6 @@ const OUTPUT_SIZE = 800
 /** Normalized crop centers [x, y] tuned to fabric body vs border/aanchal on each listing photo. */
 const CROPS = {
   1: { texture: [0.50, 0.64], border: [0.84, 0.58] },
-  2: { texture: [0.40, 0.74], border: [0.78, 0.42] },
   3: { texture: [0.64, 0.74], border: [0.20, 0.44] },
   4: { texture: [0.34, 0.74], border: [0.68, 0.56] },
   5: { texture: [0.66, 0.70], border: [0.18, 0.52] },
@@ -19,7 +18,6 @@ const CROPS = {
 
 const SOURCES = [
   { index: 1, id: 'saree-crimson-red', file: 'saree.1.jpg' },
-  { index: 2, id: 'saree-royal-blue', file: 'saree.2.jpg' },
   { index: 3, id: 'saree-olive-green', file: 'saree.3.jpg' },
   { index: 4, id: 'saree-4', file: 'saree.4.jpg' },
   { index: 5, id: 'saree-5', file: 'saree.5.png' },

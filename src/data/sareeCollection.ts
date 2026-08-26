@@ -9,7 +9,6 @@ export interface SareeProduct extends ShopProduct {
 
 const SAREE_IMAGE_EXT: Record<number, 'jpg' | 'png'> = {
   1: 'jpg',
-  2: 'jpg',
   3: 'jpg',
   4: 'jpg',
   5: 'png',
@@ -67,7 +66,7 @@ function createSaree(
   }
 }
 
-/** Static saree edit — images live in `/public/saree/` (`saree.1`–`saree.7`). */
+/** Static saree edit — images live in `/public/saree/` (`saree.1`, `saree.3`–`saree.7`). */
 export const sareeCollectionProducts: SareeProduct[] = [
   createSaree(
     1,
@@ -78,16 +77,6 @@ export const sareeCollectionProducts: SareeProduct[] = [
     'Pure Georgette',
     'Elegant crimson red lightweight georgette saree with subtle lace border details, perfect for evening gatherings and festivities.',
     { id: 'saree-crimson-red', stock: 12 },
-  ),
-  createSaree(
-    2,
-    'royal-blue-pleated-saree',
-    'Royal Blue Solid Georgette Saree',
-    4200,
-    ['Royal Blue'],
-    'Premium Georgette',
-    'Vibrant royal blue solid georgette saree featuring a modern drape with matching border finish.',
-    { id: 'saree-royal-blue', stock: 10 },
   ),
   createSaree(
     3,
