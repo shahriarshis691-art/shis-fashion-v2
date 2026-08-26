@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { sareeCollectionProducts } from '../data/sareeCollection'
@@ -117,7 +116,7 @@ export default function SareeCollectionPage() {
         </div>
       </div>
 
-      <Container className="pt-6 lg:pt-10">
+      <div className="mx-auto w-full max-w-7xl px-3 pt-6 md:px-6 lg:pt-10">
         <nav aria-label="Breadcrumb" className="text-[12px] font-normal tracking-wide text-neutral-400">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
@@ -190,7 +189,7 @@ export default function SareeCollectionPage() {
             ))}
           </ProductListingGrid>
         </div>
-      </Container>
+      </div>
     </section>
   )
 }
