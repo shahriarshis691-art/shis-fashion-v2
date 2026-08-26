@@ -49,13 +49,14 @@ const heroSlides: HeroSlide[] = [
   },
 ]
 
-const AUTO_ROTATE_MS = 4500
+const AUTO_ROTATE_MS = 4000
 const SWIPE_THRESHOLD_PX = 48
 
 export const Hero: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const touchStartX = useRef<number | null>(null)
+  const touchPausedRef = useRef(false)
   const prefersReducedMotion = usePrefersReducedMotion()
   const safeIndex = currentIndex % heroSlides.length
   const activeSlide = heroSlides[safeIndex]!
@@ -68,28 +69,53 @@ export const Hero: React.FC = () => {
     setCurrentIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
   }, [])
 
+  const goToSlide = useCallback((index: number) => {
+    setCurrentIndex(((index % heroSlides.length) + heroSlides.length) % heroSlides.length)
+  }, [])
+
+  // Auto-rotate: restarts cleanly after pause, manual nav, or slide change.
   useEffect(() => {
-    if (isPaused || prefersReducedMotion) {
+    if (isPaused || prefersReducedMotion || heroSlides.length < 2) {
       return
     }
 
-    // Interval (not timeout-on-mount) so slide 0 paints first; rotation starts after AUTO_ROTATE_MS.
     const interval = window.setInterval(nextSlide, AUTO_ROTATE_MS)
     return () => window.clearInterval(interval)
-  }, [isPaused, nextSlide, prefersReducedMotion])
+  }, [currentIndex, isPaused, nextSlide, prefersReducedMotion])
+
+  // Preload every hero image so fades never flash empty frames.
+  useEffect(() => {
+    heroSlides.forEach((slide) => {
+      const preload = new Image()
+      preload.src = slide.image
+    })
+  }, [])
+
+  const pauseAutoplay = () => setIsPaused(true)
+  const resumeAutoplay = () => {
+    if (!touchPausedRef.current) {
+      setIsPaused(false)
+    }
+  }
 
   const onTouchStart = (event: React.TouchEvent) => {
     touchStartX.current = event.changedTouches[0]?.clientX ?? null
+    touchPausedRef.current = true
+    setIsPaused(true)
   }
 
   const onTouchEnd = (event: React.TouchEvent) => {
-    if (touchStartX.current === null) {
+    const startX = touchStartX.current
+    touchStartX.current = null
+    touchPausedRef.current = false
+    setIsPaused(false)
+
+    if (startX === null) {
       return
     }
 
-    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current
-    const delta = endX - touchStartX.current
-    touchStartX.current = null
+    const endX = event.changedTouches[0]?.clientX ?? startX
+    const delta = endX - startX
 
     if (Math.abs(delta) < SWIPE_THRESHOLD_PX) {
       return
@@ -102,15 +128,21 @@ export const Hero: React.FC = () => {
     }
   }
 
+  const onTouchCancel = () => {
+    touchStartX.current = null
+    touchPausedRef.current = false
+    setIsPaused(false)
+  }
+
   return (
     <section
       className="relative w-full max-w-[100vw] select-none overflow-x-hidden bg-neutral-950"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocusCapture={() => setIsPaused(true)}
+      onMouseEnter={pauseAutoplay}
+      onMouseLeave={resumeAutoplay}
+      onFocusCapture={pauseAutoplay}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setIsPaused(false)
+          resumeAutoplay()
         }
       }}
       aria-roledescription="carousel"
@@ -123,48 +155,48 @@ export const Hero: React.FC = () => {
         className="hero-slider-frame relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] md:aspect-auto md:h-[85vh] lg:h-[90vh]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchCancel}
       >
         {heroSlides.map((slide, index) => {
           const isActive = index === safeIndex
-          const shouldLoad = index === 0 || Math.abs(index - safeIndex) <= 1
           const isLcpCandidate = Boolean(slide.priority) || index === 0
 
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 h-full w-full transition-opacity duration-700 ease-in-out ${
+              className={`absolute inset-0 h-full w-full transition-all duration-700 ease-in-out ${
                 isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
               }`}
               aria-hidden={!isActive}
             >
-              {shouldLoad ? (
-                <img
-                  src={slide.image}
-                  alt={slide.alt}
-                  width={slide.width}
-                  height={slide.height}
-                  sizes="100vw"
-                  className="hero-slide-image absolute inset-0"
-                  loading={isLcpCandidate ? 'eager' : 'lazy'}
-                  fetchPriority={isLcpCandidate ? 'high' : 'low'}
-                  decoding={isLcpCandidate ? 'sync' : 'async'}
-                  draggable={false}
-                  onError={(event) => {
-                    const src = event.currentTarget.src
-                    if (src.includes('kid-homepage.jpg')) {
-                      event.currentTarget.src = '/hero/kid-homepage.jpeg'
-                      return
-                    }
-                    if (src.includes('main-hero-image2.jpg')) {
-                      event.currentTarget.src = '/hero/main-hero-image2.jpg.jpeg'
-                      return
-                    }
-                    event.currentTarget.src = '/og-image.svg'
-                  }}
-                />
-              ) : (
-                <div className="h-full w-full bg-neutral-950" aria-hidden />
-              )}
+              <img
+                src={slide.image}
+                alt={slide.alt}
+                width={slide.width}
+                height={slide.height}
+                sizes="100vw"
+                className="hero-slide-image absolute inset-0"
+                loading="eager"
+                fetchPriority={isLcpCandidate ? 'high' : 'low'}
+                decoding={isLcpCandidate ? 'sync' : 'async'}
+                draggable={false}
+                onError={(event) => {
+                  const src = event.currentTarget.src
+                  if (src.includes('kid-homepage.jpg')) {
+                    event.currentTarget.src = '/hero/kid-homepage.jpeg'
+                    return
+                  }
+                  if (src.includes('main-hero-image2.jpg')) {
+                    event.currentTarget.src = '/hero/main-hero-image2.jpg.jpeg'
+                    return
+                  }
+                  if (src.includes('denim-homepage.jpg')) {
+                    event.currentTarget.src = '/hero/denim-homepage.jpg.png'
+                    return
+                  }
+                  event.currentTarget.src = '/og-image.svg'
+                }}
+              />
             </div>
           )
         })}
@@ -213,7 +245,7 @@ export const Hero: React.FC = () => {
             <button
               key={slide.id}
               type="button"
-              onClick={() => setCurrentIndex(dotIdx)}
+              onClick={() => goToSlide(dotIdx)}
               aria-current={dotIdx === safeIndex ? 'true' : undefined}
               className={`h-1.5 rounded-full transition-all duration-500 ${
                 dotIdx === safeIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
