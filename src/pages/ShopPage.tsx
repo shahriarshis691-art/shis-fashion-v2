@@ -31,19 +31,75 @@ import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdent
 import { applyNotFoundSeo } from '../utils/seo'
 import NotFoundPage from './NotFoundPage'
 
-type SortOption = 'popular' | 'new' | 'price-low' | 'price-high'
+type SortOption = 'featured' | 'popular' | 'new' | 'price-low' | 'price-high' | 'best-selling'
+
+type PriceRange = 'all' | 'under-1500' | '1500-3000' | '3000-plus'
 
 interface ProductFilters {
   inStockOnly: boolean
   newOnly: boolean
+  priceRange: PriceRange
 }
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
-  { value: 'popular', label: 'Popular' },
-  { value: 'new', label: 'New' },
-  { value: 'price-low', label: 'Price: low to high' },
-  { value: 'price-high', label: 'Price: high to low' },
+  { value: 'featured', label: 'Featured' },
+  { value: 'new', label: 'New Arrivals' },
+  { value: 'best-selling', label: 'Best Selling' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
 ]
+
+const priceRangeOptions: Array<{ value: PriceRange; label: string }> = [
+  { value: 'all', label: 'All prices' },
+  { value: 'under-1500', label: 'Under ৳1,500' },
+  { value: '1500-3000', label: '৳1,500 – ৳3,000' },
+  { value: '3000-plus', label: '৳3,000+' },
+]
+
+const MEN_ONLY_CATEGORY_SLUGS = new Set([
+  'shirts',
+  'half-shirts',
+  'polos',
+  'panjabi',
+  't-shirts',
+  'pants',
+  'jackets',
+])
+
+function matchesPriceRange(price: string, range: PriceRange) {
+  if (range === 'all') {
+    return true
+  }
+
+  const amount = parseBDT(price)
+  if (range === 'under-1500') {
+    return amount < 1500
+  }
+  if (range === '1500-3000') {
+    return amount >= 1500 && amount <= 3000
+  }
+  return amount > 3000
+}
+
+function isWomenListingProduct(product: ShopProduct) {
+  if (matchesSegmentByAlias('kids', product.category)) {
+    return false
+  }
+
+  const canonical = resolveCanonicalSubcategorySlug(product.category)
+  const womenSlugs = new Set(getSubcategoriesForSegment('women').map((item) => item.slug))
+
+  if (MEN_ONLY_CATEGORY_SLUGS.has(canonical) && !womenSlugs.has(canonical)) {
+    return false
+  }
+
+  const categoryText = [product.category, product.name].join(' ').toLowerCase()
+  if (/\b(men|mens|man's|men's)\b/.test(categoryText) && !/\b(women|womens|woman|woman's|women's)\b/.test(categoryText)) {
+    return false
+  }
+
+  return matchesSegmentByAlias('women', product.category)
+}
 
 function normalizeProductCategory(category: string) {
   const raw = category.trim().toLowerCase()
@@ -236,12 +292,19 @@ export default function ShopPage() {
 
   const [products, setProducts] = useState<ShopProduct[]>(() => mergeOversizedTeeCatalog(mergeHalfShirtCatalog([])))
   const [ready, setReady] = useState(false)
-  const [sortBy, setSortBy] = useState<SortOption>('popular')
+  const [sortBy, setSortBy] = useState<SortOption>('featured')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+  const [draftSortBy, setDraftSortBy] = useState<SortOption>('featured')
+  const [draftFilters, setDraftFilters] = useState<ProductFilters>({
+    inStockOnly: false,
+    newOnly: false,
+    priceRange: 'all',
+  })
   const [filters, setFilters] = useState<ProductFilters>({
     inStockOnly: false,
     newOnly: false,
-   })
+    priceRange: 'all',
+  })
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
   const emptyStateKeysSeenRef = useRef<Set<string>>(new Set())
@@ -489,7 +552,13 @@ export default function ShopPage() {
     }
     : null
 
-  const bySegment = products.filter((product) => segmentMatchesProduct(effectiveSegment, product.category))
+  const isWomenListing = effectiveSegment === 'women'
+
+  const bySegment = products.filter((product) =>
+    isWomenListing
+      ? isWomenListingProduct(product)
+      : segmentMatchesProduct(effectiveSegment, product.category),
+  )
 
   const bySubcategory = effectiveSubcategory === 'all'
     ? bySegment
@@ -505,6 +574,10 @@ export default function ShopPage() {
     }
 
     if (filters.newOnly && !product.newArrival) {
+      return false
+    }
+
+    if (!matchesPriceRange(product.price, filters.priceRange)) {
       return false
     }
 
@@ -536,9 +609,20 @@ export default function ShopPage() {
       return sorted
     }
 
+    if (sortBy === 'best-selling') {
+      sorted.sort(
+        (left, right) =>
+          Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+          (right.stock ?? 0) - (left.stock ?? 0) ||
+          parseBDT(left.price) - parseBDT(right.price),
+      )
+      return sorted
+    }
+
     sorted.sort(
       (left, right) =>
         Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+        Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)) ||
         (right.stock ?? 0) - (left.stock ?? 0),
     )
     return sorted
@@ -607,6 +691,7 @@ export default function ShopPage() {
       sortBy,
       filters.inStockOnly ? 'stock' : 'all-stock',
       filters.newOnly ? 'new' : 'all-new',
+      filters.priceRange,
       location.pathname,
       location.search,
     ].join('|')
@@ -648,6 +733,7 @@ export default function ShopPage() {
     effectiveSubcategory,
     filters.inStockOnly,
     filters.newOnly,
+    filters.priceRange,
     location.pathname,
     location.search,
     ready,
@@ -666,6 +752,7 @@ export default function ShopPage() {
       sortBy,
       filters.inStockOnly ? 'stock' : 'all-stock',
       filters.newOnly ? 'new' : 'all-new',
+      filters.priceRange,
       location.pathname,
       location.search,
     ].join('|')
@@ -711,6 +798,7 @@ export default function ShopPage() {
       sort: sortBy,
       in_stock_only: filters.inStockOnly,
       new_only: filters.newOnly,
+      price_range: filters.priceRange,
       path: location.pathname,
       search: location.search,
     })
@@ -719,6 +807,7 @@ export default function ShopPage() {
     effectiveSubcategory,
     filters.inStockOnly,
     filters.newOnly,
+    filters.priceRange,
     location.pathname,
     location.search,
     ready,
@@ -732,6 +821,81 @@ export default function ShopPage() {
     navigate({
       pathname: location.pathname,
       search: params.toString() ? `?${params.toString()}` : '',
+    })
+  }
+
+  const resetAllFilters = () => {
+    setFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
+    setDraftFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
+    setSortBy('featured')
+    setDraftSortBy('featured')
+    clearSearch()
+    if (isWomenListing && effectiveSubcategory !== 'all') {
+      navigate('/women')
+    }
+  }
+
+  const openFilterSheet = () => {
+    setDraftSortBy(sortBy)
+    setDraftFilters(filters)
+    setIsFilterSheetOpen(true)
+  }
+
+  const applyFilterSheet = () => {
+    setSortBy(draftSortBy)
+    setFilters(draftFilters)
+    setIsFilterSheetOpen(false)
+  }
+
+  const navigateWomenSubcategory = (slug: string) => {
+    if (slug === 'all') {
+      navigate('/women')
+      return
+    }
+
+    const dedicated = getDedicatedListingPath('women', slug)
+    if (dedicated) {
+      navigate(dedicated)
+      return
+    }
+
+    navigate(`/women?sub=${slug}`)
+  }
+
+  const activeFilterBadges: Array<{ key: string; label: string; onClear: () => void }> = []
+  if (isWomenListing && effectiveSubcategory !== 'all') {
+    activeFilterBadges.push({
+      key: 'sub',
+      label: segmentSubcategories.find((item) => item.slug === effectiveSubcategory)?.label ?? effectiveSubcategory,
+      onClear: () => navigate('/women'),
+    })
+  }
+  if (filters.priceRange !== 'all') {
+    activeFilterBadges.push({
+      key: 'price',
+      label: priceRangeOptions.find((item) => item.value === filters.priceRange)?.label ?? 'Price',
+      onClear: () => setFilters((current) => ({ ...current, priceRange: 'all' })),
+    })
+  }
+  if (filters.inStockOnly) {
+    activeFilterBadges.push({
+      key: 'stock',
+      label: 'In stock',
+      onClear: () => setFilters((current) => ({ ...current, inStockOnly: false })),
+    })
+  }
+  if (filters.newOnly) {
+    activeFilterBadges.push({
+      key: 'new',
+      label: 'New arrivals',
+      onClear: () => setFilters((current) => ({ ...current, newOnly: false })),
+    })
+  }
+  if (searchQuery) {
+    activeFilterBadges.push({
+      key: 'search',
+      label: `“${searchQuery}”`,
+      onClear: clearSearch,
     })
   }
 
@@ -773,11 +937,46 @@ export default function ShopPage() {
           ) : null}
         </div>
 
+        {isWomenListing ? (
+          <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 -mx-4 mt-6 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button
+                type="button"
+                onClick={() => navigateWomenSubcategory('all')}
+                className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                  effectiveSubcategory === 'all'
+                    ? 'bg-black text-white'
+                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                }`}
+              >
+                All
+              </button>
+              {segmentSubcategories.map((sub) => {
+                const active = effectiveSubcategory === sub.slug
+                return (
+                  <button
+                    key={sub.slug}
+                    type="button"
+                    onClick={() => navigateWomenSubcategory(sub.slug)}
+                    className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                      active
+                        ? 'bg-black text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                    }`}
+                  >
+                    {sub.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
+
         {/* Filter Header */}
-        <div className="mt-8 flex items-center justify-between border-b border-neutral-100 pb-3 sm:mt-10">
+        <div className="mt-6 flex items-center justify-between border-b border-neutral-100 pb-3 sm:mt-8">
           <button
             type="button"
-            onClick={() => setIsFilterSheetOpen(true)}
+            onClick={openFilterSheet}
             className="ui-interactive flex items-center gap-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 sm:hidden"
             aria-label="Filter & Sort"
           >
@@ -787,37 +986,86 @@ export default function ShopPage() {
               <path d="M4 18h6" />
             </svg>
             Filter
+            {activeFilterBadges.length ? (
+              <span className="inline-flex h-4 min-w-4 items-center justify-center bg-black px-1 text-[10px] font-semibold text-white">
+                {activeFilterBadges.length}
+              </span>
+            ) : null}
           </button>
           <p className="text-xs font-normal text-neutral-400 sm:hidden">
-            {visibleProducts.length} products
+            Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
           </p>
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <label htmlFor="desktop-sort" className="text-xs font-medium text-neutral-400">
-              Sort
-            </label>
-            <select
-              id="desktop-sort"
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="bg-transparent text-xs font-medium text-neutral-700 outline-none"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          <div className="hidden flex-wrap items-center gap-4 sm:flex">
+            {isWomenListing ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-neutral-400">Price</span>
+                {priceRangeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setFilters((current) => ({ ...current, priceRange: option.value }))}
+                    className={`px-2.5 py-1 text-[11px] font-medium tracking-[0.06em] transition-colors ${
+                      filters.priceRange === option.value
+                        ? 'bg-black text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <div className="flex items-center gap-2">
+              <label htmlFor="desktop-sort" className="text-xs font-medium text-neutral-400">
+                Sort
+              </label>
+              <select
+                id="desktop-sort"
+                value={sortBy === 'popular' ? 'featured' : sortBy}
+                onChange={(event) => setSortBy(event.target.value as SortOption)}
+                className="bg-transparent text-xs font-medium text-neutral-700 outline-none"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="hidden sm:block">
             <p className="text-xs font-normal text-neutral-400">
-              {visibleProducts.length} products
+              Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
             </p>
           </div>
         </div>
 
-        {/* Subcategory Carousels */}
+        {activeFilterBadges.length ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {activeFilterBadges.map((badge) => (
+              <button
+                key={badge.key}
+                type="button"
+                onClick={badge.onClear}
+                className="inline-flex items-center gap-1.5 border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-700 hover:border-neutral-400"
+              >
+                {badge.label}
+                <span aria-hidden className="text-neutral-400">×</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-900 underline underline-offset-4"
+            >
+              Clear all
+            </button>
+          </div>
+        ) : null}
+
+        {/* Product Grid */}
         {!ready && products.length === 0 ? (
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
@@ -826,6 +1074,18 @@ export default function ShopPage() {
                 <div className="mt-2 h-3 w-3/4 animate-pulse bg-black/5" />
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>
+            ))}
+          </ProductListingGrid>
+        ) : isWomenListing ? (
+          <ProductListingGrid className="mt-6">
+            {visibleProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                priority={index < 4}
+                onToggleWishlist={handleToggleWishlist}
+                isInWishlist={isInWishlist(String(product.id))}
+              />
             ))}
           </ProductListingGrid>
         ) : (
@@ -873,12 +1133,12 @@ export default function ShopPage() {
 
         {ready && visibleProducts.length === 0 ? (
           <div className="mt-8">
-            <div className="border border-dashed border-black/20 px-4 py-6 text-center">
+            <div className="border border-dashed border-black/20 px-4 py-10 text-center">
               <p className="text-caption uppercase tracking-[0.14em] text-black/55">{searchQuery ? 'No matching products' : 'No products found'}</p>
               <p className="mt-2 text-sm text-black/70">
                 {searchQuery
-                  ? `Nothing matched “{searchQuery}”. Try another search or browse the full collection.`
-                  : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination.'}
+                  ? `Nothing matched “${searchQuery}”. Try another search or browse the full collection.`
+                  : dedicatedListing ? 'New pieces for this collection are being prepared.' : 'Try another filter combination or clear all filters.'}
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-3">
                 {searchQuery ? (
@@ -892,13 +1152,10 @@ export default function ShopPage() {
                 ) : null}
                 <button
                   type="button"
-                  onClick={() => {
-                    setFilters({ inStockOnly: false, newOnly: false })
-                    setSortBy('popular')
-                  }}
+                  onClick={resetAllFilters}
                   className="ui-interactive border border-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white"
                 >
-                  Reset filters
+                  Clear All Filters
                 </button>
               </div>
             </div>
@@ -909,10 +1166,16 @@ export default function ShopPage() {
       <AnimateMobileSheet
         open={isFilterSheetOpen}
         onClose={() => setIsFilterSheetOpen(false)}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        filters={filters}
-        onFiltersChange={setFilters}
+        sortBy={draftSortBy}
+        onSortChange={setDraftSortBy}
+        filters={draftFilters}
+        onFiltersChange={setDraftFilters}
+        onApply={applyFilterSheet}
+        onReset={() => {
+          setDraftFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
+          setDraftSortBy('featured')
+        }}
+        showPriceRanges={isWomenListing}
       />
     </section>
   )
@@ -925,6 +1188,9 @@ function AnimateMobileSheet({
   onSortChange,
   filters,
   onFiltersChange,
+  onApply,
+  onReset,
+  showPriceRanges = false,
 }: {
   open: boolean
   onClose: () => void
@@ -932,6 +1198,9 @@ function AnimateMobileSheet({
   onSortChange: (value: SortOption) => void
   filters: ProductFilters
   onFiltersChange: (value: ProductFilters) => void
+  onApply: () => void
+  onReset: () => void
+  showPriceRanges?: boolean
 }) {
   return (
     <div>
@@ -944,7 +1213,7 @@ function AnimateMobileSheet({
             onClick={onClose}
           />
 
-          <aside className="luxury-sheet-up gpu-media fixed inset-x-0 bottom-0 z-[55] rounded-t-xl border-t border-black/15 bg-white px-4 pt-4 pb-[max(5.5rem,calc(4.5rem+env(safe-area-inset-bottom)))] sm:hidden">
+          <aside className="luxury-sheet-up gpu-media fixed inset-x-0 bottom-0 z-[55] max-h-[85dvh] overflow-y-auto rounded-t-xl border-t border-black/15 bg-white px-4 pt-4 pb-[max(5.5rem,calc(4.5rem+env(safe-area-inset-bottom)))] sm:hidden">
             <div className="mx-auto max-w-7xl">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Filter & Sort</h2>
@@ -966,17 +1235,42 @@ function AnimateMobileSheet({
                       type="button"
                       onClick={() => onSortChange(option.value)}
                       className={`ui-interactive flex items-center justify-between border px-3 py-2 text-sm ${
-                        sortBy === option.value
+                        sortBy === option.value || (option.value === 'featured' && sortBy === 'popular')
                           ? 'border-black bg-black text-white'
                           : 'border-black/15 text-black hover:bg-black/5'
                       }`}
                     >
                       <span>{option.label}</span>
-                      {sortBy === option.value ? <span aria-hidden>✓</span> : null}
+                      {sortBy === option.value || (option.value === 'featured' && sortBy === 'popular') ? (
+                        <span aria-hidden>✓</span>
+                      ) : null}
                     </button>
                   ))}
                 </div>
               </div>
+
+              {showPriceRanges ? (
+                <div className="mt-5">
+                  <p className="text-caption uppercase tracking-[0.12em] text-black/55">Price</p>
+                  <div className="mt-2 grid gap-2">
+                    {priceRangeOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => onFiltersChange({ ...filters, priceRange: option.value })}
+                        className={`ui-interactive flex items-center justify-between border px-3 py-2 text-sm ${
+                          filters.priceRange === option.value
+                            ? 'border-black bg-black text-white'
+                            : 'border-black/15 text-black hover:bg-black/5'
+                        }`}
+                      >
+                        <span>{option.label}</span>
+                        {filters.priceRange === option.value ? <span aria-hidden>✓</span> : null}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <div className="mt-5">
                 <p className="text-caption uppercase tracking-[0.12em] text-black/55">Filters</p>
@@ -1010,13 +1304,22 @@ function AnimateMobileSheet({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="ui-interactive mt-5 w-full border border-black bg-black py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-white"
-              >
-                Apply
-              </button>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="ui-interactive w-full border border-black/20 bg-white py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-black hover:bg-black/5"
+                >
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={onApply}
+                  className="ui-interactive w-full border border-black bg-black py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-white"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           </aside>
         </>
