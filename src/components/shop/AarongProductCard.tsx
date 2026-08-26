@@ -73,7 +73,7 @@ const AarongProductCard = memo(function AarongProductCard({
               event.currentTarget.src = '/og-image.svg'
             }}
           />
-          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
             <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
               View
             </span>
