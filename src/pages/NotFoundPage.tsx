@@ -19,7 +19,7 @@ export default function NotFoundPage() {
           <h1 id="not-found-title" className="mt-4 text-4xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl">Page not found</h1>
           <p className="mt-4 max-w-xl text-base leading-8 text-[var(--color-muted)]">The page you’re looking for may have moved, been removed, or never existed. Return to the collection and continue your journey.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button to="/">Back home</Button>
+            <Button to="/" variant="cta">Back home</Button>
             <Button to="/shop" variant="secondary">Browse shop</Button>
           </div>
           <Link to="/contact" className="mt-6 text-sm font-semibold text-[var(--color-accent)]">Need help? Contact us</Link>

@@ -110,7 +110,7 @@ export default function SareeCollectionPage() {
               event.preventDefault()
               document.getElementById('saree-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-xl transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:text-sm"
+            className="btn-glass-cta"
           >
             Shop Saree Collection
           </a>

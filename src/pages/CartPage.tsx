@@ -58,7 +58,7 @@ export default function CartPage() {
             <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Your bag is ready for a first edit.</h1>
             <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">Choose a piece from the shop and build your luxury capsule in a few taps.</p>
             <div className="mt-6 flex justify-center">
-              <Button to="/shop">Continue shopping</Button>
+              <Button to="/shop" variant="cta">Continue shopping</Button>
             </div>
           </div>
 
@@ -205,7 +205,7 @@ export default function CartPage() {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button onClick={handleBeginCheckout} className="w-full justify-center">Checkout</Button>
+              <Button variant="cta" onClick={handleBeginCheckout} className="w-full">Checkout</Button>
               <Button to="/shop" variant="secondary" className="w-full justify-center">Keep browsing</Button>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-xs uppercase tracking-[0.14em] text-[var(--color-muted)]">
@@ -221,7 +221,7 @@ export default function CartPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
               <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
-            <Button onClick={handleBeginCheckout} className="min-w-[8.25rem] justify-center px-4 py-2.5 text-sm">
+            <Button variant="cta" onClick={handleBeginCheckout} className="min-w-[8.25rem] px-4">
               Secure checkout
             </Button>
           </div>

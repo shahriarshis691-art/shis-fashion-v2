@@ -204,7 +204,7 @@ export default function HeroBanner({
               <div className="mt-5 flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
                 <Link
                   to={primaryLink ?? '/shop'}
-                  className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
+                  className="btn-glass-cta w-full sm:w-auto"
                 >
                   {cta}
                 </Link>
@@ -212,14 +212,14 @@ export default function HeroBanner({
                   <button
                     type="button"
                     onClick={onSecondaryClick}
-                    className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
+                    className="btn-glass-cta w-full sm:w-auto"
                   >
                     {secondaryCta || 'Explore Our Brands'}
                   </button>
                 ) : secondaryCta && secondaryLink ? (
                   <Link
                     to={secondaryLink}
-                    className="luxury-tap ui-interactive inline-flex w-full items-center justify-center border border-white/80 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
+                    className="btn-glass-cta w-full sm:w-auto"
                   >
                     {secondaryCta}
                   </Link>

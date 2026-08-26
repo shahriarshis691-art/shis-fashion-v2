@@ -138,7 +138,7 @@ export default function PromoPopup({
                 <Link
                   to={ctaLink}
                   onClick={handleCtaClick}
-                  className="luxury-tap inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-black bg-black px-6 py-3.5 text-[13px] font-bold uppercase tracking-[0.22em] text-white transition hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:text-sm"
+                  className="btn-glass-cta w-full"
                 >
                   {ctaLabel}
                 </Link>

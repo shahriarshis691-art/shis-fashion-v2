@@ -488,7 +488,7 @@ export default function InstantCheckoutSheet({ open, onClose, items }: InstantCh
             <button
               type="submit"
               disabled={isSubmitting || !items.length}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-4 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform active:scale-[0.98] disabled:opacity-50"
+              className="btn-glass-cta w-full gap-2"
             >
               {isSubmitting ? (
                 <>

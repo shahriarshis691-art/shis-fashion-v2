@@ -180,7 +180,7 @@ export default function MiniCartConfirmation() {
               <Link
                 to="/cart"
                 onClick={dismissRecentAddition}
-                className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#1f1f1f] bg-[linear-gradient(180deg,#1a1a1a,#000000)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(0,0,0,0.28)]"
+                className="btn-glass-cta w-full"
               >
                 View cart
               </Link>

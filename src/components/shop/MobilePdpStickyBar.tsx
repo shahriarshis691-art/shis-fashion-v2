@@ -34,14 +34,14 @@ export default function MobilePdpStickyBar({
           <button
             type="button"
             onClick={onAddToBag}
-            className="flex-1 rounded-sm border border-neutral-900 bg-white px-3 py-3 text-xs font-semibold tracking-wider text-neutral-900 uppercase transition-transform active:scale-[0.98]"
+            className="btn-glass-cta flex-1 px-3 sm:px-6"
           >
             {didAddToBag ? 'Added' : addToCartLabel}
           </button>
           <button
             type="button"
             onClick={onBuyNow}
-            className="flex-1 rounded-sm bg-neutral-950 px-3 py-3 text-xs font-semibold tracking-wider text-white uppercase shadow-md transition-transform active:scale-[0.98]"
+            className="btn-glass-cta flex-1 px-3 sm:px-6"
           >
             {buyNowLabel}
           </button>

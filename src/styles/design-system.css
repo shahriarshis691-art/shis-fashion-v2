@@ -306,6 +306,87 @@ button,
   }
 }
 
+/* Storefront primary CTA — sharp rectangle + frosted glass */
+.btn-glass-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+  isolation: isolate;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.14);
+  transition:
+    background-color 300ms var(--ease-standard),
+    backdrop-filter 300ms var(--ease-standard),
+    filter 300ms var(--ease-standard),
+    transform 300ms var(--ease-luxury),
+    border-color 300ms var(--ease-standard);
+}
+
+@media (min-width: 640px) {
+  .btn-glass-cta {
+    padding: 0.875rem 2rem;
+    font-size: 0.8125rem;
+  }
+}
+
+.btn-glass-cta:hover {
+  background: rgba(0, 0, 0, 0.72);
+  border-color: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  filter: brightness(1.08);
+  color: #ffffff;
+}
+
+.btn-glass-cta:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  filter: brightness(1.04);
+}
+
+.btn-glass-cta:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.btn-glass-cta:disabled,
+.btn-glass-cta[aria-disabled='true'] {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.5;
+  filter: none;
+}
+
+@supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+  .btn-glass-cta {
+    background: rgba(0, 0, 0, 0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-glass-cta,
+  .btn-glass-cta:hover,
+  .btn-glass-cta:active {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+}
+
 /* Smooth horizontal scrolling for native momentum */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;

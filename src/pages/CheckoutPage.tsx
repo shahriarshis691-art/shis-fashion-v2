@@ -220,7 +220,7 @@ export default function CheckoutPage() {
             <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Your bag is empty.</h1>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--color-muted)]">Select a piece from the collection before trying to place an order.</p>
             <div className="mt-8 flex justify-center">
-              <Button to="/shop">Continue shopping</Button>
+              <Button to="/shop" variant="cta">Continue shopping</Button>
             </div>
           </div>
         </Container>
@@ -673,7 +673,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="sticky bottom-3 z-[55] bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
-              <Button type="submit" className="w-full justify-center rounded-full bg-black px-5 py-4 text-[16px] font-semibold text-white shadow-none hover:bg-black/90 disabled:bg-black/25 disabled:text-white/70" disabled={!canSubmit}>
+              <Button type="submit" variant="cta" className="w-full" disabled={!canSubmit}>
                 {isSubmitting ? 'Placing order...' : 'Place Order'}
               </Button>
             </div>

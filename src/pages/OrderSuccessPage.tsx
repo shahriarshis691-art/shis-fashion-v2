@@ -196,7 +196,7 @@ export default function OrderSuccessPage() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button to="/shop">Continue shopping</Button>
+              <Button to="/shop" variant="cta">Continue shopping</Button>
               <Link to={trackHref} className="ui-interactive inline-flex items-center justify-center border border-black px-5 py-3 text-sm font-semibold text-black hover:bg-black hover:text-white">
                 Track this order
               </Link>

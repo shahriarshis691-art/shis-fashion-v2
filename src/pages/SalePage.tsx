@@ -83,7 +83,7 @@ export default function SalePage() {
             <p className="mt-2 text-sm text-neutral-400">Browse the full collection while the next marked-down pieces are prepared.</p>
             <Link
               to="/shop"
-              className="mt-4 inline-flex text-xs font-medium text-neutral-900 underline underline-offset-4"
+              className="btn-glass-cta mt-6"
             >
               Shop all
             </Link>

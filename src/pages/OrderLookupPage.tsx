@@ -179,7 +179,7 @@ export default function OrderLookupPage() {
               autoComplete="tel"
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full justify-center">
+          <Button type="submit" variant="cta" disabled={loading} className="w-full">
             {loading ? 'Looking up…' : 'Check status'}
           </Button>
           {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}

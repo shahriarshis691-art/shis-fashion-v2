@@ -229,7 +229,7 @@ export default function KidsOversizedTeeCollectionPage() {
               event.preventDefault()
               document.getElementById('kids-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-8 py-2.5 text-xs font-semibold tracking-wider text-neutral-950 uppercase shadow-lg transition-all duration-200 hover:bg-neutral-100 active:scale-95 sm:py-3 sm:text-sm"
+            className="btn-glass-cta mt-5"
           >
             Shop Now
           </a>

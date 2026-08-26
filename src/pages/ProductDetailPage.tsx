@@ -1,22 +1,26 @@
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
-import MobilePdpStickyBar from '../components/shop/MobilePdpStickyBar'
+import PdpAccordion from '../components/shop/PdpAccordion'
+import PdpActionButtons from '../components/shop/PdpActionButtons'
+import PdpGalleryNav from '../components/shop/PdpGalleryNav'
+import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
+import PdpShareButton from '../components/shop/PdpShareButton'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { usePdpActionGate } from '../hooks/usePdpActionGate'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
 import { subscribeToApprovedProductReviews, subscribeToProducts, type AdminProduct, type ProductReview } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
-import { parseBDT } from '../utils/currency'
+import { formatTkPrice, parseBDT } from '../utils/currency'
 import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
-import { DELIVERY_RETURN_BULLETS, EXCHANGE_WINDOW_DAYS } from '../data/storePolicy'
+import { DELIVERY_RETURN_BULLETS } from '../data/storePolicy'
 import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
@@ -46,19 +50,6 @@ function toProduct(product: AdminProduct) {
     featured: product.featured,
     newArrival: product.newArrival,
   }
-}
-
-function getWhatsAppHref(phone?: string) {
-  const digits = (phone ?? '').replace(/\D/g, '')
-  const normalized = digits ? (digits.startsWith('88') ? digits : `88${digits}`) : '8801887848304'
-  return `https://wa.me/${normalized}`
-}
-
-function getWhatsAppOrderHref(productName: string, size: string, color: string, quantity: number) {
-  const baseHref = getWhatsAppHref()
-  const colorLine = color && color !== 'Default' ? ` Color: ${color}.` : ''
-  const message = encodeURIComponent(`Hi SHIS, I want to order ${productName}. Size: ${size}.${colorLine} Quantity: ${quantity}.`)
-  return `${baseHref}?text=${message}`
 }
 
 function getPlaceholderDataUri() {
@@ -269,12 +260,6 @@ export default function ProductDetailPage() {
     })
   }, [product, ready, addToRecentlyViewed])
 
-  const toggleProductWishlist = () => {
-    if (product) {
-      handleToggleWishlist(product)
-    }
-  }
-
   const handleRelatedProductClick = (relatedProduct: ReturnType<typeof toProduct>) => {
     googleAnalytics.trackEvent('related_product_click', {
       item_id: String(relatedProduct.id),
@@ -335,7 +320,6 @@ export default function ProductDetailPage() {
   const maxQuantity = availableStock > 0 ? Math.min(availableStock, 10) : 1
   const effectiveQuantity = Math.max(1, Math.min(quantity, maxQuantity))
   const stockLabel = getStockLabel(availableStock)
-  const quickOrderHref = product ? getWhatsAppOrderHref(product.name, safeSize, safeColor, effectiveQuantity) : getWhatsAppHref()
   const { actionError, shakeToken, clearActionError, requireReadyToPurchase } = usePdpActionGate({
     isSizeSelected,
     isColorSelected,
@@ -479,7 +463,7 @@ export default function ProductDetailPage() {
             <h1 className="mt-3 text-h2 text-black">This product is no longer available</h1>
             <p className="mt-3 text-sm leading-7 text-black/70">Return to the listing and continue browsing current products.</p>
             <div className="mt-6 flex justify-center">
-              <Button to="/shop">Back to shop</Button>
+              <Button to="/shop" variant="cta">Back to shop</Button>
             </div>
           </div>
         </Container>
@@ -489,394 +473,251 @@ export default function ProductDetailPage() {
 
   const highlights = buildHighlights(product.description, product.sizes, availableStock)
 
+  const optionChipClass = (active: boolean) =>
+    `inline-flex min-h-10 min-w-10 items-center justify-center border px-3 text-xs tracking-[0.08em] ${
+      active ? 'border-black bg-black text-white' : 'border-gray-200 text-neutral-900'
+    }`
+
   return (
-    <section className="bg-white px-3.5 pb-28 pt-4 sm:px-6 md:pb-24 lg:px-8 lg:pt-10">
-      <Container>
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
-          <div>
-            <div
-              className="relative bg-[#f7f7f8]"
-              onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div className="aspect-[3/4] bg-[#f7f7f8]">
-                <img
-                  src={heroImage.src || activeImage}
-                  srcSet={heroImage.srcSet}
-                  sizes={heroImage.sizes}
-                  alt={product.galleryImageTitles?.[activeImageIndex] || product.name}
-                  loading="eager"
-                  decoding="async"
-                  fetchPriority="high"
-                  width="1200"
-                  height="1600"
-                  onError={handleImageError}
-                  onClick={() => setIsZoomOpen(true)}
-                  className={`pdp-main-image gpu-media h-full w-full cursor-zoom-in object-contain object-[center_top] md:object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
-                />
-              </div>
-
-              {resolvedGalleryImages.length > 1 ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={setPreviousImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 border border-black/15 bg-white/85 px-2.5 py-1.5 text-xs font-semibold text-black"
-                    aria-label="Previous image"
-                  >
-                    Prev
-                  </button>
-                  <button
-                    type="button"
-                    onClick={setNextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 border border-black/15 bg-white/85 px-2.5 py-1.5 text-xs font-semibold text-black"
-                    aria-label="Next image"
-                  >
-                    Next
-                  </button>
-                </>
-              ) : null}
-
-              <button
-                type="button"
+    <section className="bg-white pb-16">
+      <div className="mx-auto grid max-w-7xl lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-2">
+        <div>
+          <div
+            className="relative aspect-[3/4] w-full bg-[#f7f7f8]"
+            onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="absolute inset-0">
+              <img
+                src={heroImage.src || activeImage}
+                srcSet={heroImage.srcSet}
+                sizes={heroImage.sizes}
+                alt={product.galleryImageTitles?.[activeImageIndex] || product.name}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                width="1200"
+                height="1600"
+                onError={handleImageError}
                 onClick={() => setIsZoomOpen(true)}
-                className="absolute right-2 top-2 border border-black/15 bg-white/90 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-black"
-              >
-                Zoom
-              </button>
+                className={`pdp-main-image gpu-media h-full w-full cursor-zoom-in object-contain object-[center_top] md:object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
+              />
             </div>
+            <PdpGalleryNav
+              count={resolvedGalleryImages.length}
+              index={Math.min(activeImageIndex, resolvedGalleryImages.length - 1)}
+              onPrev={setPreviousImage}
+              onNext={setNextImage}
+              onSelect={setActiveImageIndex}
+            />
+          </div>
+        </div>
 
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {resolvedGalleryImages.map((image, index) => {
-                const thumb = catalogImageAttrs(image, 480, 600, '(max-width: 639px) 25vw, 10vw', [160, 240, 480])
-                return (
-                <button
-                  key={`${image}-${index}`}
-                  type="button"
-                  onClick={() => setActiveImageIndex(index)}
-                  className={`luxury-tap overflow-hidden border ${index === activeImageIndex ? 'border-black' : 'border-black/15'}`}
-                  aria-label={`Image ${index + 1}`}
-                >
-                  <div className="aspect-[3/4] bg-black/5">
-                    <img
-                      src={thumb.src || image}
-                      srcSet={thumb.srcSet}
-                      sizes={thumb.sizes}
-                      alt={`${product.name} view ${index + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      onError={handleImageError}
-                      className={`gpu-media h-full w-full object-cover object-[center_top] ${isDemoImageUrl(image) ? 'shis-media-tone' : ''}`}
-                    />
-                  </div>
-                </button>
-                )
-              })}
-            </div>
+        <div className="px-4 pt-5 sm:px-6 lg:px-0 lg:pt-0">
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-[15px] font-medium leading-snug tracking-[0.06em] text-neutral-900 sm:text-lg">
+              {product.name}
+            </h1>
+            <PdpShareButton title={product.name} />
           </div>
 
-          <div>
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">Product details</p>
-            <h1 className="mt-1 text-h2 text-black">{product.name}</h1>
+          <p className="mt-2 text-base font-bold tabular-nums text-neutral-900">
+            {formatTkPrice(product.price)}
+          </p>
+          {product.comparePrice ? (
+            <p className="mt-0.5 text-sm text-neutral-400 line-through tabular-nums">{formatTkPrice(product.comparePrice)}</p>
+          ) : null}
+          <p className={`mt-1 text-xs ${availableStock <= 0 ? 'text-red-600' : 'text-neutral-500'}`}>
+            {stockLabel}
+            {isSizeSelected && isColorSelected && availableStock > 0 && availableStock <= 5 ? ` · ${availableStock} left` : ''}
+          </p>
 
-            <div className="mt-3 border border-black/15 p-3 md:mt-4 md:p-4">
-              <p className="text-caption uppercase tracking-[0.12em] text-black/55">Price</p>
-              <div className="mt-1 flex items-center gap-3">
-                <p className="text-2xl font-semibold text-black">{product.price}</p>
-                {product.comparePrice ? (
-                  <p className="text-base text-black/50 line-through">{product.comparePrice}</p>
-                ) : null}
-              </div>
-              <p className={`mt-1.5 text-sm font-medium md:mt-2 ${availableStock <= 0 ? 'text-red-600' : 'text-black/70'}`}>
-                {stockLabel}{isSizeSelected && isColorSelected && availableStock > 0 && availableStock <= 5 ? ` · ${availableStock} left in this size` : ''}
-              </p>
-            </div>
-
-            <div className="mt-3 border border-black/15 p-3 md:mt-4 md:p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-caption uppercase tracking-[0.12em] text-black/55">Size</p>
-                <a
-                  href="#size-guide-details"
-                  className="text-[11px] font-medium tracking-wide text-black/70 underline underline-offset-4"
-                >
-                  Size Guide
-                </a>
-              </div>
+          {product.sizes.length ? (
+            <div className="mt-5">
+              <p className="text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">Size</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {product.sizes.map((option) => (
                   <button
                     key={option}
                     type="button"
                     onClick={() => setSelectedSize(option)}
-                    className={`ui-interactive border px-3 py-2 text-sm ${resolvedSize === option ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
+                    className={optionChipClass(resolvedSize === option)}
                   >
                     {option}
                   </button>
                 ))}
               </div>
               {!isSizeSelected ? (
-                <p className="mt-2 text-xs text-black/55">Select a size to continue.</p>
+                <p className="mt-2 text-xs text-neutral-500">Select a size to continue.</p>
               ) : null}
+            </div>
+          ) : null}
 
-              {hasColorOptions ? (
-                <>
-                  <p className="mt-3 text-caption uppercase tracking-[0.12em] text-black/55 md:mt-4">Color</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {product.colors.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setSelectedColor(option)}
-                        className={`ui-interactive border px-3 py-2 text-sm ${resolvedColor === option ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                  {!isColorSelected ? (
-                    <p className="mt-2 text-xs text-black/55">Select a color to continue.</p>
-                  ) : null}
-                </>
-              ) : null}
-
-              <p className="mt-3 text-caption uppercase tracking-[0.12em] text-black/55 md:mt-4">Quantity</p>
-              <div className="mt-2 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                  className="ui-interactive h-9 w-9 border border-black/20 text-lg text-black hover:bg-black/5"
-                  aria-label="Decrease quantity"
-                >
-                  -
-                </button>
-                <span className="min-w-10 text-center text-sm font-semibold text-black">{effectiveQuantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((current) => Math.min(maxQuantity, current + 1))}
-                  className="ui-interactive h-9 w-9 border border-black/20 text-lg text-black hover:bg-black/5"
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
+          {hasColorOptions ? (
+            <div className="mt-4">
+              <p className="text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">Color</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {product.colors.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setSelectedColor(option)}
+                    className={optionChipClass(resolvedColor === option)}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
+              {!isColorSelected ? (
+                <p className="mt-2 text-xs text-neutral-500">Select a color to continue.</p>
+              ) : null}
             </div>
+          ) : null}
 
-            <div className="mt-4 hidden gap-3 md:flex">
-              <button
-                type="button"
-                onClick={handleAddToBag}
-                className="ui-interactive flex-1 rounded-[2px] border border-neutral-900 bg-white px-5 py-3.5 text-sm font-semibold tracking-wider text-neutral-900 uppercase transition-colors hover:bg-neutral-50"
-              >
-                {didAddToBag ? 'Added' : 'Add to Cart'}
-              </button>
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                className="ui-interactive flex-1 rounded-[2px] bg-neutral-950 px-5 py-3.5 text-sm font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800"
-              >
-                Buy Now
-              </button>
-              <button
-                type="button"
-                onClick={toggleProductWishlist}
-                className={`ui-interactive w-12 border px-0 py-0 text-sm ${isInWishlist(String(product.id)) ? 'border-black bg-black text-white' : 'border-black/20 text-black hover:bg-black/5'}`}
-                aria-label={isInWishlist(String(product.id)) ? 'Remove from wishlist' : 'Add to wishlist'}
-              >
-                {isInWishlist(String(product.id)) ? '♥' : '♡'}
-              </button>
-            </div>
-            {actionError ? (
-              <p className="mt-2 hidden text-sm text-red-600 md:block" role="alert">
-                {actionError}
-              </p>
-            ) : null}
-
-            <a
-              href={quickOrderHref}
-              target="_blank"
-              rel="noreferrer"
-              className="ui-interactive mt-3 inline-flex w-full items-center justify-center border border-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-black/5"
-            >
-              Order on WhatsApp
-            </a>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <div className="border border-black/15 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Description</h2>
-            <p className="mt-3 text-sm leading-7 text-black/75">{product.description || 'Premium SHIS Fashion piece designed for everyday wear.'}</p>
+          <div className="mt-4">
+            <PdpQuantityStepper
+              value={effectiveQuantity}
+              max={maxQuantity}
+              onDecrease={() => setQuantity((current) => Math.max(1, current - 1))}
+              onIncrease={() => setQuantity((current) => Math.min(maxQuantity, current + 1))}
+            />
           </div>
 
-          <div className="border border-black/15 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Product Highlights</h2>
-            <ul className="mt-3 space-y-2 text-sm text-black/75">
-              {highlights.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <details id="size-guide-details" className="scroll-mt-24 border border-black/15 p-4">
-            <summary className="cursor-pointer text-sm font-semibold uppercase tracking-[0.12em] text-black">Size Guide</summary>
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[240px] text-left text-sm text-black/75">
-                <thead>
-                  <tr className="border-b border-black/10 text-caption uppercase tracking-[0.12em] text-black/55">
-                    <th className="py-2 font-medium">Size</th>
-                    <th className="py-2 font-medium">Chest</th>
-                    <th className="py-2 font-medium">Length</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {STANDARD_SIZE_GUIDE.map((row) => (
-                    <tr key={row.size} className="border-b border-black/5">
-                      <td className="py-2 font-semibold text-black">{row.size}</td>
-                      <td className="py-2">{row.chest}</td>
-                      <td className="py-2">{row.length}</td>
+          <div className="mt-6 border-t border-gray-200">
+            <PdpAccordion title="Product Code">
+              <p className="font-medium tracking-[0.08em] text-neutral-900 uppercase">{product.id}</p>
+            </PdpAccordion>
+            <PdpAccordion title="Product Description">
+              <p>{product.description || 'Premium SHIS Fashion piece designed for everyday wear.'}</p>
+              <ul className="mt-3 space-y-1.5">
+                {highlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <ul className="mt-3 space-y-1.5">
+                {DELIVERY_RETURN_BULLETS.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
+              </ul>
+            </PdpAccordion>
+            <PdpAccordion title="Reviews / Size Guide">
+              <div id="size-guide-details" className="overflow-x-auto">
+                <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">Size Guide</p>
+                <table className="w-full min-w-[240px] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-[11px] tracking-[0.12em] text-neutral-500 uppercase">
+                      <th className="py-2 font-medium">Size</th>
+                      <th className="py-2 font-medium">Chest</th>
+                      <th className="py-2 font-medium">Length</th>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {STANDARD_SIZE_GUIDE.map((row) => (
+                      <tr key={row.size} className="border-b border-gray-100">
+                        <td className="py-2 font-medium text-neutral-900">{row.size}</td>
+                        <td className="py-2">{row.chest}</td>
+                        <td className="py-2">{row.length}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-5 border-t border-gray-200 pt-4">
+                <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-neutral-500 uppercase">Reviews</p>
+                <div className="space-y-3">
+                  {reviews.map((review) => (
+                    <article key={review.id}>
+                      <p className="text-sm font-medium text-neutral-900">{review.authorName} · {'★'.repeat(review.rating)}</p>
+                      <p className="mt-1 text-sm">{review.body}</p>
+                    </article>
                   ))}
-                </tbody>
-              </table>
-              <p className="mt-3 text-xs leading-6 text-black/55">Measurements are approximate. For a relaxed oversized fit, choose your usual size. Need help? Chat on WhatsApp.</p>
-            </div>
-          </details>
-
-          <details className="border border-black/15 p-4">
-            <summary className="cursor-pointer text-sm font-semibold uppercase tracking-[0.12em] text-black">Fabric & Care</summary>
-            <ul className="mt-3 space-y-2 text-sm text-black/75">
-              <li>Premium quality fabric with a soft, breathable finish for all-day wear.</li>
-              <li>Wash in cold water. Do not bleach. Dry in shade.</li>
-              <li>Iron on low heat. Avoid direct heat on prints.</li>
-            </ul>
-          </details>
-
-          <div className="border border-black/15 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Delivery & Return</h2>
-            <ul className="mt-3 space-y-2 text-sm text-black/75">
-              {DELIVERY_RETURN_BULLETS.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
-              ))}
-              <li>
-                Need fit support? <a href={getWhatsAppHref()} target="_blank" rel="noreferrer" className="underline">Chat on WhatsApp</a>.
-              </li>
-            </ul>
+                  {!reviews.length ? <p>No reviews yet. Be the first to share a fit note.</p> : null}
+                </div>
+                <form className="mt-4 space-y-2" onSubmit={handleSubmitReview}>
+                  <input
+                    required
+                    value={reviewName}
+                    onChange={(event) => setReviewName(event.target.value)}
+                    className="w-full border border-gray-200 px-3 py-2 text-sm outline-none"
+                    placeholder="Your name"
+                    maxLength={60}
+                  />
+                  <select
+                    value={reviewRating}
+                    onChange={(event) => setReviewRating(Number(event.target.value))}
+                    className="w-full border border-gray-200 px-3 py-2 text-sm outline-none"
+                    aria-label="Rating"
+                  >
+                    {[5, 4, 3, 2, 1].map((value) => (
+                      <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>
+                    ))}
+                  </select>
+                  <textarea
+                    required
+                    minLength={10}
+                    maxLength={800}
+                    value={reviewBody}
+                    onChange={(event) => setReviewBody(event.target.value)}
+                    className="min-h-20 w-full border border-gray-200 px-3 py-2 text-sm outline-none"
+                    placeholder="How was the fit and fabric?"
+                  />
+                  <button type="submit" disabled={reviewSubmitting} className="h-10 w-full bg-black text-xs font-semibold tracking-[0.14em] text-white uppercase disabled:bg-black/35">
+                    {reviewSubmitting ? 'Sending…' : 'Submit review'}
+                  </button>
+                  {reviewMessage ? <p className="text-sm">{reviewMessage}</p> : null}
+                </form>
+              </div>
+            </PdpAccordion>
           </div>
 
-          <div className="border border-black/15 p-4 lg:col-span-2">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Why Customers Trust SHIS</h2>
-            <ul className="mt-3 grid grid-cols-1 gap-2 text-sm text-black/75 sm:grid-cols-2">
-              <li className="flex gap-2">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                <span>Premium quality fabrics with careful quality checks.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                <span>Easy exchange within {EXCHANGE_WINDOW_DAYS} days of delivery.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                <span>Secure checkout with Cash on Delivery option.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-black" />
-                <span>Fast dispatch and nationwide delivery across Bangladesh.</span>
-              </li>
-            </ul>
-          </div>
+          <Link
+            to="/contact"
+            className="mt-4 inline-block text-[12px] font-medium tracking-[0.16em] text-neutral-900 uppercase underline underline-offset-4"
+          >
+            FIND IN STORE
+          </Link>
+
+          <PdpActionButtons
+            didAddToBag={didAddToBag}
+            actionError={actionError}
+            shakeToken={shakeToken}
+            onAddToBag={handleAddToBag}
+            onBuyNow={handleBuyNow}
+          />
         </div>
+      </div>
 
-        <div className="mt-10 border border-black/15 p-4">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Customer reviews</h2>
-          <div className="mt-4 space-y-3">
-            {reviews.map((review) => (
-              <article key={review.id} className="border-b border-black/10 pb-3 last:border-b-0 last:pb-0">
-                <p className="text-sm font-semibold text-black">{review.authorName} · {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
-                <p className="mt-1 text-sm text-black/70">{review.body}</p>
-              </article>
+      {relatedProducts.length ? (
+        <Container className="mt-12">
+          <h2 className="border-b border-gray-200 pb-3 text-[13px] font-medium tracking-[0.16em] text-neutral-900 uppercase">
+            Similar Products
+          </h2>
+          <ProductListingGrid className="mt-5">
+            {relatedProducts.map((item, index) => (
+              <ProductCard
+                key={item.id}
+                product={{
+                  id: item.id,
+                  slug: item.slug,
+                  name: item.name,
+                  price: item.price,
+                  category: item.category,
+                  image: item.image,
+                  description: item.description,
+                  galleryImages: item.galleryImages,
+                  stock: item.stock,
+                  featured: item.featured,
+                  newArrival: item.newArrival,
+                }}
+                priority={index < 4}
+                onToggleWishlist={handleToggleWishlist}
+                isInWishlist={isInWishlist(String(item.id))}
+                onProductClick={() => handleRelatedProductClick(item)}
+              />
             ))}
-            {!reviews.length ? <p className="text-sm text-black/55">No reviews yet. Be the first to share a fit note.</p> : null}
-          </div>
-          <form className="mt-5 space-y-3" onSubmit={handleSubmitReview}>
-            <input
-              required
-              value={reviewName}
-              onChange={(event) => setReviewName(event.target.value)}
-              className="w-full border border-black/15 px-3 py-2 text-sm outline-none"
-              placeholder="Your name"
-              maxLength={60}
-            />
-            <select
-              value={reviewRating}
-              onChange={(event) => setReviewRating(Number(event.target.value))}
-              className="w-full border border-black/15 px-3 py-2 text-sm outline-none"
-              aria-label="Rating"
-            >
-              {[5, 4, 3, 2, 1].map((value) => (
-                <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>
-              ))}
-            </select>
-            <textarea
-              required
-              minLength={10}
-              maxLength={800}
-              value={reviewBody}
-              onChange={(event) => setReviewBody(event.target.value)}
-              className="min-h-24 w-full border border-black/15 px-3 py-2 text-sm outline-none"
-              placeholder="How was the fit and fabric?"
-            />
-            <button type="submit" disabled={reviewSubmitting} className="border border-black bg-black px-4 py-2 text-sm font-semibold text-white disabled:bg-black/35">
-              {reviewSubmitting ? 'Sending…' : 'Submit review'}
-            </button>
-            {reviewMessage ? <p className="text-sm text-black/70">{reviewMessage}</p> : null}
-          </form>
-        </div>
-
-        {relatedProducts.length ? (
-          <div className="mt-10">
-            <div className="flex items-end justify-between gap-2 border-b border-black/10 pb-2.5">
-              <h2 className="text-h2 text-black">Related Products</h2>
-              <span className="text-caption uppercase tracking-[0.12em] text-black/55">You may also like</span>
-            </div>
-
-            <ProductListingGrid className="mt-5">
-              {relatedProducts.map((item, index) => (
-                <ProductCard
-                  key={item.id}
-                  product={{
-                    id: item.id,
-                    slug: item.slug,
-                    name: item.name,
-                    price: item.price,
-                    category: item.category,
-                    image: item.image,
-                    description: item.description,
-                    galleryImages: item.galleryImages,
-                    stock: item.stock,
-                    featured: item.featured,
-                    newArrival: item.newArrival,
-                  }}
-                  priority={index < 4}
-                  onToggleWishlist={handleToggleWishlist}
-                  isInWishlist={isInWishlist(String(item.id))}
-                  onProductClick={() => handleRelatedProductClick(item)}
-                />
-              ))}
-            </ProductListingGrid>
-          </div>
-        ) : null}
-      </Container>
-
-      <MobilePdpStickyBar
-        didAddToBag={didAddToBag}
-        actionError={actionError}
-        shakeToken={shakeToken}
-        onAddToBag={handleAddToBag}
-        onBuyNow={handleBuyNow}
-      />
+          </ProductListingGrid>
+        </Container>
+      ) : null}
 
       {instantCheckoutOpen ? (
         <Suspense fallback={null}>

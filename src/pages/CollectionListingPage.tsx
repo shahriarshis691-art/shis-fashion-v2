@@ -234,7 +234,7 @@ export default function CollectionListingPage() {
               <p className="text-caption uppercase tracking-[0.14em] text-black/55">Collection unavailable</p>
               <h2 className="mt-3 text-h2 text-black">No products available yet.</h2>
               <div className="mt-6 flex justify-center">
-                <Button to="/shop">Browse shop</Button>
+                <Button to="/shop" variant="cta">Browse shop</Button>
               </div>
             </div>
           )}

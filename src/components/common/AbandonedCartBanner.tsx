@@ -48,7 +48,7 @@ export default function AbandonedCartBanner({ isWelcomePopupOpen = false }: Aban
         <div className="flex shrink-0 items-center gap-2">
           <Link
             to="/cart"
-            className="ui-interactive border border-black bg-black px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-[#121212]"
+            className="btn-glass-cta px-4 py-2 text-[11px]"
           >
             Return to bag
           </Link>

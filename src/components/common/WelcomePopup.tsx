@@ -228,7 +228,7 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-6 py-3 text-[15px] font-semibold leading-none text-white transition hover:bg-white/10"
+                      className="btn-glass-cta w-full sm:w-auto"
                     >
                       Continue Shopping
                     </button>
@@ -267,7 +267,7 @@ export default function WelcomePopup({ isOpen, onClose, onSubscribe, onWelcomeBa
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-6 py-3 text-[15px] font-semibold leading-none text-white transition hover:bg-white/10"
+                      className="btn-glass-cta w-full sm:w-auto"
                     >
                       Continue Shopping
                     </button>

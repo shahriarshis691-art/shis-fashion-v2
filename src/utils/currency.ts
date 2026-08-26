@@ -19,3 +19,11 @@ export function parseBDT(value: number | string): number {
   const numericValue = Number.parseFloat(String(value).replace(/[^0-9.]/g, ''))
   return Number.isNaN(numericValue) ? 0 : numericValue
 }
+
+export function formatTkPrice(price: string) {
+  const amount = parseBDT(price)
+  return `Tk ${amount.toLocaleString('en-BD', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
