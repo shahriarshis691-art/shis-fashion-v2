@@ -5,6 +5,7 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { Hero } from '../components/home/Hero'
+import SisterBrandStrip from '../components/home/SisterBrandStrip'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
@@ -370,7 +371,7 @@ export default function HomePage() {
 
   const featuredBrands = useMemo(
     () => {
-      const preferredSlugs = ['xeroxii', 'ceravo', 'rangkutir']
+      const preferredSlugs = ['ceravo', 'rangkutir', 'velorix-motors', 'xeroxii']
       const fromLive = preferredSlugs
         .map((slug) => {
           const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
@@ -438,6 +439,7 @@ export default function HomePage() {
   return (
     <div className="bg-white pb-12">
       {heroEnabled ? <Hero /> : null}
+      <SisterBrandStrip />
 
       {shopByCategoryEnabled ? (
       <section id="featured-collections" className="scroll-mt-20 bg-white py-6 sm:py-14">
