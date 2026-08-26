@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom'
 import { sisterBrandStrip } from '../../data/brandShowcase'
 
 const LOGO_FALLBACKS: Record<string, string[]> = {
-  '/brands/ceravo.png': ['/brands/ceravo.png.jpeg', '/brands/ceravo-logo.png'],
-  '/brands/rangkutir.png': ['/brands/rangkutir.png.jpeg', '/brands/rangkutir-logo.png'],
   '/brands/velorix-motors.png': ['/brands/velorix-motors.png.jpeg'],
   '/brands/xeroxii.png': ['/brands/xeroxii.png.png', '/brands/xeroxii-logo.png'],
 }
@@ -33,27 +31,24 @@ export default function SisterBrandStrip() {
       <h2 id="sister-brands-heading" className="sr-only">
         Sister brands
       </h2>
-      <ul className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-1 px-3 sm:justify-center sm:gap-10 sm:px-6 md:gap-14 lg:gap-20">
+      <ul className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-center gap-8 px-3 sm:gap-12 sm:px-6 md:gap-16">
         {sisterBrandStrip.map((brand) => (
-          <li key={brand.id} className="flex min-w-0 flex-1 justify-center sm:flex-none">
+          <li key={brand.id} className="flex min-w-0 justify-center">
             <Link
               to={brand.href}
-              className="flex min-h-11 min-w-0 max-w-full items-center gap-1 opacity-80 transition-opacity duration-300 hover:opacity-100 sm:gap-2"
+              className="inline-flex min-h-11 items-center justify-center opacity-80 transition-opacity duration-300 hover:opacity-100"
               aria-label={`${brand.name} brand`}
             >
               <img
                 src={brand.logo}
-                alt=""
-                width={28}
-                height={28}
+                alt={brand.name}
+                width={140}
+                height={40}
                 loading="lazy"
                 decoding="async"
-                className="h-5 w-5 shrink-0 object-contain object-center sm:h-6 sm:w-6 md:h-7 md:w-7"
+                className="h-8 w-auto max-h-8 max-w-[7.5rem] object-contain object-center sm:h-9 sm:max-h-9 sm:max-w-[9rem] md:h-10 md:max-h-10 md:max-w-[11rem]"
                 onError={(event) => handleSisterBrandLogoError(event, brand.logo)}
               />
-              <span className="truncate text-[8px] font-semibold uppercase tracking-[0.06em] text-neutral-800 sm:text-[11px] sm:tracking-[0.12em] md:text-xs">
-                {brand.name}
-              </span>
             </Link>
           </li>
         ))}

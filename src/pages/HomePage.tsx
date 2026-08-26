@@ -371,7 +371,7 @@ export default function HomePage() {
 
   const featuredBrands = useMemo(
     () => {
-      const preferredSlugs = ['ceravo', 'rangkutir', 'velorix-motors', 'xeroxii']
+      const preferredSlugs = ['velorix-motors', 'xeroxii', 'ceravo', 'rangkutir']
       const fromLive = preferredSlugs
         .map((slug) => {
           const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
