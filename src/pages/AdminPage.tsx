@@ -194,12 +194,12 @@ const SECTION_ROUTE_VALIDATORS: Record<HomepageCategorySectionKey, (href: string
 }
 
 const SECTION_ROUTE_HINTS: Record<HomepageCategorySectionKey, string> = {
-  women: 'Allowed: /women or /women?sub=tunic',
+  women: 'Allowed: /women or /women?sub=western-outfits',
   saree: 'Allowed: /sarees or /women?sub=saree',
   men: 'Allowed: /men or /men?sub=shirts',
   denim: 'Allowed: /men?sub=denim',
   kids: 'Allowed: /kids or /kids?sub=kids',
-  western: 'Allowed: /women?sub=tunic',
+  western: 'Allowed: /women?sub=western-outfits',
   sale: 'Allowed: /men/half-shirts or /men?sub=half-shirts',
   'new-arrivals': 'Allowed: /collections/oversized-tee or /oversized-tee',
 }
@@ -3188,7 +3188,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                             value={section.href}
                             onChange={(event) => updateHomepageCategorySection(section.key, { href: event.target.value })}
                             className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
-                            placeholder="Section route (example: /women?sub=tunic)"
+                            placeholder="Section route (example: /women?sub=western-outfits)"
                           />
                           <p className="sm:col-span-2 -mt-1 text-[11px] text-[var(--color-muted)]">
                             {SECTION_ROUTE_HINTS[section.key]}

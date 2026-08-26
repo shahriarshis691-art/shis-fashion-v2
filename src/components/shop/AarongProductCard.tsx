@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import PrefetchLink from '../common/PrefetchLink'
-import { parseBDT } from '../../utils/currency'
+import { formatBDT } from '../../utils/currency'
 
 export interface AarongProductCardProduct {
   id: string | number
@@ -26,17 +26,9 @@ export interface AarongProductCardProps {
 
 const DEFAULT_PREFETCH = () => import('../../pages/ProductDetailPage')
 
-function formatAarongListPrice(price: string) {
-  const amount = parseBDT(price)
-  return `Tk ${amount.toLocaleString('en-BD', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-}
-
 /**
  * Universal Aarong-style listing card — single source of truth for all category grids.
- * Full-bleed portrait image, outline wishlist, title + price only. No badges/shadows.
+ * Full-bleed portrait image, outline wishlist, title + BDT price only. No badges/shadows.
  */
 const AarongProductCard = memo(function AarongProductCard({
   product,
@@ -58,7 +50,7 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f5f5f7]">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100/50">
           <img
             src={product.image}
             alt={product.name}
@@ -68,11 +60,12 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-[center_top]"
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-[center_top] transition-transform duration-300"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}
           />
+          {/* Desktop-only hover CTA — mobile taps the card directly to open PDP */}
           <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
             <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
               View
@@ -84,7 +77,7 @@ const AarongProductCard = memo(function AarongProductCard({
           {product.name}
         </h3>
         <p className="mt-0.5 text-left text-[12px] font-semibold tabular-nums text-neutral-900 sm:text-[13px]">
-          {formatAarongListPrice(product.price)}
+          {formatBDT(product.price)}
         </p>
       </PrefetchLink>
 

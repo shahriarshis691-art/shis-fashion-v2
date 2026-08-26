@@ -42,11 +42,16 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
 const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'kurti', label: 'Kurti', aliases: ['kurti', 'salwar', 'salwar-kameez', 'salwar kameez', 'three-piece', 'three piece', '3-piece'] },
   { slug: 'tops', label: 'Tops', aliases: ['tops', 'women-tees', 'womens-tees', 'women-tee', 'womens-tee'] },
-  { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts', 'western-outfits', 'tunic'] },
+  { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts'] },
+  {
+    slug: 'western-outfits',
+    label: 'Western Outfits',
+    aliases: ['western-outfits', 'western', 'western-outfit', 'womens-western', 'women-western'],
+  },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee'], path: '/collections/oversized-tee' },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree', 'sarees', 'sari', 'saris', 'womens-saree', 'women-saree', 'womens-sarees'], path: '/sarees' },
-  { slug: 'tunic', label: 'Fusion Wear', aliases: ['western', 'tunic', 'fusion', 'fusion-wear', 'fusion wear'] },
+  { slug: 'tunic', label: 'Fusion Wear', aliases: ['tunic', 'fusion', 'fusion-wear', 'fusion wear'] },
   { slug: 'accessories', label: 'Accessories', aliases: ['accessories', 'gift'] },
 ]
 

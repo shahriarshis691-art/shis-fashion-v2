@@ -51,7 +51,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   {
     key: 'western',
     name: 'Western Outfits',
-    href: '/women?sub=tunic',
+    href: '/women?sub=western-outfits',
     image: '/og-image.svg',
   },
   {

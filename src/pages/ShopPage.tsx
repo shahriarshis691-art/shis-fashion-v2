@@ -12,6 +12,13 @@ import {
   shouldExcludeOversizedTeeFromMenListing,
   shouldExcludeOversizedTeeFromWomenListing,
 } from '../data/oversizedTeeCollection'
+import {
+  WESTERN_LISTING_FILTER_OPTIONS,
+  matchesWesternListingFilter,
+  mergeWesternOutfitsCatalog,
+  westernOutfitsCollectionProducts,
+  type WesternListingFilter,
+} from '../data/westernOutfitsCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
@@ -94,6 +101,7 @@ const WOMEN_INCLUSION_KEYWORDS = [
   'women tee',
   "women's tee",
   'womens tee',
+  'western',
 ]
 
 function isWomenListingProduct(product: ShopProduct) {
@@ -387,9 +395,12 @@ export default function ShopPage() {
   const searchParams = new URLSearchParams(location.search)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
-  const [products, setProducts] = useState<ShopProduct[]>(() => mergeOversizedTeeCatalog(mergeHalfShirtCatalog([])))
+  const [products, setProducts] = useState<ShopProduct[]>(() =>
+    mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+  )
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('featured')
+  const [westernFilter, setWesternFilter] = useState<WesternListingFilter>('all')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
   const [draftSortBy, setDraftSortBy] = useState<SortOption>('featured')
   const [draftFilters, setDraftFilters] = useState<ProductFilters>({
@@ -439,7 +450,11 @@ export default function ShopPage() {
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
-      setProducts(mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))))
+      setProducts(
+        mergeWesternOutfitsCatalog(
+          mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+        ),
+      )
       setReady(true)
     })
 
@@ -638,6 +653,16 @@ export default function ShopPage() {
     }
     : null
 
+  const isWesternOutfitsListing = effectiveSegment === 'women' && effectiveSubcategory === 'western-outfits'
+
+  const westernHeading = isWesternOutfitsListing
+    ? {
+      title: 'WESTERN OUTFITS',
+      description:
+        'Women’s western staples — crop tops, casual shirts, tank tops, denim shorts, tailored trousers, and skirts. Clean flat-lay and hangar edits.',
+    }
+    : null
+
   const isOversizedTeeListing = effectiveSegment === 'men' && effectiveSubcategory === 'oversized-tee'
 
   const oversizedTeeHeading = isOversizedTeeListing
@@ -668,7 +693,11 @@ export default function ShopPage() {
         matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
       )
 
-  const byFilter = bySubcategory.filter((product) => {
+  const byWesternGroup = isWesternOutfitsListing
+    ? bySubcategory.filter((product) => matchesWesternListingFilter(product, westernFilter))
+    : bySubcategory
+
+  const byFilter = byWesternGroup.filter((product) => {
     if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
       return false
     }
@@ -939,6 +968,7 @@ export default function ShopPage() {
   }
 
   const navigateWomenSubcategory = (slug: string) => {
+    setWesternFilter('all')
     if (slug === 'all') {
       navigate('/women')
       return
@@ -1005,8 +1035,8 @@ export default function ShopPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? oversizedTeeHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? oversizedTeeHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? oversizedTeeHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? oversizedTeeHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
           {searchQuery ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
@@ -1024,34 +1054,59 @@ export default function ShopPage() {
         {isWomenListing ? (
           <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 -mx-4 mt-6 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button
-                type="button"
-                onClick={() => navigateWomenSubcategory('all')}
-                className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
-                  effectiveSubcategory === 'all'
-                    ? 'bg-black text-white'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
-                }`}
-              >
-                All
-              </button>
-              {segmentSubcategories.map((sub) => {
-                const active = effectiveSubcategory === sub.slug
-                return (
+              {isWesternOutfitsListing ? (
+                WESTERN_LISTING_FILTER_OPTIONS.map((option) => {
+                  const active = westernFilter === option.value
+                  const label = option.countLabel
+                    ? `${option.label} (${westernOutfitsCollectionProducts.length})`
+                    : option.label
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setWesternFilter(option.value)}
+                      className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                        active
+                          ? 'bg-black text-white'
+                          : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })
+              ) : (
+                <>
                   <button
-                    key={sub.slug}
                     type="button"
-                    onClick={() => navigateWomenSubcategory(sub.slug)}
+                    onClick={() => navigateWomenSubcategory('all')}
                     className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
-                      active
+                      effectiveSubcategory === 'all'
                         ? 'bg-black text-white'
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
                     }`}
                   >
-                    {sub.label}
+                    All
                   </button>
-                )
-              })}
+                  {segmentSubcategories.map((sub) => {
+                    const active = effectiveSubcategory === sub.slug
+                    return (
+                      <button
+                        key={sub.slug}
+                        type="button"
+                        onClick={() => navigateWomenSubcategory(sub.slug)}
+                        className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                          active
+                            ? 'bg-black text-white'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                        }`}
+                      >
+                        {sub.label}
+                      </button>
+                    )
+                  })}
+                </>
+              )}
             </div>
           </div>
         ) : null}
@@ -1142,11 +1197,18 @@ export default function ShopPage() {
             ))}
           </ProductListingGrid>
         ) : isWomenListing ? (
-          <ProductListingGrid className="mt-6">
+          <ProductListingGrid
+            className={
+              isWesternOutfitsListing
+                ? 'mt-6 !grid-cols-2 !gap-3 !px-3 md:!grid-cols-4 md:!gap-6 md:!px-6 lg:!grid-cols-4'
+                : 'mt-6'
+            }
+          >
             {visibleProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
+                href={isWesternOutfitsListing ? `/product/${product.slug}` : undefined}
                 priority={index < 4}
                 onToggleWishlist={handleToggleWishlist}
                 isInWishlist={isInWishlist(String(product.id))}

@@ -906,7 +906,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
-  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
+  { key: 'western', label: 'Western', href: '/women?sub=western-outfits', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'half-shirts' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, legacyImageKey: 'oversized-tee' },
 ]
@@ -989,7 +989,7 @@ const defaultCategorySections: HomepageCategorySections = {
   western: {
     key: 'western',
     label: 'Western',
-    href: '/women?sub=tunic',
+    href: '/women?sub=western-outfits',
     enabled: true,
     order: 40,
     coverImage: getLegacyCategoryImage('western'),
@@ -1030,7 +1030,7 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
   }
 
   if (normalizedHref.startsWith('/women')) {
-    if (normalizedHref.includes('sub=tunic')) {
+    if (normalizedHref.includes('sub=western') || normalizedHref.includes('sub=tunic')) {
       return 'western'
     }
     if (normalizedHref.includes('sub=saree')) {

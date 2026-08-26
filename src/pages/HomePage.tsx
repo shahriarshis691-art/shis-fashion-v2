@@ -32,7 +32,7 @@ const fallbackCategoryStrips = [
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
-  { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
+  { key: 'western', label: 'Western', href: '/women?sub=western-outfits', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
 ] as const
@@ -171,7 +171,7 @@ const defaultHomepage: HomepageContent = {
     western: {
       key: 'western',
       label: 'Western',
-      href: '/women?sub=tunic',
+      href: '/women?sub=western-outfits',
       enabled: true,
       order: 40,
       coverImage: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '',

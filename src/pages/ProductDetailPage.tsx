@@ -31,6 +31,7 @@ import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
+import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
 import type { ShopProduct } from '../data/shopData'
 
 const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
@@ -121,7 +122,7 @@ export default function ProductDetailPage() {
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>(() =>
-    [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts].map(fromCatalogProduct),
+    [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts].map(fromCatalogProduct),
   )
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
@@ -146,7 +147,7 @@ export default function ProductDetailPage() {
     const unsubscribe = subscribeToProducts((nextProducts) => {
       const live = nextProducts.map(toProduct)
       const taken = new Set(live.map((entry) => entry.slug))
-      const local = [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts]
+      const local = [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts]
         .filter((entry) => !taken.has(entry.slug))
         .map(fromCatalogProduct)
       setProducts([...live, ...local])

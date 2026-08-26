@@ -152,18 +152,18 @@ button,
   .group:hover .media-hover,
   .group:focus-visible .media-hover {
     will-change: transform;
-    transform: translate3d(0, 0, 0) scale(1.04);
+    transform: translate3d(0, 0, 0) scale(1.05);
   }
 
   .product-card:hover .product-card-media,
   .group:hover .product-card-media {
-    transform: translate3d(0, 0, 0) scale(1.04);
+    transform: translate3d(0, 0, 0) scale(1.05);
   }
 }
 
 .product-card-media {
   transform: translate3d(0, 0, 0);
-  transition: transform 420ms var(--ease-luxury);
+  transition: transform 300ms var(--ease-luxury);
   will-change: transform;
 }
 

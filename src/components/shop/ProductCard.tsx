@@ -25,7 +25,7 @@ const ProductCard = memo(function ProductCard({
   href,
   prefetchModule,
 }: ProductCardProps) {
-  const detailHref = href ?? (/half-shirt|oversized-tee|unisex-tee/i.test(product.category) ? `/product/${product.slug}` : undefined)
+  const detailHref = href ?? (/half-shirt|oversized-tee|unisex-tee|western/i.test(product.category) ? `/product/${product.slug}` : undefined)
 
   return (
     <AarongProductCard
