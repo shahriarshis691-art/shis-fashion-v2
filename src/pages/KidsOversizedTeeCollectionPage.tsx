@@ -420,8 +420,10 @@ export default function KidsOversizedTeeCollectionPage() {
                 <button
                   type="button"
                   onClick={() => setSizeFilter('all')}
-                  className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
-                    sizeFilter === 'all' ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
+                  className={`px-1 py-1.5 text-xs font-medium transition-colors ${
+                    sizeFilter === 'all'
+                      ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
+                      : 'text-neutral-500 hover:text-neutral-800'
                   }`}
                 >
                   All
@@ -431,8 +433,10 @@ export default function KidsOversizedTeeCollectionPage() {
                     key={size}
                     type="button"
                     onClick={() => setSizeFilter(size)}
-                    className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
-                      sizeFilter === size ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
+                    className={`px-1 py-1.5 text-xs font-medium transition-colors ${
+                      sizeFilter === size
+                        ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
+                        : 'text-neutral-500 hover:text-neutral-800'
                     }`}
                   >
                     {size}

@@ -33,10 +33,8 @@ function mapLiveBrandToDisplayBrand(brand: AdminBrand): DisplayBrand {
 
 function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
   return (
-    <Reveal as="article" delayMs={index * 50} className="relative overflow-hidden rounded-[1.3rem] border border-white/14 bg-[#0b0b0b] p-3 shadow-[0_20px_65px_rgba(0,0,0,0.4)] sm:p-4">
-      <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.14),rgba(255,255,255,0))]" aria-hidden />
-
-      <div className="aspect-[16/9] overflow-hidden rounded-[1rem] border border-white/10 bg-[#141414]">
+    <Reveal as="article" delayMs={index * 50} className="min-w-0">
+      <div className="aspect-[16/9] overflow-hidden bg-neutral-100">
         <img
           src={brand.logo}
           alt={`${brand.name} logo`}
@@ -45,22 +43,27 @@ function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
           loading="lazy"
           decoding="async"
           onError={(event) => handleImageError(event, LOGO_PLACEHOLDER)}
-          className="gpu-media h-full w-full object-cover"
+          className="gpu-media h-full w-full object-cover object-center"
         />
       </div>
 
-      <div className="mt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75">{brand.tag}</p>
-        <h2 className="mt-1 text-xl font-semibold text-white">{brand.name}</h2>
-        <p className="mt-2 text-sm leading-6 text-white/72">{brand.summary}</p>
-        <p className="mt-2 text-sm leading-6 text-white/60">{brand.details}</p>
+      <div className="mt-4">
+        <p className="text-caption uppercase tracking-[0.2em] text-black/55">{brand.tag}</p>
+        <h2
+          className="mt-2 text-2xl font-normal text-neutral-900"
+          style={{ fontFamily: "'Cormorant Garamond', serif" }}
+        >
+          {brand.name}
+        </h2>
+        <p className="mt-3 text-sm leading-7 text-neutral-600">{brand.summary}</p>
+        <p className="mt-2 text-sm leading-7 text-neutral-500">{brand.details}</p>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-100 pt-4 text-[11px] font-semibold uppercase tracking-[0.14em]">
           <a
             href={brand.contacts.website}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-white/16 bg-white/5 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-white transition hover:border-white/32 hover:bg-white/10"
+            className="text-neutral-900 transition hover:text-neutral-500"
           >
             Visit website
           </a>
@@ -68,7 +71,7 @@ function BrandCard({ brand, index }: { brand: DisplayBrand; index: number }) {
             href={brand.contacts.contact}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-white/24 bg-white/10 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-white"
+            className="text-neutral-500 transition hover:text-neutral-900"
           >
             Contact brand
           </a>
@@ -107,27 +110,27 @@ export default function BrandsPage() {
   const displayFounder = liveFounderProfile ?? staticFounderProfile
 
   return (
-    <section className="px-3 pb-16 pt-5 sm:px-6 sm:pb-20 lg:px-8 lg:pt-8">
+    <section className="bg-white px-4 pb-16 pt-8 sm:px-6 sm:pb-20 lg:px-8 lg:pt-12">
       <Container>
-        <div className="relative overflow-hidden rounded-[1.6rem] border border-white/14 bg-[#090909] px-4 py-8 shadow-[0_30px_90px_rgba(0,0,0,0.44)] sm:rounded-[2.1rem] sm:px-8 sm:py-10">
-          <div className="pointer-events-none absolute -left-12 -top-16 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0))]" aria-hidden />
-          <div className="pointer-events-none absolute -right-16 bottom-0 h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),rgba(255,255,255,0))]" aria-hidden />
+        <header className="max-w-3xl">
+          <p className="text-caption uppercase tracking-[0.24em] text-black/55">Group Showcase</p>
+          <h1
+            className="mt-3 text-3xl font-normal leading-tight text-neutral-900 sm:text-5xl"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          >
+            Three Distinct Brands. One Design-Driven Vision.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-600 sm:text-base">
+            Explore our connected brand ecosystem across luxury watches, development materials, and decorative paints, each crafted with a premium customer-first standard.
+          </p>
+        </header>
 
-          <div className="relative max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/75">Group Showcase</p>
-            <h1 className="mt-3 text-[2rem] font-semibold leading-[0.95] text-white sm:text-[2.9rem]">Three Distinct Brands. One Design-Driven Vision.</h1>
-            <p className="mt-4 text-sm leading-7 text-white/72 sm:text-base">
-              Explore our connected brand ecosystem across luxury watches, development materials, and decorative paints, each crafted with a premium customer-first standard.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="mt-12 grid gap-10 lg:grid-cols-3 lg:gap-8">
           {displayBrands.map((brand, index) => <BrandCard key={brand.id} brand={brand} index={index} />)}
         </div>
 
-        <div className="mt-8 grid gap-4 rounded-[1.35rem] border border-[var(--color-border)] bg-[var(--color-surface)]/70 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:mt-10 sm:rounded-[1.8rem] sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:p-7">
-          <div className="aspect-[4/5] overflow-hidden rounded-[1rem] border border-[var(--color-border)] bg-[#0e0e0e]">
+        <div className="mt-16 grid gap-10 border-t border-gray-100 pt-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div className="aspect-[4/5] overflow-hidden bg-neutral-100">
             <img
               src={displayFounder.image}
               alt={displayFounder.name}
@@ -136,22 +139,27 @@ export default function BrandsPage() {
               loading="lazy"
               decoding="async"
               onError={(event) => handleImageError(event, FOUNDER_PLACEHOLDER)}
-              className="gpu-media h-full w-full object-cover"
+              className="gpu-media h-full w-full object-cover object-[center_top]"
             />
           </div>
 
           <div className="flex flex-col justify-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">Founder</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">{displayFounder.name}</h2>
-            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">{displayFounder.title}</p>
-            <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.bio}</p>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.story}</p>
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Founder</p>
+            <h2
+              className="mt-3 text-3xl font-normal text-neutral-900 sm:text-4xl"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {displayFounder.name}
+            </h2>
+            <p className="mt-2 text-caption uppercase tracking-[0.16em] text-black/55">{displayFounder.title}</p>
+            <p className="mt-4 text-sm leading-7 text-neutral-600">{displayFounder.bio}</p>
+            <p className="mt-3 text-sm leading-7 text-neutral-500">{displayFounder.story}</p>
 
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              <a href={displayFounder.socials.whatsapp} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[rgba(0,0,0,0.28)] bg-[rgba(0,0,0,0.06)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-accent)]">WhatsApp</a>
-              <a href={displayFounder.socials.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Facebook</a>
-              <a href={displayFounder.socials.instagram} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">Instagram</a>
-              <a href={displayFounder.socials.email} className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.13em] text-[var(--color-text)]">E-mail</a>
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-100 pt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-700">
+              <a href={displayFounder.socials.whatsapp} target="_blank" rel="noreferrer" className="transition hover:text-neutral-900">WhatsApp</a>
+              <a href={displayFounder.socials.facebook} target="_blank" rel="noreferrer" className="transition hover:text-neutral-900">Facebook</a>
+              <a href={displayFounder.socials.instagram} target="_blank" rel="noreferrer" className="transition hover:text-neutral-900">Instagram</a>
+              <a href={displayFounder.socials.email} className="transition hover:text-neutral-900">E-mail</a>
             </div>
           </div>
         </div>

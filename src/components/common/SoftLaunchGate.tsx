@@ -22,17 +22,17 @@ export default function SoftLaunchGate({ decision }: SoftLaunchGateProps) {
   return (
     <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-24" aria-labelledby="soft-launch-title">
       <Container>
-        <div className="mx-auto flex max-w-2xl flex-col items-center rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-6 py-12 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:px-10 sm:py-16">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Soft Launch</p>
-          <h1 id="soft-launch-title" className="mt-4 text-4xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl">Limited access rollout in progress</h1>
-          <p className="mt-4 max-w-xl text-base leading-8 text-[var(--color-muted)]">{getMessage(decision)}</p>
+        <div className="mx-auto flex max-w-2xl flex-col items-center px-2 py-12 text-center md:py-16">
+          <p className="text-caption uppercase tracking-[0.24em] text-black/55">Soft Launch</p>
+          <h1 id="soft-launch-title" className="mt-4 text-4xl font-normal tracking-tight text-neutral-900 sm:text-5xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Limited access rollout in progress</h1>
+          <p className="mt-4 max-w-xl text-base leading-8 text-neutral-600">{getMessage(decision)}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button to="/" variant="secondary">Retry access</Button>
-            <a href="https://wa.me/8801887848304" target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--color-border)] px-6 py-3 text-[15px] font-semibold leading-none text-[var(--color-text)] transition hover:border-[rgba(0,0,0,0.3)] hover:bg-[rgba(0,0,0,0.04)]">
+            <a href="https://wa.me/8801887848304" target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center border border-neutral-900 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-900 hover:text-white">
               Request invite
             </a>
           </div>
-          <p className="mt-6 text-xs uppercase tracking-[0.14em] text-[var(--color-muted)]">Rollout mode: {decision.mode}</p>
+          <p className="mt-6 text-xs uppercase tracking-[0.14em] text-neutral-400">Rollout mode: {decision.mode}</p>
         </div>
       </Container>
     </section>

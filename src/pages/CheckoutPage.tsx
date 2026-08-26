@@ -213,12 +213,12 @@ export default function CheckoutPage() {
 
   if (!items.length) {
     return (
-      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+      <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
         <Container>
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Checkout</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Your bag is empty.</h1>
-            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--color-muted)]">Select a piece from the collection before trying to place an order.</p>
+          <div className="mx-auto max-w-2xl py-8 text-center">
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Checkout</p>
+            <h1 className="mt-3 text-3xl font-normal text-neutral-900" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Your bag is empty.</h1>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-neutral-600">Select a piece from the collection before trying to place an order.</p>
             <div className="mt-8 flex justify-center">
               <Button to="/shop" variant="cta">Continue shopping</Button>
             </div>
@@ -539,11 +539,11 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+            <div className="border-t border-gray-100 pt-6">
               <CouponApplyField customerEmail={form.email} quoteSourceItems={items} />
             </div>
 
-            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+            <div className="border-t border-gray-100 pt-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-[var(--color-text)]">Order Summary</p>
@@ -552,7 +552,7 @@ export default function CheckoutPage() {
                 <p className="text-sm font-semibold text-[var(--color-text)]">{summaryLabel}</p>
               </div>
 
-              <div className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3">
+              <div className="mt-4 border-t border-gray-100 pt-3">
                 {previewItems.map((item) => (
                   <div key={item.id} className="flex items-center justify-between gap-3 py-1 text-sm">
                     <p className="min-w-0 truncate text-[var(--color-text)]">{item.name} × {item.quantity}</p>
@@ -586,7 +586,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white p-4 sm:p-5">
+            <div className="border-t border-gray-100 pt-6">
               <p className="text-sm font-medium text-[var(--color-text)]">Payment</p>
               <div className="mt-3 space-y-2">
                 <label className={`block cursor-pointer border px-4 py-3 ${paymentMethod === PAYMENT_METHOD_COD ? 'border-black' : 'border-black/15'}`}>

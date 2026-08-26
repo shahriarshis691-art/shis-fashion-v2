@@ -51,33 +51,38 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+      <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
         <Container>
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-6 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Cart</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--color-text)]">Your bag is ready for a first edit.</h1>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">Choose a piece from the shop and build your luxury capsule in a few taps.</p>
+          <div className="mx-auto max-w-2xl py-4 text-center">
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Cart</p>
+            <h1
+              className="mt-3 text-3xl font-normal text-neutral-900"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              Your bag is ready for a first edit.
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-neutral-600">Choose a piece from the shop and build your luxury capsule in a few taps.</p>
             <div className="mt-6 flex justify-center">
               <Button to="/shop" variant="cta">Continue shopping</Button>
             </div>
           </div>
 
           {wishlistItems.length > 0 ? (
-            <div id="wishlist" className="mt-4 rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Wishlist</p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">Saved for later</h2>
-              <div className="mt-4 space-y-3">
+            <div id="wishlist" className="mt-12 border-t border-gray-100 pt-10">
+              <p className="text-caption uppercase tracking-[0.24em] text-black/55">Wishlist</p>
+              <h2 className="mt-2 text-2xl font-normal text-neutral-900" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Saved for later</h2>
+              <div className="mt-4">
                 {wishlistItems.map((wishlistItem) => (
-                  <div key={wishlistItem.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-                    <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-[0.75rem] sm:h-20 sm:w-20">
+                  <div key={wishlistItem.id} className="flex items-center gap-3 border-b border-gray-100 py-4 last:border-b-0">
+                    <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden sm:h-20 sm:w-20">
                       <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-[var(--color-text)]">{wishlistItem.product.name}</h3>
-                      <p className="mt-1 text-sm text-[var(--color-accent)]">{wishlistItem.product.price}</p>
+                      <h3 className="text-sm font-semibold text-neutral-900">{wishlistItem.product.name}</h3>
+                      <p className="mt-1 text-sm text-neutral-600">{wishlistItem.product.price}</p>
                     </div>
-                    <Button to={`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`} variant="secondary" className="text-xs">View</Button>
-                    <button type="button" onClick={() => handleMoveToCart(wishlistItem)} className="text-xs font-semibold text-[var(--color-accent)]">Move to cart</button>
+                    <Button to={`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`} variant="ghost" className="text-xs">View</Button>
+                    <button type="button" onClick={() => handleMoveToCart(wishlistItem)} className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-900">Move to cart</button>
                   </div>
                 ))}
               </div>
@@ -89,32 +94,29 @@ export default function CartPage() {
   }
 
   return (
-    <section className="px-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-3 pb-[calc(10rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-12">
       <Container>
-        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-3">
-            <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Cart</p>
-                  <h1 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">{itemCount} item{itemCount > 1 ? 's' : ''} selected</h1>
-                </div>
-                <Link to="/shop" className="text-sm font-semibold text-[var(--color-accent)]">Continue shopping</Link>
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <div>
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
+              <div>
+                <p className="text-caption uppercase tracking-[0.24em] text-black/55">Cart</p>
+                <h1 className="mt-2 text-2xl font-normal text-neutral-900" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{itemCount} item{itemCount > 1 ? 's' : ''} selected</h1>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted)]">
-                <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">COD checkout</span>
-                <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5">Phone confirm before dispatch</span>
-                <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="rounded-full border border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.05)] px-3 py-1.5 text-[var(--color-accent)]">WhatsApp support</a>
-              </div>
+              <Link to="/shop" className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-900">Continue shopping</Link>
             </div>
+            <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+              COD checkout · Phone confirm before dispatch ·{' '}
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-neutral-700 hover:text-neutral-900">WhatsApp support</a>
+            </p>
 
             {items.map((item) => (
               <div
                 key={item.id}
-                className="luxury-fade-in rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-3 shadow-[0_18px_55px_rgba(0,0,0,0.05)] sm:rounded-[1.8rem] sm:p-5"
+                className="luxury-fade-in border-b border-gray-100 py-5"
               >
                 <div className="flex gap-4">
-                  <div className="aspect-square h-20 w-20 shrink-0 overflow-hidden rounded-[0.9rem] sm:h-28 sm:w-28 sm:rounded-[1.2rem]">
+                  <div className="aspect-square h-20 w-20 shrink-0 overflow-hidden sm:h-28 sm:w-28">
                     <img
                     src={item.image}
                     alt={item.name}
@@ -135,10 +137,10 @@ export default function CartPage() {
                       <button type="button" onClick={() => removeFromCart(item.id)} className="text-sm font-semibold text-[var(--color-accent)]">Remove</button>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] p-1">
-                        <button type="button" onClick={() => updateQuantity(item.id, -1)} className="h-8 w-8 text-lg text-[var(--color-text)]">−</button>
-                        <span className="min-w-8 text-center text-sm font-semibold text-[var(--color-text)]">{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={item.quantity >= (item.stock ?? 0)} className="h-8 w-8 text-lg text-[var(--color-text)] disabled:cursor-not-allowed disabled:opacity-40">+</button>
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={() => updateQuantity(item.id, -1)} className="h-8 w-8 text-lg text-neutral-900">−</button>
+                        <span className="min-w-8 text-center text-sm font-semibold text-neutral-900">{item.quantity}</span>
+                        <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={item.quantity >= (item.stock ?? 0)} className="h-8 w-8 text-lg text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40">+</button>
                       </div>
                       <p className="text-base font-semibold text-[var(--color-accent)]">{formatBDT(parseBDT(item.price) * item.quantity)}</p>
                     </div>
@@ -147,30 +149,30 @@ export default function CartPage() {
               </div>
             ))}
 
-            <div className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+            <div className="mt-8 border-t border-gray-100 pt-8">
               <CouponApplyField />
             </div>
 
             {wishlistItems.length > 0 ? (
-              <div id="wishlist" className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:rounded-[2rem] sm:p-7">
+              <div id="wishlist" className="mt-10 border-t border-gray-100 pt-10">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Wishlist</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">Saved for later</h2>
+                    <p className="text-caption uppercase tracking-[0.24em] text-black/55">Wishlist</p>
+                    <h2 className="mt-2 text-2xl font-normal text-neutral-900" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Saved for later</h2>
                   </div>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-4">
                   {wishlistItems.map((wishlistItem) => (
-                    <div key={wishlistItem.id} className="flex items-center gap-3 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-                      <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden rounded-[0.75rem] sm:h-20 sm:w-20">
+                    <div key={wishlistItem.id} className="flex items-center gap-3 border-b border-gray-100 py-4 last:border-b-0">
+                      <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden sm:h-20 sm:w-20">
                       <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
                     </div>
                       <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-[var(--color-text)]">{wishlistItem.product.name}</h3>
-                        <p className="mt-1 text-sm text-[var(--color-accent)]">{wishlistItem.product.price}</p>
+                        <h3 className="text-sm font-semibold text-neutral-900">{wishlistItem.product.name}</h3>
+                        <p className="mt-1 text-sm text-neutral-600">{wishlistItem.product.price}</p>
                       </div>
-                      <Button to={`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`} variant="secondary" className="text-xs">View</Button>
-                      <button type="button" onClick={() => handleMoveToCart(wishlistItem)} className="text-xs font-semibold text-[var(--color-accent)]">Move to cart</button>
+                      <Button to={`/shop/${wishlistItem.product.category}/${wishlistItem.product.slug}`} variant="ghost" className="text-xs">View</Button>
+                      <button type="button" onClick={() => handleMoveToCart(wishlistItem)} className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-900">Move to cart</button>
                     </div>
                   ))}
                 </div>
@@ -178,8 +180,8 @@ export default function CartPage() {
             ) : null}
           </div>
 
-          <div className="hidden rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:block sm:p-7">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Summary</p>
+          <div className="hidden border-t border-gray-100 pt-8 sm:block lg:border-t-0 lg:pt-0">
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Summary</p>
             <div className="mt-5 space-y-3 text-sm text-[var(--color-muted)]">
               <div className="flex items-center justify-between">
                 <span>Subtotal</span>

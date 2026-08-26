@@ -25,47 +25,50 @@ export default function FounderDetailPage() {
   }, [location.pathname, displayFounder])
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <Container>
-        <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
-          <Button to="/brands" variant="secondary" className="mb-4">← Back to brands</Button>
+        <Button to="/brands" variant="ghost" className="mb-8 px-0">← Back to brands</Button>
 
-          <div className="mt-4 grid gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
-            <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[#0e0e0e]">
-              <img
-                src={displayFounder.image}
-                alt={displayFounder.name}
-                width={900}
-                height={1100}
-                loading="eager"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            </div>
+        <div className="grid gap-10 lg:grid-cols-[300px_1fr] lg:gap-16">
+          <div className="aspect-[4/5] overflow-hidden bg-neutral-100">
+            <img
+              src={displayFounder.image}
+              alt={displayFounder.name}
+              width={900}
+              height={1100}
+              loading="eager"
+              decoding="async"
+              className="h-full w-full object-cover object-[center_top]"
+            />
+          </div>
 
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Founder</p>
-              <h1 className="mt-2 text-4xl font-semibold text-[var(--color-text)]">{displayFounder.name}</h1>
-              <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">{displayFounder.title}</p>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.bio}</p>
-              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{displayFounder.story}</p>
+          <div>
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Founder</p>
+            <h1
+              className="mt-3 text-4xl font-normal text-neutral-900"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {displayFounder.name}
+            </h1>
+            <p className="mt-2 text-caption uppercase tracking-[0.16em] text-black/55">{displayFounder.title}</p>
+            <p className="mt-4 text-sm leading-7 text-neutral-600">{displayFounder.bio}</p>
+            <p className="mt-3 text-sm leading-7 text-neutral-500">{displayFounder.story}</p>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a
-                  href={displayFounder.socials.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[rgba(0,0,0,0.15)]"
-                >
-                  WhatsApp
-                </a>
-                <a
-                  href={displayFounder.socials.email}
-                  className="inline-flex items-center rounded-full border border-[var(--color-border)] px-6 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)]"
-                >
-                  E-mail
-                </a>
-              </div>
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-gray-100 pt-4 text-[11px] font-semibold uppercase tracking-[0.14em]">
+              <a
+                href={displayFounder.socials.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-900 transition hover:text-neutral-500"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={displayFounder.socials.email}
+                className="text-neutral-500 transition hover:text-neutral-900"
+              >
+                E-mail
+              </a>
             </div>
           </div>
         </div>

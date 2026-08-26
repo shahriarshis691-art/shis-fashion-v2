@@ -74,12 +74,12 @@ export default function BrandDetailPage() {
 
   if (!brand) {
     return (
-      <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+      <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
         <Container>
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-6 text-center">
-            <h1 className="text-2xl font-semibold text-[var(--color-text)]">Brand not found</h1>
-            <p className="mt-2 text-[var(--color-muted)]">The brand you're looking for doesn't exist.</p>
-            <Button to="/brands" variant="secondary" className="mt-4">Back to brands</Button>
+          <div className="py-12 text-center">
+            <h1 className="text-2xl font-semibold text-neutral-900">Brand not found</h1>
+            <p className="mt-2 text-neutral-600">The brand you're looking for doesn't exist.</p>
+            <Button to="/brands" variant="secondary" className="mt-6">Back to brands</Button>
           </div>
         </Container>
       </section>
@@ -87,60 +87,63 @@ export default function BrandDetailPage() {
   }
 
   return (
-    <section className="px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <Container>
-        <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/80 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:p-7">
-          <Button to="/brands" variant="secondary" className="mb-4">← Back to brands</Button>
+        <Button to="/brands" variant="ghost" className="mb-8 px-0">← Back to brands</Button>
 
-          <div className="mt-4 grid gap-6 lg:grid-cols-[300px_1fr] lg:gap-8">
-            <div className="aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]">
-              <img
-                src={brand.logo}
-                alt={`${brand.name} logo`}
-                width={600}
-                height={750}
-                loading="eager"
-                decoding="async"
-                className="gpu-media h-full w-full object-cover"
-              />
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">{brand.tag}</p>
-              <h1 className="mt-2 text-4xl font-semibold text-[var(--color-text)]">{brand.name}</h1>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">{brand.summary}</p>
-              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{brand.details}</p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a
-                  href={brand.contacts.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[rgba(0,0,0,0.15)]"
-                >
-                  Visit website
-                </a>
-                <a
-                  href={brand.contacts.contact}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center rounded-full border border-[var(--color-border)] px-6 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-accent)]"
-                >
-                  Contact brand
-                </a>
-              </div>
-            </div>
+        <div className="grid gap-10 lg:grid-cols-[300px_1fr] lg:gap-16">
+          <div className="aspect-[4/5] overflow-hidden bg-neutral-100">
+            <img
+              src={brand.logo}
+              alt={`${brand.name} logo`}
+              width={600}
+              height={750}
+              loading="eager"
+              decoding="async"
+              className="gpu-media h-full w-full object-cover"
+            />
           </div>
 
-          <div className="mt-10 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg)]/60 p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">About {brand.name}</p>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-              {brand.summary}
-            </p>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-              {brand.details}
-            </p>
+          <div>
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">{brand.tag}</p>
+            <h1
+              className="mt-3 text-4xl font-normal text-neutral-900"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {brand.name}
+            </h1>
+            <p className="mt-4 text-sm leading-7 text-neutral-600">{brand.summary}</p>
+            <p className="mt-3 text-sm leading-7 text-neutral-500">{brand.details}</p>
+
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-gray-100 pt-4 text-[11px] font-semibold uppercase tracking-[0.14em]">
+              <a
+                href={brand.contacts.website}
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-900 transition hover:text-neutral-500"
+              >
+                Visit website
+              </a>
+              <a
+                href={brand.contacts.contact}
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-500 transition hover:text-neutral-900"
+              >
+                Contact brand
+              </a>
+            </div>
           </div>
+        </div>
+
+        <div className="mt-12 border-t border-gray-100 pt-10">
+          <p className="text-caption uppercase tracking-[0.24em] text-black/55">About {brand.name}</p>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600">
+            {brand.summary}
+          </p>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-500">
+            {brand.details}
+          </p>
         </div>
       </Container>
     </section>

@@ -12,17 +12,17 @@ export default function NotFoundPage() {
   }, [location.pathname])
 
   return (
-    <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-24" aria-labelledby="not-found-title">
+    <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-24" aria-labelledby="not-found-title">
       <Container>
-        <div className="mx-auto flex max-w-2xl flex-col items-center rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-6 py-12 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)] sm:px-10 sm:py-16">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[var(--color-accent)]">404</p>
-          <h1 id="not-found-title" className="mt-4 text-4xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl">Page not found</h1>
-          <p className="mt-4 max-w-xl text-base leading-8 text-[var(--color-muted)]">The page you’re looking for may have moved, been removed, or never existed. Return to the collection and continue your journey.</p>
+        <div className="mx-auto flex max-w-2xl flex-col items-center px-2 py-12 text-center md:py-16">
+          <p className="text-caption uppercase tracking-[0.24em] text-black/55">404</p>
+          <h1 id="not-found-title" className="mt-4 text-4xl font-normal tracking-tight text-neutral-900 sm:text-5xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Page not found</h1>
+          <p className="mt-4 max-w-xl text-base leading-8 text-neutral-600">The page you’re looking for may have moved, been removed, or never existed. Return to the collection and continue your journey.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button to="/" variant="cta">Back home</Button>
             <Button to="/shop" variant="secondary">Browse shop</Button>
           </div>
-          <Link to="/contact" className="mt-6 text-sm font-semibold text-[var(--color-accent)]">Need help? Contact us</Link>
+          <Link to="/contact" className="mt-6 text-sm font-semibold text-neutral-900 underline underline-offset-4">Need help? Contact us</Link>
         </div>
       </Container>
     </section>

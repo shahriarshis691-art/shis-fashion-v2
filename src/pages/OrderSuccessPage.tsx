@@ -165,10 +165,10 @@ export default function OrderSuccessPage() {
   const isOnlinePrepaidOrder = order ? isApiPrepaidPayment(order.paymentMethod) : isPrepaidReturn
 
   return (
-    <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
+    <section className="bg-white px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <Container>
-        <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-          <div className="border border-black/15 p-5 sm:p-7">
+        <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr] lg:gap-16">
+          <div>
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Order Confirmed</p>
             <h1 className="mt-2 text-h2 text-black">Thank you. Your order has been placed.</h1>
             <p className="mt-3 text-sm leading-7 text-black/70">
@@ -179,21 +179,23 @@ export default function OrderSuccessPage() {
                   : `Our team will call your phone number to confirm delivery details before dispatch. ${STORE_POLICY.exchangeWindow} Save your Order ID to track status anytime.`}
             </p>
 
-            <div className="mt-4 rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/70">
+            <p className="mt-4 border-b border-gray-100 pb-4 text-xs leading-6 text-black/70">
               {isOnlinePrepaidOrder
                 ? <>Online payment confirmed{order?.paymentTransactionId ? <> for TrxID <span className="font-semibold text-black">{order.paymentTransactionId}</span></> : null}. Phone confirmation follows shortly.</>
                 : isWalletOrder
                   ? <>Wallet payment verification is in progress for TrxID <span className="font-semibold text-black">{order?.paymentTransactionId ?? '—'}</span>. Phone confirmation follows after verification.</>
                   : <>Web confirmation is complete. Phone confirmation will be sent to <span className="font-semibold text-black">{order?.customerPhone ?? 'your number'}</span> shortly.</>}
-            </div>
+            </p>
 
-            <div className="mt-5 grid gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/60 sm:grid-cols-3">
-              <span className="border border-black/15 px-3 py-2 text-center">{isOnlinePrepaidOrder ? 'Payment confirmed' : isWalletOrder ? 'Payment verifying' : 'COD confirmed'}</span>
-              <span className="border border-black/15 px-3 py-2 text-center">Phone verification</span>
-              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="border border-black/15 px-3 py-2 text-center hover:bg-black/5">
+            <p className="mt-5 text-[11px] uppercase tracking-[0.14em] text-black/55">
+              {isOnlinePrepaidOrder ? 'Payment confirmed' : isWalletOrder ? 'Payment verifying' : 'COD confirmed'}
+              {' · '}
+              Phone verification
+              {' · '}
+              <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-black hover:text-black/60">
                 WhatsApp support
               </a>
-            </div>
+            </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Button to="/shop" variant="cta">Continue shopping</Button>
@@ -206,7 +208,7 @@ export default function OrderSuccessPage() {
             </div>
           </div>
 
-          <div className="border border-black/15 p-5 sm:p-7">
+          <div className="border-t border-gray-100 pt-10 lg:border-t-0 lg:pt-0">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-black">Order Recap</h2>
 
             {order ? (

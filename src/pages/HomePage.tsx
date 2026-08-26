@@ -538,7 +538,7 @@ export default function HomePage() {
       ) : null}
 
       {products.length > 0 ? (
-        <section className="py-12 sm:py-16 bg-neutral-50/50">
+        <section className="bg-white py-12 sm:py-16">
           <div className="max-w-7xl mx-auto px-3 sm:px-6">
             {/* Section Header */}
             <div className="text-center mb-8 sm:mb-12">

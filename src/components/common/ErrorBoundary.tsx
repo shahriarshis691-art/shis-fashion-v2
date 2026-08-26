@@ -81,9 +81,9 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
       return (
         <div className="flex min-h-[60vh] items-center justify-center px-4 py-10">
-          <div className="flex max-w-md flex-col items-center gap-4 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-6 py-8 text-center shadow-[0_18px_55px_rgba(0,0,0,0.06)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-accent)]">Something went wrong</p>
-            <p className="text-sm leading-7 text-[var(--color-muted)]">
+          <div className="flex max-w-md flex-col items-center gap-4 px-2 py-8 text-center">
+            <p className="text-caption uppercase tracking-[0.24em] text-black/55">Something went wrong</p>
+            <p className="text-sm leading-7 text-neutral-600">
               This section could not load. Please try again or return to the homepage.
             </p>
             <div className="mt-2 flex flex-wrap justify-center gap-3">
