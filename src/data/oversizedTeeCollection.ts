@@ -1,10 +1,20 @@
-import { formatBDT } from '../utils/currency'
 import type { ShopProduct } from './shopData'
 
 export const OVERSIZED_TEE_SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const
 export const OVERSIZED_TEE_FIT = 'Oversized Boxy Fit'
-export const OVERSIZED_TEE_COVER = '/hero/kids/timeless-oversize-hero.source.png'
 export const OVERSIZED_TEE_LISTING_PATH = '/collections/oversized-tee'
+
+const PLACEHOLDER_OVERSIZED_TEE_IMAGE = 'timeless-oversize-hero'
+const REMOVED_MOCK_SLUGS = new Set([
+  'venom-graphic-oversized-tee',
+  'acid-wash-vintage-oversized-tee',
+  'minimalist-heavyweight-tee',
+  'tiger-crest-oversized-tee',
+  'studio-boxy-oversized-tee',
+  'soft-drape-oversized-tee',
+  'heavy-cotton-core-tee',
+  'relaxed-adults-oversized-tee',
+])
 
 export type OversizedTeeAudience = 'Men' | 'Women' | 'Unisex'
 export type OversizedTeeAudienceFilter = 'all' | OversizedTeeAudience
@@ -15,125 +25,17 @@ export interface OversizedTeeProduct extends ShopProduct {
   tags: string[]
 }
 
-function createOversizedTee(
-  index: number,
-  slug: string,
-  name: string,
-  price: number,
-  audience: OversizedTeeAudience,
-  colors: string[],
-  description: string,
-  options: {
-    featured?: boolean
-    newArrival?: boolean
-    stock?: number
-  } = {},
-): OversizedTeeProduct {
-  const tags = audience === 'Unisex' ? ['Unisex', 'All Adults'] : [audience, 'All Adults']
+/** Local mock catalog is empty until real oversized-tee assets are added. */
+export const oversizedTeeCollectionProducts: OversizedTeeProduct[] = []
 
-  return {
-    id: `oversized-tee-${index}`,
-    slug,
-    name,
-    price: formatBDT(price),
-    category: 'oversized-tee',
-    brand: 'SHIS Fashion',
-    image: OVERSIZED_TEE_COVER,
-    galleryImages: [OVERSIZED_TEE_COVER],
-    description: `${description} ${OVERSIZED_TEE_FIT}. Sizes ${OVERSIZED_TEE_SIZES.join(', ')}.`,
-    sizes: [...OVERSIZED_TEE_SIZES],
-    colors,
-    stock: options.stock ?? 18,
-    featured: options.featured ?? false,
-    newArrival: options.newArrival ?? true,
-    audience,
-    fit: OVERSIZED_TEE_FIT,
-    tags,
+export function isPlaceholderOversizedTeeProduct(product: Pick<ShopProduct, 'slug' | 'image' | 'galleryImages'>) {
+  if (REMOVED_MOCK_SLUGS.has(product.slug.trim().toLowerCase())) {
+    return true
   }
-}
 
-export const oversizedTeeCollectionProducts: OversizedTeeProduct[] = [
-  createOversizedTee(
-    1,
-    'venom-graphic-oversized-tee',
-    'Venom Graphic Oversized Tee',
-    1250,
-    'Unisex',
-    ['Black'],
-    'Black heavyweight cotton with a silver graphic print and a dropped shoulder for everyday impact.',
-    { featured: true, newArrival: true, stock: 16 },
-  ),
-  createOversizedTee(
-    2,
-    'acid-wash-vintage-oversized-tee',
-    'Acid Wash Vintage Oversized Tee',
-    1150,
-    'Men',
-    ['Charcoal', 'Black'],
-    'Vintage-wash oversized tee with a lived-in hand-feel and a relaxed boxy drape.',
-    { featured: true, stock: 14 },
-  ),
-  createOversizedTee(
-    3,
-    'minimalist-heavyweight-tee',
-    'Minimalist Heavyweight Tee',
-    980,
-    'Unisex',
-    ['Black'],
-    'Clean heavyweight staple with a quiet graphic and a roomy everyday silhouette.',
-    { featured: true, stock: 20 },
-  ),
-  createOversizedTee(
-    4,
-    'tiger-crest-oversized-tee',
-    'Tiger Crest Oversized Tee',
-    1190,
-    'Unisex',
-    ['Black'],
-    'Statement tiger-crest graphic on dense black cotton, cut for unisex layering.',
-    { newArrival: true, stock: 15 },
-  ),
-  createOversizedTee(
-    5,
-    'studio-boxy-oversized-tee',
-    'Studio Boxy Oversized Tee',
-    890,
-    'Men',
-    ['Black'],
-    'Everyday studio tee with a straight boxy body and a slightly extended sleeve.',
-    { stock: 22 },
-  ),
-  createOversizedTee(
-    6,
-    'soft-drape-oversized-tee',
-    'Soft Drape Oversized Tee',
-    950,
-    'Women',
-    ['Black'],
-    'Softer drape oversized tee with a longer back hem for considered everyday wear.',
-    { featured: true, stock: 17 },
-  ),
-  createOversizedTee(
-    7,
-    'heavy-cotton-core-tee',
-    'Heavy Cotton Core Tee',
-    1050,
-    'Unisex',
-    ['Black'],
-    'Dense cotton core tee with a graphic chest print and an easy oversized hang.',
-    { stock: 19 },
-  ),
-  createOversizedTee(
-    8,
-    'relaxed-adults-oversized-tee',
-    'Relaxed Adults Oversized Tee',
-    850,
-    'Women',
-    ['Black'],
-    'Approachable oversized tee for all adults, cut with a dropped shoulder and clean neckline.',
-    { newArrival: true, stock: 21 },
-  ),
-]
+  const urls = [product.image, ...(product.galleryImages ?? [])].join(' ').toLowerCase()
+  return urls.includes(PLACEHOLDER_OVERSIZED_TEE_IMAGE)
+}
 
 export function getOversizedTeeProductBySlug(slug: string): OversizedTeeProduct | undefined {
   const normalized = slug.trim().toLowerCase()
@@ -189,10 +91,11 @@ export function matchesOversizedTeeAudience(
 }
 
 export function mergeOversizedTeeCatalog(liveProducts: ShopProduct[]): ShopProduct[] {
+  const realLive = liveProducts.filter((product) => !isPlaceholderOversizedTeeProduct(product))
   const taken = new Set(
-    liveProducts.map((product) => product.slug.trim().toLowerCase()).filter(Boolean),
+    realLive.map((product) => product.slug.trim().toLowerCase()).filter(Boolean),
   )
 
   const extras = oversizedTeeCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return extras.length ? [...realLive, ...extras] : realLive
 }

@@ -9,7 +9,6 @@ import {
   isOversizedTeeProduct,
   matchesOversizedTeeAudience,
   mergeOversizedTeeCatalog,
-  oversizedTeeCollectionProducts,
   type OversizedTeeAudienceFilter,
 } from '../data/oversizedTeeCollection'
 import { subscribeToProducts } from '../firebase/adminService'
@@ -75,7 +74,7 @@ export default function OversizedTeeCollectionPage() {
       ? '/oversized-tee'
       : OVERSIZED_TEE_LISTING_PATH
 
-    const catalog = products.length ? products : oversizedTeeCollectionProducts
+    const catalog = products
     const itemListSchema = {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
@@ -134,48 +133,52 @@ export default function OversizedTeeCollectionPage() {
           </p>
         </div>
 
-        <div className="mt-6 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-          {AUDIENCE_OPTIONS.map((option) => {
-            const active = audienceFilter === option.value
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setAudienceFilter(option.value)}
-                className={`shrink-0 px-3 py-1.5 text-xs font-medium transition-colors ${
-                  active
-                    ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
-                    : 'text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
+        {products.length ? (
+          <>
+            <div className="mt-6 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+              {AUDIENCE_OPTIONS.map((option) => {
+                const active = audienceFilter === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setAudienceFilter(option.value)}
+                    className={`shrink-0 px-3 py-1.5 text-xs font-medium transition-colors ${
+                      active
+                        ? 'text-neutral-900 underline decoration-neutral-900 decoration-1 underline-offset-8'
+                        : 'text-neutral-500 hover:text-neutral-800'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
 
-        <div className="mt-5 flex items-center justify-between border-b border-neutral-100 pb-3">
-          <p className="text-xs font-normal text-neutral-400">
-            {visibleProducts.length} product{visibleProducts.length === 1 ? '' : 's'}
-          </p>
-          <div className="flex items-center gap-2">
-            <label htmlFor="oversized-tee-sort" className="text-xs font-medium text-neutral-400">
-              Sort
-            </label>
-            <select
-              id="oversized-tee-sort"
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="border-0 bg-transparent py-1 text-xs font-medium text-neutral-800 outline-none"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+            <div className="mt-5 flex items-center justify-between border-b border-neutral-100 pb-3">
+              <p className="text-xs font-normal text-neutral-400">
+                {visibleProducts.length} product{visibleProducts.length === 1 ? '' : 's'}
+              </p>
+              <div className="flex items-center gap-2">
+                <label htmlFor="oversized-tee-sort" className="text-xs font-medium text-neutral-400">
+                  Sort
+                </label>
+                <select
+                  id="oversized-tee-sort"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value as SortOption)}
+                  className="border-0 bg-transparent py-1 text-xs font-medium text-neutral-800 outline-none"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        ) : null}
 
         {visibleProducts.length ? (
           <ProductListingGrid className="mt-6">
@@ -193,20 +196,28 @@ export default function OversizedTeeCollectionPage() {
           </ProductListingGrid>
         ) : (
           <div className="mt-16 text-center">
-            <p className="text-sm text-neutral-500">No oversized tees match this filter.</p>
-            <button
-              type="button"
-              onClick={() => setAudienceFilter('all')}
-              className="btn-glass-cta mt-5"
-            >
-              View all
-            </button>
+            <p className="text-sm text-neutral-500">
+              {products.length
+                ? 'No oversized tees match this filter.'
+                : 'New oversized tees will appear here as they are added.'}
+            </p>
+            {products.length ? (
+              <button
+                type="button"
+                onClick={() => setAudienceFilter('all')}
+                className="btn-glass-cta mt-5"
+              >
+                View all
+              </button>
+            ) : null}
           </div>
         )}
 
-        <p className="mt-8 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
-          Tags: Unisex / All Adults · {OVERSIZED_TEE_FIT}
-        </p>
+        {products.length ? (
+          <p className="mt-8 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+            Tags: Unisex / All Adults · {OVERSIZED_TEE_FIT}
+          </p>
+        ) : null}
       </Container>
     </section>
   )
