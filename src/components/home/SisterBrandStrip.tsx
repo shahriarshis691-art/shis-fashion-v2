@@ -4,10 +4,10 @@ import Container from '../ui/Container'
 import { sisterBrandStrip } from '../../data/brandShowcase'
 
 const LOGO_FALLBACKS: Record<string, string[]> = {
-  '/brands/ceravo.png': ['/brands/ceravo.png.jpeg', '/brands/ceravo-logo.png'],
-  '/brands/rangkutir.png': ['/brands/rangkutir.png.jpeg', '/brands/rangkutir-logo.png'],
-  '/brands/velorix-motors.png': ['/brands/velorix-motors.png.jpeg'],
-  '/brands/xeroxii.png': ['/brands/xeroxii.png.png', '/brands/xeroxii-logo.png'],
+  '/brands/strip/ceravo.png': ['/brands/ceravo.png', '/brands/ceravo.png.jpeg'],
+  '/brands/strip/rangkutir.png': ['/brands/rangkutir.png', '/brands/rangkutir.png.jpeg'],
+  '/brands/strip/velorix-motors.png': ['/brands/velorix-motors.png', '/brands/velorix-motors.png.jpeg'],
+  '/brands/strip/xeroxii.png': ['/brands/xeroxii.png', '/brands/xeroxii.png.png'],
 }
 
 function handleSisterBrandLogoError(event: SyntheticEvent<HTMLImageElement>, primarySrc: string) {
@@ -27,20 +27,17 @@ function handleSisterBrandLogoError(event: SyntheticEvent<HTMLImageElement>, pri
 
 export default function SisterBrandStrip() {
   return (
-    <section
-      className="border-b border-gray-100 bg-white py-6 md:py-8"
-      aria-labelledby="sister-brands-heading"
-    >
+    <section className="bg-white" aria-labelledby="sister-brands-heading">
       <Container>
         <h2 id="sister-brands-heading" className="sr-only">
           Sister brands
         </h2>
-        <ul className="grid grid-cols-2 place-items-center gap-x-6 gap-y-5 md:flex md:flex-wrap md:justify-center md:items-center md:gap-16">
+        <ul className="flex flex-wrap items-center justify-center gap-8 border-b border-gray-100 py-6 md:flex-nowrap md:gap-14 md:py-8">
           {sisterBrandStrip.map((brand) => (
             <li key={brand.id} className="flex min-w-0 items-center justify-center">
               <Link
                 to={brand.href}
-                className="inline-flex min-h-11 items-center justify-center px-2 opacity-80 transition-opacity duration-300 hover:opacity-100"
+                className="group flex h-12 w-28 items-center justify-center overflow-hidden bg-white md:w-36"
                 aria-label={`${brand.name} brand`}
               >
                 <img
@@ -50,7 +47,11 @@ export default function SisterBrandStrip() {
                   height={40}
                   loading="lazy"
                   decoding="async"
-                  className="h-8 w-auto max-w-[9.5rem] object-contain object-center md:h-10 md:max-w-[11rem]"
+                  className={`max-h-8 w-auto !max-w-[120px] object-contain mix-blend-multiply opacity-60 grayscale contrast-[1.2] transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:grayscale-0 md:max-h-10 ${
+                    brand.id === 'velorix-motors'
+                      ? 'origin-center scale-[1.7] object-[center_30%]'
+                      : ''
+                  }`}
                   onError={(event) => handleSisterBrandLogoError(event, brand.logo)}
                 />
               </Link>

@@ -37,10 +37,10 @@ export interface SisterBrandStripItem {
 }
 
 export const sisterBrandStrip: SisterBrandStripItem[] = [
-  { id: 'ceravo', name: 'CERAVO', logo: '/brands/ceravo.png', href: '/brands/ceravo' },
-  { id: 'rangkutir', name: 'RANGKUTIR', logo: '/brands/rangkutir.png', href: '/brands/rangkutir' },
-  { id: 'velorix-motors', name: 'VELORIX MOTORS', logo: '/brands/velorix-motors.png', href: '/brands/velorix-motors' },
-  { id: 'xeroxii', name: 'XEROXII', logo: '/brands/xeroxii.png', href: '/brands/xeroxii' },
+  { id: 'ceravo', name: 'CERAVO', logo: '/brands/strip/ceravo.png', href: '/brands/ceravo' },
+  { id: 'rangkutir', name: 'RANGKUTIR', logo: '/brands/strip/rangkutir.png', href: '/brands/rangkutir' },
+  { id: 'velorix-motors', name: 'VELORIX MOTORS', logo: '/brands/strip/velorix-motors.png', href: '/brands/velorix-motors' },
+  { id: 'xeroxii', name: 'XEROXII', logo: '/brands/strip/xeroxii.png', href: '/brands/xeroxii' },
 ]
 
 export const brandEntries: BrandEntry[] = [
