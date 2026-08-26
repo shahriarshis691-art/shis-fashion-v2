@@ -516,31 +516,34 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
       .map((item) => String(item.slug ?? '').trim())
       .filter(Boolean)
 
-    void sendConversionsApiEvent({
-      eventName: 'Purchase',
-      eventId: purchaseEventId || `purchase-${order.id}`,
-      eventSourceUrl: 'https://www.shisfashion.com/order-success',
-      customData: {
-        value: Number(order.total ?? 0),
-        currency: 'BDT',
-        content_type: 'product',
-        content_ids: purchaseContentIds,
-        content_name: purchaseContentIds.length === 1 ? order.items?.[0]?.name : `${purchaseContentIds.length} items`,
-        order_id: order.id,
-        num_items: (order.items ?? []).reduce((sum, item) => sum + Number(item.quantity ?? 0), 0),
-      },
-      userData: {
-        email: customerEmail,
-        phone: customerPhone,
-        firstName: customerName.split(' ')[0],
-        city: district,
-        country: 'bd',
-        clientIpAddress: getClientIp(req.headers),
-        clientUserAgent: String(
-          req.headers?.['user-agent'] ?? req.headers?.['User-Agent'] ?? '',
-        ).slice(0, 280),
-      },
-    }).catch(() => undefined)
+    // Online prepaid Purchase must fire only after gateway settle — not at create.
+    if (!isApiPrepaid) {
+      void sendConversionsApiEvent({
+        eventName: 'Purchase',
+        eventId: purchaseEventId || `purchase-${order.id}`,
+        eventSourceUrl: 'https://www.shisfashion.com/order-success',
+        customData: {
+          value: Number(order.total ?? 0),
+          currency: 'BDT',
+          content_type: 'product',
+          content_ids: purchaseContentIds,
+          content_name: purchaseContentIds.length === 1 ? order.items?.[0]?.name : `${purchaseContentIds.length} items`,
+          order_id: order.id,
+          num_items: (order.items ?? []).reduce((sum, item) => sum + Number(item.quantity ?? 0), 0),
+        },
+        userData: {
+          email: customerEmail,
+          phone: customerPhone,
+          firstName: customerName.split(' ')[0],
+          city: district,
+          country: 'bd',
+          clientIpAddress: getClientIp(req.headers),
+          clientUserAgent: String(
+            req.headers?.['user-agent'] ?? req.headers?.['User-Agent'] ?? '',
+          ).slice(0, 280),
+        },
+      }).catch(() => undefined)
+    }
 
     if (isManualWallet) {
       void sendOpsWebhook([

@@ -5,12 +5,14 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
-  kidsOversizedTeeProducts,
+  mergeKidsOversizedTeeCatalog,
   type KidsGenderCategory,
   type KidsOversizedTeeProduct,
 } from '../data/kidsOversizedTeeCollection'
+import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { parseBDT } from '../utils/currency'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const KidsSizeGuideModal = lazy(() => import('../components/kids/KidsSizeGuideModal'))
@@ -20,7 +22,6 @@ type GenderFilter = 'all' | KidsGenderCategory
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
 const SITE_URL = 'https://www.shisfashion.com'
-const ALL_KIDS_PRODUCTS = kidsOversizedTeeProducts
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
   if (genderFilter === 'all') {
@@ -92,6 +93,7 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
 
 export default function KidsOversizedTeeCollectionPage() {
   const location = useLocation()
+  const [products, setProducts] = useState<KidsOversizedTeeProduct[]>(() => mergeKidsOversizedTeeCatalog([]))
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
   const [sizeFilter, setSizeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
@@ -101,8 +103,16 @@ export default function KidsOversizedTeeCollectionPage() {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts) => {
+      setProducts(mergeKidsOversizedTeeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
+    })
+
+    return unsubscribe
+  }, [])
+
   const visibleProducts = useMemo(() => {
-    const filtered = ALL_KIDS_PRODUCTS.filter((product) => {
+    const filtered = products.filter((product) => {
       if (!matchesGenderFilter(product, genderFilter)) {
         return false
       }
@@ -128,7 +138,7 @@ export default function KidsOversizedTeeCollectionPage() {
     }
 
     return sorted
-  }, [genderFilter, sizeFilter, sortBy, searchQuery])
+  }, [genderFilter, products, searchQuery, sizeFilter, sortBy])
 
   const activeFilterCount = Number(sizeFilter !== 'all') + Number(Boolean(searchQuery.trim()))
 
@@ -142,8 +152,8 @@ export default function KidsOversizedTeeCollectionPage() {
       '@type': 'ItemList',
       name: 'Kids Oversized Tee Collection',
       url: `${SITE_URL}${canonicalPath}`,
-      numberOfItems: ALL_KIDS_PRODUCTS.length,
-      itemListElement: ALL_KIDS_PRODUCTS.map((product, index) => ({
+      numberOfItems: products.length,
+      itemListElement: products.map((product, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         url: `${SITE_URL}/kids/${product.slug}`,
@@ -152,7 +162,7 @@ export default function KidsOversizedTeeCollectionPage() {
       })),
     }
 
-    const productSchemas = ALL_KIDS_PRODUCTS.map((product) =>
+    const productSchemas = products.map((product) =>
       buildProductSchema(
         {
           name: product.name,
@@ -177,7 +187,7 @@ export default function KidsOversizedTeeCollectionPage() {
       keywords: 'kids oversized tee, kids t-shirt Bangladesh, SHIS Fashion kids',
       schema: [itemListSchema, ...productSchemas],
     })
-  }, [location.pathname])
+  }, [location.pathname, products])
 
   useEffect(() => {
     if (!sizeGuideOpen && !filterDrawerOpen) {

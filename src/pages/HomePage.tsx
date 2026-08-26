@@ -451,7 +451,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-white pb-12">
-      {heroEnabled ? <Hero /> : null}
+      {heroEnabled ? <Hero content={homepageContent} /> : null}
 
       {shopByCategoryEnabled ? (
       <section id="featured-collections" className="scroll-mt-20 bg-white py-6 sm:py-14">

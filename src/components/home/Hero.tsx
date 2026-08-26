@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
+import { isOutdatedHardcodedMediaUrl, isPersistableMediaUrl } from '../../utils/media'
 
 interface HeroSlide {
   id: number
@@ -14,14 +15,23 @@ interface HeroSlide {
   priority?: boolean
 }
 
-/** Index 0 is locked to the Monsoon Saree campaign — first paint on every mount. */
-const heroSlides: HeroSlide[] = [
+export interface HeroContentInput {
+  heroTitle?: string
+  heroCta?: string
+  heroPrimaryLink?: string
+  heroImage?: string
+  heroImageTitle?: string
+  heroImageDescription?: string
+}
+
+/** Fallback campaign carousel when admin has not uploaded a custom hero image. */
+const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
     image: '/hero/main-hero-image2.jpg',
     title: 'THE MONSOON',
     btnText: 'SHOP SAREE',
-    link: '/saree',
+    link: '/sarees',
     alt: 'The Monsoon Saree Collection',
     width: 900,
     height: 1600,
@@ -51,45 +61,138 @@ const heroSlides: HeroSlide[] = [
 
 const AUTO_ROTATE_MS = 4000
 const SWIPE_THRESHOLD_PX = 48
+const DEFAULT_OG_IMAGE = '/og-image.svg'
 
-export const Hero: React.FC = () => {
+function normalizeHeroLink(value: string | undefined, fallback: string) {
+  const trimmed = value?.trim() ?? ''
+  if (!trimmed) {
+    return fallback
+  }
+
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    return trimmed
+  }
+
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.origin.includes('shisfashion.com')) {
+      return `${parsed.pathname}${parsed.search}${parsed.hash}` || fallback
+    }
+  } catch {
+    // keep fallback
+  }
+
+  return fallback
+}
+
+function hasCustomHeroImage(image: string | undefined) {
+  const trimmed = image?.trim() ?? ''
+  if (!trimmed || trimmed === DEFAULT_OG_IMAGE) {
+    return false
+  }
+
+  return isPersistableMediaUrl(trimmed) && !isOutdatedHardcodedMediaUrl(trimmed)
+}
+
+function buildHeroSlides(content?: HeroContentInput): HeroSlide[] {
+  const primary = FALLBACK_HERO_SLIDES[0]!
+
+  if (hasCustomHeroImage(content?.heroImage)) {
+    return [
+      {
+        id: 1,
+        image: content!.heroImage!.trim(),
+        title: content?.heroTitle?.trim() || primary.title,
+        btnText: content?.heroCta?.trim() || primary.btnText,
+        link: normalizeHeroLink(content?.heroPrimaryLink, primary.link),
+        alt: content?.heroImageTitle?.trim()
+          || content?.heroImageDescription?.trim()
+          || content?.heroTitle?.trim()
+          || primary.alt,
+        width: 1200,
+        height: 1600,
+        priority: true,
+      },
+    ]
+  }
+
+  return FALLBACK_HERO_SLIDES.map((slide, index) => {
+    if (index !== 0) {
+      return slide
+    }
+
+    return {
+      ...slide,
+      title: content?.heroTitle?.trim() || slide.title,
+      btnText: content?.heroCta?.trim() || slide.btnText,
+      link: normalizeHeroLink(content?.heroPrimaryLink, slide.link),
+      alt: content?.heroImageTitle?.trim()
+        || content?.heroTitle?.trim()
+        || slide.alt,
+    }
+  })
+}
+
+interface HeroProps {
+  content?: HeroContentInput
+}
+
+export const Hero: React.FC<HeroProps> = ({ content }) => {
+  const heroSlides = useMemo(
+    () => buildHeroSlides({
+      heroTitle: content?.heroTitle,
+      heroCta: content?.heroCta,
+      heroPrimaryLink: content?.heroPrimaryLink,
+      heroImage: content?.heroImage,
+      heroImageTitle: content?.heroImageTitle,
+      heroImageDescription: content?.heroImageDescription,
+    }),
+    [
+      content?.heroCta,
+      content?.heroImage,
+      content?.heroImageDescription,
+      content?.heroImageTitle,
+      content?.heroPrimaryLink,
+      content?.heroTitle,
+    ],
+  )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const touchPausedRef = useRef(false)
   const prefersReducedMotion = usePrefersReducedMotion()
-  const safeIndex = currentIndex % heroSlides.length
-  const activeSlide = heroSlides[safeIndex]!
+  const slideCount = heroSlides.length
+  const safeIndex = slideCount > 0 ? currentIndex % slideCount : 0
+  const activeSlide = heroSlides[safeIndex] ?? FALLBACK_HERO_SLIDES[0]!
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % heroSlides.length)
-  }, [])
+    setCurrentIndex((prev) => (prev + 1) % Math.max(slideCount, 1))
+  }, [slideCount])
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
-  }, [])
+    setCurrentIndex((prev) => (prev - 1 + Math.max(slideCount, 1)) % Math.max(slideCount, 1))
+  }, [slideCount])
 
   const goToSlide = useCallback((index: number) => {
-    setCurrentIndex(((index % heroSlides.length) + heroSlides.length) % heroSlides.length)
-  }, [])
+    const count = Math.max(slideCount, 1)
+    setCurrentIndex(((index % count) + count) % count)
+  }, [slideCount])
 
-  // Auto-rotate: restarts cleanly after pause, manual nav, or slide change.
   useEffect(() => {
-    if (isPaused || prefersReducedMotion || heroSlides.length < 2) {
+    if (isPaused || prefersReducedMotion || slideCount < 2) {
       return
     }
 
     const interval = window.setInterval(nextSlide, AUTO_ROTATE_MS)
     return () => window.clearInterval(interval)
-  }, [currentIndex, isPaused, nextSlide, prefersReducedMotion])
+  }, [currentIndex, isPaused, nextSlide, prefersReducedMotion, slideCount])
 
-  // Preload every hero image so fades never flash empty frames.
   useEffect(() => {
     heroSlides.forEach((slide) => {
       const preload = new Image()
       preload.src = slide.image
     })
-  }, [])
+  }, [heroSlides])
 
   const pauseAutoplay = () => setIsPaused(true)
   const resumeAutoplay = () => {
@@ -110,7 +213,7 @@ export const Hero: React.FC = () => {
     touchPausedRef.current = false
     setIsPaused(false)
 
-    if (startX === null) {
+    if (startX === null || slideCount < 2) {
       return
     }
 
@@ -150,7 +253,6 @@ export const Hero: React.FC = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      {/* Locked frame: mobile 4/5 — identical height for every slide (no CLS jump). */}
       <div
         className="hero-slider-frame relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] md:aspect-auto md:h-[85vh] lg:h-[90vh]"
         onTouchStart={onTouchStart}
@@ -194,7 +296,7 @@ export const Hero: React.FC = () => {
                     event.currentTarget.src = '/hero/denim-homepage.jpg.png'
                     return
                   }
-                  event.currentTarget.src = '/og-image.svg'
+                  event.currentTarget.src = DEFAULT_OG_IMAGE
                 }}
               />
             </div>
@@ -203,7 +305,6 @@ export const Hero: React.FC = () => {
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-32 bg-gradient-to-t from-black/60 via-black/15 to-transparent md:h-36" />
 
-        {/* Shared CTA — same bottom-center spot on every slide */}
         <div className="hero-slide-cta absolute bottom-8 left-1/2 z-20 -translate-x-1/2">
           <Link
             to={activeSlide.link}
@@ -214,46 +315,49 @@ export const Hero: React.FC = () => {
           </Link>
         </div>
 
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            prevSlide()
-          }}
-          className="absolute top-1/2 left-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
-          aria-label="Previous slide"
-        >
-          &#8592;
-        </button>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            nextSlide()
-          }}
-          className="absolute top-1/2 right-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
-          aria-label="Next slide"
-        >
-          &#8594;
-        </button>
-
-        {/* Shared dots — fixed bottom-right, same on every slide */}
-        <div className="absolute right-3 bottom-3 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md md:right-8 md:bottom-4">
-          {heroSlides.map((slide, dotIdx) => (
+        {slideCount > 1 ? (
+          <>
             <button
-              key={slide.id}
               type="button"
-              onClick={() => goToSlide(dotIdx)}
-              aria-current={dotIdx === safeIndex ? 'true' : undefined}
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                dotIdx === safeIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
-              }`}
-              aria-label={`Go to slide ${dotIdx + 1}: ${slide.title}`}
-            />
-          ))}
-        </div>
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                prevSlide()
+              }}
+              className="absolute top-1/2 left-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
+              aria-label="Previous slide"
+            >
+              &#8592;
+            </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                nextSlide()
+              }}
+              className="absolute top-1/2 right-4 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/60 text-neutral-900 backdrop-blur-md transition-all hover:bg-white md:flex"
+              aria-label="Next slide"
+            >
+              &#8594;
+            </button>
+
+            <div className="absolute right-3 bottom-3 z-30 flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-md md:right-8 md:bottom-4">
+              {heroSlides.map((slide, dotIdx) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => goToSlide(dotIdx)}
+                  aria-current={dotIdx === safeIndex ? 'true' : undefined}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    dotIdx === safeIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                  }`}
+                  aria-label={`Go to slide ${dotIdx + 1}: ${slide.title}`}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
     </section>
   )

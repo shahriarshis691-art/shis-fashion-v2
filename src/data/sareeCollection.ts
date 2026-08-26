@@ -133,11 +133,37 @@ export const sareeCollectionProducts: SareeProduct[] = [
 /** Alias matching the requested export name. */
 export const sareeCollection = sareeCollectionProducts
 
-export function getSareeProductBySlug(slug: string): SareeProduct | undefined {
+export function isSareeProduct(product: Pick<ShopProduct, 'name' | 'slug' | 'category'>) {
+  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
+  return /\bsaree\b|\bsari\b|\bsarees\b|\bsaris\b/.test(text)
+}
+
+export function toSareeProduct(product: ShopProduct): SareeProduct {
+  const existing = sareeCollectionProducts.find(
+    (item) => item.slug.toLowerCase() === product.slug.trim().toLowerCase(),
+  )
+
+  return {
+    ...product,
+    fabric: existing?.fabric ?? 'Premium Fabric',
+    blousePiece: existing?.blousePiece ?? 'Included (Unstitched)',
+    inStock: (product.stock ?? 0) > 0,
+    sizes: product.sizes?.length ? product.sizes : ['Free Size'],
+  }
+}
+
+export function mergeSareeCatalog(liveProducts: ShopProduct[]): SareeProduct[] {
+  const liveSarees = liveProducts.filter(isSareeProduct).map(toSareeProduct)
+  const taken = new Set(liveSarees.map((product) => product.slug.trim().toLowerCase()).filter(Boolean))
+  const extras = sareeCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
+  return extras.length ? [...liveSarees, ...extras] : liveSarees
+}
+
+export function getSareeProductBySlug(slug: string, catalog: SareeProduct[] = sareeCollectionProducts): SareeProduct | undefined {
   const normalized = slug.trim().toLowerCase()
   if (!normalized) {
     return undefined
   }
 
-  return sareeCollectionProducts.find((product) => product.slug.toLowerCase() === normalized)
+  return catalog.find((product) => product.slug.toLowerCase() === normalized)
 }

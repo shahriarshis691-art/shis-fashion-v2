@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import type { DocumentReference, Firestore, Transaction } from 'firebase-admin/firestore'
 import { productMatchesSlug } from './_catalog.js'
+import { sendConversionsApiEvent } from './_metaCapi.js'
 import {
   commitStockWorkingSet,
   readStockWorkingSet,
@@ -31,6 +32,7 @@ export interface PrepaidOrderData {
   couponDiscountAmount?: number
   paymentEventId?: string
   paymentTransactionId?: string
+  purchaseEventId?: string
   archived?: boolean
 }
 
@@ -197,6 +199,38 @@ export async function settlePrepaidPaid(input: {
     }
 
     return 'applied' as const
+  }).then((result) => {
+    if (result === 'applied') {
+      const purchaseContentIds = (input.data.items ?? [])
+        .map((item) => String(item.slug ?? '').trim())
+        .filter(Boolean)
+      const settledPurchaseEventId = String(input.data.purchaseEventId ?? '').trim() || `purchase-${orderId}`
+
+      void sendConversionsApiEvent({
+        eventName: 'Purchase',
+        eventId: settledPurchaseEventId,
+        eventSourceUrl: 'https://www.shisfashion.com/order-success',
+        customData: {
+          value: Number(input.data.total ?? 0),
+          currency: 'BDT',
+          content_type: 'product',
+          content_ids: purchaseContentIds,
+          content_name: purchaseContentIds.length === 1
+            ? input.data.items?.[0]?.name
+            : `${purchaseContentIds.length} items`,
+          order_id: orderId,
+          num_items: (input.data.items ?? []).reduce((sum, item) => sum + Number(item.quantity ?? 0), 0),
+        },
+        userData: {
+          email: input.data.customerEmail,
+          phone: input.data.customerPhone,
+          firstName: String(input.data.customerName ?? '').split(' ')[0],
+          country: 'bd',
+        },
+      }).catch(() => undefined)
+    }
+
+    return result
   })
 }
 

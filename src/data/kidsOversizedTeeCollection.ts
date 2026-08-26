@@ -159,13 +159,64 @@ export function getKidsBadge(product: KidsOversizedTeeProduct): string | null {
   return null
 }
 
-export function getKidsProductBySlug(slug: string): KidsOversizedTeeProduct | undefined {
+export function getKidsProductBySlug(
+  slug: string,
+  catalog: KidsOversizedTeeProduct[] = kidsOversizedTeeProducts,
+): KidsOversizedTeeProduct | undefined {
   const normalized = decodeURIComponent(slug).trim().toLowerCase()
   if (!normalized) {
     return undefined
   }
 
-  return kidsOversizedTeeProducts.find((product) => product.slug.toLowerCase() === normalized)
+  return catalog.find((product) => product.slug.toLowerCase() === normalized)
+}
+
+export function isKidsOversizedTeeProduct(product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & { tags?: string[] }) {
+  const tagged = product as { tags?: string[] }
+  const tags = (tagged.tags ?? []).map((tag) => tag.trim().toLowerCase())
+  if (tags.some((tag) => /\bkids?\b|\bchildren\b/.test(tag))) {
+    return true
+  }
+
+  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
+  return /\bkids?\b|\bchildren\b|\bjunior\b/.test(text)
+}
+
+function inferKidsGenderCategory(product: ShopProduct): KidsGenderCategory {
+  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
+  if (/\bgirl\b|\bwomen\b/.test(text)) {
+    return 'Kids Girl'
+  }
+  if (/\bboy\b|\bmen\b/.test(text)) {
+    return 'Kids Boy'
+  }
+  return 'Unisex'
+}
+
+export function toKidsOversizedTeeProduct(product: ShopProduct): KidsOversizedTeeProduct {
+  const existing = kidsOversizedTeeProducts.find(
+    (item) => item.slug.toLowerCase() === product.slug.trim().toLowerCase(),
+  )
+  const originalPrice = product.comparePrice || existing?.originalPrice || product.price
+  const stock = product.stock ?? 0
+
+  return {
+    ...product,
+    genderCategory: existing?.genderCategory ?? inferKidsGenderCategory(product),
+    colorHexes: existing?.colorHexes ?? [],
+    originalPrice,
+    inStock: stock > 0,
+    newest: Boolean(product.newArrival || existing?.newest),
+    bestseller: existing?.bestseller,
+    sizes: product.sizes?.length ? product.sizes : [...KIDS_OVERSIZED_SIZES],
+  }
+}
+
+export function mergeKidsOversizedTeeCatalog(liveProducts: ShopProduct[]): KidsOversizedTeeProduct[] {
+  const liveKids = liveProducts.filter(isKidsOversizedTeeProduct).map(toKidsOversizedTeeProduct)
+  const taken = new Set(liveKids.map((product) => product.slug.trim().toLowerCase()).filter(Boolean))
+  const extras = kidsOversizedTeeProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
+  return extras.length ? [...liveKids, ...extras] : liveKids
 }
 
 export const KIDS_PRODUCT_FABRIC = 'Premium heavy cotton (soft hand-feel, breathable, everyday durable)'

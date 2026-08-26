@@ -18,10 +18,23 @@ interface LooseResponse {
 
 interface ConfirmationBody {
   orderId?: string
+  phone?: string
 }
 
 const isRateLimited = createRateLimiter(12, 10 * 60_000, 'order-confirmation')
 const MAX_AGE_MS = 48 * 60 * 60 * 1000
+const GENERIC_MISS = 'We could not find an order with that ID and phone number.'
+
+function normalizePhone(raw: string) {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.startsWith('8801') && digits.length === 13) {
+    return `0${digits.slice(3)}`
+  }
+  if (digits.startsWith('01') && digits.length === 11) {
+    return digits
+  }
+  return null
+}
 
 function readBody(req: LooseRequest): ConfirmationBody {
   const raw = req.body
@@ -76,9 +89,17 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     return
   }
 
-  const orderId = readBody(req).orderId?.trim() ?? ''
+  const body = readBody(req)
+  const orderId = body.orderId?.trim() ?? ''
+  const phone = typeof body.phone === 'string' ? normalizePhone(body.phone) : null
+
   if (!orderId || orderId.length < 8 || orderId.length > 64 || !/^[A-Za-z0-9_-]+$/.test(orderId)) {
     res.status(400).json({ error: 'Invalid order reference.' })
+    return
+  }
+
+  if (!phone) {
+    res.status(400).json({ error: 'Phone number is required to view order confirmation. Use track order with your order ID and phone.' })
     return
   }
 
@@ -91,7 +112,7 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
   try {
     const snapshot = await db.collection('orders').doc(orderId).get()
     if (!snapshot.exists) {
-      res.status(404).json({ error: 'Order not found.' })
+      res.status(404).json({ error: GENERIC_MISS })
       return
     }
 
@@ -113,7 +134,13 @@ export default async function handler(req: LooseRequest, res: LooseResponse) {
     }
 
     if (data.archived) {
-      res.status(404).json({ error: 'Order not found.' })
+      res.status(404).json({ error: GENERIC_MISS })
+      return
+    }
+
+    const storedPhone = normalizePhone(String(data.customerPhone ?? ''))
+    if (!storedPhone || storedPhone !== phone) {
+      res.status(404).json({ error: GENERIC_MISS })
       return
     }
 

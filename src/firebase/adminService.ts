@@ -3299,6 +3299,9 @@ export async function uploadAssets(files: File[], folder: string, options: Uploa
   }
 
   const authToken = await getCurrentAdminIdToken()
+  if (!authToken) {
+    throw new Error('Admin session expired. Sign in again before uploading media.')
+  }
 
   return uploadMultipleAssets(files, {
     folder,
@@ -3319,7 +3322,7 @@ export async function deleteAsset(url: string) {
   }
 
   const authToken = await getCurrentAdminIdToken()
-  if (!authToken && import.meta.env.PROD) {
+  if (!authToken) {
     throw new Error('Admin session expired. Sign in again before deleting media.')
   }
 

@@ -16,16 +16,18 @@ import {
   KIDS_PRODUCT_CARE,
   KIDS_PRODUCT_FABRIC,
   KIDS_SIZE_GUIDE_ROWS,
-  kidsOversizedTeeProducts,
+  mergeKidsOversizedTeeCatalog,
   type KidsOversizedTeeProduct,
 } from '../data/kidsOversizedTeeCollection'
 import { DELIVERY_RETURN_BULLETS } from '../data/storePolicy'
+import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { usePdpActionGate } from '../hooks/usePdpActionGate'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { formatTkPrice, parseBDT } from '../utils/currency'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { getVariantStock } from '../utils/variantStock'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
@@ -49,8 +51,17 @@ export default function KidsProductDetailPage() {
   const navigate = useNavigate()
   const { addToCart } = useCart()
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
+  const [catalog, setCatalog] = useState<KidsOversizedTeeProduct[]>(() => mergeKidsOversizedTeeCatalog([]))
 
-  const product = useMemo(() => getKidsProductBySlug(productSlug ?? ''), [productSlug])
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts) => {
+      setCatalog(mergeKidsOversizedTeeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
+    })
+
+    return unsubscribe
+  }, [])
+
+  const product = useMemo(() => getKidsProductBySlug(productSlug ?? '', catalog), [catalog, productSlug])
 
   const colorFromQuery = searchParams.get('color')?.trim() ?? ''
   const initialColor = colorFromQuery
@@ -175,10 +186,10 @@ export default function KidsProductDetailPage() {
       return []
     }
 
-    return kidsOversizedTeeProducts
+    return catalog
       .filter((item) => item.id !== product.id)
       .slice(0, 4)
-  }, [product])
+  }, [catalog, product])
 
   const setPreviousImage = () => {
     setActiveImageIndex((current) => (current - 1 + gallery.length) % gallery.length)

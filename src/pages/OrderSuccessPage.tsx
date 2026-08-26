@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
+import { useCart } from '../context/CartContext'
 import { parseBDT, formatBDT } from '../utils/currency'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -20,6 +21,7 @@ interface LastOrderSnapshot {
   address: string
   paymentMethod: string
   paymentTransactionId?: string
+  paymentStatus?: string
   deliveryCharge: number
   subtotal: number
   grandTotal: number
@@ -37,14 +39,40 @@ interface LastOrderSnapshot {
   }>
 }
 
+function readStoredPhone(): string {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(ORDER_CONFIRMATION_KEY)
+    if (!raw) {
+      return ''
+    }
+    const parsed = JSON.parse(raw) as { customerPhone?: string }
+    return typeof parsed.customerPhone === 'string' ? parsed.customerPhone.trim() : ''
+  } catch {
+    return ''
+  }
+}
+
 export default function OrderSuccessPage() {
   const location = useLocation()
+  const { clearCart } = useCart()
   const confirmationOrderId = useMemo(() => {
     if (typeof window === 'undefined') {
       return ''
     }
 
     return new URLSearchParams(window.location.search).get('orderId')?.trim() ?? ''
+  }, [])
+  const confirmationPhone = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    const fromQuery = new URLSearchParams(window.location.search).get('phone')?.trim() ?? ''
+    return fromQuery || readStoredPhone()
   }, [])
   const isPrepaidReturn = useMemo(() => {
     if (typeof window === 'undefined') {
@@ -66,9 +94,24 @@ export default function OrderSuccessPage() {
     }
   })
   const [confirmationError, setConfirmationError] = useState('')
+  const hasClearedCartRef = useRef(false)
+  const missingPhoneError =
+    !order && confirmationOrderId && !confirmationPhone
+      ? 'Open this page from checkout, or track your order with Order ID and phone number.'
+      : ''
+  const displayConfirmationError = confirmationError || missingPhoneError
 
   useEffect(() => {
-    if (order || !confirmationOrderId) {
+    if (!isPrepaidReturn || hasClearedCartRef.current) {
+      return
+    }
+
+    clearCart()
+    hasClearedCartRef.current = true
+  }, [clearCart, isPrepaidReturn])
+
+  useEffect(() => {
+    if (order || !confirmationOrderId || !confirmationPhone) {
       return
     }
 
@@ -77,7 +120,7 @@ export default function OrderSuccessPage() {
     void fetch('/api/order-confirmation', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ orderId: confirmationOrderId }),
+      body: JSON.stringify({ orderId: confirmationOrderId, phone: confirmationPhone }),
     })
       .then(async (response) => {
         const payload = await response.json() as { order?: LastOrderSnapshot; error?: string }
@@ -109,7 +152,7 @@ export default function OrderSuccessPage() {
     return () => {
       cancelled = true
     }
-  }, [confirmationOrderId, order])
+  }, [confirmationOrderId, confirmationPhone, order])
 
   const orderItems = order?.items ?? []
   const hasTrackedPurchaseRef = useRef(false)
@@ -135,6 +178,13 @@ export default function OrderSuccessPage() {
       return
     }
 
+    const isOnlinePrepaid = isApiPrepaidPayment(order.paymentMethod)
+    const prepaidPaid =
+      order.paymentStatus === 'paid' || isPrepaidReturn
+    if (isOnlinePrepaid && !prepaidPaid) {
+      return
+    }
+
     metaPixel.trackPurchase(purchasePayload, {
       eventId: order.purchaseEventId,
       userData: {
@@ -157,7 +207,7 @@ export default function OrderSuccessPage() {
     })
 
     hasTrackedPurchaseRef.current = true
-  }, [order, purchasePayload])
+  }, [isPrepaidReturn, order, purchasePayload])
 
   const supportWhatsAppHref = getCustomerOrderSupportHref(order?.orderId ?? confirmationOrderId)
   const trackHref = order ? `/track-order?id=${encodeURIComponent(order.orderId)}` : '/track-order'
@@ -258,7 +308,14 @@ export default function OrderSuccessPage() {
               </>
             ) : (
               <div className="mt-4 border border-dashed border-black/20 px-4 py-6 text-sm text-black/65">
-                {confirmationError || 'Order details are unavailable in this session. Check your admin panel or contact support.'}
+                {displayConfirmationError || 'Order details are unavailable in this session. Check your admin panel or contact support.'}
+                {!order && confirmationOrderId ? (
+                  <p className="mt-3">
+                    <Link to={`/track-order?id=${encodeURIComponent(confirmationOrderId)}`} className="font-semibold text-black underline">
+                      Track order with your phone number
+                    </Link>
+                  </p>
+                ) : null}
               </div>
             )}
           </div>

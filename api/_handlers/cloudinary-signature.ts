@@ -59,10 +59,6 @@ function isConfiguredAdminEmail(email: string) {
 }
 
 async function requireAdminAccess(req: LooseRequest) {
-  if (process.env.NODE_ENV !== 'production') {
-    return true
-  }
-
   const authorization = getHeaderValue(req.headers, 'authorization')
   const token = authorization.startsWith('Bearer ') ? authorization.slice('Bearer '.length).trim() : ''
 
@@ -75,9 +71,13 @@ async function requireAdminAccess(req: LooseRequest) {
     return false
   }
 
-  const decoded = await auth.verifyIdToken(token)
-  const email = decoded.email?.trim().toLowerCase() ?? ''
-  return Boolean(decoded.admin === true || isConfiguredAdminEmail(email))
+  try {
+    const decoded = await auth.verifyIdToken(token)
+    const email = decoded.email?.trim().toLowerCase() ?? ''
+    return Boolean(decoded.admin === true || isConfiguredAdminEmail(email))
+  } catch {
+    return false
+  }
 }
 
 function makeSignature(params: Record<string, string>, apiSecret: string) {

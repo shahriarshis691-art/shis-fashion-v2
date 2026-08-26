@@ -12,16 +12,18 @@ import PdpShareButton from '../components/shop/PdpShareButton'
 import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
 import {
   getSareeProductBySlug,
-  sareeCollectionProducts,
+  mergeSareeCatalog,
   type SareeProduct,
 } from '../data/sareeCollection'
 import { DELIVERY_RETURN_BULLETS } from '../data/storePolicy'
+import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { usePdpActionGate } from '../hooks/usePdpActionGate'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { metaPixel } from '../services/metaPixel'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { formatTkPrice, parseBDT } from '../utils/currency'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { getVariantStock } from '../utils/variantStock'
 import { applyNotFoundSeo, applySeoMetadata, buildProductSchema } from '../utils/seo'
 
@@ -44,8 +46,17 @@ export default function SareeProductDetailPage() {
   const navigate = useNavigate()
   const { addToCart } = useCart()
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
+  const [catalog, setCatalog] = useState<SareeProduct[]>(() => mergeSareeCatalog([]))
 
-  const product = useMemo(() => getSareeProductBySlug(productSlug ?? ''), [productSlug])
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts) => {
+      setCatalog(mergeSareeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
+    })
+
+    return unsubscribe
+  }, [])
+
+  const product = useMemo(() => getSareeProductBySlug(productSlug ?? '', catalog), [catalog, productSlug])
 
   const sizes = product?.sizes ?? ['Free Size']
   const colors = product?.colors ?? []
@@ -181,8 +192,8 @@ export default function SareeProductDetailPage() {
     if (!product) {
       return []
     }
-    return sareeCollectionProducts.filter((item) => item.id !== product.id).slice(0, 4)
-  }, [product])
+    return catalog.filter((item) => item.id !== product.id).slice(0, 4)
+  }, [catalog, product])
 
   const setPreviousImage = () => {
     setActiveImageIndex((current) => (current - 1 + gallery.length) % gallery.length)

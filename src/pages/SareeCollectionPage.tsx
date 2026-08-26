@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
-import { sareeCollectionProducts } from '../data/sareeCollection'
+import { mergeSareeCatalog, type SareeProduct } from '../data/sareeCollection'
+import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { parseBDT } from '../utils/currency'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 
 const prefetchSareeProductDetail = () => import('./SareeProductDetailPage')
@@ -20,10 +22,19 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
 
 export default function SareeCollectionPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
+  const [products, setProducts] = useState<SareeProduct[]>(() => mergeSareeCatalog([]))
   const [sortBy, setSortBy] = useState<SortOption>('featured')
 
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts) => {
+      setProducts(mergeSareeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
+    })
+
+    return unsubscribe
+  }, [])
+
   const visibleProducts = useMemo(() => {
-    const sorted = [...sareeCollectionProducts]
+    const sorted = [...products]
 
     if (sortBy === 'price-low') {
       sorted.sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
@@ -35,8 +46,13 @@ export default function SareeCollectionPage() {
       return sorted
     }
 
+    sorted.sort(
+      (left, right) =>
+        Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+        (right.stock ?? 0) - (left.stock ?? 0),
+    )
     return sorted
-  }, [sortBy])
+  }, [products, sortBy])
 
   useEffect(() => {
     applySeoMetadata('/sarees', {
@@ -50,15 +66,15 @@ export default function SareeCollectionPage() {
           '@context': 'https://schema.org',
           '@type': 'ItemList',
           name: 'SHIS Fashion Saree Collection',
-          numberOfItems: sareeCollectionProducts.length,
-          itemListElement: sareeCollectionProducts.map((product, index) => ({
+          numberOfItems: products.length,
+          itemListElement: products.map((product, index) => ({
             '@type': 'ListItem',
             position: index + 1,
             url: `${SITE_URL}/sarees/${product.slug}`,
             name: product.name,
           })),
         },
-        ...sareeCollectionProducts.map((product) =>
+        ...products.map((product) =>
           buildProductSchema(
             {
               name: product.name,
@@ -75,7 +91,7 @@ export default function SareeCollectionPage() {
         ),
       ],
     })
-  }, [])
+  }, [products])
 
   return (
     <section className="bg-white pb-24">
