@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "verify:launch": "node scripts/verify-launch-env.mjs",
     "fetch:western-images": "node scripts/fetch-western-images.mjs",
+    "fetch:kurti-images": "node scripts/fetch-kurti-images.mjs",
     "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {

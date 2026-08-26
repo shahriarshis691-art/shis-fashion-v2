@@ -34,6 +34,7 @@ import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
 import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
+import { kurtisCollectionProducts } from '../data/kurtisCollection'
 import { womensBaggyDenimCollectionProducts } from '../data/womensBaggyDenimCollection'
 import type { ShopProduct } from '../data/shopData'
 
@@ -125,7 +126,7 @@ export default function ProductDetailPage() {
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>(() =>
-    [...halfShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts].map(fromCatalogProduct),
+    [...halfShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts, ...kurtisCollectionProducts].map(fromCatalogProduct),
   )
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
@@ -156,6 +157,7 @@ export default function ProductDetailPage() {
         ...womensBaggyDenimCollectionProducts,
         ...oversizedTeeCollectionProducts,
         ...westernOutfitsCollectionProducts,
+        ...kurtisCollectionProducts,
       ]
         .filter((entry) => !taken.has(entry.slug))
         .map(fromCatalogProduct)

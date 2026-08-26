@@ -1,0 +1,610 @@
+{
+  "generatedAt": "2026-08-26T20:57:59.211Z",
+  "outputDir": "public/images/products/kurtis",
+  "count": 100,
+  "saved": 100,
+  "skipped": 0,
+  "failed": [],
+  "files": [
+    {
+      "index": 1,
+      "file": "kurti-001.jpg",
+      "publicPath": "/images/products/kurtis/kurti-001.jpg",
+      "unsplashId": "1515372039744-b8f02a3ae446"
+    },
+    {
+      "index": 2,
+      "file": "kurti-002.jpg",
+      "publicPath": "/images/products/kurtis/kurti-002.jpg",
+      "unsplashId": "1483985988355-763728e1935b"
+    },
+    {
+      "index": 3,
+      "file": "kurti-003.jpg",
+      "publicPath": "/images/products/kurtis/kurti-003.jpg",
+      "unsplashId": "1490481651871-ab68de25d43d"
+    },
+    {
+      "index": 4,
+      "file": "kurti-004.jpg",
+      "publicPath": "/images/products/kurtis/kurti-004.jpg",
+      "unsplashId": "1469334031218-e382a71b716b"
+    },
+    {
+      "index": 5,
+      "file": "kurti-005.jpg",
+      "publicPath": "/images/products/kurtis/kurti-005.jpg",
+      "unsplashId": "1496747611176-843222e1e57c"
+    },
+    {
+      "index": 6,
+      "file": "kurti-006.jpg",
+      "publicPath": "/images/products/kurtis/kurti-006.jpg",
+      "unsplashId": "1487222477894-8943e31ef7b2"
+    },
+    {
+      "index": 7,
+      "file": "kurti-007.jpg",
+      "publicPath": "/images/products/kurtis/kurti-007.jpg",
+      "unsplashId": "1509631179647-0177331693ae"
+    },
+    {
+      "index": 8,
+      "file": "kurti-008.jpg",
+      "publicPath": "/images/products/kurtis/kurti-008.jpg",
+      "unsplashId": "1523381210434-271e8be1f52b"
+    },
+    {
+      "index": 9,
+      "file": "kurti-009.jpg",
+      "publicPath": "/images/products/kurtis/kurti-009.jpg",
+      "unsplashId": "1515886657613-9f3515b0c78f"
+    },
+    {
+      "index": 10,
+      "file": "kurti-010.jpg",
+      "publicPath": "/images/products/kurtis/kurti-010.jpg",
+      "unsplashId": "1539109136881-3be0616acf4b"
+    },
+    {
+      "index": 11,
+      "file": "kurti-011.jpg",
+      "publicPath": "/images/products/kurtis/kurti-011.jpg",
+      "unsplashId": "1558171813-4c088753af8f"
+    },
+    {
+      "index": 12,
+      "file": "kurti-012.jpg",
+      "publicPath": "/images/products/kurtis/kurti-012.jpg",
+      "unsplashId": "1462392246754-28dfa2df8e6b"
+    },
+    {
+      "index": 13,
+      "file": "kurti-013.jpg",
+      "publicPath": "/images/products/kurtis/kurti-013.jpg",
+      "unsplashId": "1539533018447-63fcce2678e3"
+    },
+    {
+      "index": 14,
+      "file": "kurti-014.jpg",
+      "publicPath": "/images/products/kurtis/kurti-014.jpg",
+      "unsplashId": "1552374196-1ab2a1c593e8"
+    },
+    {
+      "index": 15,
+      "file": "kurti-015.jpg",
+      "publicPath": "/images/products/kurtis/kurti-015.jpg",
+      "unsplashId": "1574180566232-aaad1b5b8450"
+    },
+    {
+      "index": 16,
+      "file": "kurti-016.jpg",
+      "publicPath": "/images/products/kurtis/kurti-016.jpg",
+      "unsplashId": "1594938298603-c8148c4dae35"
+    },
+    {
+      "index": 17,
+      "file": "kurti-017.jpg",
+      "publicPath": "/images/products/kurtis/kurti-017.jpg",
+      "unsplashId": "1475180098004-ca77a66827be"
+    },
+    {
+      "index": 18,
+      "file": "kurti-018.jpg",
+      "publicPath": "/images/products/kurtis/kurti-018.jpg",
+      "unsplashId": "1560243563-062bfc001d68"
+    },
+    {
+      "index": 19,
+      "file": "kurti-019.jpg",
+      "publicPath": "/images/products/kurtis/kurti-019.jpg",
+      "unsplashId": "1556905055-8f358a7a47b2"
+    },
+    {
+      "index": 20,
+      "file": "kurti-020.jpg",
+      "publicPath": "/images/products/kurtis/kurti-020.jpg",
+      "unsplashId": "1434389677669-e08b4cac3105"
+    },
+    {
+      "index": 21,
+      "file": "kurti-021.jpg",
+      "publicPath": "/images/products/kurtis/kurti-021.jpg",
+      "unsplashId": "1479064555552-3ef4979f8908"
+    },
+    {
+      "index": 22,
+      "file": "kurti-022.jpg",
+      "publicPath": "/images/products/kurtis/kurti-022.jpg",
+      "unsplashId": "1512436991641-6745cdb1723f"
+    },
+    {
+      "index": 23,
+      "file": "kurti-023.jpg",
+      "publicPath": "/images/products/kurtis/kurti-023.jpg",
+      "unsplashId": "1441986300917-64674bd600d8"
+    },
+    {
+      "index": 24,
+      "file": "kurti-024.jpg",
+      "publicPath": "/images/products/kurtis/kurti-024.jpg",
+      "unsplashId": "1554568218-0f1715e72254"
+    },
+    {
+      "index": 25,
+      "file": "kurti-025.jpg",
+      "publicPath": "/images/products/kurtis/kurti-025.jpg",
+      "unsplashId": "1544441893-675973e31985"
+    },
+    {
+      "index": 26,
+      "file": "kurti-026.jpg",
+      "publicPath": "/images/products/kurtis/kurti-026.jpg",
+      "unsplashId": "1571945153237-4929e783af4a"
+    },
+    {
+      "index": 27,
+      "file": "kurti-027.jpg",
+      "publicPath": "/images/products/kurtis/kurti-027.jpg",
+      "unsplashId": "1503342217505-b0a15ec3261c"
+    },
+    {
+      "index": 28,
+      "file": "kurti-028.jpg",
+      "publicPath": "/images/products/kurtis/kurti-028.jpg",
+      "unsplashId": "1529374255404-311a2a4f1fd9"
+    },
+    {
+      "index": 29,
+      "file": "kurti-029.jpg",
+      "publicPath": "/images/products/kurtis/kurti-029.jpg",
+      "unsplashId": "1489987707025-afc232f7ea0f"
+    },
+    {
+      "index": 30,
+      "file": "kurti-030.jpg",
+      "publicPath": "/images/products/kurtis/kurti-030.jpg",
+      "unsplashId": "1602810318383-e386cc2a3ccf"
+    },
+    {
+      "index": 31,
+      "file": "kurti-031.jpg",
+      "publicPath": "/images/products/kurtis/kurti-031.jpg",
+      "unsplashId": "1618354691373-d851c5c3a990"
+    },
+    {
+      "index": 32,
+      "file": "kurti-032.jpg",
+      "publicPath": "/images/products/kurtis/kurti-032.jpg",
+      "unsplashId": "1562157873-818bc0726f68"
+    },
+    {
+      "index": 33,
+      "file": "kurti-033.jpg",
+      "publicPath": "/images/products/kurtis/kurti-033.jpg",
+      "unsplashId": "1620799140408-edc6dcb6d633"
+    },
+    {
+      "index": 34,
+      "file": "kurti-034.jpg",
+      "publicPath": "/images/products/kurtis/kurti-034.jpg",
+      "unsplashId": "1596755094514-f87e34085b2c"
+    },
+    {
+      "index": 35,
+      "file": "kurti-035.jpg",
+      "publicPath": "/images/products/kurtis/kurti-035.jpg",
+      "unsplashId": "1576566588028-4147f3842f27"
+    },
+    {
+      "index": 36,
+      "file": "kurti-036.jpg",
+      "publicPath": "/images/products/kurtis/kurti-036.jpg",
+      "unsplashId": "1583743814966-8936f5b7be1a"
+    },
+    {
+      "index": 37,
+      "file": "kurti-037.jpg",
+      "publicPath": "/images/products/kurtis/kurti-037.jpg",
+      "unsplashId": "1521572163474-6864f9cf17ab"
+    },
+    {
+      "index": 38,
+      "file": "kurti-038.jpg",
+      "publicPath": "/images/products/kurtis/kurti-038.jpg",
+      "unsplashId": "1541099649105-f69ad21f3246"
+    },
+    {
+      "index": 39,
+      "file": "kurti-039.jpg",
+      "publicPath": "/images/products/kurtis/kurti-039.jpg",
+      "unsplashId": "1582418702059-97ebafb35d09"
+    },
+    {
+      "index": 40,
+      "file": "kurti-040.jpg",
+      "publicPath": "/images/products/kurtis/kurti-040.jpg",
+      "unsplashId": "1611312449408-fcece27cdbb7"
+    },
+    {
+      "index": 41,
+      "file": "kurti-041.jpg",
+      "publicPath": "/images/products/kurtis/kurti-041.jpg",
+      "unsplashId": "1604176354204-9268737828e4"
+    },
+    {
+      "index": 42,
+      "file": "kurti-042.jpg",
+      "publicPath": "/images/products/kurtis/kurti-042.jpg",
+      "unsplashId": "1565084888279-aca607ecce0c"
+    },
+    {
+      "index": 43,
+      "file": "kurti-043.jpg",
+      "publicPath": "/images/products/kurtis/kurti-043.jpg",
+      "unsplashId": "1594750823491-e493d067ce3e"
+    },
+    {
+      "index": 44,
+      "file": "kurti-044.jpg",
+      "publicPath": "/images/products/kurtis/kurti-044.jpg",
+      "unsplashId": "1608147152875-b0eb0c53d491"
+    },
+    {
+      "index": 45,
+      "file": "kurti-045.jpg",
+      "publicPath": "/images/products/kurtis/kurti-045.jpg",
+      "unsplashId": "1617178388553-a9d022974a5c"
+    },
+    {
+      "index": 46,
+      "file": "kurti-046.jpg",
+      "publicPath": "/images/products/kurtis/kurti-046.jpg",
+      "unsplashId": "1593030761757-71fae45fa0e7"
+    },
+    {
+      "index": 47,
+      "file": "kurti-047.jpg",
+      "publicPath": "/images/products/kurtis/kurti-047.jpg",
+      "unsplashId": "1551028719-00167b16eac5"
+    },
+    {
+      "index": 48,
+      "file": "kurti-048.jpg",
+      "publicPath": "/images/products/kurtis/kurti-048.jpg",
+      "unsplashId": "1591047139829-d91aecb6caea"
+    },
+    {
+      "index": 49,
+      "file": "kurti-049.jpg",
+      "publicPath": "/images/products/kurtis/kurti-049.jpg",
+      "unsplashId": "1549298916-b41d501d3772"
+    },
+    {
+      "index": 50,
+      "file": "kurti-050.jpg",
+      "publicPath": "/images/products/kurtis/kurti-050.jpg",
+      "unsplashId": "1549298916-f52d724204b4"
+    },
+    {
+      "index": 51,
+      "file": "kurti-051.jpg",
+      "publicPath": "/images/products/kurtis/kurti-051.jpg",
+      "unsplashId": "1556906781-9a412961c28c"
+    },
+    {
+      "index": 52,
+      "file": "kurti-052.jpg",
+      "publicPath": "/images/products/kurtis/kurti-052.jpg",
+      "unsplashId": "1496747611176-843222e1e57c"
+    },
+    {
+      "index": 53,
+      "file": "kurti-053.jpg",
+      "publicPath": "/images/products/kurtis/kurti-053.jpg",
+      "unsplashId": "1529626455594-4ff0802cfb7e"
+    },
+    {
+      "index": 54,
+      "file": "kurti-054.jpg",
+      "publicPath": "/images/products/kurtis/kurti-054.jpg",
+      "unsplashId": "1488426862026-3ee34a7d66df"
+    },
+    {
+      "index": 55,
+      "file": "kurti-055.jpg",
+      "publicPath": "/images/products/kurtis/kurti-055.jpg",
+      "unsplashId": "1524504388940-b1c1722653e1"
+    },
+    {
+      "index": 56,
+      "file": "kurti-056.jpg",
+      "publicPath": "/images/products/kurtis/kurti-056.jpg",
+      "unsplashId": "1534528741775-53994a69daeb"
+    },
+    {
+      "index": 57,
+      "file": "kurti-057.jpg",
+      "publicPath": "/images/products/kurtis/kurti-057.jpg",
+      "unsplashId": "1494790108377-be9c29b29330"
+    },
+    {
+      "index": 58,
+      "file": "kurti-058.jpg",
+      "publicPath": "/images/products/kurtis/kurti-058.jpg",
+      "unsplashId": "1524504396865-2e5f3f16d1a5"
+    },
+    {
+      "index": 59,
+      "file": "kurti-059.jpg",
+      "publicPath": "/images/products/kurtis/kurti-059.jpg",
+      "unsplashId": "1502716119720-b2a702b5f2c2"
+    },
+    {
+      "index": 60,
+      "file": "kurti-060.jpg",
+      "publicPath": "/images/products/kurtis/kurti-060.jpg",
+      "unsplashId": "1517841905240-472988babdf9"
+    },
+    {
+      "index": 61,
+      "file": "kurti-061.jpg",
+      "publicPath": "/images/products/kurtis/kurti-061.jpg",
+      "unsplashId": "1529139574466-a303027c1d8b"
+    },
+    {
+      "index": 62,
+      "file": "kurti-062.jpg",
+      "publicPath": "/images/products/kurtis/kurti-062.jpg",
+      "unsplashId": "1487412720507-e7ab37603c6f"
+    },
+    {
+      "index": 63,
+      "file": "kurti-063.jpg",
+      "publicPath": "/images/products/kurtis/kurti-063.jpg",
+      "unsplashId": "1499952127939-9bbf5af6b1c1"
+    },
+    {
+      "index": 64,
+      "file": "kurti-064.jpg",
+      "publicPath": "/images/products/kurtis/kurti-064.jpg",
+      "unsplashId": "1500917293891-ef795e70a1f0"
+    },
+    {
+      "index": 65,
+      "file": "kurti-065.jpg",
+      "publicPath": "/images/products/kurtis/kurti-065.jpg",
+      "unsplashId": "1515886657613-9f3515b0c78f"
+    },
+    {
+      "index": 66,
+      "file": "kurti-066.jpg",
+      "publicPath": "/images/products/kurtis/kurti-066.jpg",
+      "unsplashId": "1469334031218-e382a71b716b"
+    },
+    {
+      "index": 67,
+      "file": "kurti-067.jpg",
+      "publicPath": "/images/products/kurtis/kurti-067.jpg",
+      "unsplashId": "1509631179647-0177331693ae"
+    },
+    {
+      "index": 68,
+      "file": "kurti-068.jpg",
+      "publicPath": "/images/products/kurtis/kurti-068.jpg",
+      "unsplashId": "1487222477894-8943e31ef7b2"
+    },
+    {
+      "index": 69,
+      "file": "kurti-069.jpg",
+      "publicPath": "/images/products/kurtis/kurti-069.jpg",
+      "unsplashId": "1496747611176-843222e1e57c"
+    },
+    {
+      "index": 70,
+      "file": "kurti-070.jpg",
+      "publicPath": "/images/products/kurtis/kurti-070.jpg",
+      "unsplashId": "1558171813-4c088753af8f"
+    },
+    {
+      "index": 71,
+      "file": "kurti-071.jpg",
+      "publicPath": "/images/products/kurtis/kurti-071.jpg",
+      "unsplashId": "1539109136881-3be0616acf4b"
+    },
+    {
+      "index": 72,
+      "file": "kurti-072.jpg",
+      "publicPath": "/images/products/kurtis/kurti-072.jpg",
+      "unsplashId": "1483985988355-763728e1935b"
+    },
+    {
+      "index": 73,
+      "file": "kurti-073.jpg",
+      "publicPath": "/images/products/kurtis/kurti-073.jpg",
+      "unsplashId": "1490481651871-ab68de25d43d"
+    },
+    {
+      "index": 74,
+      "file": "kurti-074.jpg",
+      "publicPath": "/images/products/kurtis/kurti-074.jpg",
+      "unsplashId": "1515372039744-b8f02a3ae446"
+    },
+    {
+      "index": 75,
+      "file": "kurti-075.jpg",
+      "publicPath": "/images/products/kurtis/kurti-075.jpg",
+      "unsplashId": "1462392246754-28dfa2df8e6b"
+    },
+    {
+      "index": 76,
+      "file": "kurti-076.jpg",
+      "publicPath": "/images/products/kurtis/kurti-076.jpg",
+      "unsplashId": "1539533018447-63fcce2678e3"
+    },
+    {
+      "index": 77,
+      "file": "kurti-077.jpg",
+      "publicPath": "/images/products/kurtis/kurti-077.jpg",
+      "unsplashId": "1552374196-1ab2a1c593e8"
+    },
+    {
+      "index": 78,
+      "file": "kurti-078.jpg",
+      "publicPath": "/images/products/kurtis/kurti-078.jpg",
+      "unsplashId": "1574180566232-aaad1b5b8450"
+    },
+    {
+      "index": 79,
+      "file": "kurti-079.jpg",
+      "publicPath": "/images/products/kurtis/kurti-079.jpg",
+      "unsplashId": "1475180098004-ca77a66827be"
+    },
+    {
+      "index": 80,
+      "file": "kurti-080.jpg",
+      "publicPath": "/images/products/kurtis/kurti-080.jpg",
+      "unsplashId": "1560243563-062bfc001d68"
+    },
+    {
+      "index": 81,
+      "file": "kurti-081.jpg",
+      "publicPath": "/images/products/kurtis/kurti-081.jpg",
+      "unsplashId": "1434389677669-e08b4cac3105"
+    },
+    {
+      "index": 82,
+      "file": "kurti-082.jpg",
+      "publicPath": "/images/products/kurtis/kurti-082.jpg",
+      "unsplashId": "1479064555552-3ef4979f8908"
+    },
+    {
+      "index": 83,
+      "file": "kurti-083.jpg",
+      "publicPath": "/images/products/kurtis/kurti-083.jpg",
+      "unsplashId": "1556905055-8f358a7a47b2"
+    },
+    {
+      "index": 84,
+      "file": "kurti-084.jpg",
+      "publicPath": "/images/products/kurtis/kurti-084.jpg",
+      "unsplashId": "1512436991641-6745cdb1723f"
+    },
+    {
+      "index": 85,
+      "file": "kurti-085.jpg",
+      "publicPath": "/images/products/kurtis/kurti-085.jpg",
+      "unsplashId": "1441986300917-64674bd600d8"
+    },
+    {
+      "index": 86,
+      "file": "kurti-086.jpg",
+      "publicPath": "/images/products/kurtis/kurti-086.jpg",
+      "unsplashId": "1554568218-0f1715e72254"
+    },
+    {
+      "index": 87,
+      "file": "kurti-087.jpg",
+      "publicPath": "/images/products/kurtis/kurti-087.jpg",
+      "unsplashId": "1544441893-675973e31985"
+    },
+    {
+      "index": 88,
+      "file": "kurti-088.jpg",
+      "publicPath": "/images/products/kurtis/kurti-088.jpg",
+      "unsplashId": "1571945153237-4929e783af4a"
+    },
+    {
+      "index": 89,
+      "file": "kurti-089.jpg",
+      "publicPath": "/images/products/kurtis/kurti-089.jpg",
+      "unsplashId": "1503342217505-b0a15ec3261c"
+    },
+    {
+      "index": 90,
+      "file": "kurti-090.jpg",
+      "publicPath": "/images/products/kurtis/kurti-090.jpg",
+      "unsplashId": "1529374255404-311a2a4f1fd9"
+    },
+    {
+      "index": 91,
+      "file": "kurti-091.jpg",
+      "publicPath": "/images/products/kurtis/kurti-091.jpg",
+      "unsplashId": "1489987707025-afc232f7ea0f"
+    },
+    {
+      "index": 92,
+      "file": "kurti-092.jpg",
+      "publicPath": "/images/products/kurtis/kurti-092.jpg",
+      "unsplashId": "1602810318383-e386cc2a3ccf"
+    },
+    {
+      "index": 93,
+      "file": "kurti-093.jpg",
+      "publicPath": "/images/products/kurtis/kurti-093.jpg",
+      "unsplashId": "1618354691373-d851c5c3a990"
+    },
+    {
+      "index": 94,
+      "file": "kurti-094.jpg",
+      "publicPath": "/images/products/kurtis/kurti-094.jpg",
+      "unsplashId": "1562157873-818bc0726f68"
+    },
+    {
+      "index": 95,
+      "file": "kurti-095.jpg",
+      "publicPath": "/images/products/kurtis/kurti-095.jpg",
+      "unsplashId": "1620799140408-edc6dcb6d633"
+    },
+    {
+      "index": 96,
+      "file": "kurti-096.jpg",
+      "publicPath": "/images/products/kurtis/kurti-096.jpg",
+      "unsplashId": "1596755094514-f87e34085b2c"
+    },
+    {
+      "index": 97,
+      "file": "kurti-097.jpg",
+      "publicPath": "/images/products/kurtis/kurti-097.jpg",
+      "unsplashId": "1576566588028-4147f3842f27"
+    },
+    {
+      "index": 98,
+      "file": "kurti-098.jpg",
+      "publicPath": "/images/products/kurtis/kurti-098.jpg",
+      "unsplashId": "1583743814966-8936f5b7be1a"
+    },
+    {
+      "index": 99,
+      "file": "kurti-099.jpg",
+      "publicPath": "/images/products/kurtis/kurti-099.jpg",
+      "unsplashId": "1521572163474-6864f9cf17ab"
+    },
+    {
+      "index": 100,
+      "file": "kurti-100.jpg",
+      "publicPath": "/images/products/kurtis/kurti-100.jpg",
+      "unsplashId": "1541099649105-f69ad21f3246"
+    }
+  ]
+}

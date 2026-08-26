@@ -29,6 +29,11 @@ import {
   westernOutfitsCollectionProducts,
   type WesternListingFilter,
 } from '../data/westernOutfitsCollection'
+import {
+  KURTI_PAGE_SIZE,
+  isKurtiProduct,
+  mergeKurtisCatalog,
+} from '../data/kurtisCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
@@ -406,15 +411,19 @@ export default function ShopPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   const [products, setProducts] = useState<ShopProduct[]>(() =>
-    mergeWomensBaggyDenimCatalog(
-      mergeMensBaggyDenimCatalog(
-        mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+    mergeKurtisCatalog(
+      mergeWomensBaggyDenimCatalog(
+        mergeMensBaggyDenimCatalog(
+          mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+        ),
       ),
     ),
   )
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('featured')
   const [westernFilter, setWesternFilter] = useState<WesternListingFilter>('all')
+  const [kurtiVisibleCount, setKurtiVisibleCount] = useState(KURTI_PAGE_SIZE)
+  const kurtiListingKeyRef = useRef('')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
   const [draftSortBy, setDraftSortBy] = useState<SortOption>('featured')
   const [draftFilters, setDraftFilters] = useState<ProductFilters>({
@@ -465,10 +474,12 @@ export default function ShopPage() {
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
       setProducts(
-        mergeWomensBaggyDenimCatalog(
-          mergeMensBaggyDenimCatalog(
-            mergeWesternOutfitsCatalog(
-              mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+        mergeKurtisCatalog(
+          mergeWomensBaggyDenimCatalog(
+            mergeMensBaggyDenimCatalog(
+              mergeWesternOutfitsCatalog(
+                mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+              ),
             ),
           ),
         ),
@@ -692,12 +703,21 @@ export default function ShopPage() {
     : null
 
   const isWesternOutfitsListing = effectiveSegment === 'women' && effectiveSubcategory === 'western-outfits'
+  const isKurtiListing = effectiveSegment === 'women' && effectiveSubcategory === 'kurti'
 
   const westernHeading = isWesternOutfitsListing
     ? {
       title: 'WESTERN OUTFITS',
       description:
         'Women’s western staples — crop tops, casual shirts, tank tops, denim shorts, tailored trousers, and skirts. Clean flat-lay and hangar edits.',
+    }
+    : null
+
+  const kurtiHeading = isKurtiListing
+    ? {
+      title: 'KURTI',
+      description:
+        'Indian women’s kurtis — anarkali, straight, A-line, chikankari, and embroidered styles in breathable cotton, rayon, and festive blends.',
     }
     : null
 
@@ -731,9 +751,11 @@ export default function ShopPage() {
         ? bySegment.filter(isDenimProduct)
         : isWomensBaggyListing
           ? bySegment.filter(isWomensBaggyDenimProduct)
-          : bySegment.filter((product) =>
-            matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
-          )
+          : isKurtiListing
+            ? bySegment.filter(isKurtiProduct)
+            : bySegment.filter((product) =>
+              matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
+            )
 
   const byWesternGroup = isWesternOutfitsListing
     ? bySubcategory.filter((product) => matchesWesternListingFilter(product, westernFilter))
@@ -794,6 +816,20 @@ export default function ShopPage() {
     )
     return sorted
   })()
+
+  const displayedProducts = isKurtiListing
+    ? visibleProducts.slice(0, kurtiVisibleCount)
+    : visibleProducts
+
+  const canLoadMoreKurtis = isKurtiListing && kurtiVisibleCount < visibleProducts.length
+
+  const kurtiListingKey = `${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery}`
+  if (kurtiListingKey !== kurtiListingKeyRef.current) {
+    kurtiListingKeyRef.current = kurtiListingKey
+    if (kurtiVisibleCount !== KURTI_PAGE_SIZE) {
+      setKurtiVisibleCount(KURTI_PAGE_SIZE)
+    }
+  }
 
   useEffect(() => {
     if (!ready) {
@@ -1122,8 +1158,8 @@ export default function ShopPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
           {searchQuery ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
@@ -1310,6 +1346,38 @@ export default function ShopPage() {
                 />
               ))}
             </ProductListingGrid>
+          ) : null
+        ) : isKurtiListing ? (
+          displayedProducts.length > 0 ? (
+            <>
+              <ProductListingGrid className="mt-6">
+                {displayedProducts.map((product, index) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    href={`/product/${product.slug}`}
+                    variant="studio"
+                    priority={index < 4}
+                    onToggleWishlist={handleToggleWishlist}
+                    isInWishlist={isInWishlist(String(product.id))}
+                  />
+                ))}
+              </ProductListingGrid>
+              {canLoadMoreKurtis ? (
+                <div className="mt-8 flex flex-col items-center gap-3">
+                  <p className="text-xs tracking-[0.12em] text-neutral-500 uppercase">
+                    Showing {displayedProducts.length} of {visibleProducts.length}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setKurtiVisibleCount((current) => current + KURTI_PAGE_SIZE)}
+                    className="border border-neutral-900 px-8 py-3 text-xs font-semibold tracking-[0.16em] text-neutral-900 uppercase transition-colors hover:bg-neutral-900 hover:text-white"
+                  >
+                    Load more
+                  </button>
+                </div>
+              ) : null}
+            </>
           ) : null
         ) : isWomenListing ? (
           <ProductListingGrid className="mt-6">

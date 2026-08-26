@@ -35,6 +35,7 @@ export const shopCategories: ShopCategory[] = [
   { slug: 'mens-shirt', title: "Men's Shirt", description: 'Polished structure in a relaxed fit.', image: '/og-image.svg' },
   { slug: 'womens-dresses', title: "Women's Dresses", description: 'Fluid forms with effortless movement.', image: '/og-image.svg' },
   { slug: 'saree', title: 'Saree', description: 'Refined weaves and fluid drapes for considered elegance.', image: '/collections/featured-saree-collection.jpg' },
+  { slug: 'kurti', title: 'Kurti', description: 'Indian women’s kurtis — anarkali, straight, A-line, chikankari, and embroidered styles.', image: '/images/products/kurtis/kurti-001.jpg' },
   { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge — crop tops, shirts, denim shorts, trousers, and skirts.', image: '/og-image.svg' },
   { slug: 'womens-baggy', title: "Women's Baggy", description: 'Loose and wide-leg baggy jeans for women with a premium denim finish.', image: '/hero/womens-baggy/womens-jeans-listing.png' },
   { slug: 'couples', title: 'Couples Collection', description: 'Coordinated pieces for shared moments.', image: '/og-image.svg' },
