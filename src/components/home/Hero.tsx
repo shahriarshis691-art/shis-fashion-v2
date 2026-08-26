@@ -11,12 +11,24 @@ interface HeroSlide {
   alt: string
   width: number
   height: number
+  priority?: boolean
 }
 
-/** Strictly the 3 campaign posters in /public/hero/ (clean filenames). */
+/** Index 0 is locked to the Monsoon Saree campaign — first paint on every mount. */
 const heroSlides: HeroSlide[] = [
   {
     id: 1,
+    image: '/hero/main-hero-image2.jpg',
+    title: 'THE MONSOON',
+    btnText: 'SHOP SAREE',
+    link: '/saree',
+    alt: 'The Monsoon Saree Collection',
+    width: 900,
+    height: 1600,
+    priority: true,
+  },
+  {
+    id: 2,
     image: '/hero/kid-homepage.jpg',
     title: 'Everyday Kids Edit',
     btnText: 'Shop Kids',
@@ -24,16 +36,6 @@ const heroSlides: HeroSlide[] = [
     alt: 'Kids Everyday Wear',
     width: 1122,
     height: 1402,
-  },
-  {
-    id: 2,
-    image: '/hero/main-hero-image2.jpg',
-    title: 'Monsoon Saree Collection',
-    btnText: 'Shop Saree',
-    link: '/saree',
-    alt: 'The Monsoon Saree Collection',
-    width: 900,
-    height: 1600,
   },
   {
     id: 3,
@@ -71,6 +73,7 @@ export const Hero: React.FC = () => {
       return
     }
 
+    // Interval (not timeout-on-mount) so slide 0 paints first; rotation starts after AUTO_ROTATE_MS.
     const interval = window.setInterval(nextSlide, AUTO_ROTATE_MS)
     return () => window.clearInterval(interval)
   }, [isPaused, nextSlide, prefersReducedMotion])
@@ -124,7 +127,7 @@ export const Hero: React.FC = () => {
         {heroSlides.map((slide, index) => {
           const isActive = index === safeIndex
           const shouldLoad = index === 0 || Math.abs(index - safeIndex) <= 1
-          const isLcpCandidate = index === 0
+          const isLcpCandidate = Boolean(slide.priority) || index === 0
 
           return (
             <div
