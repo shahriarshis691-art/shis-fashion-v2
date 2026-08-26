@@ -66,6 +66,41 @@ const MEN_ONLY_CATEGORY_SLUGS = new Set([
   'jackets',
 ])
 
+const MEN_EXCLUSION_KEYWORDS = [
+  'men',
+  "men's",
+  'mens',
+  'man',
+  "man's",
+  'half-shirt',
+  'half shirt',
+  'panjabi',
+  'mens-denim',
+  "men's denim",
+  'mens shirt',
+  "men's shirt",
+  'menswear',
+]
+
+const WOMEN_INCLUSION_KEYWORDS = [
+  'women',
+  "women's",
+  'womens',
+  'female',
+  'saree',
+  'sari',
+  'kurti',
+  'three piece',
+  'three-piece',
+  '3 piece',
+  '3-piece',
+  'salwar',
+  'salwar kameez',
+  'women tee',
+  "women's tee",
+  'womens tee',
+]
+
 function matchesPriceRange(price: string, range: PriceRange) {
   if (range === 'all') {
     return true
@@ -82,23 +117,61 @@ function matchesPriceRange(price: string, range: PriceRange) {
 }
 
 function isWomenListingProduct(product: ShopProduct) {
+  const extendedProduct = product as ShopProduct & {
+    gender?: string
+    tags?: string[]
+  }
+  const canonical = resolveCanonicalSubcategorySlug(product.category)
+  const womenSlugs = new Set(getSubcategoriesForSegment('women').map((item) => item.slug))
+  const normalizedCategory = product.category.trim().toLowerCase()
+  const normalizedGender = (extendedProduct.gender ?? '').trim().toLowerCase()
+  const normalizedTags = (extendedProduct.tags ?? []).map((tag) => tag.trim().toLowerCase())
+
+  const searchableText = [
+    product.category,
+    product.name,
+    product.slug,
+    String(product.id),
+    product.description,
+    product.image,
+    normalizedTags.join(' '),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
   if (matchesSegmentByAlias('kids', product.category)) {
     return false
   }
 
-  const canonical = resolveCanonicalSubcategorySlug(product.category)
-  const womenSlugs = new Set(getSubcategoriesForSegment('women').map((item) => item.slug))
+  if (normalizedCategory === 'men' || normalizedGender === 'men' || normalizedGender === 'male') {
+    return false
+  }
 
   if (MEN_ONLY_CATEGORY_SLUGS.has(canonical) && !womenSlugs.has(canonical)) {
     return false
   }
 
-  const categoryText = [product.category, product.name].join(' ').toLowerCase()
-  if (/\b(men|mens|man's|men's)\b/.test(categoryText) && !/\b(women|womens|woman|woman's|women's)\b/.test(categoryText)) {
+  if (
+    MEN_EXCLUSION_KEYWORDS.some((keyword) => searchableText.includes(keyword)) &&
+    !WOMEN_INCLUSION_KEYWORDS.some((keyword) => searchableText.includes(keyword))
+  ) {
     return false
   }
 
-  return matchesSegmentByAlias('women', product.category)
+  const isExplicitWomenByCategory = normalizedCategory === 'women' || normalizedCategory === 'woman'
+  const isExplicitWomenByGender = normalizedGender === 'women' || normalizedGender === 'female'
+  const isWomenSubcategory = womenSlugs.has(canonical)
+  const isWomenByAlias = matchesSegmentByAlias('women', product.category)
+  const isWomenByKeyword = WOMEN_INCLUSION_KEYWORDS.some((keyword) => searchableText.includes(keyword))
+
+  return (
+    isExplicitWomenByCategory ||
+    isExplicitWomenByGender ||
+    isWomenSubcategory ||
+    isWomenByAlias ||
+    isWomenByKeyword
+  )
 }
 
 function normalizeProductCategory(category: string) {
