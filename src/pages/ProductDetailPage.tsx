@@ -30,6 +30,7 @@ import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
+import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
 import type { ShopProduct } from '../data/shopData'
@@ -147,7 +148,12 @@ export default function ProductDetailPage() {
     const unsubscribe = subscribeToProducts((nextProducts) => {
       const live = nextProducts.map(toProduct)
       const taken = new Set(live.map((entry) => entry.slug))
-      const local = [...halfShirtCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts]
+      const local = [
+        ...halfShirtCollectionProducts,
+        ...mensBaggyDenimCollectionProducts,
+        ...oversizedTeeCollectionProducts,
+        ...westernOutfitsCollectionProducts,
+      ]
         .filter((entry) => !taken.has(entry.slug))
         .map(fromCatalogProduct)
       setProducts([...live, ...local])

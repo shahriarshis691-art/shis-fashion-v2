@@ -33,7 +33,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee', 'unisex-tee', 'unisex-oversized-t-shirts'], path: '/collections/oversized-tee' },
   { slug: 't-shirts', label: 'T-Shirts', aliases: ['t-shirts', 'mens-t-shirts', 'mens-tee'] },
-  { slug: 'denim', label: 'Denim', aliases: ['denim', 'denim-pants', 'denim-pant'] },
+  { slug: 'denim', label: 'Denim', aliases: ['denim', 'denim-pants', 'denim-pant', 'baggy', 'baggy-jeans', 'mens-baggy', 'mens-denim', "men's denim"] },
   { slug: 'pants', label: 'Pants', aliases: ['pants'] },
   { slug: 'jackets', label: 'Jackets', aliases: ['jackets'] },
   { slug: 'accessories', label: 'Accessories', aliases: ['accessories', 'gift', 'couples'] },

@@ -7,6 +7,10 @@ import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import {
+  isDenimProduct,
+  mergeMensBaggyDenimCatalog,
+} from '../data/mensBaggyDenimCollection'
+import {
   isOversizedTeeProduct,
   mergeOversizedTeeCatalog,
   shouldExcludeOversizedTeeFromMenListing,
@@ -396,7 +400,9 @@ export default function ShopPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   const [products, setProducts] = useState<ShopProduct[]>(() =>
-    mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+    mergeMensBaggyDenimCatalog(
+      mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+    ),
   )
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('featured')
@@ -451,8 +457,10 @@ export default function ShopPage() {
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
       setProducts(
-        mergeWesternOutfitsCatalog(
-          mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+        mergeMensBaggyDenimCatalog(
+          mergeWesternOutfitsCatalog(
+            mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+          ),
         ),
       )
       setReady(true)
@@ -653,6 +661,15 @@ export default function ShopPage() {
     }
     : null
 
+  const isDenimListing = effectiveSegment === 'men' && effectiveSubcategory === 'denim'
+
+  const denimHeading = isDenimListing
+    ? {
+      title: "MEN'S BAGGY DENIM",
+      description: 'Loose, wide-leg, and skate-ready baggy jeans — premium cotton denim in waist sizes 28–36.',
+    }
+    : null
+
   const isWesternOutfitsListing = effectiveSegment === 'women' && effectiveSubcategory === 'western-outfits'
 
   const westernHeading = isWesternOutfitsListing
@@ -689,9 +706,11 @@ export default function ShopPage() {
     ? bySegment
     : isHalfShirtListing
       ? bySegment.filter(isHalfShirtProduct)
-      : bySegment.filter((product) =>
-        matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
-      )
+      : isDenimListing
+        ? bySegment.filter(isDenimProduct)
+        : bySegment.filter((product) =>
+          matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
+        )
 
   const byWesternGroup = isWesternOutfitsListing
     ? bySubcategory.filter((product) => matchesWesternListingFilter(product, westernFilter))
@@ -1035,8 +1054,8 @@ export default function ShopPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? oversizedTeeHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? oversizedTeeHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? westernHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? westernHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
           {searchQuery ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
