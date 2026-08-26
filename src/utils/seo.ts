@@ -106,6 +106,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/women',
     '/sarees',
     '/men',
+    '/men/half-shirts',
     '/kids',
     '/cart',
     '/checkout',
@@ -143,7 +144,7 @@ function getCollectionTitle(slug: string) {
     return 'Collection'
   }
 
-  if (slug === 'half-shirt') {
+  if (slug === 'half-shirt' || slug === 'half-shirts') {
     return "Men's Half Shirt Collection"
   }
 
@@ -228,6 +229,9 @@ function buildBreadcrumbItems(pathname: string) {
 
   if (segments[0] === 'men') {
     items.push({ name: 'Men', item: `${SITE_URL}/men` })
+    if (segments[1] === 'half-shirts') {
+      items.push({ name: 'Half Shirts', item: `${SITE_URL}/men/half-shirts` })
+    }
     return items
   }
 
@@ -583,6 +587,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Explore men\'s premium polos, oversized tees, shirts, and denim from SHIS Fashion Bangladesh.',
       keywords: 'Men fashion Bangladesh, SHIS men collection, premium men wear',
       canonicalPath: '/men',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/men/half-shirts') {
+    return {
+      title: "Men's Half Shirts | SHIS Fashion Bangladesh",
+      description: 'Shop men\'s half shirts from SHIS Fashion Bangladesh — breathable everyday edits with fast delivery and cash on delivery.',
+      keywords: 'half shirt Bangladesh, mens half shirt, SHIS half shirts, casual shirt Dhaka',
+      canonicalPath: '/men/half-shirts',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',

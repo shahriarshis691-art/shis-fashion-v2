@@ -23,6 +23,7 @@ const STATIC_PATHS = [
   '/shop',
   '/women',
   '/men',
+  '/men/half-shirts',
   '/kids',
   '/sarees',
   '/sarees/crimson-red-georgette-saree',

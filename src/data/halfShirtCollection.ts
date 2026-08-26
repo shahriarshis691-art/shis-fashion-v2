@@ -6,157 +6,184 @@ export interface HalfShirtProduct extends ShopProduct {
   fabric: string
 }
 
-const HALF_SHIRT_IMAGE = '/collections/men-category.webp'
-const HALF_SHIRT_ALT_IMAGES = [
-  '/hero/hero-premium-casual-shirt.webp',
-  '/collections/men-category.webp',
-]
+const HALF_SHIRT_SIZES = ['M', 'L', 'XL', 'XXL'] as const
+const HALF_SHIRT_IMAGE_DIR = '/collections/half-shirts'
+
+function halfShirtImage(index: number) {
+  return `${HALF_SHIRT_IMAGE_DIR}/half-shirt-${index}.jpg`
+}
+
+function createHalfShirt(
+  index: number,
+  slug: string,
+  name: string,
+  price: number,
+  colors: string[],
+  description: string,
+  options: {
+    fit?: HalfShirtProduct['fit']
+    fabric?: string
+    featured?: boolean
+    newArrival?: boolean
+    stock?: number
+  } = {},
+): HalfShirtProduct {
+  const image = halfShirtImage(index)
+
+  return {
+    id: `half-shirt-${index}`,
+    slug,
+    name,
+    price: formatBDT(price),
+    category: 'half-shirts',
+    brand: 'SHIS Fashion',
+    image,
+    galleryImages: [image],
+    description,
+    sizes: [...HALF_SHIRT_SIZES],
+    colors,
+    stock: options.stock ?? 16,
+    featured: options.featured ?? false,
+    newArrival: options.newArrival ?? true,
+    fit: options.fit ?? 'Regular',
+    fabric: options.fabric ?? 'Cotton',
+  }
+}
 
 export const halfShirtCollectionProducts: HalfShirtProduct[] = [
-  {
-    id: 'half-shirt-cuban-collar',
-    slug: 'cuban-collar-half-shirt',
-    name: 'Cuban Collar Half Shirt',
-    price: formatBDT(1450),
-    comparePrice: formatBDT(1690),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_IMAGE,
-    galleryImages: [HALF_SHIRT_IMAGE, HALF_SHIRT_ALT_IMAGES[0]],
-    description: 'Open Cuban collar with breathable cotton and an easy summer drape.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['Navy', 'Ivory', 'Black'],
-    stock: 18,
-    featured: true,
-    newArrival: true,
-    fit: 'Regular',
-    fabric: 'Cotton',
-  },
-  {
-    id: 'half-shirt-textured-linen',
-    slug: 'textured-linen-half-shirt',
-    name: 'Textured Linen Half Shirt',
-    price: formatBDT(1650),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_ALT_IMAGES[0],
-    galleryImages: [HALF_SHIRT_ALT_IMAGES[0], HALF_SHIRT_IMAGE],
-    description: 'Light linen texture with a relaxed half-sleeve silhouette for warm days.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['Sand', 'Olive'],
-    stock: 12,
-    featured: true,
-    newArrival: false,
-    fit: 'Regular',
-    fabric: 'Linen',
-  },
-  {
-    id: 'half-shirt-printed-casual',
-    slug: 'printed-casual-half-shirt',
-    name: 'Printed Casual Half Shirt',
-    price: formatBDT(1390),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_IMAGE,
-    galleryImages: [HALF_SHIRT_IMAGE],
-    description: 'Subtle print detailing balanced with a clean everyday collar.',
-    sizes: ['M', 'L', 'XL'],
-    colors: ['Ink', 'Stone'],
-    stock: 20,
-    featured: false,
-    newArrival: true,
-    fit: 'Oversized',
-    fabric: 'Cotton',
-  },
-  {
-    id: 'half-shirt-minimalist-cotton',
-    slug: 'minimalist-cotton-half-shirt',
-    name: 'Minimalist Cotton Half Shirt',
-    price: formatBDT(1290),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_ALT_IMAGES[0],
-    galleryImages: [HALF_SHIRT_ALT_IMAGES[0]],
-    description: 'Clean lines, soft hand-feel, and a refined everyday half-shirt cut.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['White', 'Black', 'Charcoal'],
-    stock: 24,
-    featured: true,
-    newArrival: false,
-    fit: 'Regular',
-    fabric: 'Cotton',
-  },
-  {
-    id: 'half-shirt-mandarin-soft',
-    slug: 'soft-mandarin-half-shirt',
-    name: 'Soft Mandarin Half Shirt',
-    price: formatBDT(1550),
-    comparePrice: formatBDT(1790),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_IMAGE,
-    galleryImages: [HALF_SHIRT_IMAGE],
-    description: 'Banded mandarin collar with a calm, polished finish.',
-    sizes: ['L', 'XL', 'XXL'],
-    colors: ['Navy', 'Beige'],
-    stock: 10,
-    featured: false,
-    newArrival: true,
-    fit: 'Regular',
-    fabric: 'Cotton Blend',
-  },
-  {
-    id: 'half-shirt-relaxed-camp',
-    slug: 'relaxed-camp-collar-half-shirt',
-    name: 'Relaxed Camp Collar Half Shirt',
-    price: formatBDT(1490),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_ALT_IMAGES[0],
-    galleryImages: [HALF_SHIRT_ALT_IMAGES[0]],
-    description: 'Camp collar ease with a soft oversized drop for weekend wear.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['Cream', 'Sky'],
-    stock: 16,
-    featured: true,
-    newArrival: false,
-    fit: 'Oversized',
-    fabric: 'Cotton',
-  },
-  {
-    id: 'half-shirt-structured-poplin',
-    slug: 'structured-poplin-half-shirt',
-    name: 'Structured Poplin Half Shirt',
-    price: formatBDT(1590),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_IMAGE,
-    galleryImages: [HALF_SHIRT_IMAGE],
-    description: 'Crisp poplin body with a tailored regular fit for smart-casual days.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['White', 'Pale Blue'],
-    stock: 14,
-    featured: false,
-    newArrival: false,
-    fit: 'Regular',
-    fabric: 'Poplin',
-  },
-  {
-    id: 'half-shirt-airflow-oxford',
-    slug: 'airflow-oxford-half-shirt',
-    name: 'Airflow Oxford Half Shirt',
-    price: formatBDT(1720),
-    category: 'mens-shirt',
-    brand: 'SHIS Fashion',
-    image: HALF_SHIRT_ALT_IMAGES[0],
-    galleryImages: [HALF_SHIRT_ALT_IMAGES[0]],
-    description: 'Breathable oxford weave designed for all-day movement and polish.',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    colors: ['Slate', 'Ivory'],
-    stock: 9,
-    featured: true,
-    newArrival: true,
-    fit: 'Oversized',
-    fabric: 'Oxford',
-  },
+  createHalfShirt(
+    1,
+    'ivory-vine-print-half-shirt',
+    'Ivory Vine Print Half Shirt',
+    1250,
+    ['Ivory', 'White'],
+    'Crisp ivory cotton with a quiet vine print and an easy half-sleeve drape for warm Dhaka days.',
+    { featured: true, newArrival: true, stock: 18 },
+  ),
+  createHalfShirt(
+    2,
+    'silver-microcheck-half-shirt',
+    'Silver Microcheck Half Shirt',
+    1190,
+    ['Silver', 'Pale Blue'],
+    'Fine microcheck texture in silver-blue with a clean collar and tailored half-sleeve finish.',
+    { fabric: 'Cotton Blend', stock: 20 },
+  ),
+  createHalfShirt(
+    3,
+    'maroon-geometric-half-shirt',
+    'Maroon Geometric Print Half Shirt',
+    1290,
+    ['Maroon'],
+    'Deep maroon cotton with a compact geometric print and a refined everyday camp-collar ease.',
+    { featured: true, stock: 14 },
+  ),
+  createHalfShirt(
+    4,
+    'mustard-block-print-half-shirt',
+    'Mustard Block Print Half Shirt',
+    1350,
+    ['Mustard'],
+    'Warm mustard block print with vertical artisan motifs, cut for considered casual wear.',
+    { fabric: 'Cotton', featured: true, stock: 15 },
+  ),
+  createHalfShirt(
+    5,
+    'violet-mandala-half-shirt',
+    'Violet Mandala Print Half Shirt',
+    1390,
+    ['Violet'],
+    'Tonal violet mandala print on a breathable half-shirt body for evening and weekend edits.',
+    { stock: 12 },
+  ),
+  createHalfShirt(
+    6,
+    'coral-geo-print-half-shirt',
+    'Coral Geo Print Half Shirt',
+    1320,
+    ['Coral'],
+    'Vivid coral ground with a white geometric print, balanced for heat and everyday polish.',
+    { featured: true, stock: 17 },
+  ),
+  createHalfShirt(
+    7,
+    'sky-twin-pocket-half-shirt',
+    'Sky Twin Pocket Half Shirt',
+    1450,
+    ['Sky Blue'],
+    'Clear sky-blue cotton with twin flap pockets and a structured collar for smart-casual days.',
+    { fabric: 'Cotton', featured: true, stock: 11 },
+  ),
+  createHalfShirt(
+    8,
+    'mist-dotdash-half-shirt',
+    'Mist Dotdash Print Half Shirt',
+    1220,
+    ['Mist Grey'],
+    'Soft mist-grey micro print with a single chest pocket and an unforced regular fit.',
+    { stock: 19 },
+  ),
+  createHalfShirt(
+    9,
+    'indigo-diamond-half-shirt',
+    'Indigo Diamond Print Half Shirt',
+    1280,
+    ['Indigo'],
+    'Indigo diamond geometry on a breathable half-sleeve shirt, styled for city heat.',
+    { featured: true, stock: 13 },
+  ),
+  createHalfShirt(
+    10,
+    'navy-mosaic-half-shirt',
+    'Navy Mosaic Print Half Shirt',
+    1420,
+    ['Navy', 'Coral'],
+    'Navy mosaic print with coral and cyan accents, cut for presence without heaviness.',
+    { fabric: 'Cotton Blend', featured: true, stock: 10 },
+  ),
+  createHalfShirt(
+    11,
+    'ice-cyan-geo-half-shirt',
+    'Ice Cyan Geo Half Shirt',
+    1260,
+    ['Ice Blue', 'White'],
+    'White-ground cyan geometry with a clean pointed collar and a light summer hand-feel.',
+    { stock: 16 },
+  ),
+  createHalfShirt(
+    12,
+    'crimson-stripe-half-shirt',
+    'Crimson Stripe Half Shirt',
+    1180,
+    ['Crimson', 'White'],
+    'Fine crimson-and-white vertical stripe with navy inner collar detailing and a chest pocket.',
+    { fabric: 'Poplin', newArrival: true, stock: 21 },
+  ),
+  createHalfShirt(
+    13,
+    'midnight-kaleidoscope-half-shirt',
+    'Midnight Kaleidoscope Half Shirt',
+    1380,
+    ['Midnight Navy'],
+    'Midnight navy kaleidoscope print with a calm drape for evening gatherings and travel.',
+    { featured: true, stock: 9 },
+  ),
 ]
+
+export function getHalfShirtProductBySlug(slug: string): HalfShirtProduct | undefined {
+  const normalized = slug.trim().toLowerCase()
+  if (!normalized) {
+    return undefined
+  }
+
+  return halfShirtCollectionProducts.find((product) => product.slug === normalized || String(product.id) === normalized)
+}
+
+export function mergeHalfShirtCatalog(liveProducts: ShopProduct[]): ShopProduct[] {
+  const taken = new Set(
+    liveProducts.map((product) => product.slug.trim().toLowerCase()).filter(Boolean),
+  )
+
+  const extras = halfShirtCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
+  return extras.length ? [...liveProducts, ...extras] : liveProducts
+}

@@ -23,7 +23,6 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const OrderLookupPage = lazy(() => import('./pages/OrderLookupPage'))
 const SalePage = lazy(() => import('./pages/SalePage'))
-const HalfShirtCollectionPage = lazy(() => import('./pages/HalfShirtCollectionPage'))
 const KidsOversizedTeeCollectionPage = lazy(() => import('./pages/KidsOversizedTeeCollectionPage'))
 const KidsProductDetailPage = lazy(() => import('./pages/KidsProductDetailPage'))
 const SareeCollectionPage = lazy(() => import('./pages/SareeCollectionPage'))
@@ -88,6 +87,10 @@ export const router = createBrowserRouter([
         element: withSuspense(<ShopPage />),
       },
       {
+        path: 'men/half-shirts',
+        element: withSuspense(<ShopPage />),
+      },
+      {
         path: 'kids',
         element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },
@@ -129,7 +132,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'collections/half-shirt',
-        element: withSuspense(<HalfShirtCollectionPage />),
+        element: <Navigate to="/men/half-shirts" replace />,
+      },
+      {
+        path: 'collections/half-shirts/:productSlug',
+        element: withSuspense(<ProductDetailPage />),
+      },
+      {
+        path: 'collections/half-shirts',
+        element: <Navigate to="/men/half-shirts" replace />,
       },
       {
         path: 'collections/kids',

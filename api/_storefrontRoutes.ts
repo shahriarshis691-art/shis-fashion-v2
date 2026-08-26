@@ -11,6 +11,7 @@ const STATIC_PATHS = new Set([
   '/shop',
   '/women',
   '/men',
+  '/men/half-shirts',
   '/kids',
   '/sarees',
   '/saree',
@@ -44,6 +45,8 @@ const KNOWN_LISTING_SLUGS = new Set([
   'sarees',
   'shirts',
   'mens-shirt',
+  'half-shirt',
+  'half-shirts',
   'polos',
   'panjabi',
   'oversized-tee',
@@ -124,6 +127,10 @@ export function classifyStorefrontPath(pathname: string): StorefrontPathClass {
 
   if (segments[0] === 'collections' && segments.length === 2) {
     return { kind: 'collection', slug: segments[1] ?? '' }
+  }
+
+  if (segments[0] === 'collections' && segments.length === 3) {
+    return { kind: 'product', slug: segments[2] ?? '' }
   }
 
   if (segments[0] === 'brands' && segments.length === 2) {

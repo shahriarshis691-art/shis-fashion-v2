@@ -25,10 +25,12 @@ const ProductCard = memo(function ProductCard({
   href,
   prefetchModule,
 }: ProductCardProps) {
+  const detailHref = href ?? (/half-shirt/i.test(product.category) ? `/product/${product.slug}` : undefined)
+
   return (
     <AarongProductCard
       product={product}
-      href={href}
+      href={detailHref}
       prefetchModule={prefetchModule}
       priority={priority}
       isInWishlist={isInWishlist}

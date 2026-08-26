@@ -24,6 +24,8 @@ import { DELIVERY_RETURN_BULLETS } from '../data/storePolicy'
 import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
+import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
+import type { ShopProduct } from '../data/shopData'
 
 const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
 
@@ -81,6 +83,28 @@ function buildHighlights(description: string, sizes: string[], stock: number) {
   return [...snippets, sizeLine, stockLine].slice(0, 4)
 }
 
+function fromCatalogProduct(product: ShopProduct) {
+  return {
+    id: String(product.id),
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    comparePrice: product.comparePrice,
+    brand: product.brand,
+    category: product.category,
+    image: product.image,
+    description: product.description,
+    galleryImages: product.galleryImages?.filter(Boolean) ?? (product.image ? [product.image] : []),
+    galleryImageTitles: (product.galleryImages?.length ? product.galleryImages : product.image ? [product.image] : []).map(() => product.name),
+    sizes: product.sizes ?? [],
+    colors: product.colors ?? [],
+    variants: product.variants ?? [] as ProductVariantStock[],
+    stock: product.stock ?? 0,
+    featured: Boolean(product.featured),
+    newArrival: Boolean(product.newArrival),
+  }
+}
+
 export default function ProductDetailPage() {
   const { productSlug } = useParams()
   const decodedSlug = decodeURIComponent(productSlug ?? '')
@@ -90,7 +114,9 @@ export default function ProductDetailPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
-  const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([])
+  const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>(() =>
+    halfShirtCollectionProducts.map(fromCatalogProduct),
+  )
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
@@ -112,14 +138,21 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
-      setProducts(nextProducts.map(toProduct))
+      const live = nextProducts.map(toProduct)
+      const taken = new Set(live.map((entry) => entry.slug))
+      const local = halfShirtCollectionProducts
+        .filter((entry) => !taken.has(entry.slug))
+        .map(fromCatalogProduct)
+      setProducts([...live, ...local])
       setReady(true)
     })
 
     return unsubscribe
   }, [])
 
-  const product = products.find((entry) => entry.slug === decodedSlug)
+  const product = products.find((entry) =>
+    entry.slug === decodedSlug || String(entry.id) === decodedSlug,
+  )
 
   useEffect(() => {
     if (!product?.id) {
@@ -177,7 +210,7 @@ export default function ProductDetailPage() {
   }, [location.pathname, product, ready])
 
   useEffect(() => {
-    if (!product || !ready) {
+    if (!product) {
       return
     }
 
@@ -243,7 +276,7 @@ export default function ProductDetailPage() {
   }, [isZoomOpen])
 
   useEffect(() => {
-    if (!product || !ready || hasTrackedRecentlyViewedRef.current) {
+    if (!product || hasTrackedRecentlyViewedRef.current) {
       return
     }
 
@@ -444,7 +477,7 @@ export default function ProductDetailPage() {
     }
   }
 
-  if (!ready) {
+  if (!ready && !product) {
     return (
       <section className="bg-white px-3.5 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
         <Container>

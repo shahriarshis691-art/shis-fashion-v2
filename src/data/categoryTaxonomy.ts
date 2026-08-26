@@ -22,7 +22,13 @@ interface SegmentConfig {
 }
 
 const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
-  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt', 'half-shirt', 'half-shirts', 'casual-shirt', 'casual-shirts'] },
+  { slug: 'shirts', label: 'Shirts', aliases: ['shirts', 'mens-shirt', 'casual-shirt', 'casual-shirts'] },
+  {
+    slug: 'half-shirts',
+    label: 'Half Shirts',
+    aliases: ['half-shirt', 'half-shirts', 'half shirt', 'mens-half-shirt', 'mens-half-shirts'],
+    path: '/men/half-shirts',
+  },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'unisex-tee', 'unisex-oversized-t-shirts'] },
@@ -166,12 +172,30 @@ export function getDedicatedListingFromPath(pathname: string) {
     }
   }
 
+  if (
+    normalized === '/men/half-shirts' ||
+    normalized === '/collections/half-shirt' ||
+    normalized === '/collections/half-shirts'
+  ) {
+    return {
+      segment: 'men' as const,
+      subcategory: 'half-shirts',
+      eyebrow: "Men's Half Shirt Collection",
+      title: "MEN'S HALF SHIRTS",
+      description: 'Refined half-shirt edits focused on comfort, fit, and repeat wear.',
+    }
+  }
+
   return null
 }
 
 export function getDedicatedListingPath(segment: ShopSegment, subcategory: string) {
   if (segment === 'women' && subcategory === 'saree') {
     return '/sarees'
+  }
+
+  if (segment === 'men' && (subcategory === 'half-shirts' || subcategory === 'half-shirt')) {
+    return '/men/half-shirts'
   }
 
   return null

@@ -34,7 +34,7 @@ const fallbackCategoryStrips = [
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
-  { key: 'sale', label: 'HALF SHIRT', href: '/collections/half-shirt', order: 50, image: categoryStripCovers.men, imagePosition: 'center top' },
+  { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'couples')?.image ?? '', imagePosition: 'center top' },
 ] as const
 
@@ -181,8 +181,8 @@ const defaultHomepage: HomepageContent = {
     },
     sale: {
       key: 'sale',
-      label: 'HALF SHIRT',
-      href: '/collections/half-shirt',
+      label: 'HALF SHIRTS',
+      href: '/men/half-shirts',
       enabled: true,
       order: 50,
       coverImage: categoryStripCovers.men,
@@ -301,6 +301,7 @@ export default function HomePage() {
         const liveLabel = section?.label?.trim() || fallback.label
         const liveHref = section?.href?.trim() || fallback.href
         const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
+        const isHalfShirtsCard = fallback.key === 'sale'
         const resolvedCover = pickPreferredCategoryCoverUrl(
           section?.coverImage,
           section?.images,
@@ -309,8 +310,12 @@ export default function HomePage() {
 
         return {
           key: fallback.key,
-          label: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
-          href: fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
+          label: isHalfShirtsCard
+            ? 'HALF SHIRTS'
+            : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+          href: isHalfShirtsCard
+            ? '/men/half-shirts'
+            : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }

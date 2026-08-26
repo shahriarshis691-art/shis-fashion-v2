@@ -50,7 +50,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
 
   return (
-    <article className="product-card luxury-tap group relative min-w-0">
+    <article className="product-card luxury-tap group relative min-w-0 transition-transform duration-500 ease-out hover:-translate-y-1">
       <PrefetchLink
         to={detailHref}
         prefetchModule={prefetchModule}
@@ -68,17 +68,22 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-105"
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-[center_top]"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}
           />
+          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+            <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
+              View
+            </span>
+          </div>
         </div>
 
         <h3 className="mt-2.5 line-clamp-1 text-left text-[13px] font-medium tracking-tight text-neutral-900 sm:text-[14px]">
           {product.name}
         </h3>
-        <p className="mt-0.5 text-left text-[12px] font-normal text-neutral-700 sm:text-[13px]">
+        <p className="mt-0.5 text-left text-[12px] font-semibold tabular-nums text-neutral-900 sm:text-[13px]">
           {formatAarongListPrice(product.price)}
         </p>
       </PrefetchLink>

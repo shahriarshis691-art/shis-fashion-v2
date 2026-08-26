@@ -5,6 +5,7 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import { metaPixel } from '../services/metaPixel'
@@ -135,6 +136,15 @@ function segmentMatchesProduct(segment: ShopSegment, category: string) {
   return matchesSegmentByAlias(segment, category)
 }
 
+function isHalfShirtProduct(product: ShopProduct) {
+  if (matchesSubcategoryByAlias('men', 'half-shirts', product.category)) {
+    return true
+  }
+
+  const text = [product.name, product.slug, product.category].join(' ').toLowerCase()
+  return /half[\s_-]?shirts?/.test(text)
+}
+
 function getLegacyCategorySlug(pathname: string) {
   const parts = pathname.split('/').filter(Boolean)
   if (parts[0] !== 'shop' || parts.length < 2) {
@@ -206,6 +216,7 @@ function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, i
           <ProductCard
             key={product.id}
             product={product}
+            href={/half-shirt/i.test(product.category) ? `/product/${product.slug}` : undefined}
             priority={index < 4}
             onToggleWishlist={onToggleWishlist}
             isInWishlist={isInWishlist(String(product.id))}
@@ -222,7 +233,7 @@ export default function ShopPage() {
   const searchParams = new URLSearchParams(location.search)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
-  const [products, setProducts] = useState<ShopProduct[]>([])
+  const [products, setProducts] = useState<ShopProduct[]>(() => mergeHalfShirtCatalog([]))
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('popular')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
@@ -269,7 +280,7 @@ export default function ShopPage() {
 
   useEffect(() => {
     const unsubscribeProducts = subscribeToProducts((nextProducts) => {
-      setProducts(nextProducts.map(mapProduct))
+      setProducts(mergeHalfShirtCatalog(nextProducts.map(mapProduct)))
       setReady(true)
     })
 
@@ -458,10 +469,8 @@ export default function ShopPage() {
     }
     : null
 
-  const isHalfShirtListing =
-    effectiveSegment === 'men' &&
-    effectiveSubcategory === 'shirts' &&
-    rawQuerySubcategory === 'half-shirt'
+  const isHalfShirtListing = dedicatedListing?.subcategory === 'half-shirts' ||
+    (effectiveSegment === 'men' && effectiveSubcategory === 'half-shirts')
 
   const halfShirtHeading = isHalfShirtListing
     ? {
@@ -483,9 +492,11 @@ export default function ShopPage() {
 
   const bySubcategory = effectiveSubcategory === 'all'
     ? bySegment
-    : bySegment.filter((product) =>
-      matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
-    )
+    : isHalfShirtListing
+      ? bySegment.filter(isHalfShirtProduct)
+      : bySegment.filter((product) =>
+        matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
+      )
 
   const byFilter = bySubcategory.filter((product) => {
     if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
@@ -806,7 +817,7 @@ export default function ShopPage() {
         </div>
 
         {/* Subcategory Carousels */}
-        {!ready ? (
+        {!ready && products.length === 0 ? (
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`listing-skeleton-${index}`}>

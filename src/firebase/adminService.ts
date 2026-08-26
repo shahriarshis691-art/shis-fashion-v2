@@ -907,7 +907,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
-  { key: 'sale', label: 'HALF SHIRT', href: '/collections/half-shirt', order: 50, legacyImageKey: 'mens' },
+  { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'mens' },
   { key: 'new-arrivals', label: 'OVERSIZE TEE', href: '/shop?category=men&sub=oversized-tee', order: 60, legacyImageKey: 'couples' },
 ]
 
@@ -990,8 +990,8 @@ const defaultCategorySections: HomepageCategorySections = {
   },
   sale: {
     key: 'sale',
-    label: 'HALF SHIRT',
-    href: '/collections/half-shirt',
+    label: 'HALF SHIRTS',
+    href: '/men/half-shirts',
     enabled: true,
     order: 50,
     coverImage: getLegacyCategoryImage('mens'),
@@ -1035,6 +1035,9 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
     if (normalizedHref.includes('sub=denim')) {
       return 'denim'
     }
+    if (normalizedHref.includes('half-shirt')) {
+      return 'sale'
+    }
     return 'men'
   }
 
@@ -1043,10 +1046,6 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
   }
 
   if (normalizedHref.startsWith('/sale') || normalizedHref.includes('half-shirt')) {
-    return 'sale'
-  }
-
-  if (normalizedHref.startsWith('/men') && normalizedHref.includes('sub=shirts')) {
     return 'sale'
   }
 
@@ -1135,6 +1134,10 @@ function aliasToSectionKey(value: string): HomepageCategorySectionKey | null {
 
   if (normalized === 'denims' || normalized === 'jeans') {
     return 'denim'
+  }
+
+  if (normalized === 'half-shirt' || normalized === 'half-shirts' || normalized === 'half shirts') {
+    return 'sale'
   }
 
   return null
@@ -1306,8 +1309,8 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
 
     const normalizedSection: HomepageCategorySection = {
       key: layout.key,
-      label: source?.label?.trim() || fallback.label,
-      href: source?.href?.trim() || fallback.href,
+      label: layout.key === 'sale' ? 'HALF SHIRTS' : (source?.label?.trim() || fallback.label),
+      href: layout.key === 'sale' ? '/men/half-shirts' : (source?.href?.trim() || fallback.href),
       enabled: source?.enabled ?? fallback.enabled,
       order: typeof source?.order === 'number' ? source.order : fallback.order,
       coverImage,
