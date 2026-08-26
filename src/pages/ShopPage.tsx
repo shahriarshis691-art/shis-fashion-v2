@@ -33,12 +33,9 @@ import NotFoundPage from './NotFoundPage'
 
 type SortOption = 'featured' | 'popular' | 'new' | 'price-low' | 'price-high' | 'best-selling'
 
-type PriceRange = 'all' | 'under-1500' | '1500-3000' | '3000-plus'
-
 interface ProductFilters {
   inStockOnly: boolean
   newOnly: boolean
-  priceRange: PriceRange
 }
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
@@ -47,13 +44,6 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'best-selling', label: 'Best Selling' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
-]
-
-const priceRangeOptions: Array<{ value: PriceRange; label: string }> = [
-  { value: 'all', label: 'All prices' },
-  { value: 'under-1500', label: 'Under ৳1,500' },
-  { value: '1500-3000', label: '৳1,500 – ৳3,000' },
-  { value: '3000-plus', label: '৳3,000+' },
 ]
 
 const MEN_ONLY_CATEGORY_SLUGS = new Set([
@@ -100,21 +90,6 @@ const WOMEN_INCLUSION_KEYWORDS = [
   "women's tee",
   'womens tee',
 ]
-
-function matchesPriceRange(price: string, range: PriceRange) {
-  if (range === 'all') {
-    return true
-  }
-
-  const amount = parseBDT(price)
-  if (range === 'under-1500') {
-    return amount < 1500
-  }
-  if (range === '1500-3000') {
-    return amount >= 1500 && amount <= 3000
-  }
-  return amount > 3000
-}
 
 function isWomenListingProduct(product: ShopProduct) {
   const extendedProduct = product as ShopProduct & {
@@ -371,12 +346,10 @@ export default function ShopPage() {
   const [draftFilters, setDraftFilters] = useState<ProductFilters>({
     inStockOnly: false,
     newOnly: false,
-    priceRange: 'all',
   })
   const [filters, setFilters] = useState<ProductFilters>({
     inStockOnly: false,
     newOnly: false,
-    priceRange: 'all',
   })
   const lastTrackedListStateRef = useRef('')
   const lastTrackedEmptyStateRef = useRef('')
@@ -650,10 +623,6 @@ export default function ShopPage() {
       return false
     }
 
-    if (!matchesPriceRange(product.price, filters.priceRange)) {
-      return false
-    }
-
     return true
   })
 
@@ -764,7 +733,6 @@ export default function ShopPage() {
       sortBy,
       filters.inStockOnly ? 'stock' : 'all-stock',
       filters.newOnly ? 'new' : 'all-new',
-      filters.priceRange,
       location.pathname,
       location.search,
     ].join('|')
@@ -806,7 +774,6 @@ export default function ShopPage() {
     effectiveSubcategory,
     filters.inStockOnly,
     filters.newOnly,
-    filters.priceRange,
     location.pathname,
     location.search,
     ready,
@@ -825,7 +792,6 @@ export default function ShopPage() {
       sortBy,
       filters.inStockOnly ? 'stock' : 'all-stock',
       filters.newOnly ? 'new' : 'all-new',
-      filters.priceRange,
       location.pathname,
       location.search,
     ].join('|')
@@ -871,7 +837,6 @@ export default function ShopPage() {
       sort: sortBy,
       in_stock_only: filters.inStockOnly,
       new_only: filters.newOnly,
-      price_range: filters.priceRange,
       path: location.pathname,
       search: location.search,
     })
@@ -880,7 +845,6 @@ export default function ShopPage() {
     effectiveSubcategory,
     filters.inStockOnly,
     filters.newOnly,
-    filters.priceRange,
     location.pathname,
     location.search,
     ready,
@@ -898,8 +862,8 @@ export default function ShopPage() {
   }
 
   const resetAllFilters = () => {
-    setFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
-    setDraftFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
+    setFilters({ inStockOnly: false, newOnly: false })
+    setDraftFilters({ inStockOnly: false, newOnly: false })
     setSortBy('featured')
     setDraftSortBy('featured')
     clearSearch()
@@ -941,13 +905,6 @@ export default function ShopPage() {
       key: 'sub',
       label: segmentSubcategories.find((item) => item.slug === effectiveSubcategory)?.label ?? effectiveSubcategory,
       onClear: () => navigate('/women'),
-    })
-  }
-  if (filters.priceRange !== 'all') {
-    activeFilterBadges.push({
-      key: 'price',
-      label: priceRangeOptions.find((item) => item.value === filters.priceRange)?.label ?? 'Price',
-      onClear: () => setFilters((current) => ({ ...current, priceRange: 'all' })),
     })
   }
   if (filters.inStockOnly) {
@@ -1070,25 +1027,6 @@ export default function ShopPage() {
           </p>
 
           <div className="hidden flex-wrap items-center gap-4 sm:flex">
-            {isWomenListing ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-neutral-400">Price</span>
-                {priceRangeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setFilters((current) => ({ ...current, priceRange: option.value }))}
-                    className={`px-2.5 py-1 text-[11px] font-medium tracking-[0.06em] transition-colors ${
-                      filters.priceRange === option.value
-                        ? 'bg-black text-white'
-                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
             <div className="flex items-center gap-2">
               <label htmlFor="desktop-sort" className="text-xs font-medium text-neutral-400">
                 Sort
@@ -1245,10 +1183,9 @@ export default function ShopPage() {
         onFiltersChange={setDraftFilters}
         onApply={applyFilterSheet}
         onReset={() => {
-          setDraftFilters({ inStockOnly: false, newOnly: false, priceRange: 'all' })
+          setDraftFilters({ inStockOnly: false, newOnly: false })
           setDraftSortBy('featured')
         }}
-        showPriceRanges={isWomenListing}
       />
     </section>
   )
@@ -1263,7 +1200,6 @@ function AnimateMobileSheet({
   onFiltersChange,
   onApply,
   onReset,
-  showPriceRanges = false,
 }: {
   open: boolean
   onClose: () => void
@@ -1273,7 +1209,6 @@ function AnimateMobileSheet({
   onFiltersChange: (value: ProductFilters) => void
   onApply: () => void
   onReset: () => void
-  showPriceRanges?: boolean
 }) {
   return (
     <div>
@@ -1321,29 +1256,6 @@ function AnimateMobileSheet({
                   ))}
                 </div>
               </div>
-
-              {showPriceRanges ? (
-                <div className="mt-5">
-                  <p className="text-caption uppercase tracking-[0.12em] text-black/55">Price</p>
-                  <div className="mt-2 grid gap-2">
-                    {priceRangeOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => onFiltersChange({ ...filters, priceRange: option.value })}
-                        className={`ui-interactive flex items-center justify-between border px-3 py-2 text-sm ${
-                          filters.priceRange === option.value
-                            ? 'border-black bg-black text-white'
-                            : 'border-black/15 text-black hover:bg-black/5'
-                        }`}
-                      >
-                        <span>{option.label}</span>
-                        {filters.priceRange === option.value ? <span aria-hidden>✓</span> : null}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
 
               <div className="mt-5">
                 <p className="text-caption uppercase tracking-[0.12em] text-black/55">Filters</p>
