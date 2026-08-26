@@ -11,6 +11,8 @@
     "verify:launch": "node scripts/verify-launch-env.mjs",
     "fetch:western-images": "node scripts/fetch-western-images.mjs",
     "fetch:kurti-images": "node scripts/fetch-kurti-images.mjs",
+    "generate:kurtis-catalog": "node scripts/generate-kurtis-catalog.mjs",
+    "prebuild": "node scripts/generate-kurtis-catalog.mjs",
     "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
