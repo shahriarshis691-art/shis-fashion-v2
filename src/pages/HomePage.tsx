@@ -32,7 +32,7 @@ const fallbackCategoryStrips = [
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
-  { key: 'western', label: "WOMEN'S BAGGY", href: '/collections/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
+  { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
 ] as const
@@ -171,7 +171,7 @@ const defaultHomepage: HomepageContent = {
     western: {
       key: 'western',
       label: "WOMEN'S BAGGY",
-      href: '/collections/womens-baggy',
+      href: '/women/womens-baggy',
       enabled: true,
       order: 40,
       coverImage: categoryStripCovers.western,
@@ -329,7 +329,7 @@ export default function HomePage() {
             : isOversizedTeeCard
               ? '/collections/oversized-tee'
               : isWomensBaggyCard
-                ? '/collections/womens-baggy'
+                ? '/women/womens-baggy'
                 : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,

@@ -12,6 +12,7 @@ import {
 } from '../data/mensBaggyDenimCollection'
 import {
   WOMENS_BAGGY_HERO_IMAGE,
+  WOMENS_BAGGY_HERO_IMAGE_FALLBACK,
   isWomensBaggyDenimProduct,
   mergeWomensBaggyDenimCatalog,
 } from '../data/womensBaggyDenimCollection'
@@ -680,7 +681,8 @@ export default function ShopPage() {
     : null
 
   const isWomensBaggyListing = dedicatedListing?.subcategory === 'womens-baggy' ||
-    (effectiveSegment === 'women' && effectiveSubcategory === 'womens-baggy')
+    (effectiveSegment === 'women' && effectiveSubcategory === 'womens-baggy') ||
+    location.pathname.includes('womens-baggy')
 
   const womensBaggyHeading = isWomensBaggyListing
     ? {
@@ -1060,7 +1062,7 @@ export default function ShopPage() {
   return (
     <section className={`bg-white pb-24 ${isWomensBaggyListing ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isWomensBaggyListing ? (
-        <div className="listing-hero-frame relative flex w-full max-w-[100vw] items-end justify-center overflow-hidden bg-white aspect-[3/2] sm:aspect-[2/1] lg:aspect-[2.15/1]">
+        <div className="listing-hero-frame relative flex w-full max-w-[100vw] items-end justify-center overflow-hidden bg-neutral-100">
           <img
             src={WOMENS_BAGGY_HERO_IMAGE}
             alt="Women's Baggy Jeans — SHIS Fashion"
@@ -1071,14 +1073,19 @@ export default function ShopPage() {
             fetchPriority="high"
             decoding="async"
             draggable={false}
-            className="listing-hero-motion gpu-media absolute inset-0 h-full w-full object-cover object-center"
+            className="listing-hero-motion gpu-media"
             onError={(event) => {
-              const src = event.currentTarget.src
-              if (src.includes('womens-jeans-listing.png') && !src.endsWith('.jpeg')) {
-                event.currentTarget.src = '/hero/womens-baggy/womens-jeans-listing.png.jpeg'
+              const image = event.currentTarget
+              if (image.dataset.fallback === 'done') {
                 return
               }
-              event.currentTarget.src = '/og-image.svg'
+              if (image.dataset.fallback !== 'jpeg') {
+                image.dataset.fallback = 'jpeg'
+                image.src = WOMENS_BAGGY_HERO_IMAGE_FALLBACK
+                return
+              }
+              image.dataset.fallback = 'done'
+              image.src = '/og-image.svg'
             }}
           />
           <div className="relative z-10 pb-5 sm:pb-8">

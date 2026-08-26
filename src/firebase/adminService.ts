@@ -906,7 +906,7 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'men', label: 'Men', href: '/men', order: 20, legacyImageKey: 'mens' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
-  { key: 'western', label: "WOMEN'S BAGGY", href: '/collections/womens-baggy', order: 40, legacyImageKey: 'western' },
+  { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, legacyImageKey: 'western' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'half-shirts' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, legacyImageKey: 'oversized-tee' },
 ]
@@ -993,7 +993,7 @@ const defaultCategorySections: HomepageCategorySections = {
   western: {
     key: 'western',
     label: "WOMEN'S BAGGY",
-    href: '/collections/womens-baggy',
+    href: '/women/womens-baggy',
     enabled: true,
     order: 40,
     coverImage: getLegacyCategoryImage('western'),

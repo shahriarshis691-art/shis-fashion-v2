@@ -54,7 +54,7 @@ const HERO_SLIDES: HeroSlide[] = [
     image: '/collections/featured-denim-collection.jpg',
     title: "Women's Baggy",
     btnText: "Shop Women's Baggy",
-    link: '/collections/womens-baggy',
+    link: '/women/womens-baggy',
     alt: "Women's Baggy Jeans Collection",
     width: 1122,
     height: 1402,

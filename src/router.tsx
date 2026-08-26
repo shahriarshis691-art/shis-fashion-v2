@@ -84,6 +84,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<ShopPage />),
       },
       {
+        path: 'women/womens-baggy',
+        element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'women/womens-baggy-jeans',
+        element: <Navigate to="/women/womens-baggy" replace />,
+      },
+      {
         path: 'men',
         element: withSuspense(<ShopPage />),
       },
@@ -161,7 +169,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'collections/womens-baggy',
-        element: withSuspense(<ShopPage />),
+        element: <Navigate to="/women/womens-baggy" replace />,
+      },
+      {
+        path: 'collections/womens-baggy-jeans',
+        element: <Navigate to="/women/womens-baggy" replace />,
       },
       {
         path: 'collections/kids',

@@ -59,7 +59,7 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
       'women-baggy-jeans',
       'ladies-baggy',
     ],
-    path: '/collections/womens-baggy',
+    path: '/women/womens-baggy',
   },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee'], path: '/collections/oversized-tee' },
   { slug: 'denim', label: 'Denim', aliases: ['denim'] },
@@ -206,6 +206,8 @@ export function getDedicatedListingFromPath(pathname: string) {
   }
 
   if (
+    normalized === '/women/womens-baggy' ||
+    normalized === '/women/womens-baggy-jeans' ||
     normalized === '/collections/womens-baggy' ||
     normalized === '/collections/womens-baggy-jeans'
   ) {
@@ -231,7 +233,7 @@ export function getDedicatedListingPath(segment: ShopSegment, subcategory: strin
   }
 
   if (segment === 'women' && (subcategory === 'womens-baggy' || subcategory === 'womens-baggy-jeans')) {
-    return '/collections/womens-baggy'
+    return '/women/womens-baggy'
   }
 
   if (subcategory === 'oversized-tee' || subcategory === 'oversize-tee') {

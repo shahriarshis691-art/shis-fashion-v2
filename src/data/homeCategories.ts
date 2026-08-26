@@ -51,7 +51,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   {
     key: 'western',
     name: "Women's Baggy",
-    href: '/collections/womens-baggy',
+    href: '/women/womens-baggy',
     image: '/collections/featured-denim-collection.jpg',
     imagePosition: 'center top',
   },
