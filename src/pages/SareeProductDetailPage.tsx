@@ -7,6 +7,7 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import PdpAccordion from '../components/shop/PdpAccordion'
 import PdpActionButtons from '../components/shop/PdpActionButtons'
 import PdpGalleryNav from '../components/shop/PdpGalleryNav'
+import PdpThumbnailStrip from '../components/shop/PdpThumbnailStrip'
 import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
 import PdpShareButton from '../components/shop/PdpShareButton'
 import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
@@ -329,7 +330,7 @@ export default function SareeProductDetailPage() {
       <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-2">
         <div>
           <div
-            className="relative aspect-[3/4] w-full bg-[#f7f7f8]"
+            className="studio-media-frame"
             onTouchStart={(event) => setTouchStartX(event.changedTouches[0]?.clientX ?? null)}
             onTouchEnd={(event) => {
               if (touchStartX == null || gallery.length < 2) {
@@ -360,7 +361,7 @@ export default function SareeProductDetailPage() {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                className="pdp-main-image absolute inset-0 h-full w-full object-contain object-[center_top] md:object-cover"
+                className="pdp-main-image"
                 onError={(event) => {
                   event.currentTarget.src = '/og-image.svg'
                 }}
@@ -374,6 +375,17 @@ export default function SareeProductDetailPage() {
               onSelect={setActiveImageIndex}
             />
           </div>
+          <PdpThumbnailStrip
+            items={gallery.map((src, index) => ({
+              src,
+              alt: galleryAlt(index),
+            }))}
+            activeIndex={activeImageIndex}
+            onSelect={setActiveImageIndex}
+            onError={(event) => {
+              event.currentTarget.src = '/og-image.svg'
+            }}
+          />
         </div>
 
         <div className="px-4 pt-5 sm:px-8 lg:px-0 lg:pt-0">

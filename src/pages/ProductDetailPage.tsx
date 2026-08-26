@@ -12,6 +12,7 @@ import PdpCssCropGallery, {
   getHalfShirtCropView,
   halfShirtCropImageClass,
 } from '../components/shop/PdpCssCropGallery'
+import PdpThumbnailStrip from '../components/shop/PdpThumbnailStrip'
 import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
 import PdpShareButton from '../components/shop/PdpShareButton'
 import { useListingWishlist } from '../hooks/useListingWishlist'
@@ -554,12 +555,13 @@ export default function ProductDetailPage() {
               onTouchEnd={handleTouchEnd}
             />
           ) : (
+          <>
           <div
-            className="relative aspect-[3/4] w-full bg-[#f7f7f8]"
+            className="studio-media-frame"
             onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-0">
               <img
                 src={heroImage.src || activeImage}
                 srcSet={heroImage.srcSet}
@@ -572,7 +574,7 @@ export default function ProductDetailPage() {
                 height="1600"
                 onError={handleImageError}
                 onClick={() => setIsZoomOpen(true)}
-                className={`pdp-main-image gpu-media h-full w-full cursor-zoom-in object-contain object-[center_top] md:object-cover ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
+                className={`pdp-main-image gpu-media h-full w-full cursor-zoom-in ${isDemoImageUrl(activeImage) ? 'shis-media-tone' : ''}`}
               />
             </div>
             <PdpGalleryNav
@@ -583,6 +585,16 @@ export default function ProductDetailPage() {
               onSelect={setActiveImageIndex}
             />
           </div>
+          <PdpThumbnailStrip
+            items={resolvedGalleryImages.map((src, index) => ({
+              src,
+              alt: product.galleryImageTitles?.[index] || product.name,
+            }))}
+            activeIndex={Math.min(activeImageIndex, resolvedGalleryImages.length - 1)}
+            onSelect={setActiveImageIndex}
+            onError={handleImageError}
+          />
+          </>
           )}
         </div>
 

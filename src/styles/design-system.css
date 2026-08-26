@@ -401,3 +401,143 @@ button,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* -------------------------------------------------------------------------
+   Aarong studio media — listing cards + PDP galleries
+   Layout-only: existing <img src> values are never swapped.
+   ------------------------------------------------------------------------- */
+.studio-media-frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  overflow: hidden;
+  background-color: #f3f3f5;
+  background-image: linear-gradient(
+    90deg,
+    rgba(158, 158, 164, 0.22) 0%,
+    rgba(196, 196, 202, 0.1) 22%,
+    transparent 48%
+  );
+}
+
+.studio-media-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(186, 186, 192, 0.12) 0%,
+    transparent 20%,
+    transparent 78%,
+    rgba(150, 150, 156, 0.1) 100%
+  );
+}
+
+.studio-media-frame > img,
+.studio-media-frame img.product-card-media,
+.studio-media-frame img.pdp-main-image,
+.studio-media-frame img.gpu-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.studio-wishlist {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 3;
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.85));
+  transition: color 220ms var(--ease-luxury);
+}
+
+.studio-wishlist:hover,
+.studio-wishlist:focus-visible {
+  color: #e11d48;
+}
+
+.product-card {
+  min-width: 0;
+}
+
+.product-card-meta {
+  margin-top: 0.625rem;
+  text-align: left;
+}
+
+.product-card-title {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: #1a1a1a;
+}
+
+.product-card-price {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: var(--fw-semibold);
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  color: #111111;
+}
+
+.product-card-price .is-compare {
+  margin-right: 0.4rem;
+  font-weight: var(--fw-regular);
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.pdp-thumb-strip {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .product-card-title,
+  .product-card-price {
+    font-size: 0.875rem;
+  }
+
+  .studio-wishlist {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .pdp-thumb-strip {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pdp-thumb-strip {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

@@ -59,7 +59,7 @@ export default function SalePage() {
           <ProductListingGrid className="mt-8" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`sale-skeleton-${index}`}>
-                <div className="aspect-[3/4] animate-pulse bg-black/5" />
+                <div className="studio-media-frame animate-pulse bg-black/5" />
                 <div className="mt-2 h-3 w-3/4 animate-pulse bg-black/5" />
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>

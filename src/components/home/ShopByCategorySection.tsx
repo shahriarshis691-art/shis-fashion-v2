@@ -28,7 +28,7 @@ export default function ShopByCategorySection({ items }: { items?: { key: string
                 className="group luxury-tap flex flex-col items-center w-full cursor-pointer"
                 aria-label={`${item.name} collection`}
               >
-                <div className="relative w-full aspect-[3/4] overflow-hidden bg-neutral-100">
+                <div className="studio-media-frame">
                   <LuxuryImage
                     src={item.image}
                     alt={`${item.name} category`}

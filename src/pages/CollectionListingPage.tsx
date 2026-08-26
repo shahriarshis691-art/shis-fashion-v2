@@ -201,7 +201,7 @@ export default function CollectionListingPage() {
                 height={1200}
                 sizes="(max-width: 639px) 50vw, 25vw"
                 widths={[320, 480, 768, 960]}
-                className="min-w-0"
+                className="studio-media-frame min-w-0"
                 aspectClassName="aspect-[3/4]"
                 objectPosition="center top"
                 hover

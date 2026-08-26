@@ -1,4 +1,5 @@
 import PdpGalleryNav from './PdpGalleryNav'
+import PdpThumbnailStrip from './PdpThumbnailStrip'
 
 export const HALF_SHIRT_CROP_VIEWS = [
   {
@@ -70,7 +71,7 @@ export default function PdpCssCropGallery({
   return (
     <div>
       <div
-        className="relative aspect-[3/4] w-full overflow-hidden bg-[#f7f7f8]"
+        className="studio-media-frame"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -91,7 +92,7 @@ export default function PdpCssCropGallery({
             decoding="async"
             fetchPriority="high"
             onError={onError}
-            className={`gpu-media absolute inset-0 h-full w-full cursor-zoom-in transition-transform duration-500 ease-out ${halfShirtCropImageClass(safeIndex)}`}
+            className={`pdp-main-image gpu-media cursor-zoom-in transition-transform duration-500 ease-out ${halfShirtCropImageClass(safeIndex)}`}
           />
         </button>
         <PdpGalleryNav
@@ -104,43 +105,17 @@ export default function PdpCssCropGallery({
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2 px-4 sm:px-6 lg:px-0" role="tablist" aria-label="Product detail views">
-        {HALF_SHIRT_CROP_VIEWS.map((view, index) => {
-          const isActive = index === safeIndex
-
-          return (
-            <button
-              key={view.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              aria-label={view.label}
-              onClick={() => onSelect(index)}
-              className={`group text-left ${isActive ? 'text-neutral-900' : 'text-neutral-500'}`}
-            >
-              <span
-                className={`relative block aspect-[3/4] overflow-hidden bg-[#f7f7f8] ${
-                  isActive ? 'ring-1 ring-black' : 'ring-1 ring-black/10'
-                }`}
-              >
-                <img
-                  src={src}
-                  alt=""
-                  width={240}
-                  height={320}
-                  loading="lazy"
-                  decoding="async"
-                  onError={onError}
-                  className={`gpu-media absolute inset-0 h-full w-full transition-transform duration-500 ease-out ${halfShirtCropImageClass(index)}`}
-                />
-              </span>
-              <span className="mt-1.5 block text-center text-[10px] font-medium uppercase tracking-[0.12em]">
-                {view.label}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      <PdpThumbnailStrip
+        items={HALF_SHIRT_CROP_VIEWS.map((view, index) => ({
+          src,
+          alt: `${name} — ${view.label}`,
+          label: view.label,
+          imgClassName: `transition-transform duration-500 ease-out ${halfShirtCropImageClass(index)}`,
+        }))}
+        activeIndex={safeIndex}
+        onSelect={onSelect}
+        onError={onError}
+      />
     </div>
   )
 }

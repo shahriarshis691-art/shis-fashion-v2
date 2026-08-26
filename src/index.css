@@ -167,10 +167,26 @@ main {
 .product-grid {
   content-visibility: auto;
   contain-intrinsic-size: 0 600px;
+  column-gap: 0.625rem;
+  row-gap: 1.25rem;
 }
 
 .product-grid > * {
   min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    column-gap: 1rem;
+    row-gap: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    column-gap: 1.25rem;
+    row-gap: 2rem;
+  }
 }
 
 /* Form Elements Premium */
@@ -217,19 +233,14 @@ img.hero-slide-image {
   display: block;
 }
 
-/* PDP main gallery — full garment visible on mobile; cover fill from desktop. */
+/* PDP main gallery — fill the 3/4 studio frame on every breakpoint. */
 img.pdp-main-image {
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center top !important;
 }
 
 @media (min-width: 768px) {
   img.hero-slide-image {
-    object-position: center top !important;
-  }
-
-  img.pdp-main-image {
-    object-fit: cover !important;
     object-position: center top !important;
   }
 }

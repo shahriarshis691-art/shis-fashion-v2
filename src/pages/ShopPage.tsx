@@ -1289,7 +1289,7 @@ export default function ShopPage() {
           <ProductListingGrid className="mt-4 sm:mt-5" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={`listing-skeleton-${index}`}>
-                <div className="aspect-[3/4] animate-pulse bg-black/5" />
+                <div className="studio-media-frame animate-pulse bg-black/5" />
                 <div className="mt-2 h-3 w-3/4 animate-pulse bg-black/5" />
                 <div className="mt-1.5 h-3 w-1/3 animate-pulse bg-black/5" />
               </div>
@@ -1297,7 +1297,7 @@ export default function ShopPage() {
           </ProductListingGrid>
         ) : isWesternOutfitsListing ? (
           visibleProducts.length > 0 ? (
-            <div className="-mx-4 mt-6 grid grid-cols-2 gap-4 px-4 md:-mx-8 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4">
+            <ProductListingGrid className="mt-6">
               {visibleProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
@@ -1309,7 +1309,7 @@ export default function ShopPage() {
                   isInWishlist={isInWishlist(String(product.id))}
                 />
               ))}
-            </div>
+            </ProductListingGrid>
           ) : null
         ) : isWomenListing ? (
           <ProductListingGrid className="mt-6">

@@ -488,7 +488,7 @@ export default function HomePage() {
                   className="group flex min-w-0 w-full cursor-pointer flex-col"
                   aria-label={`${displayLabel} collection`}
                 >
-                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100">
+                  <div className="studio-media-frame">
                     <img
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
