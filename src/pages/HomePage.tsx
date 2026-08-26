@@ -35,7 +35,7 @@ const fallbackCategoryStrips = [
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, image: homeCategoryItems.find((item) => item.key === 'western')?.image ?? '', imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
-  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image || '/hero/kids/timeless-oversize-hero.source.png', imagePosition: 'center top' },
+  { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
 ] as const
 
 const categoryStripCardImage = {
@@ -195,7 +195,7 @@ const defaultHomepage: HomepageContent = {
       href: '/collections/oversized-tee',
       enabled: true,
       order: 60,
-      coverImage: homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image || '/hero/kids/timeless-oversize-hero.source.png',
+      coverImage: categoryStripCovers['oversized-tee'],
       images: [],
       updatedAt: null,
     },
@@ -305,11 +305,13 @@ export default function HomePage() {
         const isOversizedTeeCard = fallback.key === 'new-arrivals'
         const resolvedCover = isHalfShirtsCard
           ? categoryStripCovers['half-shirts']
-          : pickPreferredCategoryCoverUrl(
-            section?.coverImage,
-            section?.images,
-            fallback.image || categoryStripCover(fallback.key, ''),
-          )
+          : isOversizedTeeCard
+            ? categoryStripCovers['oversized-tee']
+            : pickPreferredCategoryCoverUrl(
+              section?.coverImage,
+              section?.images,
+              fallback.image || categoryStripCover(fallback.key, ''),
+            )
 
         return {
           key: fallback.key,
@@ -495,6 +497,11 @@ export default function HomePage() {
                         if (item.key === 'sale' && !event.currentTarget.dataset.halfShirtFallback) {
                           event.currentTarget.dataset.halfShirtFallback = '1'
                           event.currentTarget.src = '/hero/half-shirt-1.jpg.png'
+                          return
+                        }
+                        if (item.key === 'new-arrivals' && !event.currentTarget.dataset.oversizedTeeFallback) {
+                          event.currentTarget.dataset.oversizedTeeFallback = '1'
+                          event.currentTarget.src = '/hero/oversized-tee.jpg.jpeg'
                           return
                         }
                         handleImageError(event)

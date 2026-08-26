@@ -929,8 +929,7 @@ function getLegacyCategoryImage(legacyImageKey: string) {
   }
 
   if (legacyImageKey === 'oversized-tee' || legacyImageKey === 'oversized') {
-    return homeCategoryItems.find((item) => item.key === 'oversized-tee')?.image
-      || '/hero/kids/timeless-oversize-hero.source.png'
+    return categoryStripCovers['oversized-tee']
   }
 
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
@@ -1320,11 +1319,13 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
       ? categoryStripCovers.denim
       : layout.key === 'sale'
         ? categoryStripCovers['half-shirts']
-        : pickPreferredCategoryCoverUrl(
-          incomingCover || sourceCover,
-          sourceImages,
-          fallback.coverImage,
-        )
+        : layout.key === 'new-arrivals'
+          ? categoryStripCovers['oversized-tee']
+          : pickPreferredCategoryCoverUrl(
+            incomingCover || sourceCover,
+            sourceImages,
+            fallback.coverImage,
+          )
 
     const updatedAt = typeof source?.updatedAt === 'string'
       ? source.updatedAt

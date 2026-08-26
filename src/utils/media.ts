@@ -72,6 +72,7 @@ export function isOutdatedHardcodedMediaUrl(value: string) {
     || normalized.includes('plus.unsplash.com')
     || normalized.includes('featured-men-collection.jpg')
     || normalized.includes('category-saree-blue.jpg')
+    || normalized.includes('timeless-oversize-hero')
 }
 
 export function pickPreferredMediaUrl(

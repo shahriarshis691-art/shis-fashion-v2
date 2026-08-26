@@ -9,6 +9,7 @@ export const categoryStripCovers: Record<string, string> = {
   saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
   'half-shirts': '/hero/half-shirt-1.jpg',
+  'oversized-tee': '/hero/oversized-tee.jpg',
 }
 
 export function featuredCollectionCover(slug: string, fallback = '') {
@@ -19,6 +20,7 @@ export function categoryStripCover(key: string, fallback = '') {
   const bundled = (
     categoryStripCovers[key]
     ?? (key === 'sale' ? categoryStripCovers['half-shirts'] : '')
+    ?? (key === 'new-arrivals' ? categoryStripCovers['oversized-tee'] : '')
   ) || (key === 'women' ? categoryStripCovers.saree : '')
   const saved = fallback.trim()
 
@@ -30,6 +32,7 @@ export function categoryStripCover(key: string, fallback = '') {
       || normalized.includes('plus.unsplash.com')
       || normalized.includes('featured-men-collection.jpg')
       || normalized.includes('category-saree-blue.jpg')
+      || normalized.includes('timeless-oversize-hero')
 
     if (!isOutdatedPlaceholder) {
       return saved

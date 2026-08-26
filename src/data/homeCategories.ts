@@ -11,7 +11,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'oversized-tee',
     name: 'Unisex Oversized Tee',
     href: '/collections/oversized-tee',
-    image: '/hero/kids/timeless-oversize-hero.source.png',
+    image: '/hero/oversized-tee.jpg',
     imagePosition: 'center top',
   },
   {
