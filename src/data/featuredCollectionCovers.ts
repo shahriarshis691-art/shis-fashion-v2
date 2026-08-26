@@ -16,9 +16,10 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
-  const bundled = categoryStripCovers[key]
+  const bundled = (
+    categoryStripCovers[key]
     ?? (key === 'sale' ? categoryStripCovers['half-shirts'] : '')
-    || (key === 'women' ? categoryStripCovers.saree : '')
+  ) || (key === 'women' ? categoryStripCovers.saree : '')
   const saved = fallback.trim()
 
   if (saved) {
