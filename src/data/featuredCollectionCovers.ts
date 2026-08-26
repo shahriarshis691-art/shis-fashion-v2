@@ -8,6 +8,7 @@ export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.webp',
   saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
+  'half-shirts': '/hero/half-shirt-1.jpg',
 }
 
 export function featuredCollectionCover(slug: string, fallback = '') {
@@ -15,7 +16,9 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 }
 
 export function categoryStripCover(key: string, fallback = '') {
-  const bundled = categoryStripCovers[key] ?? (key === 'women' ? categoryStripCovers.saree : '')
+  const bundled = categoryStripCovers[key]
+    ?? (key === 'sale' ? categoryStripCovers['half-shirts'] : '')
+    || (key === 'women' ? categoryStripCovers.saree : '')
   const saved = fallback.trim()
 
   if (saved) {

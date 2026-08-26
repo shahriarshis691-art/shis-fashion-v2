@@ -907,13 +907,17 @@ const HOMEPAGE_CATEGORY_SECTION_LAYOUT: Array<{
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, legacyImageKey: 'denim' },
   { key: 'kids', label: 'Kids', href: '/kids', order: 30, legacyImageKey: 'kids' },
   { key: 'western', label: 'Western', href: '/women?sub=tunic', order: 40, legacyImageKey: 'western' },
-  { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'mens' },
+  { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, legacyImageKey: 'half-shirts' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, legacyImageKey: 'oversized-tee' },
 ]
 
 function getLegacyCategoryImage(legacyImageKey: string) {
   if (legacyImageKey === 'denim') {
     return categoryStripCovers.denim
+  }
+
+  if (legacyImageKey === 'half-shirts' || legacyImageKey === 'half-shirt') {
+    return categoryStripCovers['half-shirts']
   }
 
   if (legacyImageKey === 'mens' || legacyImageKey === 'men') {
@@ -999,7 +1003,7 @@ const defaultCategorySections: HomepageCategorySections = {
     href: '/men/half-shirts',
     enabled: true,
     order: 50,
-    coverImage: getLegacyCategoryImage('mens'),
+    coverImage: getLegacyCategoryImage('half-shirts'),
     images: [],
     updatedAt: null,
   },
@@ -1314,11 +1318,13 @@ function normalizeHomepageCategorySections(content: Partial<HomepageContent> | u
     const sourceCover = typeof source?.coverImage === 'string' ? source.coverImage.trim() : ''
     const coverImage = layout.key === 'denim'
       ? categoryStripCovers.denim
-      : pickPreferredCategoryCoverUrl(
-        incomingCover || sourceCover,
-        sourceImages,
-        fallback.coverImage,
-      )
+      : layout.key === 'sale'
+        ? categoryStripCovers['half-shirts']
+        : pickPreferredCategoryCoverUrl(
+          incomingCover || sourceCover,
+          sourceImages,
+          fallback.coverImage,
+        )
 
     const updatedAt = typeof source?.updatedAt === 'string'
       ? source.updatedAt
