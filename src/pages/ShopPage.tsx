@@ -1052,7 +1052,11 @@ export default function ShopPage() {
         </div>
 
         {isWomenListing ? (
-          <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 -mx-4 mt-6 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+          <div className={`sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md ${
+            isWesternOutfitsListing
+              ? '-mx-4 px-4 md:-mx-8 md:px-8'
+              : '-mx-4 px-4 sm:-mx-8 sm:px-8'
+          }`}>
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {isWesternOutfitsListing ? (
                 WESTERN_LISTING_FILTER_OPTIONS.map((option) => {
@@ -1065,7 +1069,7 @@ export default function ShopPage() {
                       key={option.value}
                       type="button"
                       onClick={() => setWesternFilter(option.value)}
-                      className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                      className={`shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
                         active
                           ? 'bg-black text-white'
                           : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
@@ -1196,19 +1200,26 @@ export default function ShopPage() {
               </div>
             ))}
           </ProductListingGrid>
-        ) : isWomenListing ? (
-          <ProductListingGrid
-            className={
-              isWesternOutfitsListing
-                ? 'mt-6 !grid-cols-2 !gap-3 !px-3 md:!grid-cols-4 md:!gap-6 md:!px-6 lg:!grid-cols-4'
-                : 'mt-6'
-            }
-          >
+        ) : isWesternOutfitsListing ? (
+          <div className="-mx-4 mt-6 grid grid-cols-2 gap-4 px-4 md:-mx-8 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4">
             {visibleProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                href={isWesternOutfitsListing ? `/product/${product.slug}` : undefined}
+                href={`/product/${product.slug}`}
+                variant="studio"
+                priority={index < 4}
+                onToggleWishlist={handleToggleWishlist}
+                isInWishlist={isInWishlist(String(product.id))}
+              />
+            ))}
+          </div>
+        ) : isWomenListing ? (
+          <ProductListingGrid className="mt-6">
+            {visibleProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
                 priority={index < 4}
                 onToggleWishlist={handleToggleWishlist}
                 isInWishlist={isInWishlist(String(product.id))}

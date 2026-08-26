@@ -163,7 +163,7 @@ button,
 
 .product-card-media {
   transform: translate3d(0, 0, 0);
-  transition: transform 300ms var(--ease-luxury);
+  transition: transform 500ms var(--ease-luxury);
   will-change: transform;
 }
 

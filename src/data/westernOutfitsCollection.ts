@@ -6,7 +6,8 @@ export const WESTERN_OUTFIT_SIZES = ['S', 'M', 'L', 'XL'] as const
 export const WESTERN_OUTFIT_IMAGE_DIR = '/images/western'
 
 export type WesternOutfitGroup = 'tops-blouses' | 'shorts-denim' | 'bottoms-skirts'
-export type WesternListingFilter = 'all' | WesternOutfitGroup
+/** Listing filter chips on `/women?sub=western-outfits`. */
+export type WesternListingFilter = 'all' | 'crop-tops-blouses' | 'casual-shirts' | 'denim-shorts'
 
 export interface WesternOutfitProduct extends ShopProduct {
   sku: string
@@ -43,7 +44,9 @@ function westernImage(index: number) {
 function resolveSubcategory(group: WesternOutfitGroup, name: string): WesternOutfitProduct['subcategory'] {
   if (group === 'shorts-denim') return 'Shorts'
   if (group === 'bottoms-skirts') return 'Bottoms'
-  if (/\bshirt\b|\bblouse\b|\boxford\b|\bcamp collar\b/i.test(name)) return 'Shirts'
+  // Blouses live with crop tops; shirts stay in Casual Shirts.
+  if (/\bblouse\b/i.test(name)) return 'Tops'
+  if (/\bshirt\b|\boxford\b|\bcamp collar\b/i.test(name)) return 'Shirts'
   return 'Tops'
 }
 
@@ -555,10 +558,10 @@ export const WESTERN_LISTING_FILTER_OPTIONS: Array<{
   label: string
   countLabel?: boolean
 }> = [
-  { value: 'all', label: 'All Western', countLabel: true },
-  { value: 'tops-blouses', label: 'Tops & Blouses' },
-  { value: 'shorts-denim', label: 'Shorts & Denim' },
-  { value: 'bottoms-skirts', label: 'Bottoms & Skirts' },
+  { value: 'all', label: 'All', countLabel: true },
+  { value: 'crop-tops-blouses', label: 'Crop Tops & Blouses' },
+  { value: 'casual-shirts', label: 'Casual Shirts' },
+  { value: 'denim-shorts', label: 'Denim & Shorts' },
 ]
 
 export function getWesternOutfitProductBySlug(slug: string): WesternOutfitProduct | undefined {
@@ -615,12 +618,35 @@ export function inferWesternOutfitGroup(product: ShopProduct): WesternOutfitGrou
   return 'tops-blouses'
 }
 
+function inferWesternSubcategory(product: ShopProduct): WesternOutfitProduct['subcategory'] {
+  const tagged = product as WesternOutfitFields & { subcategory?: WesternOutfitProduct['subcategory'] }
+  if (tagged.subcategory === 'Tops' || tagged.subcategory === 'Shirts' || tagged.subcategory === 'Shorts' || tagged.subcategory === 'Bottoms') {
+    return tagged.subcategory
+  }
+
+  return resolveSubcategory(inferWesternOutfitGroup(product), product.name)
+}
+
 export function matchesWesternListingFilter(product: ShopProduct, filter: WesternListingFilter) {
   if (filter === 'all') {
     return true
   }
 
-  return inferWesternOutfitGroup(product) === filter
+  const subcategory = inferWesternSubcategory(product)
+
+  if (filter === 'crop-tops-blouses') {
+    return subcategory === 'Tops'
+  }
+
+  if (filter === 'casual-shirts') {
+    return subcategory === 'Shirts'
+  }
+
+  if (filter === 'denim-shorts') {
+    return subcategory === 'Shorts' || inferWesternOutfitGroup(product) === 'shorts-denim'
+  }
+
+  return true
 }
 
 export function mergeWesternOutfitsCatalog(liveProducts: ShopProduct[]): ShopProduct[] {

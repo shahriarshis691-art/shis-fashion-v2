@@ -10,6 +10,7 @@ interface ProductCardProps {
   priority?: boolean
   href?: string
   prefetchModule?: () => Promise<unknown>
+  variant?: 'default' | 'studio'
 }
 
 /**
@@ -24,6 +25,7 @@ const ProductCard = memo(function ProductCard({
   priority,
   href,
   prefetchModule,
+  variant = 'default',
 }: ProductCardProps) {
   const detailHref = href ?? (/half-shirt|oversized-tee|unisex-tee|western/i.test(product.category) ? `/product/${product.slug}` : undefined)
 
@@ -33,6 +35,7 @@ const ProductCard = memo(function ProductCard({
       href={detailHref}
       prefetchModule={prefetchModule}
       priority={priority}
+      variant={variant}
       isInWishlist={isInWishlist}
       onToggleWishlist={onToggleWishlist ? (item) => onToggleWishlist(item as ShopProduct) : undefined}
       onProductClick={onProductClick ? (item) => onProductClick(item as ShopProduct) : undefined}

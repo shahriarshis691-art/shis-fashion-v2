@@ -22,6 +22,8 @@ export interface AarongProductCardProps {
   onToggleWishlist?: (product: AarongProductCardProduct) => void
   isInWishlist?: boolean
   onProductClick?: (product: AarongProductCardProduct) => void
+  /** Studio-style western / premium listing treatment. */
+  variant?: 'default' | 'studio'
 }
 
 const DEFAULT_PREFETCH = () => import('../../pages/ProductDetailPage')
@@ -38,8 +40,10 @@ const AarongProductCard = memo(function AarongProductCard({
   onToggleWishlist,
   isInWishlist = false,
   onProductClick,
+  variant = 'default',
 }: AarongProductCardProps) {
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
+  const isStudio = variant === 'studio'
 
   return (
     <article className="product-card luxury-tap group relative min-w-0 transition-transform duration-500 ease-out hover:-translate-y-1">
@@ -50,7 +54,11 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100/50">
+        <div
+          className={`relative aspect-[3/4] w-full overflow-hidden rounded-sm ${
+            isStudio ? 'bg-[#f9f9f9]' : 'bg-neutral-100'
+          }`}
+        >
           <img
             src={product.image}
             alt={product.name}
@@ -60,20 +68,26 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-[center_top] transition-transform duration-300"
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-105"
             onError={(event) => {
               event.currentTarget.src = '/og-image.svg'
             }}
           />
-          {/* Desktop-only hover CTA — mobile taps the card directly to open PDP */}
-          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
+          {/* Desktop-only subtle VIEW — disabled on mobile so the card itself opens PDP */}
+          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[1] hidden opacity-0 transition-opacity duration-500 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
             <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
               View
             </span>
           </div>
         </div>
 
-        <h3 className="mt-2.5 line-clamp-1 text-left text-[13px] font-medium tracking-tight text-neutral-900 sm:text-[14px]">
+        <h3
+          className={`mt-2.5 line-clamp-1 text-left tracking-tight text-neutral-900 ${
+            isStudio
+              ? 'font-[family-name:var(--font-display)] text-[14px] font-medium sm:text-[15px]'
+              : 'text-[13px] font-medium sm:text-[14px]'
+          }`}
+        >
           {product.name}
         </h3>
         <p className="mt-0.5 text-left text-[12px] font-semibold tabular-nums text-neutral-900 sm:text-[13px]">
@@ -92,7 +106,7 @@ const AarongProductCard = memo(function AarongProductCard({
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="absolute top-1.5 right-1.5 z-10 inline-flex h-11 w-11 items-center justify-center text-neutral-600 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-red-500"
+          className="absolute top-1.5 right-1.5 z-10 inline-flex h-11 w-11 items-center justify-center text-neutral-500 transition-colors duration-300 ease-out hover:text-red-500"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
