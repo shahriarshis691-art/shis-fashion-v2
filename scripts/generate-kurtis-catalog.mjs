@@ -123,21 +123,87 @@ function inferColors(name) {
   return matches.length ? matches.slice(0, 2) : ['Multicolour']
 }
 
-function inferPrice(name, index) {
-  const text = name.toLowerCase()
-  let base = 1690 + (index % 12) * 70
+/**
+ * Bangladesh premium retail pricing tiers (numeric BDT; `formatBDT` adds ৳).
+ *
+ * 1. Daily casual / digital print singles …… 1,300 – 1,550
+ * 2. Embroidered / chikankari / handwork ……… 1,850 – 2,350
+ *    · Download / premium printed …………… 1,650 – 1,850
+ * 3. Two-piece / co-ord sets ………………… 2,050 – 2,650
+ *    · Plazzo / palazzo co-ords …………… 2,110 – 2,250
+ * 4. Luxury / 3-piece festive ………………… 2,600 – 3,450
+ */
+function retailStep(min, max, index, step = 50) {
+  const span = Math.max(0, max - min)
+  const slots = Math.max(1, Math.floor(span / step))
+  return min + ((index % (slots + 1)) * step)
+}
 
-  if (/luxury|designer|premium|embroider|handwork|sequin|zari|3 piece|3pc|3-piece/.test(text)) {
-    base += 450
+function inferPrice(name, index, style = 'straight', filename = '') {
+  const text = name.toLowerCase().trim()
+  const file = filename.toLowerCase()
+  const combined = `${text} ${file}`
+
+  // Explicit product overrides
+  if (text === 'chikankari cotton kurti') {
+    return 2330
   }
-  if (/lawn|linen|cotton/.test(text)) {
-    base += 80
-  }
-  if (/download|classic|elegant casual/.test(text) && index % 3 === 0) {
-    base -= 120
+  if (text === 'nairah mizyn kurti') {
+    return 2180
   }
 
-  return Math.min(3490, Math.max(1490, base))
+  // Tier 4 — Luxury / 3-piece festive: ৳2,600 – ৳3,450
+  if (
+    /\b3\s*piece\b|\b3pc\b|\b3-piece\b|\(\s*3\s*pcs?\s*\)/.test(combined) ||
+    /party dress|festive collection/.test(text)
+  ) {
+    return retailStep(2600, 3450, index, 100)
+  }
+  if (/luxury/.test(text) && !/\b2\s*piece\b|\b2pc\b|\b2-piece\b|\(\s*2\s*pcs?\s*\)/.test(combined)) {
+    return retailStep(2800, 3450, index, 100)
+  }
+
+  // Tier 3 — Two-piece / co-ord: ৳2,050 – ৳2,650 (Plazzo ৳2,110 – ৳2,250)
+  if (/plazzo|palazzo/.test(combined)) {
+    return retailStep(2110, 2250, index, 40)
+  }
+  if (
+    /\b2\s*piece\b|\b2pc\b|\b2-piece\b|\(\s*2\s*pcs?\s*\)|co-?ord|co-order|farshi shalwar/.test(combined) ||
+    /\bsuit\b/.test(combined)
+  ) {
+    return retailStep(2050, 2650, index, 50)
+  }
+
+  // Premium printed / Download Kurti: ৳1,650 – ৳1,850
+  if (text === 'download kurti' || (/premium/.test(text) && /print/.test(text))) {
+    return retailStep(1650, 1850, index, 40)
+  }
+
+  // Tier 2 — Heavy handwork / embroidered / chikankari singles: ৳1,850 – ৳2,350
+  if (
+    style === 'embroidered' ||
+    style === 'chikankari' ||
+    /embroider|handwork|chikankari|bead|sequin|zari|mirror|nairah/.test(text)
+  ) {
+    return retailStep(1850, 2350, index, 50)
+  }
+
+  // Brand / designer single without embroidery — mid premium printed band
+  if (/designer|premium|sana safinaz|amberimran/.test(text)) {
+    return retailStep(1650, 1850, index, 40)
+  }
+
+  // Tier 1 — Digital printed / daily casual singles: ৳1,300 – ৳1,550
+  if (
+    style === 'printed' ||
+    style === 'a-line' ||
+    /digital|print|a-line|casual|block print|summer outfit|beautiful dress/.test(text)
+  ) {
+    return retailStep(1300, 1550, index, 50)
+  }
+
+  // Default daily casual
+  return retailStep(1300, 1550, index, 50)
 }
 
 function ensureKurtiTitle(title) {
@@ -192,7 +258,7 @@ function buildEntry(filename, index) {
   const style = inferStyle(name)
   const fabric = inferFabric(name)
   const colors = inferColors(name)
-  const price = inferPrice(name, index)
+  const price = inferPrice(name, index, style, filename)
   const image = publicImagePath(filename)
   const sku = `KRT-${String(index + 1).padStart(3, '0')}`
   const description = `${name} in ${fabric.toLowerCase()} — a polished Indian ethnic piece for everyday and festive wear.`
