@@ -1,32 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import Container from '../components/ui/Container'
-import ProductCard from '../components/shop/ProductCard'
-import ProductListingGrid from '../components/shop/ProductListingGrid'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
-import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
   isLiveHomepageBackend,
-  subscribeToAdminBrands,
   subscribeToHomepageContent,
-  subscribeToProducts,
-  type AdminBrand,
   type HomepageCategorySection,
   type HomepageCategorySections,
-  type AdminProduct,
   type HomepageContent,
 } from '../firebase/adminService'
-import { CATALOG_IMAGE_PLACEHOLDER, normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
-import { useRecentlyViewed } from '../context/RecentlyViewedContext'
-import { mapAdminProductToShopProduct } from '../utils/productMapper'
-import { useListingWishlist } from '../hooks/useListingWishlist'
+import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
@@ -231,25 +220,13 @@ const defaultHomepage: HomepageContent = {
   ],
 }
 
-const IMAGE_PLACEHOLDER = CATALOG_IMAGE_PLACEHOLDER
-
-function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.removeAttribute('srcset')
-  event.currentTarget.src = IMAGE_PLACEHOLDER
-}
-
 function hasValidSectionHref(section: HomepageCategorySection) {
   return section.href.trim().startsWith('/')
 }
 
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
-  const [products, setProducts] = useState<AdminProduct[]>([])
-  const [brands, setBrands] = useState<AdminBrand[]>([])
-  const [isBrandPanelOpen, setIsBrandPanelOpen] = useState(false)
   const lastSectionIntegritySignalRef = useRef('')
-  const { items: recentlyViewedItems } = useRecentlyViewed()
-  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content, meta) => {
@@ -264,16 +241,6 @@ export default function HomePage() {
       })
       setHomepageContent(content)
     })
-    return unsubscribe
-  }, [])
-
-  useEffect(() => {
-    const unsubscribe = subscribeToProducts((nextProducts) => setProducts(nextProducts))
-    return unsubscribe
-  }, [])
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAdminBrands((nextBrands) => setBrands(nextBrands))
     return unsubscribe
   }, [])
 
@@ -407,73 +374,7 @@ export default function HomePage() {
 
   const heroEnabled = homepageContent.sections.find((section) => section.key === 'hero')?.enabled !== false
   const shopByCategoryEnabled = homepageContent.sections.find((section) => section.key === 'featuredCollection')?.enabled !== false
-
-  const featuredBrands = useMemo(
-    () => {
-      const preferredSlugs = ['ceravo', 'rangkutir', 'velorix-motors', 'xeroxii']
-      const fromLive = preferredSlugs
-        .map((slug) => {
-          const liveBrand = brands.find((brand) => brand.slug.trim().toLowerCase() === slug)
-          if (liveBrand) {
-            return {
-              id: liveBrand.slug,
-              name: liveBrand.name,
-              tag: liveBrand.tag,
-              summary: liveBrand.summary,
-              details: liveBrand.description,
-              logo: liveBrand.logo,
-              contacts: {
-                website: liveBrand.website,
-                contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
-              },
-            }
-          }
-
-          return brandEntries.find((brand) => brand.id === slug) ?? null
-        })
-        .filter((brand): brand is NonNullable<typeof brand> => Boolean(brand))
-
-      const extraLive = brands
-        .filter((brand) => !preferredSlugs.includes(brand.slug.trim().toLowerCase()))
-        .slice(0, Math.max(0, 6 - fromLive.length))
-        .map((liveBrand) => ({
-          id: liveBrand.slug,
-          name: liveBrand.name,
-          tag: liveBrand.tag,
-          summary: liveBrand.summary,
-          details: liveBrand.description,
-          logo: liveBrand.logo,
-          contacts: {
-            website: liveBrand.website,
-            contact: liveBrand.contactPhone ? `tel:${liveBrand.contactPhone.replace(/\s+/g, '')}` : `mailto:${liveBrand.contactEmail}`,
-          },
-        }))
-
-      return [...fromLive, ...extraLive]
-    },
-    [brands],
-  )
-
-  useEffect(() => {
-    if (!isBrandPanelOpen) {
-      return
-    }
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsBrandPanelOpen(false)
-      }
-    }
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', handleEscape)
-
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', handleEscape)
-    }
-  }, [isBrandPanelOpen])
+  const brandPromiseEnabled = homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false
 
   return (
     <div className="bg-white pb-12">
@@ -487,175 +388,35 @@ export default function HomePage() {
         />
       ) : null}
 
-      {homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false ? (
+      {brandPromiseEnabled ? (
         <section className="py-12 sm:py-16">
-              <Container>
-                <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-                  {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
-                </p>
-                <h2 className="mt-1 text-h2 text-black">{homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
-                  {homepageContent.brandPromiseDescription}
-                </p>
-                {homepageContent.bannerImage ? (
-                  <div className="mt-5">
-                    <LuxuryImage
-                      src={homepageContent.bannerImage}
-                      alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
-                      width={1400}
-                      height={800}
-                      sizes="(max-width: 639px) 100vw, 1100px"
-                      widths={[640, 960, 1400]}
-                      aspectClassName="aspect-[21/9]"
-                    />
-                  </div>
-                ) : null}
-                <p className="mt-4 text-sm text-black/70">
-                  <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
-                  {homepageContent.brandSignatureText}
-                </p>
-              </Container>
-            </section>
-      ) : null}
-
-      {products.length > 0 ? (
-        <section className="bg-white py-12 sm:py-16">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6">
-            {/* Section Header */}
-            <div className="text-center mb-8 sm:mb-12">
-              <span className="text-xs tracking-[0.25em] text-neutral-500 uppercase block mb-2 font-medium">
-                Curated Selection
-              </span>
-              <h2
-                className="text-xl sm:text-3xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
-                style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
-              >
-                ALL PRODUCTS
-              </h2>
-            </div>
-
-            {/* Responsive Product Grid */}
-            <ProductListingGrid>
-              {products.map((product) => {
-                const mapped = mapAdminProductToShopProduct(product)
-                return (
-                  <ProductCard
-                    key={mapped.id}
-                    product={mapped}
-                    priority={false}
-                    onToggleWishlist={handleToggleWishlist}
-                    isInWishlist={isInWishlist(String(mapped.id))}
-                  />
-                )
-              })}
-            </ProductListingGrid>
-
-            {/* View All Button */}
-            <div className="mt-10 text-center">
-              <Link
-                to="/shop"
-                className="inline-block border border-neutral-900 text-neutral-900 px-8 py-3 text-xs sm:text-sm font-semibold tracking-widest uppercase hover:bg-neutral-900 hover:text-white transition-all duration-300"
-              >
-                VIEW FULL CATALOG
-              </Link>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {recentlyViewedItems.length > 0 ? (
-        <section className="px-3.5 pb-16 pt-6 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-10">
           <Container>
-            <div className="flex items-end justify-between gap-2 border-b border-black/10 pb-2.5">
-              <h2 className="text-h2 text-black">Recently Viewed</h2>
-              <span className="text-caption uppercase tracking-[0.12em] text-black/55">Continue where you left off</span>
-            </div>
-            <ProductListingGrid className="mt-5">
-              {recentlyViewedItems.slice(0, 4).map((item) => (
-                <ProductCard
-                  key={item.id}
-                  product={item.product}
-                  priority={false}
-                  onToggleWishlist={handleToggleWishlist}
-                  isInWishlist={isInWishlist(String(item.product.id))}
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">
+              {homepageContent.brandPromiseEyebrow ?? 'Our promise'}
+            </p>
+            <h2 className="mt-1 text-h2 text-black">{homepageContent.brandPromiseTitle ?? 'Quality, comfort, and consistency.'}</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
+              {homepageContent.brandPromiseDescription}
+            </p>
+            {homepageContent.bannerImage ? (
+              <div className="mt-5">
+                <LuxuryImage
+                  src={homepageContent.bannerImage}
+                  alt={homepageContent.bannerImageTitle || 'SHIS Fashion'}
+                  width={1400}
+                  height={800}
+                  sizes="(max-width: 639px) 100vw, 1100px"
+                  widths={[640, 960, 1400]}
+                  aspectClassName="aspect-[21/9]"
                 />
-              ))}
-            </ProductListingGrid>
+              </div>
+            ) : null}
+            <p className="mt-4 text-sm text-black/70">
+              <span className="font-semibold text-black">{homepageContent.brandSignatureLabel ?? 'SHIS Signature'}. </span>
+              {homepageContent.brandSignatureText}
+            </p>
           </Container>
         </section>
-      ) : null}
-
-      {isBrandPanelOpen ? (
-        <div
-          className="fixed inset-0 z-[80] bg-black/72 px-3 py-3 sm:px-6 sm:py-8"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Brand details"
-          onClick={() => setIsBrandPanelOpen(false)}
-        >
-          <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-end sm:justify-start">
-            <div
-              className="max-h-[90vh] overflow-hidden rounded-t-[1.35rem] border border-white/20 bg-[rgba(8,8,8,0.96)] p-3 pb-4 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:max-h-full sm:rounded-[1.4rem] sm:p-5"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-white/20 pb-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">Our Business Brands</p>
-                <button
-                  type="button"
-                  onClick={() => setIsBrandPanelOpen(false)}
-                  className="ui-interactive border border-white/35 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div className="mt-4 overflow-y-auto pr-0.5">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {featuredBrands.map((brand) => (
-                  <article key={brand.id} className="rounded-[1.15rem] border border-white/18 bg-white/8 p-4 backdrop-blur-sm">
-                    <div className="aspect-[16/10] overflow-hidden rounded-[0.9rem] border border-white/20 bg-white/95">
-                      <img
-                        src={brand.logo}
-                        alt={`${brand.name} logo`}
-                        width={640}
-                        height={400}
-                        loading="lazy"
-                        decoding="async"
-                        onError={handleImageError}
-                        className="gpu-media h-full w-full object-contain p-3"
-                      />
-                    </div>
-
-                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">{brand.tag}</p>
-                    <h3 className="mt-1 text-lg font-semibold text-white">{brand.name}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/80">{brand.summary}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/68">{brand.details}</p>
-
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                      <a
-                        href={brand.contacts.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="ui-interactive inline-flex w-full items-center justify-center border border-white bg-white px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-black hover:bg-white/90 sm:w-auto"
-                      >
-                        Website
-                      </a>
-                      <a
-                        href={brand.contacts.contact}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="ui-interactive inline-flex w-full items-center justify-center border border-white/40 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white hover:bg-white/10 sm:w-auto"
-                      >
-                        Contact
-                      </a>
-                    </div>
-                  </article>
-                ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       ) : null}
     </div>
   )
