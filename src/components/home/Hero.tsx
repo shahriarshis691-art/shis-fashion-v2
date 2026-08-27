@@ -1,7 +1,7 @@
 import React from 'react'
 
-const HERO_IMAGE = '/hero/oversized-new-hero.png'
-const HERO_IMAGE_FALLBACK = '/hero/oversized-new-hero.png.jpeg'
+const HERO_IMAGE = '/hero/main-hero-image2.jpg'
+const HERO_IMAGE_FALLBACK = '/hero/main-hero-image2.jpg.jpeg'
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 
 export interface HeroContentInput {
@@ -14,7 +14,7 @@ export interface HeroContentInput {
 }
 
 interface HeroProps {
-  /** Reserved for layout compatibility; homepage hero uses a fixed HD banner. */
+  /** Reserved for layout compatibility; homepage hero uses a fixed campaign banner. */
   content?: HeroContentInput
 }
 
@@ -26,14 +26,14 @@ export const Hero: React.FC<HeroProps> = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      <div className="relative w-full overflow-hidden bg-neutral-950 md:h-auto md:min-h-0">
+      <div className="homepage-hero-frame relative w-full overflow-hidden bg-neutral-950">
         <img
           src={HERO_IMAGE}
-          alt="SHIS Fashion premium collection — style meets comfort"
-          width={1717}
-          height={916}
+          alt="The Monsoon — SHIS Fashion saree collection"
+          width={900}
+          height={1600}
           sizes="100vw"
-          className="block h-auto w-full object-contain object-center md:h-auto md:w-full md:object-cover md:object-center"
+          className="homepage-hero-image"
           loading="eager"
           fetchPriority="high"
           decoding="sync"

@@ -301,6 +301,71 @@ img.pdp-main-image {
   }
 }
 
+/* Homepage hero — mobile Ken Burns drift, desktop static cover frame */
+.homepage-hero-frame {
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout paint;
+  width: 100%;
+  min-height: 75vh;
+  aspect-ratio: 4 / 5;
+  background-color: #0a0a0a;
+}
+
+@media (min-width: 768px) {
+  .homepage-hero-frame {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: 75vh;
+  }
+}
+
+img.homepage-hero-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center center;
+  transform: translate3d(0, 0, 0) scale(1.04);
+  transform-origin: 50% 38%;
+  backface-visibility: hidden;
+}
+
+@media (max-width: 767px) {
+  img.homepage-hero-image {
+    will-change: transform;
+    animation: homepage-hero-kenburns 18s ease-in-out infinite alternate;
+  }
+}
+
+@media (min-width: 768px) {
+  img.homepage-hero-image {
+    transform: translate3d(0, 0, 0) scale(1);
+    transform-origin: 50% 35%;
+  }
+}
+
+@keyframes homepage-hero-kenburns {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+
+  to {
+    transform: translate3d(-1.5%, -3.5%, 0) scale(1.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img.homepage-hero-image {
+    animation: none;
+    will-change: auto;
+    transform: translate3d(0, 0, 0) scale(1.04);
+  }
+}
+
 /* Listing heroes — locked frame + Ken Burns drift (compositor-only) */
 .listing-hero-frame {
   overflow: hidden;
