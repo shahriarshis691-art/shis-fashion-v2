@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
@@ -381,7 +382,7 @@ export default function HomePage() {
   const brandPromiseEnabled = homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false
 
   return (
-    <div className="relative isolate bg-white pb-12">
+    <div className="relative isolate bg-white">
       {heroEnabled ? <Hero content={homepageContent} /> : null}
 
       {shopByCategoryEnabled ? (
@@ -440,6 +441,58 @@ export default function HomePage() {
             </p>
           </div>
         ) : null}
+      </section>
+
+      <section
+        id="homepage-about"
+        className="relative w-full overflow-hidden bg-neutral-950"
+        aria-labelledby="homepage-about-title"
+      >
+        <Link
+          to="/about"
+          className="group relative block h-[55vh] w-full overflow-hidden md:h-[70vh]"
+          aria-label="About Us, established 2026"
+        >
+          <img
+            src={HOMEPAGE_GALLERY_IMAGE}
+            alt="The SHIS Fashion team"
+            width={959}
+            height={1280}
+            sizes="100vw"
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+            onError={(event) => {
+              const image = event.currentTarget
+              if (image.dataset.fallback === 'done') {
+                return
+              }
+              if (image.dataset.fallback !== 'jpeg') {
+                image.dataset.fallback = 'jpeg'
+                image.src = HOMEPAGE_GALLERY_IMAGE_FALLBACK
+                return
+              }
+              image.dataset.fallback = 'done'
+              image.src = '/og-image.svg'
+            }}
+          />
+          <div className="absolute inset-0 bg-black/30 transition-colors duration-500 group-hover:bg-black/40" aria-hidden />
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+            <h2
+              id="homepage-about-title"
+              className="font-serif text-4xl font-normal text-white drop-shadow-md sm:text-6xl"
+              style={{ fontFamily: "'Cormorant Garamond', serif", color: '#ffffff' }}
+            >
+              About Us
+            </h2>
+            <p
+              className="mt-2 text-sm font-medium uppercase tracking-[0.3em] text-white drop-shadow-md sm:text-base"
+              style={{ color: '#ffffff' }}
+            >
+              EST. 2026
+            </p>
+          </div>
+        </Link>
       </section>
     </div>
   )
