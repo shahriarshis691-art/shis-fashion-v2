@@ -38,7 +38,7 @@ export default function ShopByCategorySection({
       <h2 id="shop-by-category-title" className="sr-only">
         {title}
       </h2>
-      <div className="border-t border-black/10 bg-white px-4 pt-6 pb-4 text-center md:hidden">
+      <div className="border-t border-black/10 bg-white px-4 py-6 text-center md:hidden">
         <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
         <p
           className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
