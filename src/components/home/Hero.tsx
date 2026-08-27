@@ -26,14 +26,14 @@ export const Hero: React.FC<HeroProps> = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      <div className="relative w-full overflow-hidden bg-neutral-950">
+      <div className="relative h-[65vh] min-h-[62vh] w-full overflow-hidden bg-neutral-950 md:h-auto md:min-h-0">
         <img
           src={HERO_IMAGE}
           alt="SHIS Fashion premium collection — style meets comfort"
           width={1717}
           height={916}
           sizes="100vw"
-          className="block h-auto w-full object-cover object-center md:h-auto md:w-full"
+          className="block h-full w-full object-cover object-[center_35%] md:h-auto md:w-full md:object-center"
           loading="eager"
           fetchPriority="high"
           decoding="sync"
