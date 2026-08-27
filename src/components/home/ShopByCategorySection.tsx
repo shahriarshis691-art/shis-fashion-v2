@@ -76,6 +76,7 @@ export default function ShopByCategorySection({
               variant="feed"
               imagePosition={item.imagePosition}
               sizes="(max-width: 767px) 100vw, 33vw"
+              showOverlay={item.key.trim().toLowerCase() === 'kids'}
             />
           </article>
         ))}

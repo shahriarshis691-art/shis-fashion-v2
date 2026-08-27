@@ -10,6 +10,7 @@ export interface CategoryHeroCardProps {
   variant?: 'feed' | 'portrait'
   imagePosition?: string
   sizes?: string
+  showOverlay?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
 }
 
@@ -22,6 +23,7 @@ export default function CategoryHeroCard({
   variant = 'portrait',
   imagePosition = 'center top',
   sizes,
+  showOverlay = false,
   onError,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
@@ -49,10 +51,12 @@ export default function CategoryHeroCard({
           onError={onError}
         />
         <div className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-end">
-          <div
-            className="absolute inset-0 z-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10"
-            aria-hidden
-          />
+          {showOverlay ? (
+            <div
+              className="absolute inset-0 z-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10"
+              aria-hidden
+            />
+          ) : null}
           <div
             className={`relative z-10 flex flex-col items-center text-center ${
               isFeed

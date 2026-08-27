@@ -247,7 +247,6 @@ export default function KidsOversizedTeeCollectionPage() {
             event.currentTarget.src = '/og-image.svg'
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
 
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
           <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/90 uppercase sm:text-xs">

@@ -179,8 +179,6 @@ export default function HeroBanner({
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#1b1b1b,#454545)]" />
           )}
 
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.4)_52%,rgba(0,0,0,0.05)_100%)]" />
-
           <Container className="relative z-10 flex h-full items-end pb-8 pt-14 sm:items-center sm:py-0">
             <div className="luxury-fade-in max-w-[17rem] sm:max-w-[25rem]">
               <p

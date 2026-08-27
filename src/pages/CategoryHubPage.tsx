@@ -66,18 +66,17 @@ export default function CategoryHubPage() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-70"
+          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/20" />
         <Container className="relative z-10 pb-8 pt-16 sm:pb-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/75">Collections</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]">Collections</p>
           <h1
-            className="mt-2 text-4xl font-semibold uppercase tracking-[0.18em] text-white sm:text-5xl"
+            className="mt-2 text-4xl font-semibold uppercase tracking-[0.18em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl"
             style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
           >
             {heading.title}
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] sm:text-base">
             {heading.description}
           </p>
         </Container>
