@@ -7,7 +7,6 @@ const WOMEN_COVERS: Record<string, string> = {
   'western-outfits': '/images/products/kurtis/Elegant Black Floral Embroidered Dress _ Stylish & Chic by Pink Tulip _ Model PR-0284.jpg',
   'womens-baggy': categoryStripCovers['womens-baggy'] || categoryStripCovers.western,
   'oversized-tee': categoryStripCovers['oversized-tee'],
-  denim: categoryStripCovers.denim,
   saree: categoryStripCovers.saree,
   tunic: '/images/products/kurtis/Jade green digital printed lawn Kurti  with white  embroidered bell sleeves.jpg',
   accessories: categoryStripCovers.saree,

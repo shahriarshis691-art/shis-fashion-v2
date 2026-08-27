@@ -62,7 +62,6 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
     path: '/women/womens-baggy',
   },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee'], path: '/collections/oversized-tee' },
-  { slug: 'denim', label: 'Denim', aliases: ['denim'] },
   { slug: 'saree', label: 'Saree', aliases: ['saree', 'sarees', 'sari', 'saris', 'womens-saree', 'women-saree', 'womens-sarees'], path: '/sarees' },
   { slug: 'tunic', label: 'Fusion Wear', aliases: ['tunic', 'fusion', 'fusion-wear', 'fusion wear'] },
   { slug: 'accessories', label: 'Accessories', aliases: ['accessories', 'gift'] },
