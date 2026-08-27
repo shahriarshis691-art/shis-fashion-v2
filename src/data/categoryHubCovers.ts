@@ -9,7 +9,6 @@ const WOMEN_COVERS: Record<string, string> = {
   'oversized-tee': categoryStripCovers['oversized-tee'],
   saree: categoryStripCovers.saree,
   tunic: '/images/products/kurtis/Jade green digital printed lawn Kurti  with white  embroidered bell sleeves.jpg',
-  accessories: categoryStripCovers.saree,
 }
 
 const MEN_COVERS: Record<string, string> = {
@@ -22,7 +21,6 @@ const MEN_COVERS: Record<string, string> = {
   denim: '/collections/mens-baggy/mens-baggy1.jpg',
   pants: '/collections/mens-baggy/mens-baggy3.jpg',
   jackets: categoryStripCovers.men,
-  accessories: categoryStripCovers.men,
 }
 
 const KIDS_COVERS: Record<string, string> = {

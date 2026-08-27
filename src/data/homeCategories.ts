@@ -1,5 +1,5 @@
 export interface HomeCategoryItem {
-  key: 'mens' | 'womens' | 'couples' | 'kids' | 'western' | 'denim' | 'oversized-tee' | 'saree'
+  key: 'mens' | 'womens' | 'kids' | 'western' | 'denim' | 'oversized-tee' | 'saree'
   name: string
   href: string
   image: string
@@ -54,11 +54,5 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     href: '/women/womens-baggy',
     image: '/collections/featured-denim-collection.jpg',
     imagePosition: 'center top',
-  },
-  {
-    key: 'couples',
-    name: 'Couples Collection',
-    href: '/men?sub=accessories',
-    image: '/og-image.svg',
   },
 ]

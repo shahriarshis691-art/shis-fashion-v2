@@ -42,8 +42,6 @@ export const shopCategories: ShopCategory[] = [
   { slug: 'kurti', title: 'Kurti', description: 'Indian women’s kurtis — anarkali, straight, A-line, chikankari, and embroidered styles.', image: kurtiCategoryImage },
   { slug: 'western-outfits', title: 'Western Outfits', description: 'Modern staples with a bold edge — crop tops, shirts, denim shorts, trousers, and skirts.', image: '/og-image.svg' },
   { slug: 'womens-baggy', title: "Women's Baggy", description: 'Loose and wide-leg baggy jeans for women with a premium denim finish.', image: '/hero/womens-baggy/womens-jeans-listing.png' },
-  { slug: 'couples', title: 'Couples Collection', description: 'Coordinated pieces for shared moments.', image: '/og-image.svg' },
-  { slug: 'gift', title: 'Gift Collection', description: 'Thoughtful pieces with a premium finish.', image: '/og-image.svg' },
   { slug: 'kids', title: 'Kids Collection', description: 'Soft tailoring for little style legends.', image: '/og-image.svg' },
 ]
 
