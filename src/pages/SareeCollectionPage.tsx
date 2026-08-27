@@ -12,6 +12,14 @@ import { applySeoMetadata, buildProductSchema } from '../utils/seo'
 const prefetchSareeProductDetail = () => import('./SareeProductDetailPage')
 const SITE_URL = 'https://www.shisfashion.com'
 
+const SAREE_LISTING_HERO = {
+  jpg: '/hero/kids/hero-soft-cotton-saree.jpg',
+  webp: '/hero/kids/hero-soft-cotton-saree.jpg.webp',
+  width: 1086,
+  height: 1448,
+  alt: 'Tat Soft Cotton Saree - SHIS Fashion',
+} as const
+
 type SortOption = 'featured' | 'price-low' | 'price-high'
 
 const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
@@ -95,27 +103,41 @@ export default function SareeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      {/* Poster already embeds brand typography — no text or CTA overlay */}
-      <div className="relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[80vh]">
+      {/* Portrait campaign poster — framed per breakpoint; no CTA overlay */}
+      <div className="saree-listing-hero">
         <img
-          src="/hero/kids/hero-soft-cotton-saree.jpg"
-          alt="Tat Soft Cotton Saree - SHIS Fashion"
-          width={1200}
-          height={1500}
-          sizes="100vw"
+          src={SAREE_LISTING_HERO.jpg}
+          alt=""
+          aria-hidden
+          width={SAREE_LISTING_HERO.width}
+          height={SAREE_LISTING_HERO.height}
+          className="saree-listing-hero__bleed"
           loading="eager"
-          fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
-          onError={(event) => {
-            const src = event.currentTarget.src
-            if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {
-              event.currentTarget.src = '/hero/kids/hero-soft-cotton-saree.jpg.webp'
-              return
-            }
-            event.currentTarget.src = '/og-image.svg'
-          }}
         />
+        <picture>
+          <source srcSet={SAREE_LISTING_HERO.webp} type="image/webp" sizes="100vw" />
+          <img
+            src={SAREE_LISTING_HERO.jpg}
+            alt={SAREE_LISTING_HERO.alt}
+            width={SAREE_LISTING_HERO.width}
+            height={SAREE_LISTING_HERO.height}
+            sizes="100vw"
+            className="saree-listing-hero__image"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={(event) => {
+              const image = event.currentTarget
+              const src = image.src
+              if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {
+                image.src = SAREE_LISTING_HERO.webp
+                return
+              }
+              image.src = '/og-image.svg'
+            }}
+          />
+        </picture>
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-3 pt-6 md:px-6 lg:pt-10">
