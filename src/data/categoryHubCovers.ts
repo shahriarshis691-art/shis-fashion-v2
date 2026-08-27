@@ -17,7 +17,6 @@ const MEN_COVERS: Record<string, string> = {
   polos: categoryStripCovers.men,
   panjabi: categoryStripCovers.men,
   'oversized-tee': categoryStripCovers['oversized-tee'],
-  't-shirts': categoryStripCovers['oversized-tee'],
   denim: '/collections/mens-baggy/mens-baggy1.jpg',
   pants: '/collections/mens-baggy/mens-baggy3.jpg',
   jackets: categoryStripCovers.men,
