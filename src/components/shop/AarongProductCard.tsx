@@ -12,6 +12,8 @@ export interface AarongProductCardProduct {
   image: string
   category: string
   comparePrice?: string
+  /** Distinct design colors for listing swatches (kurti design groups). */
+  colors?: string[]
 }
 
 export interface AarongProductCardProps {
@@ -29,6 +31,47 @@ export interface AarongProductCardProps {
 }
 
 const DEFAULT_PREFETCH = () => import('../../pages/ProductDetailPage')
+
+const SWATCH_TONES: Record<string, string> = {
+  black: '#111111',
+  white: '#f4f4f4',
+  'off white': '#f0ebe3',
+  sand: '#c4b59a',
+  beige: '#d6c6a8',
+  cream: '#ebe4d4',
+  ivory: '#f3efe6',
+  blue: '#1e3a5f',
+  azure: '#2f5f8a',
+  aqua: '#5b8fa8',
+  green: '#2f4f3e',
+  jade: '#3d6b5a',
+  red: '#7a1f1f',
+  ruby: '#6b1520',
+  maroon: '#5c1a24',
+  pink: '#c48b9f',
+  rose: '#b76e79',
+  purple: '#4a3560',
+  violet: '#4a3560',
+  yellow: '#c6a24a',
+  amber: '#b8893d',
+  mustard: '#b08a2e',
+  multicolour: 'linear-gradient(135deg, #111 0%, #c4b59a 45%, #f4f4f4 100%)',
+}
+
+function swatchBackground(color: string): string {
+  const key = color.trim().toLowerCase()
+  if (SWATCH_TONES[key]) {
+    return SWATCH_TONES[key]!
+  }
+
+  for (const [token, value] of Object.entries(SWATCH_TONES)) {
+    if (key.includes(token)) {
+      return value
+    }
+  }
+
+  return '#d4d4d4'
+}
 
 /**
  * Universal Aarong-style listing card — single source of truth for all category grids.
@@ -50,6 +93,10 @@ const AarongProductCard = memo(function AarongProductCard({
     [product.image],
   )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
+  const colorSwatches = useMemo(() => {
+    const colors = (product.colors ?? []).map((color) => color.trim()).filter(Boolean)
+    return colors.slice(0, 5)
+  }, [product.colors])
 
   return (
     <article className="product-card luxury-tap group relative">
@@ -98,6 +145,24 @@ const AarongProductCard = memo(function AarongProductCard({
             ) : null}
             <span>{formatBDT(product.price)}</span>
           </p>
+          {colorSwatches.length > 1 ? (
+            <ul className="product-card-swatches" aria-label={`${colorSwatches.length} color options`}>
+              {colorSwatches.map((color) => (
+                <li key={color} title={color}>
+                  <span
+                    className="product-card-swatch"
+                    style={{ background: swatchBackground(color) }}
+                    aria-hidden
+                  />
+                </li>
+              ))}
+              {(product.colors?.length ?? 0) > colorSwatches.length ? (
+                <li className="product-card-swatch-more" aria-hidden>
+                  +{(product.colors?.length ?? 0) - colorSwatches.length}
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
         </div>
       </PrefetchLink>
 

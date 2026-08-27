@@ -22,6 +22,7 @@ import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartCont
 import { subscribeToApprovedProductReviews, subscribeToProducts, type AdminProduct, type ProductReview } from '../firebase/adminService'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl, catalogImageAttrs } from '../utils/media'
 import { formatTkPrice, parseBDT } from '../utils/currency'
+import { getLuxuryBadgeForPrice } from '../utils/luxuryBadge'
 import { normalizeSizes, STANDARD_SIZE_GUIDE } from '../utils/sizes'
 import { metaPixel } from '../services/metaPixel'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -34,7 +35,7 @@ import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
 import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
-import { kurtisCollectionProducts } from '../data/kurtisCollection'
+import { kurtisCollectionProducts, getKurtiColorGallery, getKurtiVariantPrice, getKurtiProductBySlug, type KurtiColorVariant } from '../data/kurtisCollection'
 import { womensBaggyDenimCollectionProducts } from '../data/womensBaggyDenimCollection'
 import type { ShopProduct } from '../data/shopData'
 
@@ -58,6 +59,8 @@ function toProduct(product: AdminProduct) {
     galleryImageTitles: imageEntries.map((entry) => entry.title),
     sizes: normalizeSizes(product.sizes),
     colors: Array.isArray(product.colors) ? product.colors.map((color) => color.trim()).filter(Boolean) : [],
+    colorVariants: [] as KurtiColorVariant[],
+    designId: undefined as string | undefined,
     variants: product.variants ?? [] as ProductVariantStock[],
     stock: getProductStockTotal(product),
     featured: product.featured,
@@ -94,7 +97,7 @@ function buildHighlights(description: string, sizes: string[], stock: number) {
   return [...snippets, sizeLine, stockLine].slice(0, 4)
 }
 
-function fromCatalogProduct(product: ShopProduct) {
+function fromCatalogProduct(product: ShopProduct & { colorVariants?: KurtiColorVariant[]; designId?: string }) {
   return {
     id: String(product.id),
     slug: product.slug,
@@ -109,6 +112,8 @@ function fromCatalogProduct(product: ShopProduct) {
     galleryImageTitles: (product.galleryImages?.length ? product.galleryImages : product.image ? [product.image] : []).map(() => product.name),
     sizes: product.sizes ?? [],
     colors: product.colors ?? [],
+    colorVariants: product.colorVariants ?? [],
+    designId: product.designId,
     variants: product.variants ?? [] as ProductVariantStock[],
     stock: product.stock ?? 0,
     featured: Boolean(product.featured),
@@ -125,7 +130,7 @@ export default function ProductDetailPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
   const { addToRecentlyViewed } = useRecentlyViewed()
 
-  const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>(() =>
+  const [products, setProducts] = useState<ReturnType<typeof fromCatalogProduct>[]>(() =>
     [...halfShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts, ...kurtisCollectionProducts].map(fromCatalogProduct),
   )
   const [ready, setReady] = useState(false)
@@ -149,7 +154,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
-      const live = nextProducts.map(toProduct)
+      const live = nextProducts.map((entry) => fromCatalogProduct(toProduct(entry)))
       const taken = new Set(live.map((entry) => entry.slug))
       const local = [
         ...halfShirtCollectionProducts,
@@ -170,7 +175,12 @@ export default function ProductDetailPage() {
 
   const product = products.find((entry) =>
     entry.slug === decodedSlug || String(entry.id) === decodedSlug,
-  )
+  ) ?? (() => {
+    const kurti = getKurtiProductBySlug(decodedSlug)
+    return kurti ? fromCatalogProduct(kurti) : undefined
+  })()
+
+  const isKurtiDesignPdp = Boolean(product && /kurti/i.test(product.category) && (product.colorVariants?.length ?? 0) > 0)
 
   useEffect(() => {
     if (!product?.id) {
@@ -180,8 +190,23 @@ export default function ProductDetailPage() {
     return subscribeToApprovedProductReviews(String(product.id), setReviews)
   }, [product?.id])
 
+  const colorDrivenGallery = isKurtiDesignPdp && product
+    ? getKurtiColorGallery(
+      {
+        colorVariants: product.colorVariants ?? [],
+        galleryImages: product.galleryImages,
+        image: product.image,
+      },
+      selectedColor || (product.colors.length === 1 ? product.colors[0] : undefined),
+    )
+    : null
+
   const fallbackImages = product?.image ? [product.image] : []
-  const sourceImages = product?.galleryImages?.length ? product.galleryImages : fallbackImages
+  const sourceImages = colorDrivenGallery?.length
+    ? colorDrivenGallery
+    : product?.galleryImages?.length
+      ? product.galleryImages
+      : fallbackImages
   const galleryImages = sourceImages.filter(Boolean)
   const resolvedGalleryImages = galleryImages.length ? galleryImages : [getPlaceholderDataUri()]
   const isHalfShirtPdp = Boolean(product && /half-shirt/i.test(product.category))
@@ -198,6 +223,13 @@ export default function ProductDetailPage() {
     [640, 960, 1400],
   )
   const zoomImage = catalogImageAttrs(isHalfShirtPdp ? halfShirtHeroSrc : activeImage, 1600, 2000, '100vw', [960, 1400, 1600])
+
+  const displayPrice = product && isKurtiDesignPdp
+    ? getKurtiVariantPrice(
+      { colorVariants: product.colorVariants ?? [], price: product.price },
+      selectedColor || (product.colors.length === 1 ? product.colors[0] : undefined),
+    )
+    : product?.price
 
   const relatedProducts = (() => {
     if (!product) {
@@ -390,8 +422,12 @@ export default function ProductDetailPage() {
       return null
     }
 
+    const linePrice = displayPrice || product.price
+
     return {
       ...product,
+      price: linePrice,
+      image: colorDrivenGallery?.[0] || product.image,
       id: `${product.slug}-${safeSize}-${safeColor}`,
       size: safeSize,
       color: safeColor,
@@ -405,12 +441,19 @@ export default function ProductDetailPage() {
       return
     }
 
-    addToCart(product, { size: safeSize, color: safeColor, quantity: effectiveQuantity })
+    const linePrice = displayPrice || product.price
+    const cartProduct = {
+      ...product,
+      price: linePrice,
+      image: colorDrivenGallery?.[0] || product.image,
+    }
+
+    addToCart(cartProduct, { size: safeSize, color: safeColor, quantity: effectiveQuantity })
     metaPixel.trackAddToCart({
       content_name: product.name,
       content_ids: [getCatalogContentId(product)],
       content_type: 'product',
-      value: parseBDT(product.price) * effectiveQuantity,
+      value: parseBDT(linePrice) * effectiveQuantity,
       currency: 'BDT',
       brand: product.brand,
     })
@@ -419,7 +462,7 @@ export default function ProductDetailPage() {
       item_id: getCatalogContentId(product),
       item_name: product.name,
       item_category: product.category,
-      price: parseBDT(product.price),
+      price: parseBDT(linePrice),
       quantity: effectiveQuantity,
       brand: product.brand,
     }, 'BDT')
@@ -531,6 +574,7 @@ export default function ProductDetailPage() {
   }
 
   const highlights = buildHighlights(product.description, product.sizes, availableStock)
+  const luxuryBadge = getLuxuryBadgeForPrice(product.price)
 
   const optionChipClass = (active: boolean) =>
     `inline-flex min-h-10 min-w-10 items-center justify-center border px-3 text-xs tracking-[0.08em] ${
@@ -609,8 +653,13 @@ export default function ProductDetailPage() {
           </div>
 
           <p className="mt-2 text-base font-bold tabular-nums text-neutral-900">
-            {formatTkPrice(product.price)}
+            {formatTkPrice(displayPrice || product.price)}
           </p>
+          {luxuryBadge ? (
+            <p className="mt-1.5 inline-flex border border-neutral-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-900">
+              {luxuryBadge}
+            </p>
+          ) : null}
           {product.comparePrice ? (
             <p className="mt-0.5 text-sm text-neutral-400 line-through tabular-nums">{formatTkPrice(product.comparePrice)}</p>
           ) : null}
@@ -648,7 +697,10 @@ export default function ProductDetailPage() {
                   <button
                     key={option}
                     type="button"
-                    onClick={() => setSelectedColor(option)}
+                    onClick={() => {
+                      setSelectedColor(option)
+                      setActiveImageIndex(0)
+                    }}
                     className={optionChipClass(resolvedColor === option)}
                   >
                     {option}
