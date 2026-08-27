@@ -124,16 +124,14 @@ function inferColors(name) {
 }
 
 /**
- * Bangladesh premium retail pricing tiers (numeric BDT; `formatBDT` adds ৳).
+ * High-end luxury Bangladesh retail tiers (numeric BDT; `formatBDT` adds ৳).
  *
- * 1. Daily casual / digital print singles …… 1,300 – 1,550
- * 2. Embroidered / chikankari / handwork ……… 1,850 – 2,350
- *    · Download / premium printed …………… 1,650 – 1,850
- * 3. Two-piece / co-ord sets ………………… 2,050 – 2,650
- *    · Plazzo / palazzo co-ords …………… 2,110 – 2,250
- * 4. Luxury / 3-piece festive ………………… 2,600 – 3,450
+ * 1. Entry luxury / semi-formal …………… 2,400 – 3,800
+ * 2. Festive embroidered 2pc / 3pc ……… 4,500 – 8,500
+ * 3. Premium boutique / handcrafted …… 9,500 – 15,500
+ * 4. Designer exclusive / haute couture … 18,000 – 27,000
  */
-function retailStep(min, max, index, step = 50) {
+function retailStep(min, max, index, step = 100) {
   const span = Math.max(0, max - min)
   const slots = Math.max(1, Math.floor(span / step))
   return min + ((index % (slots + 1)) * step)
@@ -144,66 +142,62 @@ function inferPrice(name, index, style = 'straight', filename = '') {
   const file = filename.toLowerCase()
   const combined = `${text} ${file}`
 
-  // Explicit product overrides
-  if (text === 'chikankari cotton kurti') {
-    return 2330
+  // Tier 4 flagship — Designer Exclusive & Haute Couture: ৳18,000 – ৳27,000
+  // Highest luxury ensemble locked at ৳27,000
+  if (/gul ahmed.*3pc|3pc luxury lawn|munira designer 3 piece/.test(combined)) {
+    if (/gul ahmed/.test(combined)) {
+      return 27000
+    }
+    return 24500
   }
-  if (text === 'nairah mizyn kurti') {
-    return 2180
-  }
-
-  // Tier 4 — Luxury / 3-piece festive: ৳2,600 – ৳3,450
   if (
-    /\b3\s*piece\b|\b3pc\b|\b3-piece\b|\(\s*3\s*pcs?\s*\)/.test(combined) ||
-    /party dress|festive collection/.test(text)
+    /haute|couture|designer exclusive|flagship/.test(combined) ||
+    (/luxury/.test(text) && /\b3\s*piece\b|\b3pc\b|dupatta/.test(combined) && /silk|organza|georgette/.test(combined))
   ) {
-    return retailStep(2600, 3450, index, 100)
-  }
-  if (/luxury/.test(text) && !/\b2\s*piece\b|\b2pc\b|\b2-piece\b|\(\s*2\s*pcs?\s*\)/.test(combined)) {
-    return retailStep(2800, 3450, index, 100)
+    return retailStep(18000, 26000, index, 500)
   }
 
-  // Tier 3 — Two-piece / co-ord: ৳2,050 – ৳2,650 (Plazzo ৳2,110 – ৳2,250)
-  if (/plazzo|palazzo/.test(combined)) {
-    return retailStep(2110, 2250, index, 40)
+  // Tier 3 — Premium Boutique / Handcrafted: ৳9,500 – ৳15,500
+  if (
+    /handwork|bead|sequin|mirror|stone|zari|heavy embroider|luxury unstitched|pink tulip|no[eé]mie/.test(combined) ||
+    (style === 'embroidered' && /premium|linen|party/.test(combined))
+  ) {
+    return retailStep(9500, 15500, index, 500)
+  }
+
+  // Tier 2 — Festive & Embroidered 2-Piece / 3-Piece: ৳4,500 – ৳8,500
+  if (
+    /\b3\s*piece\b|\b3pc\b|\b3-piece\b|\(\s*3\s*pcs?\s*\)|party dress/.test(combined)
+  ) {
+    return retailStep(5500, 8500, index, 250)
   }
   if (
-    /\b2\s*piece\b|\b2pc\b|\b2-piece\b|\(\s*2\s*pcs?\s*\)|co-?ord|co-order|farshi shalwar/.test(combined) ||
+    /\b2\s*piece\b|\b2pc\b|\b2-piece\b|\(\s*2\s*pcs?\s*\)|co-?ord|co-order|farshi shalwar|plazzo|palazzo/.test(combined) ||
     /\bsuit\b/.test(combined)
   ) {
-    return retailStep(2050, 2650, index, 50)
+    return retailStep(4500, 8500, index, 250)
   }
-
-  // Premium printed / Download Kurti: ৳1,650 – ৳1,850
-  if (text === 'download kurti' || (/premium/.test(text) && /print/.test(text))) {
-    return retailStep(1650, 1850, index, 40)
-  }
-
-  // Tier 2 — Heavy handwork / embroidered / chikankari singles: ৳1,850 – ৳2,350
   if (
     style === 'embroidered' ||
-    style === 'chikankari' ||
-    /embroider|handwork|chikankari|bead|sequin|zari|mirror|nairah/.test(text)
+    /embroider|festive|organza|georgette/.test(combined)
   ) {
-    return retailStep(1850, 2350, index, 50)
+    return retailStep(4500, 7500, index, 250)
   }
 
-  // Brand / designer single without embroidery — mid premium printed band
-  if (/designer|premium|sana safinaz|amberimran/.test(text)) {
-    return retailStep(1650, 1850, index, 40)
+  // Tier 1 — Entry Luxury / Semi-Formal: ৳2,400 – ৳3,800
+  // Explicit baselines
+  if (text === 'chikankari cotton kurti') {
+    return 3650
+  }
+  if (text === 'nairah mizyn kurti') {
+    return 3480
+  }
+  if (text === 'download kurti' || style === 'chikankari' || /nairah|chikankari|amberimran|sana safinaz|a-line|casual|digital|print|summer outfit|beautiful dress/.test(combined)) {
+    return retailStep(2400, 3800, index, 100)
   }
 
-  // Tier 1 — Digital printed / daily casual singles: ৳1,300 – ৳1,550
-  if (
-    style === 'printed' ||
-    style === 'a-line' ||
-    /digital|print|a-line|casual|block print|summer outfit|beautiful dress/.test(text)
-  ) {
-    return retailStep(1300, 1550, index, 50)
-  }
-
-  // Default daily casual
-  return retailStep(1300, 1550, index, 50)
+  // Default entry luxury
+  return retailStep(2400, 3800, index, 100)
 }
 
 function ensureKurtiTitle(title) {

@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import PrefetchLink from '../common/PrefetchLink'
 import { formatBDT } from '../../utils/currency'
 import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../../utils/media'
+import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 
 export interface AarongProductCardProduct {
   id: string | number
@@ -48,6 +49,7 @@ const AarongProductCard = memo(function AarongProductCard({
     () => catalogImageAttrs(product.image, 640, 853, cardSizes, [320, 480, 640]),
     [product.image],
   )
+  const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
 
   return (
     <article className="product-card luxury-tap group relative">
@@ -75,6 +77,11 @@ const AarongProductCard = memo(function AarongProductCard({
               event.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
             }}
           />
+          {luxuryBadge ? (
+            <span className="product-card-badge" aria-label={luxuryBadge}>
+              {luxuryBadge}
+            </span>
+          ) : null}
           {/* Desktop-only subtle VIEW — disabled on mobile so the card itself opens PDP */}
           <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-500 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
             <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
