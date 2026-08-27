@@ -22,7 +22,7 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
+  { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
@@ -149,7 +149,7 @@ const defaultHomepage: HomepageContent = {
     },
     kids: {
       key: 'kids',
-      label: 'Kids',
+      label: 'KID',
       href: '/kids',
       enabled: true,
       order: 30,
@@ -317,7 +317,7 @@ export default function HomePage() {
           : categoryStripCovers.saree
       return {
         key,
-        name: key === 'women' ? 'Women' : strip?.label || (key === 'men' ? 'Men' : 'Kids'),
+        name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : strip?.label || (key === 'men' ? 'Men' : 'KID'),
         href: strip?.href || `/${key}`,
         image: strip?.image || fallbackImage,
         imagePosition: strip?.imagePosition || 'center top',

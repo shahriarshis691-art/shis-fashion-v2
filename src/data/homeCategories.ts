@@ -44,7 +44,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   },
   {
     key: 'kids',
-    name: 'Kids Collection',
+    name: 'KID',
     href: '/kids',
     image: '/hero/kid-homepage.jpg',
   },
