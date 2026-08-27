@@ -21,6 +21,9 @@ import type { ShopProduct } from '../data/shopData'
 const SITE_URL = 'https://www.shisfashion.com'
 const prefetchProductDetail = () => import('./ProductDetailPage')
 
+const OVERSIZED_TEE_LISTING_HERO = '/hero/oversized-new-hero.png'
+const OVERSIZED_TEE_LISTING_HERO_FALLBACK = '/hero/oversized-new-hero.png.jpeg'
+
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
 const LISTING_FILTER_OPTIONS: Array<{ value: OversizedTeeListingFilter; label: string }> = [
@@ -120,8 +123,39 @@ export default function OversizedTeeCollectionPage() {
   }, [location.pathname, products])
 
   return (
-    <section className="bg-white pb-24 pt-6 lg:pb-20 lg:pt-10">
-      <Container>
+    <section className="bg-white pb-24 lg:pb-20">
+      <div
+        className="relative w-full max-w-[100vw] overflow-hidden bg-neutral-950"
+        aria-label="Oversized Tee collection banner"
+      >
+        <img
+          src={OVERSIZED_TEE_LISTING_HERO}
+          alt="SHIS Fashion oversized tee collection — premium fashion"
+          width={1717}
+          height={916}
+          sizes="100vw"
+          className="block h-auto w-full object-cover object-center md:h-auto md:w-full"
+          loading="eager"
+          fetchPriority="high"
+          decoding="sync"
+          draggable={false}
+          onError={(event) => {
+            const image = event.currentTarget
+            if (image.dataset.fallback === 'done') {
+              return
+            }
+            if (image.dataset.fallback !== 'jpeg') {
+              image.dataset.fallback = 'jpeg'
+              image.src = OVERSIZED_TEE_LISTING_HERO_FALLBACK
+              return
+            }
+            image.dataset.fallback = 'done'
+            image.src = '/og-image.svg'
+          }}
+        />
+      </div>
+
+      <Container className="pt-6 lg:pt-10">
         <nav className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55">
           <Link to="/" className="hover:text-black">Home</Link>
           <span>/</span>
