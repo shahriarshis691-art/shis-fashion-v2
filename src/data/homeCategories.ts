@@ -18,8 +18,8 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'mens',
     name: "Men's Collection",
     href: '/men',
-    image: '/collections/men-category.webp',
-    imagePosition: 'center top',
+    image: '/collections/men-category.jpg',
+    imagePosition: 'center',
   },
   {
     key: 'womens',

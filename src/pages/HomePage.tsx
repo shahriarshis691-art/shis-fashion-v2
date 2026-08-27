@@ -18,7 +18,7 @@ import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../util
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
@@ -271,17 +271,20 @@ export default function HomePage() {
         const isHalfShirtsCard = fallback.key === 'sale'
         const isOversizedTeeCard = fallback.key === 'new-arrivals'
         const isWomensBaggyCard = fallback.key === 'western'
+        const isMenCard = fallback.key === 'men'
         const resolvedCover = isHalfShirtsCard
           ? categoryStripCovers['half-shirts']
           : isOversizedTeeCard
             ? categoryStripCovers['oversized-tee']
             : isWomensBaggyCard
               ? categoryStripCovers.western
-              : pickPreferredCategoryCoverUrl(
-                section?.coverImage,
-                section?.images,
-                fallback.image || categoryStripCover(fallback.key, ''),
-              )
+              : isMenCard
+                ? categoryStripCovers.men
+                : pickPreferredCategoryCoverUrl(
+                  section?.coverImage,
+                  section?.images,
+                  fallback.image || categoryStripCover(fallback.key, ''),
+                )
 
         return {
           key: fallback.key,
@@ -321,7 +324,7 @@ export default function HomePage() {
         name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : strip?.label || (key === 'men' ? 'Men' : 'KID'),
         href: strip?.href || `/${key}`,
         image: strip?.image || fallbackImage,
-        imagePosition: strip?.imagePosition || 'center top',
+        imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : 'center top'),
       }
     })
   }, [categoryStrips])

@@ -44,6 +44,7 @@ export function isBundledFallbackMediaUrl(value: string) {
     || normalized.includes('category-saree-blue.jpg')
     || normalized.includes('saree-category-new.jpg')
     || normalized.includes('featured-denim-collection.jpg')
+    || normalized.includes('men-category.jpg')
     || normalized.includes('men-category.webp')
     || normalized.includes('featured-men-collection.jpg')
 }
@@ -71,6 +72,7 @@ export function isOutdatedHardcodedMediaUrl(value: string) {
     || normalized.includes('images.unsplash.com')
     || normalized.includes('plus.unsplash.com')
     || normalized.includes('featured-men-collection.jpg')
+    || normalized.includes('men-category.webp')
     || normalized.includes('category-saree-blue.jpg')
     || normalized.includes('timeless-oversize-hero')
 }
