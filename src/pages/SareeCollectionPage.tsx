@@ -95,8 +95,8 @@ export default function SareeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      {/* Poster already embeds brand typography — CTA only, no duplicate H1 overlay */}
-      <div className="relative flex w-full items-end justify-center overflow-hidden bg-neutral-950 aspect-[4/5] pb-8 sm:aspect-auto sm:h-[80vh] sm:pb-12">
+      {/* Poster already embeds brand typography — no text or CTA overlay */}
+      <div className="relative w-full overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[80vh]">
         <img
           src="/hero/kids/hero-soft-cotton-saree.jpg"
           alt="Tat Soft Cotton Saree - SHIS Fashion"
@@ -116,20 +116,6 @@ export default function SareeCollectionPage() {
             event.currentTarget.src = '/og-image.svg'
           }}
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
-
-        <div className="relative z-10 text-center">
-          <a
-            href="#saree-grid"
-            onClick={(event) => {
-              event.preventDefault()
-              document.getElementById('saree-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
-            className="btn-glass-cta"
-          >
-            Shop Saree Collection
-          </a>
-        </div>
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-3 pt-6 md:px-6 lg:pt-10">
