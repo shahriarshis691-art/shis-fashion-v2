@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
@@ -31,9 +30,6 @@ const categoryStripCardImage = {
   width: 960,
   height: 1200,
 } as const
-
-const HOMEPAGE_GALLERY_IMAGE = '/homepage/homepage-gellary-image.jpg'
-const HOMEPAGE_GALLERY_IMAGE_FALLBACK = '/homepage/homepage-gellary-image.jpg.jpeg'
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
   const seen = new Set<string>()
@@ -393,107 +389,28 @@ export default function HomePage() {
         />
       ) : null}
 
-      <section
-        id="homepage-gallery"
-        className="relative w-full overflow-hidden bg-white"
-        aria-label="SHIS Fashion gallery"
-      >
-        <div className="relative w-full overflow-hidden h-[420px] sm:h-[500px] md:aspect-[4/3] md:h-auto md:max-h-[640px]">
-          <img
-            src={HOMEPAGE_GALLERY_IMAGE}
-            alt="SHIS Fashion community gallery"
-            width={959}
-            height={1280}
-            sizes="100vw"
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            onError={(event) => {
-              const image = event.currentTarget
-              if (image.dataset.fallback === 'done') {
-                return
-              }
-              if (image.dataset.fallback !== 'jpeg') {
-                image.dataset.fallback = 'jpeg'
-                image.src = HOMEPAGE_GALLERY_IMAGE_FALLBACK
-                return
-              }
-              image.dataset.fallback = 'done'
-              image.src = '/og-image.svg'
-            }}
-          />
-        </div>
-
-        {brandPromiseEnabled ? (
-          <div className="bg-white px-5 py-8 md:mx-auto md:max-w-3xl md:px-8 md:py-12 lg:max-w-4xl">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
-              {homepageContent.brandPromiseEyebrow ?? 'BRAND PROMISE'}
-            </p>
-            <h2
-              className="mb-3 font-serif text-2xl leading-tight text-gray-900 sm:text-3xl"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
-            </h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
-              {homepageContent.brandPromiseDescription
-                ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}
-            </p>
-          </div>
-        ) : null}
-      </section>
-
-      <section
-        id="homepage-about"
-        className="relative w-full overflow-hidden bg-neutral-950"
-        aria-labelledby="homepage-about-title"
-      >
-        <Link
-          to="/about"
-          className="group relative block h-[55vh] w-full overflow-hidden md:h-[70vh]"
-          aria-label="About Us, established 2026"
+      {brandPromiseEnabled ? (
+        <section
+          id="brand-promise"
+          className="bg-white px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
+          aria-labelledby="brand-promise-title"
         >
-          <img
-            src={HOMEPAGE_GALLERY_IMAGE}
-            alt="The SHIS Fashion team"
-            width={959}
-            height={1280}
-            sizes="100vw"
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-            onError={(event) => {
-              const image = event.currentTarget
-              if (image.dataset.fallback === 'done') {
-                return
-              }
-              if (image.dataset.fallback !== 'jpeg') {
-                image.dataset.fallback = 'jpeg'
-                image.src = HOMEPAGE_GALLERY_IMAGE_FALLBACK
-                return
-              }
-              image.dataset.fallback = 'done'
-              image.src = '/og-image.svg'
-            }}
-          />
-          <div className="absolute inset-0 bg-black/30 transition-colors duration-500 group-hover:bg-black/40" aria-hidden />
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
-            <h2
-              id="homepage-about-title"
-              className="font-serif text-4xl font-normal text-white drop-shadow-md sm:text-6xl"
-              style={{ fontFamily: "'Cormorant Garamond', serif", color: '#ffffff' }}
-            >
-              About Us
-            </h2>
-            <p
-              className="mt-2 text-sm font-medium uppercase tracking-[0.3em] text-white drop-shadow-md sm:text-base"
-              style={{ color: '#ffffff' }}
-            >
-              EST. 2026
-            </p>
-          </div>
-        </Link>
-      </section>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
+            {homepageContent.brandPromiseEyebrow ?? 'BRAND PROMISE'}
+          </p>
+          <h2
+            id="brand-promise-title"
+            className="mb-3 font-serif text-2xl leading-tight text-gray-900 sm:text-3xl"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
+          </h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
+            {homepageContent.brandPromiseDescription
+              ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}
+          </p>
+        </section>
+      ) : null}
     </div>
   )
 }
