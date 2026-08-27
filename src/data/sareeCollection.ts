@@ -629,18 +629,6 @@ const jamdaniFolderEntries: JamdaniFolderEntry[] = [
     stock: 7,
   },
   {
-    id: 'saree-jamdani-37',
-    slug: 'ivory-tribal-face-print-saree',
-    name: 'Ivory Tribal Face Print Soft Cotton Saree',
-    price: 3250,
-    originalPrice: 4290,
-    filename: 'WhatsApp Image 2026-08-27 at 5.29.35 AM (2).jpeg',
-    colors: ['Ivory', 'Black'],
-    fabric: 'Soft Cotton',
-    description: 'Ivory cotton with black tribal face motifs, triangle borders, and a contemporary artisanal attitude.',
-    stock: 12,
-  },
-  {
     id: 'saree-jamdani-38',
     slug: 'temple-paisley-gold-border-saree',
     name: 'Temple Paisley Gold Border Saree',
