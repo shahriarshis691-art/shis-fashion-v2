@@ -399,6 +399,9 @@ export default function SareeProductDetailPage() {
           <p className="mt-2 text-base font-bold tabular-nums text-neutral-900">
             {formatTkPrice(product.price)}
           </p>
+          {product.comparePrice ? (
+            <p className="mt-0.5 text-sm text-neutral-400 line-through tabular-nums">{formatTkPrice(product.comparePrice)}</p>
+          ) : null}
           <p className={`mt-1 text-xs ${availableStock <= 0 ? 'text-red-600' : 'text-neutral-500'}`}>{stockLabel}</p>
 
           {sizes.length ? (
