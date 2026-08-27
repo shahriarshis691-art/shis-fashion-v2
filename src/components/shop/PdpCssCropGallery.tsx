@@ -101,7 +101,6 @@ export default function PdpCssCropGallery({
           onPrev={onPrev}
           onNext={onNext}
           onSelect={onSelect}
-          showDots={false}
         />
       </div>
 

@@ -605,7 +605,7 @@ button,
 }
 
 .pdp-thumb-strip {
-  display: grid;
+  display: none;
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding-left: 1rem;
@@ -631,6 +631,7 @@ button,
 
 @media (min-width: 1024px) {
   .pdp-thumb-strip {
+    display: grid;
     padding-left: 0;
     padding-right: 0;
   }

@@ -8,6 +8,9 @@ interface PdpActionButtonsProps {
   orderLabel?: string
 }
 
+const actionButtonClass =
+  'flex h-12 w-full items-center justify-center rounded-none bg-black text-xs font-semibold tracking-[0.18em] text-white uppercase transition-colors hover:bg-neutral-800 active:bg-neutral-900'
+
 export default function PdpActionButtons({
   didAddToBag,
   actionError = '',
@@ -24,10 +27,10 @@ export default function PdpActionButtons({
           {actionError}
         </p>
       ) : null}
-      <button type="button" onClick={onAddToBag} className="btn-glass-cta w-full">
+      <button type="button" onClick={onAddToBag} className={actionButtonClass}>
         {didAddToBag ? 'ADDED' : addLabel}
       </button>
-      <button type="button" onClick={onBuyNow} className="btn-glass-cta w-full">
+      <button type="button" onClick={onBuyNow} className={actionButtonClass}>
         {orderLabel}
       </button>
     </div>
