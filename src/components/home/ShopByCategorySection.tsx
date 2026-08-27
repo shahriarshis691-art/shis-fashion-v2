@@ -32,12 +32,22 @@ export default function ShopByCategorySection({
   return (
     <section
       id="featured-collections"
-      className="scroll-mt-20 overflow-x-hidden bg-white md:py-14"
+      className="relative z-10 isolate scroll-mt-20 overflow-x-hidden bg-white md:py-14"
       aria-labelledby="shop-by-category-title"
     >
       <h2 id="shop-by-category-title" className="sr-only">
         {title}
       </h2>
+      <div className="border-t border-black/10 bg-white px-4 py-6 text-center md:hidden">
+        <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
+        <p
+          className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
+          style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
+          aria-hidden
+        >
+          {title}
+        </p>
+      </div>
       <div className="mx-auto hidden max-w-7xl px-6 md:block">
         <div className="mb-10 text-center">
           <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
@@ -66,7 +76,7 @@ export default function ShopByCategorySection({
             />
             {index < hubItems.length - 1 ? (
               <span
-                className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center text-white/70 md:hidden"
+                className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center text-white/80 md:hidden"
                 aria-hidden
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5 animate-bounce" fill="none" stroke="currentColor" strokeWidth="1.5">

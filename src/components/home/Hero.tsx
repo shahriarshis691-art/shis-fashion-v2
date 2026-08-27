@@ -142,7 +142,7 @@ export const Hero: React.FC<HeroProps> = () => {
 
   return (
     <section
-      className="relative w-full max-w-[100vw] select-none overflow-x-hidden bg-neutral-950"
+      className="relative z-0 isolate w-full max-w-[100vw] select-none overflow-hidden bg-neutral-950"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
       aria-roledescription="carousel"
@@ -163,8 +163,8 @@ export const Hero: React.FC<HeroProps> = () => {
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 h-full w-full transition-all duration-700 ease-in-out ${
-                isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
+              className={`absolute inset-0 z-0 h-full w-full transition-all duration-700 ease-in-out ${
+                isActive ? 'opacity-100' : 'pointer-events-none opacity-0'
               }`}
               aria-hidden={!isActive}
             >

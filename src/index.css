@@ -223,6 +223,7 @@ img.navbar-brand-logo {
 /* Homepage hero — locked frame + cover fill (no height jump between slides) */
 .hero-slider-frame {
   overflow: hidden;
+  isolation: isolate;
 }
 
 img.hero-slide-image {
