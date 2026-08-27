@@ -1034,7 +1034,7 @@ export default function ShopPage() {
     setDraftSortBy('featured')
     clearSearch()
     if (isWomenListing && effectiveSubcategory !== 'all') {
-      navigate('/women')
+      navigate('/shop?segment=women')
     }
   }
 
@@ -1053,7 +1053,7 @@ export default function ShopPage() {
   const navigateWomenSubcategory = (slug: string) => {
     setWesternFilter('all')
     if (slug === 'all') {
-      navigate('/women')
+      navigate('/shop?segment=women')
       return
     }
 
@@ -1071,7 +1071,7 @@ export default function ShopPage() {
     activeFilterBadges.push({
       key: 'sub',
       label: segmentSubcategories.find((item) => item.slug === effectiveSubcategory)?.label ?? effectiveSubcategory,
-      onClear: () => navigate('/women'),
+      onClear: () => navigate('/shop?segment=women'),
     })
   }
   if (filters.inStockOnly) {

@@ -119,6 +119,7 @@ span {
 
 .page-shell {
   width: 100%;
+  overflow-x: hidden;
 }
 
 ::selection {

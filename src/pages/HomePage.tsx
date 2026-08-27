@@ -5,7 +5,9 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { Hero } from '../components/home/Hero'
+import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
+import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
 import { brandEntries } from '../data/brandShowcase'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -31,7 +33,7 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center top' },
   { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '', imagePosition: 'center top' },
+  { key: 'kids', label: 'Kids', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
@@ -40,8 +42,6 @@ const fallbackCategoryStrips = [
 const categoryStripCardImage = {
   width: 960,
   height: 1200,
-  aspectClassName: 'aspect-[3/4]',
-  imgClassName: 'h-full w-full object-cover object-[center_top]',
 } as const
 
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
@@ -164,7 +164,7 @@ const defaultHomepage: HomepageContent = {
       href: '/kids',
       enabled: true,
       order: 30,
-      coverImage: homeCategoryItems.find((item) => item.key === 'kids')?.image ?? '',
+      coverImage: SEGMENT_HUB_COVERS.kids,
       images: [],
       updatedAt: null,
     },
@@ -339,6 +339,25 @@ export default function HomePage() {
     return uniqueVisibleCategoryStrips(strips)
   }, [homepageContent.categorySections])
 
+  const hubCategoryItems = useMemo(() => {
+    const byKey = new Map(categoryStrips.map((item) => [item.key, item]))
+    return (['men', 'women', 'kids'] as const).map((key) => {
+      const strip = byKey.get(key)
+      const fallbackImage = key === 'kids'
+        ? SEGMENT_HUB_COVERS.kids
+        : key === 'men'
+          ? categoryStripCovers.men
+          : categoryStripCovers.saree
+      return {
+        key,
+        name: strip?.label || (key === 'men' ? 'Men' : key === 'women' ? 'Women' : 'Kids'),
+        href: strip?.href || `/${key}`,
+        image: strip?.image || fallbackImage,
+        imagePosition: strip?.imagePosition || 'center top',
+      }
+    })
+  }, [categoryStrips])
+
   useEffect(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})
     if (!sectionEntries.length) {
@@ -461,74 +480,11 @@ export default function HomePage() {
       {heroEnabled ? <Hero content={homepageContent} /> : null}
 
       {shopByCategoryEnabled ? (
-      <section id="featured-collections" className="scroll-mt-20 bg-white py-6 sm:py-14">
-        <div className="mx-auto max-w-7xl px-3 sm:px-6">
-          {/* Header */}
-          <div className="mb-5 text-center sm:mb-10">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">
-              {homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
-            </p>
-            <h2
-              className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase sm:text-2xl md:text-3xl"
-              style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
-            >
-              {homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
-            </h2>
-          </div>
-
-          {/* 2-column tall cards on mobile; 4-column on md+ */}
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-6">
-            {categoryStrips.map((item) => {
-              const displayLabel = item.label
-
-              return (
-                <Link
-                  key={item.key}
-                  to={item.href}
-                  className="group flex min-w-0 w-full cursor-pointer flex-col"
-                  aria-label={`${displayLabel} collection`}
-                >
-                  <div className="studio-media-frame">
-                    <LuxuryImage
-                      src={item.image || CATALOG_IMAGE_PLACEHOLDER}
-                      alt={displayLabel}
-                      width={categoryStripCardImage.width}
-                      height={categoryStripCardImage.height}
-                      sizes="(max-width: 767px) 50vw, 25vw"
-                      widths={[320, 480, 768, 960]}
-                      className="h-full w-full"
-                      aspectClassName={categoryStripCardImage.aspectClassName}
-                      objectPosition="center top"
-                      imgClassName={categoryStripCardImage.imgClassName + ' group-hover:scale-105 transition-transform duration-500 ease-out'}
-                      onError={(event) => {
-                        if (item.key === 'sale' && !event.currentTarget.dataset.halfShirtFallback) {
-                          event.currentTarget.dataset.halfShirtFallback = '1'
-                          event.currentTarget.removeAttribute('srcset')
-                          event.currentTarget.src = '/hero/half-shirt-1.jpg.png'
-                          return
-                        }
-                        if (item.key === 'new-arrivals' && !event.currentTarget.dataset.oversizedTeeFallback) {
-                          event.currentTarget.dataset.oversizedTeeFallback = '1'
-                          event.currentTarget.removeAttribute('srcset')
-                          event.currentTarget.src = '/hero/oversized-tee.jpg.jpeg'
-                          return
-                        }
-                        handleImageError(event)
-                      }}
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 z-10 px-2.5 pb-3 pt-10 text-left sm:px-3 sm:text-center">
-                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] sm:text-sm sm:tracking-[0.18em]">
-                        {displayLabel}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+        <ShopByCategorySection
+          items={hubCategoryItems}
+          eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
+          title={homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
+        />
       ) : null}
 
       {homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false ? (

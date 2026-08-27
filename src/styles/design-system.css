@@ -392,6 +392,57 @@ button,
   }
 }
 
+/* Homepage mobile category snap feed */
+.category-snap-feed {
+  display: flex;
+  flex-direction: column;
+  height: calc(100svh - 4rem);
+  max-height: calc(100dvh - 4rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  width: 100%;
+}
+
+.category-snap-card {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .category-snap-feed {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    scroll-snap-type: none;
+    touch-action: auto;
+  }
+
+  .category-snap-card {
+    height: auto;
+    aspect-ratio: 3 / 4;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-snap-feed {
+    scroll-snap-type: none;
+  }
+}
+
 /* Smooth horizontal scrolling for native momentum */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;

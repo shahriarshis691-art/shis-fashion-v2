@@ -46,7 +46,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'kids',
     name: 'Kids Collection',
     href: '/kids',
-    image: '/og-image.svg',
+    image: '/hero/kid-homepage.jpg',
   },
   {
     key: 'western',

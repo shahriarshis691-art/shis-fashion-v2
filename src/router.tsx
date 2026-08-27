@@ -7,6 +7,7 @@ import ErrorBoundary from './components/common/ErrorBoundary'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
+const SegmentLandingPage = lazy(() => import('./pages/SegmentLandingPage'))
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
 const CollectionListingPage = lazy(() => import('./pages/CollectionListingPage'))
 const NewArrivalsPage = lazy(() => import('./pages/NewArrivalsPage'))
@@ -91,7 +92,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'women',
-        element: withSuspense(<ShopPage />),
+        element: withSuspense(<SegmentLandingPage />),
       },
       {
         path: 'women/womens-baggy',
@@ -103,7 +104,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'men',
-        element: withSuspense(<ShopPage />),
+        element: withSuspense(<SegmentLandingPage />),
       },
       {
         path: 'men/half-shirts',
@@ -111,11 +112,23 @@ export const router = createBrowserRouter([
       },
       {
         path: 'kids',
-        element: withSuspense(<KidsOversizedTeeCollectionPage />),
+        element: withSuspense(<SegmentLandingPage />),
       },
       {
         path: 'kids/:productSlug',
         element: withSuspense(<KidsProductDetailPage />),
+      },
+      {
+        path: 'category/women',
+        element: <Navigate to="/women" replace />,
+      },
+      {
+        path: 'category/men',
+        element: <Navigate to="/men" replace />,
+      },
+      {
+        path: 'category/kids',
+        element: <Navigate to="/kids" replace />,
       },
       {
         path: 'sarees',

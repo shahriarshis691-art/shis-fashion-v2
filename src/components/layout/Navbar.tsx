@@ -44,23 +44,33 @@ const megaMenuGroups = {
     href: '/men',
     links: getSubcategoryLinksForSegment('men'),
   },
+  kids: {
+    label: 'Kids',
+    href: '/kids',
+    links: getSubcategoryLinksForSegment('kids'),
+  },
 } as const
 
 const mobileMenuGroups = [
   {
     key: 'women',
     title: 'Women',
-    links: megaMenuGroups.women.links,
+    links: [{ label: 'View categories', href: megaMenuGroups.women.href }, ...megaMenuGroups.women.links],
   },
   {
     key: 'men',
     title: 'Men',
-    links: megaMenuGroups.men.links,
+    links: [{ label: 'View categories', href: megaMenuGroups.men.href }, ...megaMenuGroups.men.links],
+  },
+  {
+    key: 'kids',
+    title: 'Kids',
+    links: [{ label: 'View categories', href: megaMenuGroups.kids.href }, ...megaMenuGroups.kids.links],
   },
   {
     key: 'discover',
     title: 'Discover',
-    links: [...primaryLinks.filter((link) => link.label !== 'Women' && link.label !== 'Men'), ...utilityLinks],
+    links: [...primaryLinks.filter((link) => link.label !== 'Women' && link.label !== 'Men' && link.label !== 'Kids'), ...utilityLinks],
   },
 ] as const
 

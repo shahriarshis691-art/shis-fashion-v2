@@ -1,65 +1,82 @@
-import { Link } from 'react-router-dom'
-import { homeCategoryItems } from '../../data/homeCategories'
-import Container from '../ui/Container'
-import Reveal from '../common/Reveal'
-import LuxuryImage from '../common/LuxuryImage'
+import CategoryHeroCard from '../common/CategoryHeroCard'
 
-export default function ShopByCategorySection({ items }: { items?: { key: string; name: string; href: string; image: string }[] }) {
-  const categoryItems = items?.length ? items : homeCategoryItems
+export interface ShopByCategoryItem {
+  key: string
+  name: string
+  href: string
+  image: string
+  imagePosition?: string
+}
+
+const HUB_ORDER = ['men', 'women', 'kids'] as const
+
+function orderHubItems(items: ShopByCategoryItem[]) {
+  const byKey = new Map(items.map((item) => [item.key.trim().toLowerCase(), item]))
+  return HUB_ORDER.map((key) => byKey.get(key)).filter((item): item is ShopByCategoryItem => Boolean(item))
+}
+
+export default function ShopByCategorySection({
+  items,
+  title = 'SHOP BY CATEGORY',
+  eyebrow = 'Featured collections',
+}: {
+  items: ShopByCategoryItem[]
+  title?: string
+  eyebrow?: string
+}) {
+  const hubItems = orderHubItems(items)
+  if (!hubItems.length) {
+    return null
+  }
 
   return (
     <section
-      className="bg-transparent px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14"
+      id="featured-collections"
+      className="scroll-mt-20 overflow-x-hidden bg-white md:py-14"
       aria-labelledby="shop-by-category-title"
     >
-      <Container>
-        <h2
-          id="shop-by-category-title"
-          className="text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-center text-neutral-900 uppercase mb-6 sm:mb-8"
-        >
-          SHOP BY CATEGORY
-        </h2>
+      <h2 id="shop-by-category-title" className="sr-only">
+        {title}
+      </h2>
+      <div className="mx-auto hidden max-w-7xl px-6 md:block">
+        <div className="mb-10 text-center">
+          <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
+          <p
+            className="mt-1 text-2xl font-normal tracking-[0.2em] text-neutral-900 uppercase md:text-3xl"
+            style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
+            aria-hidden
+          >
+            {title}
+          </p>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6">
-          {categoryItems.map((item, index) => (
-            <Reveal key={item.key} delayMs={index * 50}>
-              <Link
-                to={item.href}
-                className="group luxury-tap flex flex-col items-center w-full cursor-pointer"
-                aria-label={`${item.name} collection`}
+      <div className="category-snap-feed md:mx-auto md:max-w-7xl md:px-6">
+        {hubItems.map((item, index) => (
+          <article key={item.key} className="category-snap-card">
+            <CategoryHeroCard
+              name={item.name}
+              href={item.href}
+              image={item.image}
+              cta="View Categories"
+              priority={index === 0}
+              variant="feed"
+              imagePosition={item.imagePosition}
+              sizes="(max-width: 767px) 100vw, 33vw"
+            />
+            {index < hubItems.length - 1 ? (
+              <span
+                className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center text-white/70 md:hidden"
+                aria-hidden
               >
-                <div className="studio-media-frame">
-                  <LuxuryImage
-                    src={item.image}
-                    alt={`${item.name} category`}
-                    width={960}
-                    height={1200}
-                    sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
-                    widths={[320, 480, 768, 960]}
-                    className="h-full w-full"
-                    aspectClassName="aspect-[3/4]"
-                    objectPosition="center top"
-                    imgClassName="h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 z-10 px-3 pb-3 pt-8 text-center">
-                    <span className="text-xs sm:text-sm md:text-base font-bold text-white tracking-wide uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
-                      {item.name}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-
-        <div className="mt-4 flex md:hidden">
-          <Link to="/shop" className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text)]">
-            <span>View all</span>
-            <span aria-hidden className="text-base leading-none">→</span>
-          </Link>
-        </div>
-      </Container>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 animate-bounce" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </span>
+            ) : null}
+          </article>
+        ))}
+      </div>
     </section>
   )
 }

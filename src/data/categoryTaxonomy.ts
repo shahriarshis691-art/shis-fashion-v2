@@ -69,8 +69,33 @@ const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
 ]
 
 const KIDS_SUBCATEGORIES: SubcategoryConfig[] = [
-  { slug: 'kids', label: 'Kids', aliases: ['kids', 'kid', 'kidswear', 'kids-wear', 'children', 'child', 'baby', 'babies', 'toddler', 'mini'] },
+  {
+    slug: 'kids-oversized-tee',
+    label: 'Oversized Tee',
+    aliases: ['kids-tee', 'kids-oversized', 'kids oversized tee', 'kids-oversized-tee'],
+    path: '/collections/kids-oversized-tee',
+  },
+  {
+    slug: 'kids-boys',
+    label: 'Boys',
+    aliases: ['kids-boy', 'kids boy'],
+    path: '/collections/kids-oversized-tee?gender=Kids%20Boy',
+  },
+  {
+    slug: 'kids-girls',
+    label: 'Girls',
+    aliases: ['kids-girl', 'kids girl'],
+    path: '/collections/kids-oversized-tee?gender=Kids%20Girl',
+  },
+  {
+    slug: 'kids-unisex',
+    label: 'Unisex',
+    aliases: ['kids unisex'],
+    path: '/collections/kids-oversized-tee?gender=Unisex',
+  },
 ]
+
+const WOMEN_HUB_PRIORITY_SLUGS = ['kurti', 'womens-baggy', 'oversized-tee', 'dresses', 'western-outfits'] as const
 
 const SEGMENTS: SegmentConfig[] = [
   {
@@ -177,6 +202,28 @@ export function getSubcategoryLinksForSegment(segment: Exclude<ShopSegment, 'all
     label: subcategory.label,
     href: subcategory.path ?? `${config.path}?sub=${subcategory.slug}`,
   }))
+}
+
+export function getHubSubcategories(segment: Exclude<ShopSegment, 'all'>) {
+  const subcategories = getSubcategoriesForSegment(segment)
+  if (segment !== 'women') {
+    return subcategories
+  }
+
+  const priority = new Set<string>(WOMEN_HUB_PRIORITY_SLUGS)
+  const featured = WOMEN_HUB_PRIORITY_SLUGS
+    .map((slug) => subcategories.find((item) => item.slug === slug))
+    .filter((item): item is SubcategoryConfig => Boolean(item))
+  const rest = subcategories.filter((item) => !priority.has(item.slug))
+  return [...featured, ...rest]
+}
+
+export function getSegmentAllProductsHref(segment: Exclude<ShopSegment, 'all'>) {
+  if (segment === 'kids') {
+    return '/collections/kids-oversized-tee'
+  }
+
+  return `/shop?segment=${segment}`
 }
 
 export function getDedicatedListingFromPath(pathname: string) {

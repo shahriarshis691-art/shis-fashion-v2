@@ -936,6 +936,10 @@ function getLegacyCategoryImage(legacyImageKey: string) {
     return categoryStripCovers.western
   }
 
+  if (legacyImageKey === 'kids' || legacyImageKey === 'kid') {
+    return '/hero/kid-homepage.jpg'
+  }
+
   return homeCategoryItems.find((item) => item.key === legacyImageKey)?.image ?? shopCategories.find((category) => category.slug === 'mens-shirt')?.image ?? ''
 }
 

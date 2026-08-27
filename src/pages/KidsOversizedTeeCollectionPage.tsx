@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AarongProductCard from '../components/shop/AarongProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import {
@@ -91,10 +91,25 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
   { value: 'price-high', label: 'Price: High to Low' },
 ]
 
+function parseKidsGenderParam(raw: string | null): GenderFilter {
+  const value = (raw ?? '').trim().toLowerCase()
+  if (value === 'kids boy' || value === 'boy' || value === 'boys') {
+    return 'Kids Boy'
+  }
+  if (value === 'kids girl' || value === 'girl' || value === 'girls') {
+    return 'Kids Girl'
+  }
+  if (value === 'unisex') {
+    return 'Unisex'
+  }
+  return 'all'
+}
+
 export default function KidsOversizedTeeCollectionPage() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const genderFilter = parseKidsGenderParam(new URLSearchParams(location.search).get('gender'))
   const [products, setProducts] = useState<KidsOversizedTeeProduct[]>(() => mergeKidsOversizedTeeCatalog([]))
-  const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
   const [sizeFilter, setSizeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [searchQuery, setSearchQuery] = useState('')
@@ -102,6 +117,20 @@ export default function KidsOversizedTeeCollectionPage() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
+
+  const setGenderFilter = (next: GenderFilter) => {
+    const params = new URLSearchParams(location.search)
+    if (next === 'all') {
+      params.delete('gender')
+    } else {
+      params.set('gender', next)
+    }
+    const search = params.toString()
+    navigate(
+      { pathname: location.pathname, search: search ? `?${search}` : '' },
+      { replace: true },
+    )
+  }
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -257,7 +286,15 @@ export default function KidsOversizedTeeCollectionPage() {
             <li aria-hidden className="text-neutral-300">
               /
             </li>
-            <li className="text-neutral-500">Kids</li>
+            <li>
+              <Link to="/kids" className="transition-colors hover:text-neutral-700">
+                Kids
+              </Link>
+            </li>
+            <li aria-hidden className="text-neutral-300">
+              /
+            </li>
+            <li className="text-neutral-500">Oversized Tee</li>
           </ol>
         </nav>
 
