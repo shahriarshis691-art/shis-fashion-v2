@@ -23,7 +23,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   },
   {
     key: 'womens',
-    name: "Women's Collection",
+    name: 'Women',
     href: '/women',
     image: '/collections/saree-category-new.jpg',
     imagePosition: 'center top',

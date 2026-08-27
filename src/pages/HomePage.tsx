@@ -317,7 +317,7 @@ export default function HomePage() {
           : categoryStripCovers.saree
       return {
         key,
-        name: strip?.label || (key === 'men' ? 'Men' : key === 'women' ? 'Women' : 'Kids'),
+        name: key === 'women' ? 'Women' : strip?.label || (key === 'men' ? 'Men' : 'Kids'),
         href: strip?.href || `/${key}`,
         image: strip?.image || fallbackImage,
         imagePosition: strip?.imagePosition || 'center top',

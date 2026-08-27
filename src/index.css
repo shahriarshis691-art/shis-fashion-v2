@@ -224,6 +224,7 @@ img.navbar-brand-logo {
 .hero-slider-frame {
   overflow: hidden;
   isolation: isolate;
+  contain: layout paint;
 }
 
 img.hero-slide-image {

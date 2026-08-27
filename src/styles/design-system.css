@@ -412,7 +412,7 @@ button,
   z-index: 1;
   isolation: isolate;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: calc(100svh - 14rem);
   min-height: 28rem;
   overflow: hidden;
 }

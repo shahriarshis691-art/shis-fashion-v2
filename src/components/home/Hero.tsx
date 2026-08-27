@@ -142,7 +142,7 @@ export const Hero: React.FC<HeroProps> = () => {
 
   return (
     <section
-      className="relative z-0 isolate w-full max-w-[100vw] select-none overflow-hidden bg-neutral-950"
+      className="relative z-0 isolate mb-3 w-full max-w-[100vw] select-none overflow-hidden bg-neutral-950 md:mb-0"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
       aria-roledescription="carousel"

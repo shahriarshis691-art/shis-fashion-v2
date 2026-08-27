@@ -48,9 +48,9 @@ export default function CategoryHeroCard({
           imgClassName="h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
           onError={onError}
         />
-        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-end">
+        <div className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-end">
           <div
-            className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
+            className="absolute inset-0 z-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10"
             aria-hidden
           />
           <div

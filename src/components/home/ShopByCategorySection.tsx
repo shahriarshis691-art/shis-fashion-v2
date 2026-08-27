@@ -61,9 +61,12 @@ export default function ShopByCategorySection({
         </div>
       </div>
 
-      <div className="category-snap-feed md:mx-auto md:max-w-7xl md:px-6">
+      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-3 md:gap-6 md:px-6 md:pb-0">
         {hubItems.map((item, index) => (
-          <article key={item.key} className="category-snap-card">
+          <article
+            key={item.key}
+            className="relative z-10 isolate h-[calc(100svh-14rem)] min-h-[28rem] overflow-hidden md:h-auto md:min-h-0 md:aspect-[3/4]"
+          >
             <CategoryHeroCard
               name={item.name}
               href={item.href}
@@ -74,16 +77,6 @@ export default function ShopByCategorySection({
               imagePosition={item.imagePosition}
               sizes="(max-width: 767px) 100vw, 33vw"
             />
-            {index < hubItems.length - 1 ? (
-              <span
-                className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center text-white/80 md:hidden"
-                aria-hidden
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5 animate-bounce" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </span>
-            ) : null}
           </article>
         ))}
       </div>
