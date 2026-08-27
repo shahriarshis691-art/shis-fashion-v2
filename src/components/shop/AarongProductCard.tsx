@@ -1,6 +1,7 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import PrefetchLink from '../common/PrefetchLink'
 import { formatBDT } from '../../utils/currency'
+import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../../utils/media'
 
 export interface AarongProductCardProduct {
   id: string | number
@@ -42,6 +43,11 @@ const AarongProductCard = memo(function AarongProductCard({
   onProductClick,
 }: AarongProductCardProps) {
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
+  const cardSizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
+  const image = useMemo(
+    () => catalogImageAttrs(product.image, 640, 853, cardSizes, [320, 480, 640]),
+    [product.image],
+  )
 
   return (
     <article className="product-card luxury-tap group relative">
@@ -54,17 +60,19 @@ const AarongProductCard = memo(function AarongProductCard({
       >
         <div className="studio-media-frame">
           <img
-            src={product.image}
+            src={image.src || CATALOG_IMAGE_PLACEHOLDER}
+            srcSet={image.srcSet}
+            sizes={image.sizes}
             alt={product.name}
             width={640}
             height={853}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
             className="product-card-media"
             onError={(event) => {
-              event.currentTarget.src = '/og-image.svg'
+              event.currentTarget.removeAttribute('srcset')
+              event.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
             }}
           />
           {/* Desktop-only subtle VIEW — disabled on mobile so the card itself opens PDP */}

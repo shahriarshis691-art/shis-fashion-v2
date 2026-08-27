@@ -1,4 +1,9 @@
 /* SHIS Design System — luxury Apple / ultra-premium foundation */
+/* Google Fonts loaded with display=swap in index.html — keep swap if self-hosting later. */
+@supports (font-display: swap) {
+  /* Intentionally empty: remote @font-face already sets font-display via the CSS API. */
+}
+
 :root {
   --font-sans: 'Manrope', 'Segoe UI', sans-serif;
   --font-display: 'Cormorant Garamond', Georgia, serif;

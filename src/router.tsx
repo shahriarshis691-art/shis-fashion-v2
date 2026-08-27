@@ -4,7 +4,6 @@ import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Loading from './components/ui/Loading'
 import ErrorBoundary from './components/common/ErrorBoundary'
-import { onAdminAuthChanged } from './firebase/adminService'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
@@ -47,12 +46,23 @@ function AdminRouteGuard({ children }: { children: ReactElement }) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = onAdminAuthChanged((nextUser) => {
-      setUser(nextUser)
-      setReady(true)
+    let active = true
+    let unsubscribe = () => {}
+
+    void import('./firebase/adminService').then(({ onAdminAuthChanged }) => {
+      if (!active) {
+        return
+      }
+      unsubscribe = onAdminAuthChanged((nextUser) => {
+        setUser(nextUser)
+        setReady(true)
+      })
     })
 
-    return unsubscribe
+    return () => {
+      active = false
+      unsubscribe()
+    }
   }, [])
 
   if (!ready) {

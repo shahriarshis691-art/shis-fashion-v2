@@ -5,6 +5,8 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 interface HeroSlide {
   id: number
   image: string
+  /** Optional WebP/AVIF source for <picture> (preferred over JPEG). */
+  imageWebp?: string
   title: string
   btnText: string
   link: string
@@ -31,6 +33,7 @@ const HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
     image: '/hero/kids/hero-soft-cotton-saree.jpg',
+    imageWebp: '/hero/kids/hero-soft-cotton-saree.jpg.webp',
     title: 'THE MONSOON',
     btnText: 'SHOP SAREE',
     link: '/sarees',
@@ -104,13 +107,6 @@ export const Hero: React.FC<HeroProps> = () => {
     return () => window.clearInterval(interval)
   }, [currentIndex, hoverPaused, nextSlide, prefersReducedMotion, slideCount, touchPaused])
 
-  useEffect(() => {
-    heroSlides.forEach((slide) => {
-      const preload = new Image()
-      preload.src = slide.image
-    })
-  }, [heroSlides])
-
   const onTouchStart = (event: React.TouchEvent) => {
     touchStartX.current = event.changedTouches[0]?.clientX ?? null
     setTouchPaused(true)
@@ -172,34 +168,35 @@ export const Hero: React.FC<HeroProps> = () => {
               }`}
               aria-hidden={!isActive}
             >
-              <img
-                src={slide.image}
-                alt={slide.alt}
-                width={slide.width}
-                height={slide.height}
-                sizes="100vw"
-                className="hero-slide-image absolute inset-0 h-full w-full object-cover object-[center_top]"
-                loading="eager"
-                fetchPriority={isLcpCandidate ? 'high' : 'low'}
-                decoding={isLcpCandidate ? 'sync' : 'async'}
-                draggable={false}
-                onError={(event) => {
-                  const src = event.currentTarget.src
-                  if (src.includes('hero-soft-cotton-saree.jpg') && !src.includes('.webp')) {
-                    event.currentTarget.src = '/hero/kids/hero-soft-cotton-saree.jpg.webp'
-                    return
-                  }
-                  if (src.includes('mens-baggy1.jpg')) {
-                    event.currentTarget.src = '/collections/featured-denim-collection.jpg'
-                    return
-                  }
-                  if (src.includes('featured-denim-collection.jpg')) {
-                    event.currentTarget.src = '/hero/denim-homepage.jpg'
-                    return
-                  }
-                  event.currentTarget.src = DEFAULT_OG_IMAGE
-                }}
-              />
+              <picture>
+                {slide.imageWebp ? (
+                  <source srcSet={slide.imageWebp} type="image/webp" sizes="100vw" />
+                ) : null}
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  width={slide.width}
+                  height={slide.height}
+                  sizes="100vw"
+                  className="hero-slide-image absolute inset-0 h-full w-full object-cover object-[center_top]"
+                  loading={isLcpCandidate ? 'eager' : 'lazy'}
+                  fetchPriority={isLcpCandidate ? 'high' : 'low'}
+                  decoding={isLcpCandidate ? 'sync' : 'async'}
+                  draggable={false}
+                  onError={(event) => {
+                    const src = event.currentTarget.src
+                    if (src.includes('mens-baggy1.jpg')) {
+                      event.currentTarget.src = '/collections/featured-denim-collection.jpg'
+                      return
+                    }
+                    if (src.includes('featured-denim-collection.jpg')) {
+                      event.currentTarget.src = '/hero/denim-homepage.jpg'
+                      return
+                    }
+                    event.currentTarget.src = DEFAULT_OG_IMAGE
+                  }}
+                />
+              </picture>
             </div>
           )
         })}

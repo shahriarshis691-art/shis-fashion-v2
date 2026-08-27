@@ -5,36 +5,39 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Critical LCP candidate for homepage hero (Kids Everyday Edit). -->
-    <link rel="preload" as="image" href="/hero/kid-homepage.jpg" fetchpriority="high" />
-    <link rel="preload" as="image" href="/hero/shis-brand-logo-v2.png" fetchpriority="high" />
-    <!-- Subset weights + display=swap; non-blocking stylesheet load. -->
+    <!-- Critical LCP: homepage hero slide 1 (WebP preferred). -->
+    <link
+      rel="preload"
+      as="image"
+      href="/hero/kids/hero-soft-cotton-saree.jpg.webp"
+      type="image/webp"
+      fetchpriority="high"
+    />
+    <!-- Body + display fonts only; display=swap; non-blocking stylesheet load. -->
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600&display=swap"
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600&display=swap"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600&display=swap"
       />
     </noscript>
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://connect.facebook.net" />
+    <!-- Media CDN early; analytics hosts via dns-prefetch only (scripts boot idle). -->
     <link rel="preconnect" href="https://res.cloudinary.com" />
-    <link rel="preconnect" href="https://firestore.googleapis.com" />
-    <link rel="preconnect" href="https://firebase.googleapis.com" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://connect.facebook.net" />
-    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://www.clarity.ms" />
     <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+    <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Shop premium oversized T-shirts, Polo Shirts, Denim and Fashion Essentials from SHIS Fashion Bangladesh. Premium quality. Fast Delivery. Cash on Delivery available." />
     <meta name="keywords" content="SHIS Fashion, Bangladesh Fashion, Oversized T Shirt Bangladesh, Premium Polo Shirt, Denim, Fashion Store Bangladesh" />

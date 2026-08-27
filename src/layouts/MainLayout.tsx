@@ -13,7 +13,6 @@ import { incidentAlerts } from '../services/incidentAlerts'
 import { applySeoMetadata, setRuntimeSeoOverrides } from '../utils/seo'
 import { evaluateSoftLaunchAccess } from '../services/softLaunch'
 import { captureCampaignAttribution } from '../utils/attribution'
-import { subscribeToHomepageContent, subscribeNewsletter } from '../firebase/adminService'
 import { normalizeCatalogImageUrl } from '../utils/media'
 
 const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''
@@ -122,16 +121,28 @@ export default function MainLayout() {
   }, [navigate, oversizedCampaignLanding])
 
   useEffect(() => {
-    const unsubscribe = subscribeToHomepageContent((content) => {
-      const normalized = normalizeCatalogImageUrl(content.heroImage ?? '', 1400, 900)
-      setHeroImage(normalized)
-      setRuntimeSeoOverrides({
-        home: content.seo?.home,
-        shop: content.seo?.shop,
-        oversized: content.seo?.oversized,
+    let active = true
+    let unsubscribe = () => {}
+
+    void import('../firebase/adminService').then(({ subscribeToHomepageContent }) => {
+      if (!active) {
+        return
+      }
+      unsubscribe = subscribeToHomepageContent((content) => {
+        const normalized = normalizeCatalogImageUrl(content.heroImage ?? '', 1400, 900)
+        setHeroImage(normalized)
+        setRuntimeSeoOverrides({
+          home: content.seo?.home,
+          shop: content.seo?.shop,
+          oversized: content.seo?.oversized,
+        })
       })
     })
-    return unsubscribe
+
+    return () => {
+      active = false
+      unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -221,8 +232,8 @@ export default function MainLayout() {
   ])
 
   const handleSubscribe = async (email: string) => {
-    const result = await subscribeNewsletter(email)
-    return result
+    const { subscribeNewsletter } = await import('../firebase/adminService')
+    return subscribeNewsletter(email)
   }
 
   const handleWelcomeBack = (email: string) => {

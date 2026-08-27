@@ -13,7 +13,7 @@ class SessionReplayService {
   }
 
   initialize() {
-    if (this.initialized || !this.projectId || typeof window === 'undefined') {
+    if (this.initialized || !this.projectId || typeof window === 'undefined' || !import.meta.env.PROD) {
       return
     }
 

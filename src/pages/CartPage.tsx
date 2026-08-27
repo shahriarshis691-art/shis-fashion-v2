@@ -6,12 +6,42 @@ import { useCart, clearBuyNowCheckout } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import type { ShopProduct } from '../data/shopData'
 import { formatBDT, parseBDT } from '../utils/currency'
+import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../utils/media'
 import { subscribeToHomepageContent } from '../firebase/adminService'
 import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../utils/bangladeshAddress'
 import CouponApplyField from '../components/shop/CouponApplyField'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
+}
+
+function CartThumbImage({
+  src,
+  alt,
+  width,
+  height,
+  sizes,
+}: {
+  src: string
+  alt: string
+  width: number
+  height: number
+  sizes: string
+}) {
+  const thumb = catalogImageAttrs(src, width * 2, height * 2, sizes, [width, width * 2])
+  return (
+    <img
+      src={thumb.src || CATALOG_IMAGE_PLACEHOLDER}
+      srcSet={thumb.srcSet}
+      sizes={thumb.sizes}
+      alt={alt}
+      width={width}
+      height={height}
+      loading="lazy"
+      decoding="async"
+      className="gpu-media h-full w-full object-cover"
+    />
+  )
 }
 
 export default function CartPage() {
@@ -75,7 +105,7 @@ export default function CartPage() {
                 {wishlistItems.map((wishlistItem) => (
                   <div key={wishlistItem.id} className="flex items-center gap-3 border-b border-gray-100 py-4 last:border-b-0">
                     <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden sm:h-20 sm:w-20">
-                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
+                      <CartThumbImage src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} sizes="80px" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-sm font-semibold text-neutral-900">{wishlistItem.product.name}</h3>
@@ -117,16 +147,7 @@ export default function CartPage() {
               >
                 <div className="flex gap-4">
                   <div className="aspect-square h-20 w-20 shrink-0 overflow-hidden sm:h-28 sm:w-28">
-                    <img
-                    src={item.image}
-                    alt={item.name}
-                    loading="lazy"
-                    decoding="async"
-                    width={112}
-                    height={112}
-                    sizes="(max-width: 639px) 80px, 112px"
-                    className="gpu-media h-full w-full object-cover"
-                  />
+                    <CartThumbImage src={item.image} alt={item.name} width={112} height={112} sizes="(max-width: 639px) 80px, 112px" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3">
@@ -165,7 +186,7 @@ export default function CartPage() {
                   {wishlistItems.map((wishlistItem) => (
                     <div key={wishlistItem.id} className="flex items-center gap-3 border-b border-gray-100 py-4 last:border-b-0">
                       <div className="aspect-square h-16 w-16 shrink-0 overflow-hidden sm:h-20 sm:w-20">
-                      <img src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} loading="lazy" decoding="async" className="gpu-media h-full w-full object-cover" />
+                      <CartThumbImage src={wishlistItem.product.image} alt={wishlistItem.product.name} width={80} height={80} sizes="80px" />
                     </div>
                       <div className="flex-1">
                         <h3 className="text-sm font-semibold text-neutral-900">{wishlistItem.product.name}</h3>

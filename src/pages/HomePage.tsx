@@ -489,23 +489,27 @@ export default function HomePage() {
                   aria-label={`${displayLabel} collection`}
                 >
                   <div className="studio-media-frame">
-                    <img
+                    <LuxuryImage
                       src={item.image || CATALOG_IMAGE_PLACEHOLDER}
                       alt={displayLabel}
                       width={categoryStripCardImage.width}
                       height={categoryStripCardImage.height}
-                      className="absolute inset-0 h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
-                      style={{ objectPosition: 'center top' }}
-                      loading="lazy"
-                      decoding="async"
+                      sizes="(max-width: 767px) 50vw, 25vw"
+                      widths={[320, 480, 768, 960]}
+                      className="h-full w-full"
+                      aspectClassName={categoryStripCardImage.aspectClassName}
+                      objectPosition="center top"
+                      imgClassName={categoryStripCardImage.imgClassName + ' group-hover:scale-105 transition-transform duration-500 ease-out'}
                       onError={(event) => {
                         if (item.key === 'sale' && !event.currentTarget.dataset.halfShirtFallback) {
                           event.currentTarget.dataset.halfShirtFallback = '1'
+                          event.currentTarget.removeAttribute('srcset')
                           event.currentTarget.src = '/hero/half-shirt-1.jpg.png'
                           return
                         }
                         if (item.key === 'new-arrivals' && !event.currentTarget.dataset.oversizedTeeFallback) {
                           event.currentTarget.dataset.oversizedTeeFallback = '1'
+                          event.currentTarget.removeAttribute('srcset')
                           event.currentTarget.src = '/hero/oversized-tee.jpg.jpeg'
                           return
                         }
@@ -576,13 +580,13 @@ export default function HomePage() {
 
             {/* Responsive Product Grid */}
             <ProductListingGrid>
-              {products.map((product, index) => {
+              {products.map((product) => {
                 const mapped = mapAdminProductToShopProduct(product)
                 return (
                   <ProductCard
                     key={mapped.id}
                     product={mapped}
-                    priority={index < 4}
+                    priority={false}
                     onToggleWishlist={handleToggleWishlist}
                     isInWishlist={isInWishlist(String(mapped.id))}
                   />
@@ -611,11 +615,11 @@ export default function HomePage() {
               <span className="text-caption uppercase tracking-[0.12em] text-black/55">Continue where you left off</span>
             </div>
             <ProductListingGrid className="mt-5">
-              {recentlyViewedItems.slice(0, 4).map((item, index) => (
+              {recentlyViewedItems.slice(0, 4).map((item) => (
                 <ProductCard
                   key={item.id}
                   product={item.product}
-                  priority={index < 4}
+                  priority={false}
                   onToggleWishlist={handleToggleWishlist}
                   isInWishlist={isInWishlist(String(item.product.id))}
                 />

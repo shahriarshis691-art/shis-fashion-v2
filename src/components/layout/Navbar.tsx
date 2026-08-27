@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
-import { subscribeToHomepageContent, type HomepageContent } from '../../firebase/adminService'
+import type { HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
 import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
@@ -139,8 +139,20 @@ export default function Navbar() {
   }
 
   useEffect(() => {
-    const unsubscribe = subscribeToHomepageContent((content) => setHomepageContent(content))
-    return unsubscribe
+    let active = true
+    let unsubscribe = () => {}
+
+    void import('../../firebase/adminService').then(({ subscribeToHomepageContent }) => {
+      if (!active) {
+        return
+      }
+      unsubscribe = subscribeToHomepageContent((content: HomepageContent) => setHomepageContent(content))
+    })
+
+    return () => {
+      active = false
+      unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -239,9 +251,9 @@ export default function Navbar() {
               alt="SHIS Fashion"
               width={180}
               height={36}
-              decoding="sync"
+              decoding="async"
               loading="eager"
-              fetchPriority="high"
+              fetchPriority="low"
               className="navbar-brand-logo"
               style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
               onError={(event) => {

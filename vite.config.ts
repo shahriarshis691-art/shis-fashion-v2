@@ -8,7 +8,7 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
     modulePreload: {
-      polyfill: true,
+      polyfill: false,
     },
     chunkSizeWarningLimit: 1000,
     target: 'es2020',
@@ -17,6 +17,10 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) {
             return undefined
+          }
+
+          if (id.includes('/firebase/adminService') || id.includes('\\firebase\\adminService')) {
+            return 'admin-service'
           }
 
           if (id.includes('firebase')) {

@@ -1,3 +1,5 @@
+import { catalogImageAttrs } from '../../utils/media'
+
 interface PdpThumbnailItem {
   src: string
   alt: string
@@ -11,6 +13,8 @@ interface PdpThumbnailStripProps {
   onSelect: (index: number) => void
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
 }
+
+const THUMB_SIZES = '(max-width: 639px) 22vw, 120px'
 
 /** Horizontal thumbnail row under the PDP hero — uses existing gallery srcs only. */
 export default function PdpThumbnailStrip({ items, activeIndex, onSelect, onError }: PdpThumbnailStripProps) {
@@ -29,6 +33,7 @@ export default function PdpThumbnailStrip({ items, activeIndex, onSelect, onErro
     >
       {items.map((item, index) => {
         const isActive = index === activeIndex
+        const image = catalogImageAttrs(item.src, 240, 320, THUMB_SIZES, [160, 240])
 
         return (
           <button
@@ -46,13 +51,18 @@ export default function PdpThumbnailStrip({ items, activeIndex, onSelect, onErro
               }`}
             >
               <img
-                src={item.src}
+                src={image.src}
+                srcSet={image.srcSet}
+                sizes={image.sizes}
                 alt=""
                 width={240}
                 height={320}
                 loading="lazy"
                 decoding="async"
-                onError={onError}
+                onError={(event) => {
+                  event.currentTarget.removeAttribute('srcset')
+                  onError?.(event)
+                }}
                 className={`gpu-media ${item.imgClassName ?? ''}`.trim()}
               />
             </span>
