@@ -1103,7 +1103,7 @@ export default function ShopPage() {
   return (
     <section className={`bg-white pb-24 ${isWomensBaggyListing ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isWomensBaggyListing ? (
-        <div className="listing-hero-frame relative flex w-full max-w-[100vw] items-end justify-center overflow-hidden bg-neutral-100">
+        <div className="listing-hero-frame relative w-full max-w-[100vw] overflow-hidden bg-neutral-100">
           <img
             src={WOMENS_BAGGY_HERO_IMAGE}
             alt="Women's Baggy Jeans — SHIS Fashion"
@@ -1129,18 +1129,6 @@ export default function ShopPage() {
               image.src = '/og-image.svg'
             }}
           />
-          <div className="relative z-10 pb-5 sm:pb-8">
-            <a
-              href="#womens-baggy-grid"
-              onClick={(event) => {
-                event.preventDefault()
-                document.getElementById('womens-baggy-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              className="btn-glass-cta"
-            >
-              Shop Women&apos;s Baggy
-            </a>
-          </div>
         </div>
       ) : null}
 
