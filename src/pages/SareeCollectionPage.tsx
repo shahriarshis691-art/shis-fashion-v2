@@ -104,7 +104,7 @@ export default function SareeCollectionPage() {
   return (
     <section className="bg-white pb-24">
       {/* Portrait campaign poster — framed per breakpoint; no CTA overlay */}
-      <div className="saree-listing-hero">
+      <div className="saree-listing-hero md:aspect-auto md:h-[65vh] md:max-h-none md:min-h-0 md:w-full md:max-w-full lg:h-[75vh] lg:max-h-[700px]">
         <img
           src={SAREE_LISTING_HERO.jpg}
           alt=""
@@ -123,7 +123,7 @@ export default function SareeCollectionPage() {
             width={SAREE_LISTING_HERO.width}
             height={SAREE_LISTING_HERO.height}
             sizes="100vw"
-            className="saree-listing-hero__image"
+            className="saree-listing-hero__image md:object-cover md:object-[center_20%]"
             loading="eager"
             fetchPriority="high"
             decoding="async"

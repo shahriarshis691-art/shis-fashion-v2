@@ -236,9 +236,8 @@ img.hero-slide-image {
   display: block;
 }
 
-/* Saree listing hero — portrait source (3:4). Mobile covers the frame;
-   desktop contains the full figure over a blurred bleed so ultrawide
-   monitors do not crop the model or show white letterboxing. */
+/* Saree listing hero — portrait source (3:4). Mobile covers the frame.
+   Desktop (≥768px) is a full-width cover banner; mobile rules below stay unchanged. */
 .saree-listing-hero {
   position: relative;
   width: 100%;
@@ -253,31 +252,23 @@ img.hero-slide-image {
 @media (min-width: 768px) {
   .saree-listing-hero {
     aspect-ratio: auto;
-    height: clamp(36rem, 72vh, 75vh);
-    min-height: 60vh;
-    max-height: 75vh;
+    width: 100%;
+    max-width: 100%;
+    height: 65vh;
+    min-height: 0;
+    max-height: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .saree-listing-hero {
+    height: 75vh;
+    max-height: 700px;
   }
 }
 
 .saree-listing-hero__bleed {
   display: none;
-}
-
-@media (min-width: 768px) {
-  .saree-listing-hero__bleed {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    transform: scale(1.14);
-    filter: blur(28px);
-    pointer-events: none;
-    user-select: none;
-  }
 }
 
 .saree-listing-hero__image {
@@ -293,15 +284,8 @@ img.hero-slide-image {
 
 @media (min-width: 768px) {
   .saree-listing-hero__image {
-    object-fit: contain;
-    object-position: center center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .saree-listing-hero__bleed {
-    transform: none;
-    filter: blur(20px);
+    object-fit: cover;
+    object-position: center 20%;
   }
 }
 
