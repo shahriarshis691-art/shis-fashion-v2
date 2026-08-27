@@ -33,6 +33,9 @@ const categoryStripCardImage = {
   height: 1200,
 } as const
 
+const HOMEPAGE_GALLERY_IMAGE = '/homepage/homepage-gellary-image.jpg'
+const HOMEPAGE_GALLERY_IMAGE_FALLBACK = '/homepage/homepage-gellary-image.jpg.jpeg'
+
 function uniqueCategoryStrips<T extends { key: string }>(items: T[]) {
   const seen = new Set<string>()
   return items.filter((item) => {
@@ -387,6 +390,40 @@ export default function HomePage() {
           title={homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
         />
       ) : null}
+
+      <section
+        id="homepage-gallery"
+        className="relative w-full overflow-hidden bg-neutral-950 min-h-[85vh] md:min-h-0 md:h-[85vh] md:max-h-[850px]"
+        aria-label="SHIS Fashion gallery"
+      >
+        <img
+          src={HOMEPAGE_GALLERY_IMAGE}
+          alt="SHIS Fashion community gallery"
+          width={959}
+          height={1280}
+          sizes="100vw"
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          onError={(event) => {
+            const image = event.currentTarget
+            if (image.dataset.fallback === 'done') {
+              return
+            }
+            if (image.dataset.fallback !== 'jpeg') {
+              image.dataset.fallback = 'jpeg'
+              image.src = HOMEPAGE_GALLERY_IMAGE_FALLBACK
+              return
+            }
+            image.dataset.fallback = 'done'
+            image.src = '/og-image.svg'
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/25"
+          aria-hidden
+        />
+      </section>
 
       {brandPromiseEnabled ? (
         <section className="py-12 sm:py-16">
