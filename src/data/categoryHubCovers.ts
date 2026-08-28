@@ -12,7 +12,7 @@ const WOMEN_COVERS: Record<string, string> = {
 const MEN_COVERS: Record<string, string> = {
   shirts: categoryStripCovers.men,
   'half-shirts': categoryStripCovers['half-shirts'],
-  polos: categoryStripCovers.men,
+  polos: '/collections/polo-hero-images/polo-collection-herimage.png',
   panjabi: '/collections/panjabi-collection-mainimage/panjabi-main-image.jpg',
   'oversized-tee': categoryStripCovers['oversized-tee'],
   denim: '/collections/mens-baggy/mens-baggy1.jpg',
