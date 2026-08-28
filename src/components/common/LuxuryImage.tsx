@@ -49,8 +49,13 @@ export default function LuxuryImage({
   const image = catalogImageAttrs(src, width, height, sizes, widths)
   const imageSrc = image.src || CATALOG_IMAGE_PLACEHOLDER
   const lqip = !priority && !cinematicFill ? buildLqipUrl(src) : ''
-  const imageStyle: CSSProperties | undefined = objectPosition ? { objectPosition } : undefined
   const isContained = objectFit === 'contain'
+  const imageStyle: CSSProperties | undefined = objectPosition || isContained
+    ? {
+      ...(objectPosition ? { objectPosition } : {}),
+      ...(isContained ? { objectFit: 'contain' } : {}),
+    }
+    : undefined
   const wrapperStyle: CSSProperties | undefined = lqip
     ? {
       backgroundImage: `url("${lqip}")`,
@@ -106,7 +111,7 @@ export default function LuxuryImage({
         style={imageStyle}
         className={[
           'gpu-media absolute inset-0 z-[1] h-full w-full',
-          isContained ? 'object-contain object-center' : 'object-cover',
+          isContained ? '!object-contain object-center' : 'object-cover',
           objectPosition ? '' : isContained ? 'object-center' : 'object-[center_top]',
           hover ? 'media-hover' : '',
           loaded || priority ? 'opacity-100' : 'opacity-0',

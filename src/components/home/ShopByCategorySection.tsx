@@ -8,7 +8,7 @@ export interface ShopByCategoryItem {
   imagePosition?: string
 }
 
-const HUB_ORDER = ['men', 'women', 'kids'] as const
+const HUB_ORDER = ['men', 'women', 'kids', 'saree'] as const
 
 function orderHubItems(items: ShopByCategoryItem[]) {
   const byKey = new Map(items.map((item) => [item.key.trim().toLowerCase(), item]))
@@ -61,7 +61,7 @@ export default function ShopByCategorySection({
         </div>
       </div>
 
-      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-3 md:gap-6 md:px-6 md:pb-0">
+      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:gap-6 md:px-6 md:pb-0 lg:grid-cols-4">
         {hubItems.map((item, index) => (
           <article
             key={item.key}
@@ -74,7 +74,7 @@ export default function ShopByCategorySection({
               priority={index === 0}
               variant="feed"
               imagePosition={item.imagePosition}
-              sizes="(max-width: 767px) 100vw, 33vw"
+              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
               showOverlay={item.key.trim().toLowerCase() === 'kids'}
             />
           </article>

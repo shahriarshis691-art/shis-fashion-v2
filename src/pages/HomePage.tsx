@@ -20,7 +20,7 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'KID', href: '/collections/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
+  { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
@@ -148,7 +148,7 @@ const defaultHomepage: HomepageContent = {
     kids: {
       key: 'kids',
       label: 'KID',
-      href: '/collections/kids',
+      href: '/kids',
       enabled: true,
       order: 30,
       coverImage: SEGMENT_HUB_COVERS.kids,
@@ -307,7 +307,7 @@ export default function HomePage() {
                 : isPantsCard
                   ? '/men/pants'
                   : isKidsCard
-                    ? '/collections/kids'
+                    ? '/kids'
                     : liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
@@ -319,17 +319,18 @@ export default function HomePage() {
 
   const hubCategoryItems = useMemo(() => {
     const byKey = new Map(categoryStrips.map((item) => [item.key, item]))
-    return (['men', 'women', 'kids'] as const).map((key) => {
+    return (['men', 'women', 'kids', 'saree'] as const).map((key) => {
       const strip = byKey.get(key)
       const fallbackImage = key === 'kids'
         ? SEGMENT_HUB_COVERS.kids
         : key === 'men'
           ? categoryStripCovers.men
           : categoryStripCovers.saree
+      const fallbackHref = key === 'kids' ? '/kids' : key === 'saree' ? '/sarees' : `/${key}`
       return {
         key,
-        name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : strip?.label || (key === 'men' ? 'Men' : 'KID'),
-        href: key === 'kids' ? '/collections/kids' : (strip?.href || `/${key}`),
+        name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : key === 'saree' ? 'Saree' : strip?.label || 'Men',
+        href: key === 'kids' ? '/kids' : (strip?.href || fallbackHref),
         image: strip?.image || fallbackImage,
         imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : 'center top'),
       }

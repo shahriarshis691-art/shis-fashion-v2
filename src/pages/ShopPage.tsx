@@ -1128,20 +1128,20 @@ export default function ShopPage() {
     <section className={`bg-white pb-24 ${isListingWithTopHero ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isShirtsListing ? (
         <div
-          className="relative w-full overflow-hidden aspect-[16/9]"
+          className="relative w-full max-w-[100vw] bg-[#dcdcdc]"
           style={{ backgroundColor: MENS_SHIRTS_HERO_BACKGROUND }}
         >
           <img
             src={MENS_SHIRTS_HERO_IMAGE}
             alt="Men's Shirts Collection — SHIS Fashion"
-            width={1920}
-            height={1080}
+            width={736}
+            height={414}
             sizes="100vw"
             loading="eager"
             fetchPriority="high"
             decoding="async"
             draggable={false}
-            className="block h-full w-full object-contain object-center"
+            className="block h-auto w-full max-w-full object-contain object-center"
             onError={(event) => {
               const image = event.currentTarget
               if (image.dataset.fallback === 'done') {
@@ -1205,7 +1205,23 @@ export default function ShopPage() {
         </nav>
 
         {/* Header */}
-        {!isShirtsListing ? (
+        {isShirtsListing ? (
+          <>
+            <h1 className="sr-only">Men&apos;s Shirts</h1>
+            {searchQuery ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
+          </>
+        ) : (
           <div>
             <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
             <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
@@ -1222,18 +1238,7 @@ export default function ShopPage() {
               </div>
             ) : null}
           </div>
-        ) : searchQuery ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
-            >
-              Clear search
-            </button>
-          </div>
-        ) : null}
+        )}
 
         {isWomenListing ? (
           <div className={`sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md ${

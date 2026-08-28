@@ -11,6 +11,8 @@ export interface CategoryHeroCardProps {
   imageFit?: 'cover' | 'contain'
   sizes?: string
   showOverlay?: boolean
+  /** Skip studio-media-frame overlay while keeping cover crop. */
+  plainFrame?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
 }
 
@@ -24,12 +26,17 @@ export default function CategoryHeroCard({
   imageFit = 'cover',
   sizes,
   showOverlay = false,
+  plainFrame = false,
   onError,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
   const isContained = !isFeed && imageFit === 'contain'
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
-  const portraitFrameClass = isContained ? 'aspect-[3/4] bg-white' : 'studio-media-frame'
+  const portraitFrameClass = isContained
+    ? 'aspect-[3/4] bg-white'
+    : plainFrame
+      ? 'aspect-[3/4] overflow-hidden bg-neutral-100'
+      : 'studio-media-frame'
   const imageObjectClass = isContained
     ? ''
     : 'group-hover:scale-105 transition-transform duration-500 ease-out'
