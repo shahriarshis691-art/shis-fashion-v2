@@ -9,8 +9,10 @@ const WOMEN_COVERS: Record<string, string> = {
   tunic: '/images/products/kurtis/Jade green digital printed lawn Kurti  with white  embroidered bell sleeves.jpg',
 }
 
+const MENS_SHIRTS_HUB_COVER = '/collections/full=shirts/72d32a26-0458-48bc-a2ea-a3f81f6eeb24.png'
+
 const MEN_COVERS: Record<string, string> = {
-  shirts: categoryStripCovers.men,
+  shirts: MENS_SHIRTS_HUB_COVER,
   'half-shirts': categoryStripCovers['half-shirts'],
   polos: '/collections/polo-hero-images/polo-collection-herimage.png',
   panjabi: '/collections/panjabi-collection-mainimage/panjabi-main-image.jpg',
