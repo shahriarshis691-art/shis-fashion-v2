@@ -18,6 +18,11 @@ const BLOCKED_IMAGE_FRAGMENTS = [
   'shis-media-tone',
 ] as const
 
+/** Live-catalog slugs with missing/broken assets — never render on listing grids. */
+const BLOCKED_LISTING_SLUGS = new Set([
+  'coffee-brown-oversized-graphic-tee',
+])
+
 export function resolveListingProductImage(product: ListingProductLike): string {
   return getProductImage(product)
 }
@@ -44,6 +49,11 @@ export function isListingPlaceholderImage(image: string): boolean {
 }
 
 export function hasListingRenderableImage(product: ListingProductLike): boolean {
+  const slug = product.slug?.trim().toLowerCase()
+  if (slug && BLOCKED_LISTING_SLUGS.has(slug)) {
+    return false
+  }
+
   if (product.isPlaceholder === true) {
     return false
   }

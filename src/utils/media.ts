@@ -256,7 +256,7 @@ export function normalizeCloudinaryImageUrl(
     const transformations =
       fit === 'contain'
         ? `f_auto,q_auto,c_limit,w_${w}`
-        : `f_auto,q_auto,c_fill,g_auto,w_${w},h_${Math.max(1, Math.round(height))}`
+        : `f_auto,q_auto,c_fill,g_top,w_${w},h_${Math.max(1, Math.round(height))}`
     parsed.pathname = `${prefix}${transformations}/${suffix}`
     return parsed.toString()
   } catch {

@@ -293,7 +293,7 @@ button,
   transition: transform 500ms var(--ease-luxury);
   will-change: transform;
   object-fit: cover;
-  object-position: center center;
+  object-position: center top;
 }
 
 .product-card .product-card-meta {

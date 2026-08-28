@@ -176,7 +176,7 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-center"
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
             onError={() => setImageFailed(true)}
           />
           {luxuryBadge ? (
