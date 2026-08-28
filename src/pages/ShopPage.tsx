@@ -11,6 +11,7 @@ import {
   mergeMensShirtCatalog,
   MENS_SHIRTS_HERO_IMAGE,
   MENS_SHIRTS_HERO_IMAGE_FALLBACK,
+  MENS_SHIRTS_HERO_BACKGROUND,
 } from '../data/mensShirtCollection'
 import {
   MENS_PANTS_FILTER_OPTIONS,
@@ -1126,7 +1127,10 @@ export default function ShopPage() {
   return (
     <section className={`bg-white pb-24 ${isListingWithTopHero ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isShirtsListing ? (
-        <div className="listing-hero-frame relative w-full max-w-[100vw] overflow-hidden bg-white">
+        <div
+          className="relative w-full overflow-hidden aspect-[16/9]"
+          style={{ backgroundColor: MENS_SHIRTS_HERO_BACKGROUND }}
+        >
           <img
             src={MENS_SHIRTS_HERO_IMAGE}
             alt="Men's Shirts Collection — SHIS Fashion"
@@ -1137,7 +1141,7 @@ export default function ShopPage() {
             fetchPriority="high"
             decoding="async"
             draggable={false}
-            className="absolute inset-0 block h-full w-full bg-white object-contain object-center sm:object-cover sm:object-center"
+            className="block h-full w-full object-contain object-center"
             onError={(event) => {
               const image = event.currentTarget
               if (image.dataset.fallback === 'done') {
@@ -1183,11 +1187,11 @@ export default function ShopPage() {
         </div>
       ) : null}
 
-      <Container className={isListingWithTopHero ? 'pt-6 lg:pt-10' : undefined}>
+      <Container className={isShirtsListing ? 'px-4 py-4' : isListingWithTopHero ? 'pt-6 lg:pt-10' : undefined}>
         {/* Breadcrumb */}
         <nav
           id={isWomensBaggyListing ? 'womens-baggy-grid' : isShirtsListing ? 'mens-shirts-grid' : undefined}
-          className="mb-4 flex scroll-mt-[calc(var(--nav-offset,3.5rem)+0.5rem)] items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55"
+          className={`flex scroll-mt-[calc(var(--nav-offset,3.5rem)+0.5rem)] items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55 ${isShirtsListing ? 'mb-3' : 'mb-4'}`}
         >
           <Link to="/" className="hover:text-black">Home</Link>
           <span>/</span>
@@ -1328,7 +1332,7 @@ export default function ShopPage() {
         ) : null}
 
         {/* Filter Header */}
-        <div className="mt-6 flex items-center justify-between border-b border-neutral-100 pb-3 sm:mt-8">
+        <div className={`flex items-center justify-between border-b border-neutral-100 pb-3 ${isShirtsListing ? 'mt-0' : 'mt-6 sm:mt-8'}`}>
           <button
             type="button"
             onClick={openFilterSheet}
