@@ -3,6 +3,9 @@ import React from 'react'
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 const HERO_IMAGE = '/hero/saree-heroimage/homepage-hero-image.jpg'
 const HERO_IMAGE_FALLBACKS = ['/hero/saree-heroimage/homepage-hero-image.jpg.png']
+const HERO_IMAGE_WIDTH = 1122
+const HERO_IMAGE_HEIGHT = 1402
+const HERO_BACKGROUND = '#f7f5f2'
 
 export interface HeroContentInput {
   heroTitle?: string
@@ -38,27 +41,27 @@ function handleHeroImageError(event: React.SyntheticEvent<HTMLImageElement>, fal
 export const Hero: React.FC<HeroProps> = () => {
   return (
     <section
-      className="relative z-0 isolate mb-3 w-full max-w-[100vw] overflow-x-hidden bg-neutral-950 md:mb-0"
+      className="relative z-0 isolate mb-3 w-full max-w-[100vw] overflow-x-hidden md:mb-0"
+      style={{ backgroundColor: HERO_BACKGROUND }}
       aria-label="SHIS Fashion hero banner"
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      <div className="homepage-hero-frame relative h-[75vh] min-h-[70vh] w-full overflow-hidden bg-neutral-950 md:h-[75vh] md:min-h-[75vh] md:w-full">
+      <div
+        className="relative w-full md:h-[75vh] md:min-h-[75vh] md:overflow-hidden"
+        style={{ backgroundColor: HERO_BACKGROUND }}
+      >
         <img
           src={HERO_IMAGE}
           alt="SHIS Fashion Exclusive Launch Saree — campaign banner"
-          width={900}
-          height={1600}
+          width={HERO_IMAGE_WIDTH}
+          height={HERO_IMAGE_HEIGHT}
           sizes="100vw"
-          className="homepage-hero-image homepage-hero-image--saree object-cover object-center"
-          style={{
-            objectPosition: 'center center',
-            ['--hero-desktop-object-position' as string]: 'center 38%',
-          }}
           loading="eager"
           fetchPriority="high"
           decoding="sync"
           draggable={false}
+          className="block h-auto w-full max-w-full object-contain object-top md:absolute md:inset-0 md:h-full md:max-w-none md:object-cover md:object-[center_38%]"
           onError={(event) => handleHeroImageError(event, HERO_IMAGE_FALLBACKS)}
         />
       </div>
