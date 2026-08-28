@@ -273,12 +273,24 @@ button,
   }
 }
 
+/* Listing cards — full image visible (no crop), taller mobile frame */
+.product-card .listing-media-frame {
+  aspect-ratio: 4 / 5;
+}
+
+.product-card .listing-media-frame > img.product-card-media {
+  object-fit: contain;
+  object-position: center top;
+}
+
+@media (min-width: 768px) {
+  .product-card .listing-media-frame {
+    aspect-ratio: 3 / 4;
+  }
+}
+
 /* Mobile micro-pass: luxury 2×2 listing card typography */
 @media (max-width: 767px) {
-  .product-card .studio-media-frame > img.product-card-media {
-    object-position: center center;
-  }
-
   .product-card .product-card-meta {
     margin-top: 0.75rem;
     text-align: center;

@@ -98,7 +98,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
   const cardSizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
   const image = useMemo(
-    () => catalogImageAttrs(product.image, 640, 853, cardSizes, [320, 480, 640]),
+    () => catalogImageAttrs(product.image, 640, 800, cardSizes, [320, 480, 640], 'contain'),
     [product.image],
   )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
@@ -159,14 +159,14 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="studio-media-frame">
+        <div className="studio-media-frame listing-media-frame">
           <img
             src={image.src || CATALOG_IMAGE_PLACEHOLDER}
             srcSet={image.srcSet}
             sizes={image.sizes}
             alt={product.name}
             width={640}
-            height={853}
+            height={800}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"

@@ -165,7 +165,14 @@ export function isDemoImageUrl(url?: string) {
   }
 }
 
-export function normalizeDemoImageUrl(url: string, width: number, height: number) {
+export type CatalogImageFit = 'cover' | 'contain'
+
+export function normalizeDemoImageUrl(
+  url: string,
+  width: number,
+  height: number,
+  fit: CatalogImageFit = 'cover',
+) {
   if (!url || !isDemoImageUrl(url)) {
     return url
   }
@@ -173,10 +180,17 @@ export function normalizeDemoImageUrl(url: string, width: number, height: number
   try {
     const parsed = new URL(url)
     parsed.searchParams.set('auto', 'format')
-    parsed.searchParams.set('fit', 'crop')
-    parsed.searchParams.set('crop', 'faces,center')
-    parsed.searchParams.set('w', String(width))
-    parsed.searchParams.set('h', String(height))
+    if (fit === 'contain') {
+      parsed.searchParams.set('fit', 'max')
+      parsed.searchParams.delete('crop')
+      parsed.searchParams.set('w', String(width))
+      parsed.searchParams.delete('h')
+    } else {
+      parsed.searchParams.set('fit', 'crop')
+      parsed.searchParams.set('crop', 'faces,center')
+      parsed.searchParams.set('w', String(width))
+      parsed.searchParams.set('h', String(height))
+    }
     parsed.searchParams.set('q', '80')
     return parsed.toString()
   } catch {
@@ -213,7 +227,12 @@ function stripCloudinaryTransforms(pathname: string) {
   return `${prefix}${rest.join('/')}`
 }
 
-export function normalizeCloudinaryImageUrl(url: string, width: number, height: number) {
+export function normalizeCloudinaryImageUrl(
+  url: string,
+  width: number,
+  height: number,
+  fit: CatalogImageFit = 'cover',
+) {
   if (!url) {
     return url
   }
@@ -233,7 +252,11 @@ export function normalizeCloudinaryImageUrl(url: string, width: number, height: 
     const cleanPath = stripCloudinaryTransforms(parsed.pathname)
     const prefix = cleanPath.slice(0, cleanPath.indexOf(marker) + marker.length)
     const suffix = cleanPath.slice(cleanPath.indexOf(marker) + marker.length)
-    const transformations = `f_auto,q_auto,c_fill,g_auto,w_${Math.max(1, Math.round(width))},h_${Math.max(1, Math.round(height))}`
+    const w = Math.max(1, Math.round(width))
+    const transformations =
+      fit === 'contain'
+        ? `f_auto,q_auto,c_limit,w_${w}`
+        : `f_auto,q_auto,c_fill,g_auto,w_${w},h_${Math.max(1, Math.round(height))}`
     parsed.pathname = `${prefix}${transformations}/${suffix}`
     return parsed.toString()
   } catch {
@@ -241,9 +264,14 @@ export function normalizeCloudinaryImageUrl(url: string, width: number, height: 
   }
 }
 
-export function normalizeCatalogImageUrl(url: string, width: number, height: number) {
-  const cloudinaryUrl = normalizeCloudinaryImageUrl(url, width, height)
-  return normalizeDemoImageUrl(cloudinaryUrl, width, height)
+export function normalizeCatalogImageUrl(
+  url: string,
+  width: number,
+  height: number,
+  fit: CatalogImageFit = 'cover',
+) {
+  const cloudinaryUrl = normalizeCloudinaryImageUrl(url, width, height, fit)
+  return normalizeDemoImageUrl(cloudinaryUrl, width, height, fit)
 }
 
 const DEFAULT_SRCSET_WIDTHS = [320, 480, 640, 768, 960]
@@ -253,6 +281,7 @@ export function buildCatalogSrcSet(
   width: number,
   height: number,
   widths: number[] = DEFAULT_SRCSET_WIDTHS,
+  fit: CatalogImageFit = 'cover',
 ) {
   if (!url) {
     return undefined
@@ -262,7 +291,7 @@ export function buildCatalogSrcSet(
   const entries = widths.map((entryWidth) => {
     const w = Math.max(1, Math.round(entryWidth))
     const h = Math.max(1, Math.round(w * aspect))
-    return `${normalizeCatalogImageUrl(url, w, h)} ${w}w`
+    return `${normalizeCatalogImageUrl(url, w, h, fit)} ${w}w`
   })
   const uniqueSrcs = new Set(entries.map((entry) => entry.split(' ')[0]))
   return uniqueSrcs.size > 1 ? entries.join(', ') : undefined
@@ -274,10 +303,11 @@ export function catalogImageAttrs(
   height: number,
   sizes: string,
   widths?: number[],
+  fit: CatalogImageFit = 'cover',
 ) {
   return {
-    src: normalizeCatalogImageUrl(url, width, height) || url,
-    srcSet: buildCatalogSrcSet(url, width, height, widths),
+    src: normalizeCatalogImageUrl(url, width, height, fit) || url,
+    srcSet: buildCatalogSrcSet(url, width, height, widths, fit),
     sizes,
   }
 }
