@@ -9,6 +9,8 @@ import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import {
   isMensShirtProduct,
   mergeMensShirtCatalog,
+  MENS_SHIRTS_HERO_IMAGE,
+  MENS_SHIRTS_HERO_IMAGE_FALLBACK,
 } from '../data/mensShirtCollection'
 import {
   MENS_PANTS_FILTER_OPTIONS,
@@ -686,6 +688,8 @@ export default function ShopPage() {
   const isHalfShirtListing = dedicatedListing?.subcategory === 'half-shirts' ||
     (effectiveSegment === 'men' && effectiveSubcategory === 'half-shirts')
 
+  const isShirtsListing = effectiveSegment === 'men' && effectiveSubcategory === 'shirts'
+
   const halfShirtHeading = isHalfShirtListing
     ? {
       title: "MEN'S HALF SHIRTS",
@@ -1113,13 +1117,43 @@ export default function ShopPage() {
     })
   }
 
+  const isListingWithTopHero = isWomensBaggyListing || isShirtsListing
+
   if (isInvalidListing) {
     return <NotFoundPage />
   }
 
   return (
-    <section className={`bg-white pb-24 ${isWomensBaggyListing ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
-      {isWomensBaggyListing ? (
+    <section className={`bg-white pb-24 ${isListingWithTopHero ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
+      {isShirtsListing ? (
+        <div className="listing-hero-frame relative w-full max-w-[100vw] overflow-hidden bg-white">
+          <img
+            src={MENS_SHIRTS_HERO_IMAGE}
+            alt="Men's Shirts Collection — SHIS Fashion"
+            width={1920}
+            height={1080}
+            sizes="100vw"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            draggable={false}
+            className="absolute inset-0 block h-full w-full bg-white object-contain object-center sm:object-cover sm:object-center"
+            onError={(event) => {
+              const image = event.currentTarget
+              if (image.dataset.fallback === 'done') {
+                return
+              }
+              if (image.dataset.fallback !== 'jpeg') {
+                image.dataset.fallback = 'jpeg'
+                image.src = MENS_SHIRTS_HERO_IMAGE_FALLBACK
+                return
+              }
+              image.dataset.fallback = 'done'
+              image.src = '/og-image.svg'
+            }}
+          />
+        </div>
+      ) : isWomensBaggyListing ? (
         <div className="listing-hero-frame relative w-full max-w-[100vw] overflow-hidden bg-neutral-100">
           <img
             src={WOMENS_BAGGY_HERO_IMAGE}
@@ -1149,10 +1183,10 @@ export default function ShopPage() {
         </div>
       ) : null}
 
-      <Container className={isWomensBaggyListing ? 'pt-6 lg:pt-10' : undefined}>
+      <Container className={isListingWithTopHero ? 'pt-6 lg:pt-10' : undefined}>
         {/* Breadcrumb */}
         <nav
-          id={isWomensBaggyListing ? 'womens-baggy-grid' : undefined}
+          id={isWomensBaggyListing ? 'womens-baggy-grid' : isShirtsListing ? 'mens-shirts-grid' : undefined}
           className="mb-4 flex scroll-mt-[calc(var(--nav-offset,3.5rem)+0.5rem)] items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55"
         >
           <Link to="/" className="hover:text-black">Home</Link>
@@ -1167,22 +1201,35 @@ export default function ShopPage() {
         </nav>
 
         {/* Header */}
-        <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
-          {searchQuery ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
-              >
-                Clear search
-              </button>
-            </div>
-          ) : null}
-        </div>
+        {!isShirtsListing ? (
+          <div>
+            <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+            {searchQuery ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : searchQuery ? (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="ui-interactive text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4"
+            >
+              Clear search
+            </button>
+          </div>
+        ) : null}
 
         {isWomenListing ? (
           <div className={`sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md ${

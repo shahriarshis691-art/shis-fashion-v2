@@ -10,6 +10,8 @@ export interface MensShirtProduct extends ShopProduct {
 }
 
 export const MENS_SHIRT_SIZES = ['M', 'L', 'XL', 'XXL'] as const
+export const MENS_SHIRTS_HERO_IMAGE = '/collections/full=shirts/shirts-hero-image/shirts-hero.png'
+export const MENS_SHIRTS_HERO_IMAGE_FALLBACK = '/collections/full=shirts/shirts-hero-image/shirts-hero.png.jpeg'
 const MENS_SHIRT_IMAGE_DIR = '/collections/full=shirts'
 
 function shirtImage(filename: string) {
