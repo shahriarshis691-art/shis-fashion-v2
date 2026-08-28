@@ -114,6 +114,8 @@ export default function CategoryHubPage() {
               image={getSubcategoryCover(segment, subcategory.slug)}
               priority={index < 2}
               variant="portrait"
+              imagePosition={subcategory.slug === 'womens-baggy' ? 'center center' : 'center top'}
+              showOverlay={subcategory.slug === 'womens-baggy'}
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
             />
           ))}

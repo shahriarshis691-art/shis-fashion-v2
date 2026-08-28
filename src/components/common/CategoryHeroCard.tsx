@@ -19,7 +19,7 @@ export default function CategoryHeroCard({
   image,
   priority = false,
   variant = 'portrait',
-  imagePosition = 'center top',
+  imagePosition = 'center center',
   sizes,
   showOverlay = false,
   onError,
@@ -45,7 +45,7 @@ export default function CategoryHeroCard({
           aspectClassName={isFeed ? 'absolute inset-0 z-0 h-full w-full' : 'relative z-0 aspect-[3/4]'}
           objectPosition={imagePosition}
           priority={priority}
-          imgClassName="h-full w-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-500 ease-out"
+          imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           onError={onError}
         />
         <div className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-end">

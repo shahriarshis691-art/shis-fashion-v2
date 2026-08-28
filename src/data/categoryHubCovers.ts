@@ -3,7 +3,7 @@ import { categoryStripCovers } from './featuredCollectionCovers'
 const WOMEN_COVERS: Record<string, string> = {
   kurti: '/images/products/kurtis/Nairah Porcelain Blue - M.jpg',
   dresses: '/images/products/kurtis/Beautiful dress.jpg',
-  'womens-baggy': categoryStripCovers['womens-baggy'] || categoryStripCovers.western,
+  'womens-baggy': '/hero/womens-baggy/1119918632363621348.jpg',
   'oversized-tee': categoryStripCovers['oversized-tee'],
   saree: categoryStripCovers.saree,
   tunic: '/images/products/kurtis/Jade green digital printed lawn Kurti  with white  embroidered bell sleeves.jpg',

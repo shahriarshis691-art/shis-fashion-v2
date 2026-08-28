@@ -9,7 +9,7 @@ export const categoryStripCovers: Record<string, string> = {
   saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
   western: '/collections/featured-denim-collection.jpg',
-  'womens-baggy': '/hero/womens-baggy/womens-jeans-listing.png',
+  'womens-baggy': '/hero/womens-baggy/1119918632363621348.jpg',
   'half-shirts': '/hero/half-shirt-1.jpg',
   'oversized-tee': '/hero/oversized-tee.jpg',
 }
@@ -35,7 +35,7 @@ export function categoryStripCover(key: string, fallback = '') {
       || normalized.includes('featured-men-collection.jpg')
       || normalized.includes('men-category.webp')
       || normalized.includes('category-saree-blue.jpg')
-      || normalized.includes('timeless-oversize-hero')
+      || normalized.includes('womens-jeans-listing')
 
     if (!isOutdatedPlaceholder) {
       return saved
