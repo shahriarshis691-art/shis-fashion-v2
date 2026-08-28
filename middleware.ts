@@ -72,7 +72,6 @@ const KNOWN_LISTING_SLUGS = new Set([
   'women-shirts',
   'womens-shirt',
   'womens-shirts',
-  'tunic',
   'sari',
   'saris',
   'womens-saree',

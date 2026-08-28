@@ -6,7 +6,6 @@ const WOMEN_COVERS: Record<string, string> = {
   'womens-baggy': '/hero/womens-baggy/1119918632363621348.jpg',
   'oversized-tee': categoryStripCovers['oversized-tee'],
   saree: categoryStripCovers.saree,
-  tunic: '/images/products/kurtis/Jade green digital printed lawn Kurti  with white  embroidered bell sleeves.jpg',
 }
 
 const MENS_SHIRTS_HUB_COVER = '/collections/full=shirts/72d32a26-0458-48bc-a2ea-a3f81f6eeb24.png'

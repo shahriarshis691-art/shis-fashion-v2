@@ -1041,7 +1041,6 @@ function normalizeSectionKeyFromHref(href: string): HomepageCategorySectionKey |
     if (
       normalizedHref.includes('womens-baggy')
       || normalizedHref.includes('sub=western')
-      || normalizedHref.includes('sub=tunic')
     ) {
       return 'western'
     }
