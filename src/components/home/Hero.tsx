@@ -47,7 +47,7 @@ export const Hero: React.FC<HeroProps> = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      <div className="relative w-full md:h-[85vh] md:overflow-hidden lg:h-[90vh]">
+      <div className="relative w-full md:flex md:h-[80vh] md:items-center md:justify-center md:overflow-hidden md:bg-[#f6f2ec] lg:h-[88vh]">
         <img
           src={HERO_IMAGE}
           alt="SHIS Fashion Exclusive Launch Saree — campaign banner"
@@ -58,7 +58,7 @@ export const Hero: React.FC<HeroProps> = () => {
           fetchPriority="high"
           decoding="sync"
           draggable={false}
-          className="block h-auto w-full max-w-full object-contain object-top md:absolute md:inset-0 md:h-full md:w-full md:max-w-none md:object-cover md:object-top"
+          className="block h-auto w-full max-w-full object-contain object-top md:h-full md:w-auto md:max-h-full md:object-contain md:object-center"
           onError={(event) => handleHeroImageError(event, HERO_IMAGE_FALLBACKS)}
         />
       </div>
