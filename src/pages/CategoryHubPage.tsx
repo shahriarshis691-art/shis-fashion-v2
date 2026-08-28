@@ -112,7 +112,6 @@ export default function CategoryHubPage() {
               name={subcategory.label}
               href={subcategory.path ?? `/${segment}?sub=${subcategory.slug}`}
               image={getSubcategoryCover(segment, subcategory.slug)}
-              cta="Explore Collection"
               priority={index < 2}
               variant="portrait"
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"

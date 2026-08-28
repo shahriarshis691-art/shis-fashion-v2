@@ -71,7 +71,6 @@ export default function ShopByCategorySection({
               name={item.name}
               href={item.href}
               image={item.image}
-              cta="View Categories"
               priority={index === 0}
               variant="feed"
               imagePosition={item.imagePosition}

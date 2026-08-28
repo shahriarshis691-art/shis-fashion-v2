@@ -5,7 +5,6 @@ export interface CategoryHeroCardProps {
   name: string
   href: string
   image: string
-  cta?: string
   priority?: boolean
   variant?: 'feed' | 'portrait'
   imagePosition?: string
@@ -18,7 +17,6 @@ export default function CategoryHeroCard({
   name,
   href,
   image,
-  cta = 'Explore Collection',
   priority = false,
   variant = 'portrait',
   imagePosition = 'center top',
@@ -33,7 +31,7 @@ export default function CategoryHeroCard({
     <Link
       to={href}
       className="group luxury-tap relative z-0 isolate flex h-full w-full min-w-0 cursor-pointer overflow-hidden"
-      aria-label={`${name} — ${cta}`}
+      aria-label={name}
     >
       <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? '' : 'studio-media-frame'}`}>
         <LuxuryImage
@@ -73,15 +71,6 @@ export default function CategoryHeroCard({
               style={isFeed ? { fontFamily: "'Cormorant Garamond', 'Cinzel', serif" } : undefined}
             >
               {name}
-            </span>
-            <span
-              className={`relative mt-3 inline-flex items-center border border-white/80 bg-black/25 text-white uppercase tracking-[0.18em] backdrop-blur-[2px] transition-colors duration-300 group-hover:bg-white group-hover:text-neutral-950 ${
-                isFeed
-                  ? 'min-h-11 px-5 text-[11px] font-semibold md:min-h-8 md:px-3 md:text-[10px]'
-                  : 'min-h-8 px-3 text-[9px] font-semibold sm:text-[10px]'
-              }`}
-            >
-              {cta}
             </span>
           </div>
         </div>
