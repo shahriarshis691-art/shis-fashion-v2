@@ -64,16 +64,6 @@ function createBaggyJean(
 /** Static men's baggy denim edit — images in `/public/collections/mens-baggy/`. */
 export const mensBaggyDenimCollectionProducts: MensBaggyDenimProduct[] = [
   createBaggyJean(
-    1,
-    'mens-loose-baggy-denim',
-    "Men's Loose Baggy Denim",
-    'SHIS-MB-001',
-    2490,
-    ['Indigo'],
-    'Relaxed baggy denim with a deep indigo wash and easy drape — built for everyday street comfort.',
-    { fit: 'Loose', featured: true, newArrival: true, stock: 22, comparePrice: 2890 },
-  ),
-  createBaggyJean(
     2,
     'acid-wash-baggy-jeans',
     'Acid Wash Baggy Jeans',
