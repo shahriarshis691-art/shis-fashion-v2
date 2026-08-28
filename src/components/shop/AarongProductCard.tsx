@@ -81,8 +81,7 @@ function swatchBackground(color: string): string {
 }
 
 /**
- * Universal Aarong-style listing card — single source of truth for all category grids.
- * Full-bleed 3/4 studio frame, outline wishlist, bold title + BDT price.
+ * Universal Aarong-style listing card — tall 2:3 portrait frame, no crop, centered meta.
  */
 const AarongProductCard = memo(function AarongProductCard({
   product,
@@ -98,7 +97,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
   const cardSizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
   const image = useMemo(
-    () => catalogImageAttrs(product.image, 640, 800, cardSizes, [320, 480, 640], 'contain'),
+    () => catalogImageAttrs(product.image, 640, 960, cardSizes, [320, 480, 640], 'contain'),
     [product.image],
   )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
@@ -159,18 +158,18 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="studio-media-frame listing-media-frame">
+        <div className="listing-media-frame">
           <img
             src={image.src || CATALOG_IMAGE_PLACEHOLDER}
             srcSet={image.srcSet}
             sizes={image.sizes}
             alt={product.name}
             width={640}
-            height={800}
+            height={960}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media"
+            className="product-card-media h-full w-full object-contain object-center"
             onError={(event) => {
               event.currentTarget.removeAttribute('srcset')
               event.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
@@ -248,7 +247,7 @@ const AarongProductCard = memo(function AarongProductCard({
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="studio-wishlist"
+          className="studio-wishlist top-2.5 right-2.5 z-10"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
