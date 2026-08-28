@@ -378,7 +378,7 @@ export default function HomePage() {
   const brandPromiseEnabled = homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false
 
   return (
-    <div className="relative isolate bg-white">
+    <div className="relative isolate overflow-x-hidden bg-white">
       {heroEnabled ? <Hero content={homepageContent} /> : null}
 
       {shopByCategoryEnabled ? (
