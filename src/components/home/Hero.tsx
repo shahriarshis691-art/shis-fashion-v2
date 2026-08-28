@@ -48,7 +48,7 @@ export const Hero: React.FC<HeroProps> = () => {
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
       <div
-        className="relative w-full md:h-[75vh] md:min-h-[75vh] md:overflow-hidden"
+        className="relative w-full md:flex md:justify-center md:bg-[#f7f5f2]"
         style={{ backgroundColor: HERO_BACKGROUND }}
       >
         <img
@@ -61,7 +61,7 @@ export const Hero: React.FC<HeroProps> = () => {
           fetchPriority="high"
           decoding="sync"
           draggable={false}
-          className="block h-auto w-full max-w-full object-contain object-top md:absolute md:inset-0 md:h-full md:max-w-none md:object-cover md:object-[center_38%]"
+          className="block h-auto w-full max-w-full object-contain object-top md:mx-auto md:h-auto md:max-h-[85vh] md:w-auto md:max-w-full"
           onError={(event) => handleHeroImageError(event, HERO_IMAGE_FALLBACKS)}
         />
       </div>
