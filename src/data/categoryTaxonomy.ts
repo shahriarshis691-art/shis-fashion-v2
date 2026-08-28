@@ -1,5 +1,19 @@
 export type ShopSegment = 'all' | 'women' | 'men' | 'kids'
 
+export type MensBottomSubCategory = 'pants' | 'denim' | 'baggy' | 'trousers'
+
+export const MENS_BOTTOM_SUBCATEGORIES: readonly MensBottomSubCategory[] = [
+  'pants',
+  'denim',
+  'baggy',
+  'trousers',
+]
+
+export function isMensBottomSubCategory(value: string): value is MensBottomSubCategory {
+  const normalized = value.trim().toLowerCase()
+  return (MENS_BOTTOM_SUBCATEGORIES as readonly string[]).includes(normalized)
+}
+
 export interface SubcategoryConfig {
   slug: string
   label: string

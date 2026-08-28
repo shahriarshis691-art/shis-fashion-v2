@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { isMensBottomSubCategory } from './categoryTaxonomy'
 import type { ShopProduct } from './shopData'
 
 export const MENS_BAGGY_DENIM_SIZES = ['28', '30', '32', '34', '36'] as const
@@ -34,6 +35,7 @@ const MENS_BAGGY_IMAGE_DIR = '/collections/mens-baggy'
 
 export interface MensBaggyDenimProduct extends ShopProduct {
   sku: string
+  subCategory: 'denim' | 'baggy' | 'pants'
   fit: 'Baggy' | 'Wide Leg' | 'Loose'
   fabric: string
   tags: string[]
@@ -72,6 +74,7 @@ function createBaggyJean(
     price: formatBDT(price),
     comparePrice: options.comparePrice ? formatBDT(options.comparePrice) : undefined,
     category: 'denim',
+    subCategory: options.fit === 'Baggy' ? 'baggy' : 'denim',
     brand: 'SHIS Fashion',
     image,
     galleryImages: [image],
@@ -276,9 +279,14 @@ export function isMensPantsProduct(
   }
 
   if (
-    MENS_PANTS_CATEGORY_SLUGS.has(category)
-    || MENS_PANTS_CATEGORY_SLUGS.has(subCategory)
-    || tags.some((tag) => MENS_PANTS_CATEGORY_SLUGS.has(tag))
+    isMensBottomSubCategory(category)
+    || isMensBottomSubCategory(subCategory)
+    || subCategory === 'pants'
+    || subCategory === 'denim'
+    || subCategory === 'baggy'
+    || subCategory === 'trousers'
+    || tags.some((tag) => isMensBottomSubCategory(tag) || MENS_PANTS_CATEGORY_SLUGS.has(tag))
+    || MENS_PANTS_CATEGORY_SLUGS.has(category)
   ) {
     return true
   }

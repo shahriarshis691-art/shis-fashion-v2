@@ -294,7 +294,7 @@ export default function HomePage() {
                 ? "WOMEN'S BAGGY"
                 : isPantsCard
                   ? 'Pants'
-                  : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+                  : liveLooksLikeDenim ? fallback.label : liveLabel,
           href: isHalfShirtsCard
             ? '/men/half-shirts'
             : isOversizedTeeCard
@@ -303,7 +303,7 @@ export default function HomePage() {
                 ? '/women/womens-baggy'
                 : isPantsCard
                   ? '/men/pants'
-                  : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
+                  : liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }
