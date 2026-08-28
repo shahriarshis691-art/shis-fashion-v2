@@ -107,6 +107,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<SegmentLandingPage />),
       },
       {
+        path: 'men/pants',
+        element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'men/denim',
+        element: <Navigate to="/men/pants" replace />,
+      },
+      {
         path: 'men/half-shirts',
         element: withSuspense(<ShopPage />),
       },
@@ -169,6 +177,14 @@ export const router = createBrowserRouter([
       {
         path: 'shop/:category/:productSlug',
         element: withSuspense(<ProductDetailPage />),
+      },
+      {
+        path: 'collections/men-pants',
+        element: <Navigate to="/men/pants" replace />,
+      },
+      {
+        path: 'collections/mens-pants',
+        element: <Navigate to="/men/pants" replace />,
       },
       {
         path: 'collections/half-shirt',

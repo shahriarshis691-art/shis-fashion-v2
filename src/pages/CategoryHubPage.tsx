@@ -114,8 +114,8 @@ export default function CategoryHubPage() {
               image={getSubcategoryCover(segment, subcategory.slug)}
               priority={index < 2}
               variant="portrait"
-              imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' ? 'center center' : 'center top'}
-              showOverlay={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi'}
+              imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' ? 'center center' : 'center top'}
+              showOverlay={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants'}
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
             />
           ))}

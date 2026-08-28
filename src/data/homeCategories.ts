@@ -37,8 +37,8 @@ export const homeCategoryItems: HomeCategoryItem[] = [
   },
   {
     key: 'denim',
-    name: 'Denim',
-    href: '/men?sub=denim',
+    name: 'Pants',
+    href: '/men/pants',
     image: '/collections/featured-denim-collection.jpg',
     imagePosition: 'center top',
   },

@@ -16,7 +16,7 @@ const MEN_COVERS: Record<string, string> = {
   panjabi: '/collections/panjabi-collection-mainimage/panjabi-main-image.jpg',
   'oversized-tee': categoryStripCovers['oversized-tee'],
   denim: '/collections/mens-baggy/mens-baggy1.jpg',
-  pants: '/collections/mens-baggy/mens-baggy3.jpg',
+  pants: '/collections/mens-baggy/mens-baggy1.jpg',
   jackets: categoryStripCovers.men,
 }
 

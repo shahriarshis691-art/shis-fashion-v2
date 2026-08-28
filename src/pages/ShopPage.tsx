@@ -7,8 +7,11 @@ import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import {
-  isDenimProduct,
+  MENS_PANTS_FILTER_OPTIONS,
+  isMensPantsProduct,
+  matchesMensPantsListingFilter,
   mergeMensBaggyDenimCatalog,
+  type MensPantsListingFilter,
 } from '../data/mensBaggyDenimCollection'
 import {
   WOMENS_BAGGY_HERO_IMAGE,
@@ -422,6 +425,7 @@ export default function ShopPage() {
   const [ready, setReady] = useState(false)
   const [sortBy, setSortBy] = useState<SortOption>('featured')
   const [westernFilter, setWesternFilter] = useState<WesternListingFilter>('all')
+  const [pantsFilter, setPantsFilter] = useState<MensPantsListingFilter>('all')
   const [kurtiVisibleCount, setKurtiVisibleCount] = useState(KURTI_PAGE_SIZE)
   const kurtiListingKeyRef = useRef('')
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
@@ -682,12 +686,13 @@ export default function ShopPage() {
     }
     : null
 
-  const isDenimListing = effectiveSegment === 'men' && effectiveSubcategory === 'denim'
+  const isPantsListing = dedicatedListing?.subcategory === 'pants' ||
+    (effectiveSegment === 'men' && (effectiveSubcategory === 'pants' || effectiveSubcategory === 'denim'))
 
-  const denimHeading = isDenimListing
+  const pantsHeading = isPantsListing
     ? {
-      title: "MEN'S BAGGY DENIM",
-      description: 'Loose, wide-leg, and skate-ready baggy jeans — premium cotton denim in waist sizes 28–36.',
+      title: "MEN'S PANTS",
+      description: 'Denim, baggy, trousers, cargo, and casual pants — premium men’s bottom-wear in one edit.',
     }
     : null
 
@@ -754,8 +759,8 @@ export default function ShopPage() {
       ? bySegment
       : isHalfShirtListing
         ? bySegment.filter(isHalfShirtProduct)
-        : isDenimListing
-          ? bySegment.filter(isDenimProduct)
+        : isPantsListing
+          ? bySegment.filter(isMensPantsProduct)
           : isWomensBaggyListing
             ? bySegment.filter(isWomensBaggyDenimProduct)
             : bySegment.filter((product) =>
@@ -766,7 +771,11 @@ export default function ShopPage() {
     ? bySubcategory.filter((product) => matchesWesternListingFilter(product, westernFilter))
     : bySubcategory
 
-  const byFilter = byWesternGroup.filter((product) => {
+  const byPantsGroup = isPantsListing
+    ? byWesternGroup.filter((product) => matchesMensPantsListingFilter(product, pantsFilter))
+    : byWesternGroup
+
+  const byFilter = byPantsGroup.filter((product) => {
     if (filters.inStockOnly && (product.stock ?? 0) <= 0) {
       return false
     }
@@ -1151,8 +1160,8 @@ export default function ShopPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? denimHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? denimHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+          <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+          <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
           {searchQuery ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
@@ -1235,6 +1244,30 @@ export default function ShopPage() {
                   })}
                 </>
               )}
+            </div>
+          </div>
+        ) : null}
+
+        {isPantsListing ? (
+          <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 -mx-4 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {MENS_PANTS_FILTER_OPTIONS.map((option) => {
+                const active = pantsFilter === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setPantsFilter(option.value)}
+                    className={`shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
+                      active
+                        ? 'bg-black text-white'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
         ) : null}
@@ -1475,7 +1508,7 @@ export default function ShopPage() {
                     Back to Home
                   </Link>
                   <Link
-                    to="/men?sub=denim"
+                    to="/men/pants"
                     className="inline-flex min-h-11 items-center justify-center border border-black px-5 text-xs font-semibold uppercase tracking-[0.12em] text-black transition-colors hover:bg-black hover:text-white"
                   >
                     Shop Men&apos;s Baggy

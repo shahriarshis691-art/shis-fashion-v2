@@ -2,7 +2,34 @@ import { formatBDT } from '../utils/currency'
 import type { ShopProduct } from './shopData'
 
 export const MENS_BAGGY_DENIM_SIZES = ['28', '30', '32', '34', '36'] as const
-export const MENS_BAGGY_DENIM_LISTING_PATH = '/men?sub=denim'
+export const MENS_BAGGY_DENIM_LISTING_PATH = '/men/pants'
+export const MENS_PANTS_LISTING_PATH = '/men/pants'
+
+export type MensPantsListingFilter = 'all' | 'denim' | 'baggy' | 'relaxed'
+
+export const MENS_PANTS_FILTER_OPTIONS: Array<{ value: MensPantsListingFilter; label: string }> = [
+  { value: 'all', label: 'All' },
+  { value: 'denim', label: 'Denim' },
+  { value: 'baggy', label: 'Baggy' },
+  { value: 'relaxed', label: 'Relaxed' },
+]
+
+const MENS_PANTS_CATEGORY_SLUGS = new Set([
+  'pants',
+  'denim',
+  'baggy',
+  'trousers',
+  'trouser',
+  'cargo',
+  'cargos',
+  'chinos',
+  'chino',
+  'jeans',
+  'jean',
+  'casual-pants',
+  'casual-pant',
+])
+
 const MENS_BAGGY_IMAGE_DIR = '/collections/mens-baggy'
 
 export interface MensBaggyDenimProduct extends ShopProduct {
@@ -212,6 +239,80 @@ export function isDenimProduct(
   }
 
   return /\bdenim\b|\bjeans?\b|\bbaggy\b/.test(text)
+}
+
+function getMensPantsProductFields(
+  product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & {
+    tags?: string[]
+    subCategory?: string
+    fit?: string
+  },
+) {
+  const tags = (product.tags ?? []).map((tag) => tag.trim().toLowerCase())
+  const category = product.category.trim().toLowerCase()
+  const subCategory = (product.subCategory ?? '').trim().toLowerCase()
+  const fit = (product.fit ?? '').trim().toLowerCase()
+  const text = [product.name, product.slug, product.category, subCategory, tags.join(' ')].join(' ').toLowerCase()
+
+  return { tags, category, subCategory, fit, text }
+}
+
+export function isMensPantsProduct(
+  product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & {
+    tags?: string[]
+    subCategory?: string
+    fit?: string
+  },
+) {
+  const { tags, category, subCategory, text } = getMensPantsProductFields(product)
+
+  if (
+    tags.includes('womens-baggy')
+    || (tags.includes('baggy') && (tags.includes('women') || tags.includes("women's")))
+    || /womens?-?baggy|women'?s\s+baggy|ladies?\s+baggy/.test(text)
+    || category === 'women'
+  ) {
+    return false
+  }
+
+  if (
+    MENS_PANTS_CATEGORY_SLUGS.has(category)
+    || MENS_PANTS_CATEGORY_SLUGS.has(subCategory)
+    || tags.some((tag) => MENS_PANTS_CATEGORY_SLUGS.has(tag))
+  ) {
+    return true
+  }
+
+  if (isDenimProduct(product)) {
+    return true
+  }
+
+  return /\b(trousers?|cargos?|chinos?|casual\s+pants?)\b/.test(text)
+}
+
+export function matchesMensPantsListingFilter(
+  product: Pick<ShopProduct, 'name' | 'slug' | 'category'> & {
+    tags?: string[]
+    subCategory?: string
+    fit?: string
+  },
+  filter: MensPantsListingFilter,
+) {
+  if (filter === 'all') {
+    return true
+  }
+
+  const { tags, category, subCategory, fit, text } = getMensPantsProductFields(product)
+
+  if (filter === 'denim') {
+    return isDenimProduct(product) || category === 'denim' || subCategory === 'denim' || tags.includes('denim')
+  }
+
+  if (filter === 'baggy') {
+    return isMensBaggyDenimProduct(product) || fit === 'baggy' || subCategory === 'baggy' || tags.includes('baggy')
+  }
+
+  return fit === 'loose' || fit === 'relaxed' || fit === 'wide leg' || /relax|loose|wide[\s_-]?leg/.test(text)
 }
 
 export function getMensBaggyDenimProductBySlug(slug: string): MensBaggyDenimProduct | undefined {

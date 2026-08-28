@@ -19,7 +19,7 @@ const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
-  { key: 'denim', label: 'Denim', href: '/men?sub=denim', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
+  { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
@@ -47,7 +47,7 @@ function isDenimCategoryStrip(item: { key: string; label: string; href: string }
   const key = item.key.trim().toLowerCase()
   const label = item.label.trim().toLowerCase()
   const href = item.href.trim().toLowerCase()
-  return key === 'denim' || label === 'denim' || href.includes('sub=denim')
+  return key === 'denim' || label === 'denim' || label === 'pants' || href.includes('sub=denim') || href.includes('/men/pants')
 }
 
 function uniqueVisibleCategoryStrips<T extends { key: string; label: string; href: string }>(items: T[]) {
@@ -137,8 +137,8 @@ const defaultHomepage: HomepageContent = {
     },
     denim: {
       key: 'denim',
-      label: 'Denim',
-      href: '/men?sub=denim',
+      label: 'Pants',
+      href: '/men/pants',
       enabled: true,
       order: 25,
       coverImage: categoryStripCovers.denim,
@@ -264,11 +264,12 @@ export default function HomePage() {
         const section = sections[fallback.key]
         const liveLabel = section?.label?.trim() || fallback.label
         const liveHref = section?.href?.trim() || fallback.href
-        const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveHref.toLowerCase().includes('sub=denim')
+        const liveLooksLikeDenim = liveLabel.toLowerCase() === 'denim' || liveLabel.toLowerCase() === 'pants' || liveHref.toLowerCase().includes('sub=denim') || liveHref.toLowerCase().includes('/men/pants')
         const isHalfShirtsCard = fallback.key === 'sale'
         const isOversizedTeeCard = fallback.key === 'new-arrivals'
         const isWomensBaggyCard = fallback.key === 'western'
         const isMenCard = fallback.key === 'men'
+        const isPantsCard = fallback.key === 'denim'
         const resolvedCover = isHalfShirtsCard
           ? categoryStripCovers['half-shirts']
           : isOversizedTeeCard
@@ -291,14 +292,18 @@ export default function HomePage() {
               ? 'OVERSIZED TEE'
               : isWomensBaggyCard
                 ? "WOMEN'S BAGGY"
-                : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
+                : isPantsCard
+                  ? 'Pants'
+                  : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.label : liveLabel,
           href: isHalfShirtsCard
             ? '/men/half-shirts'
             : isOversizedTeeCard
               ? '/collections/oversized-tee'
               : isWomensBaggyCard
                 ? '/women/womens-baggy'
-                : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
+                : isPantsCard
+                  ? '/men/pants'
+                  : fallback.key !== 'denim' && liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }

@@ -32,8 +32,30 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee', 'unisex-tee', 'unisex-oversized-t-shirts'], path: '/collections/oversized-tee' },
-  { slug: 'denim', label: 'Denim', aliases: ['denim', 'denim-pants', 'denim-pant', 'baggy', 'baggy-jeans', 'mens-baggy', 'mens-denim', "men's denim"] },
-  { slug: 'pants', label: 'Pants', aliases: ['pants'] },
+  {
+    slug: 'pants',
+    label: 'Pants',
+    aliases: [
+      'pants',
+      'denim',
+      'denim-pants',
+      'denim-pant',
+      'baggy',
+      'baggy-jeans',
+      'mens-baggy',
+      'mens-denim',
+      "men's denim",
+      'trousers',
+      'trouser',
+      'cargo',
+      'cargos',
+      'chinos',
+      'chino',
+      'casual-pants',
+      'casual-pant',
+    ],
+    path: '/men/pants',
+  },
   { slug: 'jackets', label: 'Jackets', aliases: ['jackets'] },
 ]
 
@@ -229,6 +251,21 @@ export function getDedicatedListingFromPath(pathname: string) {
   }
 
   if (
+    normalized === '/men/pants' ||
+    normalized === '/men/denim' ||
+    normalized === '/collections/men-pants' ||
+    normalized === '/collections/mens-pants'
+  ) {
+    return {
+      segment: 'men' as const,
+      subcategory: 'pants',
+      eyebrow: "Men's Pants Collection",
+      title: "MEN'S PANTS",
+      description: 'Denim, baggy, trousers, cargo, and casual pants — premium men’s bottom-wear in one edit.',
+    }
+  }
+
+  if (
     normalized === '/men/half-shirts' ||
     normalized === '/collections/half-shirt' ||
     normalized === '/collections/half-shirts'
@@ -263,6 +300,13 @@ export function getDedicatedListingFromPath(pathname: string) {
 export function getDedicatedListingPath(segment: ShopSegment, subcategory: string) {
   if (segment === 'women' && subcategory === 'saree') {
     return '/sarees'
+  }
+
+  if (
+    segment === 'men' &&
+    (subcategory === 'pants' || subcategory === 'denim' || subcategory === 'baggy' || subcategory === 'trousers')
+  ) {
+    return '/men/pants'
   }
 
   if (segment === 'men' && (subcategory === 'half-shirts' || subcategory === 'half-shirt')) {

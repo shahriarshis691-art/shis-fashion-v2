@@ -111,6 +111,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/sarees',
     '/men',
     '/men/half-shirts',
+    '/men/pants',
     '/collections/oversized-tee',
     '/oversized-tee',
     '/kids',
@@ -152,6 +153,10 @@ function getCollectionTitle(slug: string) {
 
   if (slug === 'half-shirt' || slug === 'half-shirts') {
     return "Men's Half Shirt Collection"
+  }
+
+  if (slug === 'men-pants' || slug === 'mens-pants' || slug === 'pants') {
+    return "Men's Pants Collection"
   }
 
   if (slug === 'oversized-tee' || slug === 'oversize-tee') {
@@ -241,6 +246,9 @@ function buildBreadcrumbItems(pathname: string) {
     items.push({ name: 'Men', item: `${SITE_URL}/men` })
     if (segments[1] === 'half-shirts') {
       items.push({ name: 'Half Shirts', item: `${SITE_URL}/men/half-shirts` })
+    }
+    if (segments[1] === 'pants') {
+      items.push({ name: 'Pants', item: `${SITE_URL}/men/pants` })
     }
     return items
   }
@@ -602,6 +610,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Explore men\'s premium polos, oversized tees, shirts, and denim from SHIS Fashion Bangladesh.',
       keywords: 'Men fashion Bangladesh, SHIS men collection, premium men wear',
       canonicalPath: '/men',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/men/pants' || normalizedPath === '/men/denim') {
+    return {
+      title: "Men's Pants | SHIS Fashion Bangladesh",
+      description: 'Shop men\'s pants from SHIS Fashion Bangladesh — denim, baggy, trousers, cargo, and casual bottom-wear with fast delivery and cash on delivery.',
+      keywords: 'mens pants Bangladesh, baggy jeans, denim pants, cargo pants Dhaka, SHIS pants',
+      canonicalPath: '/men/pants',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',
