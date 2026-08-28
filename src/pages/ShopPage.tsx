@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Container from '../components/ui/Container'
 import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
+import ShirtsListingHero from '../components/shop/ShirtsListingHero'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
@@ -10,9 +11,6 @@ import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import {
   isMensShirtProduct,
   mergeMensShirtCatalog,
-  MENS_SHIRTS_HERO_IMAGE,
-  MENS_SHIRTS_HERO_IMAGE_FALLBACK,
-  MENS_SHIRTS_HERO_BACKGROUND,
 } from '../data/mensShirtCollection'
 import {
   MENS_PANTS_FILTER_OPTIONS,
@@ -24,6 +22,8 @@ import {
 import {
   WOMENS_BAGGY_HERO_IMAGE,
   WOMENS_BAGGY_HERO_IMAGE_FALLBACK,
+  WOMENS_BAGGY_HERO_HEIGHT,
+  WOMENS_BAGGY_HERO_WIDTH,
   isWomensBaggyDenimProduct,
   mergeWomensBaggyDenimCatalog,
 } from '../data/womensBaggyDenimCollection'
@@ -1128,21 +1128,13 @@ export default function ShopPage() {
   return (
     <section className={`bg-white pb-24 ${isListingWithTopHero ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isShirtsListing ? (
-        <ResponsiveHeroBanner
-          src={MENS_SHIRTS_HERO_IMAGE}
-          alt="Men's Shirts Collection — SHIS Fashion"
-          width={736}
-          height={414}
-          fallbacks={[MENS_SHIRTS_HERO_IMAGE_FALLBACK]}
-          background={MENS_SHIRTS_HERO_BACKGROUND}
-          ariaLabel="Men's Shirts collection banner"
-        />
+        <ShirtsListingHero />
       ) : isWomensBaggyListing ? (
         <ResponsiveHeroBanner
           src={WOMENS_BAGGY_HERO_IMAGE}
           alt="Women's Baggy Jeans — SHIS Fashion"
-          width={1536}
-          height={1024}
+          width={WOMENS_BAGGY_HERO_WIDTH}
+          height={WOMENS_BAGGY_HERO_HEIGHT}
           fallbacks={[WOMENS_BAGGY_HERO_IMAGE_FALLBACK]}
           background="neutral"
           ariaLabel="Women's Baggy Jeans collection banner"

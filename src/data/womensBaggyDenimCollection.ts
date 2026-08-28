@@ -6,6 +6,8 @@ export const WOMENS_BAGGY_TEE_SIZES = ['S', 'M', 'L', 'XL'] as const
 export const WOMENS_BAGGY_DENIM_LISTING_PATH = '/women/womens-baggy'
 export const WOMENS_BAGGY_HERO_IMAGE = '/hero/womens-baggy/womens-jeans-listing.png'
 export const WOMENS_BAGGY_HERO_IMAGE_FALLBACK = '/hero/womens-baggy/womens-jeans-listing.png.jpeg'
+export const WOMENS_BAGGY_HERO_WIDTH = 3072
+export const WOMENS_BAGGY_HERO_HEIGHT = 2048
 export const WOMENS_BAGGY_COVER_IMAGE = WOMENS_BAGGY_HERO_IMAGE
 
 const WOMENS_BAGGY_IMAGE_DIR = '/collections/womens-baggy'

@@ -13,6 +13,11 @@ export const MENS_SHIRT_SIZES = ['M', 'L', 'XL', 'XXL'] as const
 export const MENS_SHIRTS_HERO_IMAGE = '/collections/full=shirts/shirts-hero-image/shirts-hero.png'
 export const MENS_SHIRTS_HERO_IMAGE_FALLBACK = '/collections/full=shirts/shirts-hero-image/shirts-hero.png.jpeg'
 export const MENS_SHIRTS_HERO_BACKGROUND = '#dcdcdc'
+export const MENS_SHIRTS_HERO_WIDTH = 1472
+export const MENS_SHIRTS_HERO_HEIGHT = 828
+export const MENS_SHIRTS_HERO_SIZES =
+  '(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px'
+export const MENS_SHIRTS_HERO_SRCSET = `${MENS_SHIRTS_HERO_IMAGE} ${MENS_SHIRTS_HERO_WIDTH}w`
 const MENS_SHIRT_IMAGE_DIR = '/collections/full=shirts'
 
 function shirtImage(filename: string) {
