@@ -8,6 +8,7 @@ export interface CategoryHeroCardProps {
   priority?: boolean
   variant?: 'feed' | 'portrait'
   imagePosition?: string
+  imageFit?: 'cover' | 'contain'
   sizes?: string
   showOverlay?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
@@ -20,12 +21,18 @@ export default function CategoryHeroCard({
   priority = false,
   variant = 'portrait',
   imagePosition = 'center center',
+  imageFit = 'cover',
   sizes,
   showOverlay = false,
   onError,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
+  const isContained = !isFeed && imageFit === 'contain'
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
+  const portraitFrameClass = isContained ? 'aspect-[3/4] bg-white' : 'studio-media-frame'
+  const imageObjectClass = isContained
+    ? ''
+    : 'group-hover:scale-105 transition-transform duration-500 ease-out'
 
   return (
     <Link
@@ -33,7 +40,7 @@ export default function CategoryHeroCard({
       className="group luxury-tap relative z-0 isolate flex h-full w-full min-w-0 cursor-pointer overflow-hidden"
       aria-label={name}
     >
-      <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? '' : 'studio-media-frame'}`}>
+      <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? '' : portraitFrameClass}`}>
         <LuxuryImage
           src={image}
           alt={`${name} collection`}
@@ -44,8 +51,9 @@ export default function CategoryHeroCard({
           className="h-full w-full"
           aspectClassName={isFeed ? 'absolute inset-0 z-0 h-full w-full' : 'relative z-0 aspect-[3/4]'}
           objectPosition={imagePosition}
+          objectFit={imageFit}
           priority={priority}
-          imgClassName="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+          imgClassName={imageObjectClass}
           onError={onError}
         />
         <div className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-end">
@@ -63,7 +71,11 @@ export default function CategoryHeroCard({
             }`}
           >
             <span
-              className={`relative font-semibold uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
+              className={`relative font-semibold uppercase ${
+                isContained
+                  ? 'text-neutral-900'
+                  : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
+              } ${
                 isFeed
                   ? 'text-3xl tracking-[0.22em] md:text-sm md:tracking-[0.18em] lg:text-base'
                   : 'text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.18em]'
