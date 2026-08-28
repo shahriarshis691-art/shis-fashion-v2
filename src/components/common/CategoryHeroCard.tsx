@@ -63,7 +63,7 @@ export default function CategoryHeroCard({
             }`}
           >
             <span
-              className={`relative font-semibold uppercase text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] ${
+              className={`relative font-semibold uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
                 isFeed
                   ? 'text-3xl tracking-[0.22em] md:text-sm md:tracking-[0.18em] lg:text-base'
                   : 'text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.18em]'

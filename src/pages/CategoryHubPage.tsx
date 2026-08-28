@@ -123,7 +123,7 @@ export default function CategoryHubPage() {
               priority={index < 2}
               variant="portrait"
               imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' || subcategory.slug === 'polos' ? 'center center' : 'center top'}
-              showOverlay={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi'}
+              showOverlay={subcategory.slug === 'womens-baggy'}
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
             />
           ))}
