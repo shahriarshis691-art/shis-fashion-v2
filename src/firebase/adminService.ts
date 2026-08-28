@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore'
 import { deleteCloudinaryAssetByUrl, uploadMultipleAssets } from '../services/cloudinary'
 import { homeCategoryItems } from '../data/homeCategories'
-import { featuredCollectionCovers, categoryStripCovers } from '../data/featuredCollectionCovers'
+import { featuredCollectionCovers, categoryStripCovers, SAREE_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { shopCategories } from '../data/shopData'
 import { brandEntries } from '../data/brandShowcase'
 import { compactManagedImages, isOutdatedHardcodedMediaUrl, isPersistableMediaUrl, isRemoteMediaUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
@@ -924,7 +924,11 @@ function getLegacyCategoryImage(legacyImageKey: string) {
     return categoryStripCovers.men
   }
 
-  if (legacyImageKey === 'saree' || legacyImageKey === 'womens') {
+  if (legacyImageKey === 'saree') {
+    return SAREE_HOMEPAGE_COVER
+  }
+
+  if (legacyImageKey === 'womens') {
     return categoryStripCovers.saree
   }
 

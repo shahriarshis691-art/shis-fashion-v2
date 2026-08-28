@@ -4,6 +4,8 @@ export const featuredCollectionCovers: Record<string, string> = {
   'everyday-wear': '/collections/featured-everyday-wear.jpg',
 }
 
+export const SAREE_HOMEPAGE_COVER = '/homepage/category.png'
+
 export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.jpg',
   saree: '/collections/saree-category-new.jpg',
@@ -20,7 +22,7 @@ export function featuredCollectionCover(slug: string, fallback = '') {
 
 export function categoryStripCover(key: string, fallback = '') {
   const bundled = (
-    categoryStripCovers[key]
+    (key === 'saree' ? SAREE_HOMEPAGE_COVER : categoryStripCovers[key])
     ?? (key === 'sale' ? categoryStripCovers['half-shirts'] : '')
     ?? (key === 'new-arrivals' ? categoryStripCovers['oversized-tee'] : '')
   ) || (key === 'women' ? categoryStripCovers.saree : '')

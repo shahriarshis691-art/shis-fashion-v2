@@ -1,3 +1,5 @@
+import { SAREE_HOMEPAGE_COVER } from './featuredCollectionCovers'
+
 export interface HomeCategoryItem {
   key: 'mens' | 'womens' | 'kids' | 'western' | 'denim' | 'oversized-tee' | 'saree'
   name: string
@@ -32,8 +34,8 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'saree',
     name: 'Saree',
     href: '/sarees',
-    image: '/collections/saree-category-new.jpg',
-    imagePosition: 'center top',
+    image: SAREE_HOMEPAGE_COVER,
+    imagePosition: 'center right',
   },
   {
     key: 'denim',

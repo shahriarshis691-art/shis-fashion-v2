@@ -3,7 +3,7 @@ import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
-import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers, SAREE_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -17,7 +17,7 @@ import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../util
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
-  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: 'center right' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
@@ -121,7 +121,7 @@ const defaultHomepage: HomepageContent = {
       href: '/sarees',
       enabled: true,
       order: 15,
-      coverImage: categoryStripCovers.saree,
+      coverImage: SAREE_HOMEPAGE_COVER,
       images: [],
       updatedAt: null,
     },
@@ -269,6 +269,7 @@ export default function HomePage() {
         const isOversizedTeeCard = fallback.key === 'new-arrivals'
         const isWomensBaggyCard = fallback.key === 'western'
         const isMenCard = fallback.key === 'men'
+        const isSareeCard = fallback.key === 'saree'
         const isPantsCard = fallback.key === 'denim'
         const isKidsCard = fallback.key === 'kids'
         const resolvedCover = isHalfShirtsCard
@@ -279,11 +280,13 @@ export default function HomePage() {
               ? categoryStripCovers.western
               : isMenCard
                 ? categoryStripCovers.men
-                : pickPreferredCategoryCoverUrl(
-                  section?.coverImage,
-                  section?.images,
-                  fallback.image || categoryStripCover(fallback.key, ''),
-                )
+                : isSareeCard
+                  ? SAREE_HOMEPAGE_COVER
+                  : pickPreferredCategoryCoverUrl(
+                    section?.coverImage,
+                    section?.images,
+                    fallback.image || categoryStripCover(fallback.key, ''),
+                  )
 
         return {
           key: fallback.key,
@@ -325,7 +328,9 @@ export default function HomePage() {
         ? SEGMENT_HUB_COVERS.kids
         : key === 'men'
           ? categoryStripCovers.men
-          : categoryStripCovers.saree
+          : key === 'saree'
+            ? SAREE_HOMEPAGE_COVER
+            : categoryStripCovers.saree
       const fallbackHref = key === 'kids' ? '/kids' : key === 'saree' ? '/sarees' : `/${key}`
       return {
         key,
