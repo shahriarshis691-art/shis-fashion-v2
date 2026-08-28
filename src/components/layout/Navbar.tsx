@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
-import { useCartDrawer } from '../../context/CartDrawerContext'
-import { useWishlist } from '../../context/WishlistContext'
 import type { HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
 import { googleAnalytics } from '../../services/googleAnalytics'
@@ -10,12 +8,29 @@ import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
 
 const BRAND_LOGO = '/hero/shis-brand-logo-v2.png'
 
+const primaryLinks = [
+  { label: 'Women', href: '/women' },
+  { label: 'Men', href: '/men' },
+  { label: 'Kids', href: '/kids' },
+  { label: 'Sale', href: '/sale' },
+  { label: 'New Arrivals', href: '/shop/new-arrivals' },
+  { label: 'XEROXII', href: '/brands/xeroxii' },
+  { label: 'CERAVO', href: '/brands/ceravo' },
+  { label: 'FOUNDER', href: '/founder' },
+]
+
+const utilityLinks = [
+  { label: 'Shop All', href: '/shop' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
+]
+
 const desktopNavLinks = [
   { label: 'Women', href: '/women' },
   { label: 'Men', href: '/men' },
   { label: 'Kids', href: '/kids' },
   { label: 'Sarees', href: '/sarees' },
-  { label: 'Collections', href: '/shop/new-arrivals' },
+  { label: 'Sale', href: '/sale' },
 ]
 
 const megaMenuGroups = {
@@ -40,37 +55,22 @@ const mobileMenuGroups = [
   {
     key: 'women',
     title: 'Women',
-    links: [{ label: 'Shop Women', href: megaMenuGroups.women.href }, ...megaMenuGroups.women.links],
+    links: [{ label: 'View categories', href: megaMenuGroups.women.href }, ...megaMenuGroups.women.links],
   },
   {
     key: 'men',
     title: 'Men',
-    links: [{ label: 'Shop Men', href: megaMenuGroups.men.href }, ...megaMenuGroups.men.links],
+    links: [{ label: 'View categories', href: megaMenuGroups.men.href }, ...megaMenuGroups.men.links],
   },
   {
     key: 'kids',
     title: 'Kids',
-    links: [{ label: 'Shop Kids', href: megaMenuGroups.kids.href }, ...megaMenuGroups.kids.links],
+    links: [{ label: 'View categories', href: megaMenuGroups.kids.href }, ...megaMenuGroups.kids.links],
   },
   {
-    key: 'saree',
-    title: 'Saree',
-    links: [
-      { label: 'All Sarees', href: '/sarees' },
-      { label: 'Shop Women', href: '/women' },
-    ],
-  },
-  {
-    key: 'collections',
-    title: 'Collections',
-    links: [
-      { label: 'New Arrivals', href: '/shop/new-arrivals' },
-      { label: 'Oversized Tee', href: '/collections/oversized-tee' },
-      { label: 'Half Shirts', href: '/men/half-shirts' },
-      { label: "Women's Baggy", href: '/women/womens-baggy' },
-      { label: 'Sale', href: '/sale' },
-      { label: 'Shop All', href: '/shop' },
-    ],
+    key: 'discover',
+    title: 'Discover',
+    links: [...primaryLinks.filter((link) => link.label !== 'Women' && link.label !== 'Men' && link.label !== 'Kids'), ...utilityLinks],
   },
 ] as const
 
@@ -88,12 +88,12 @@ function MobileAccordionGroup({
   onNavigate: () => void
 }) {
   return (
-    <div className="border-b border-neutral-200">
+    <div className="border border-neutral-200">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        className="ui-interactive flex w-full items-center justify-between py-3.5 text-left text-sm font-medium tracking-[0.08em] text-[#111111] uppercase"
+        className="ui-interactive flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
       >
         <span>{title}</span>
         <span aria-hidden className="text-base leading-none text-neutral-400">
@@ -102,23 +102,24 @@ function MobileAccordionGroup({
       </button>
 
       <div
-        className={`grid overflow-hidden transition-[grid-template-rows] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`grid overflow-hidden border-t border-neutral-200 transition-[grid-template-rows] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
-        <nav className="min-h-0 grid gap-0.5 pb-3" aria-label={`${title} links`}>
+        <nav className="min-h-0 grid gap-0.5 p-1.5" aria-label={`${title} links`}>
           {links.map((link) => (
             <NavLink
               key={`${title}-${link.label}-${link.href}`}
               to={link.href}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `ui-interactive px-1 py-2 text-sm ${
-                  isActive ? 'text-[#111111]' : 'text-neutral-500 hover:text-[#111111]'
+                `ui-interactive flex items-center justify-between px-3 py-2.5 text-sm ${
+                  isActive ? 'bg-neutral-950 text-white' : 'text-neutral-800 hover:bg-neutral-50'
                 }`
               }
             >
-              {link.label}
+              <span>{link.label}</span>
+              <span aria-hidden>→</span>
             </NavLink>
           ))}
         </nav>
@@ -128,7 +129,7 @@ function MobileAccordionGroup({
 }
 
 const iconButtonClass =
-  'ui-interactive inline-flex h-10 w-10 shrink-0 items-center justify-center text-[#111111] transition-colors hover:text-neutral-500'
+  'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500 md:h-10 md:w-10'
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -138,11 +139,8 @@ export default function Navbar() {
   )
   const [searchTerm, setSearchTerm] = useState('')
   const lastSearchQueryRef = useRef<string | null>(null)
-  const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { itemCount } = useCart()
-  const { itemCount: wishlistCount } = useWishlist()
-  const { openCart } = useCartDrawer()
   const navigate = useNavigate()
 
   const closeOverlays = () => {
@@ -179,7 +177,7 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    if (!isMenuOpen && !isSearchOpen) {
+    if (!isMenuOpen) {
       document.body.style.overflow = ''
       return
     }
@@ -188,13 +186,7 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isMenuOpen, isSearchOpen])
-
-  useEffect(() => {
-    if (isSearchOpen) {
-      searchInputRef.current?.focus()
-    }
-  }, [isSearchOpen])
+  }, [isMenuOpen])
 
   const runSearch = () => {
     const query = searchTerm.trim()
@@ -210,8 +202,9 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-[#eeeeee] bg-white">
         <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-4 sm:px-6 md:h-[70px] md:px-10">
+          {/* Left — hamburger (+ desktop nav) */}
           <div className="relative z-10 flex h-full min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
             <button
               type="button"
@@ -224,12 +217,12 @@ export default function Navbar() {
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                   <path d="M6 6 18 18" />
                   <path d="M18 6 6 18" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                   <path d="M4 7h16" />
                   <path d="M4 12h16" />
                   <path d="M4 17h16" />
@@ -237,15 +230,15 @@ export default function Navbar() {
               )}
             </button>
 
-            <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+            <nav className="hidden items-center gap-5 lg:flex" aria-label="Primary">
               {desktopNavLinks.map((link) => (
                 <NavLink
                   key={link.href}
                   to={link.href}
                   onClick={closeOverlays}
                   className={({ isActive }) =>
-                    `text-[11px] font-medium tracking-[0.18em] uppercase transition-colors ${
-                      isActive ? 'text-[#111111]' : 'text-neutral-500 hover:text-[#111111]'
+                    `text-[11px] font-medium tracking-[0.16em] uppercase transition-colors ${
+                      isActive ? 'text-neutral-950' : 'text-neutral-600 hover:text-neutral-950'
                     }`
                   }
                 >
@@ -255,11 +248,13 @@ export default function Navbar() {
             </nav>
           </div>
 
+          {/* Center — brand logo (dead-center; no stretch / flicker) */}
           <Link
             to="/"
             onClick={closeOverlays}
             className="absolute inset-y-0 left-1/2 z-20 flex h-full -translate-x-1/2 items-center justify-center"
             aria-label="SHIS Fashion home"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
           >
             <img
               src={BRAND_LOGO}
@@ -270,13 +265,15 @@ export default function Navbar() {
               loading="eager"
               fetchPriority="low"
               className="navbar-brand-logo"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
               onError={(event) => {
                 event.currentTarget.src = '/shis-logo.svg'
               }}
             />
           </Link>
 
-          <div className="relative z-10 flex h-full flex-1 items-center justify-end gap-1 sm:gap-2">
+          {/* Right — utility icons (balanced gap; does not shift logo) */}
+          <div className="relative z-10 flex h-full flex-1 items-center justify-end gap-3.5">
             <button
               type="button"
               onClick={() => {
@@ -287,75 +284,47 @@ export default function Navbar() {
               aria-label="Search"
               aria-expanded={isSearchOpen}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </button>
 
-            <Link
-              to="/cart#wishlist"
-              onClick={closeOverlays}
-              className={`${iconButtonClass} relative`}
-              aria-label={`Wishlist, ${wishlistCount} saved`}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill={wishlistCount > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-              {wishlistCount > 0 ? (
-                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#111111] px-1 text-[9px] font-semibold text-white">
-                  {wishlistCount > 99 ? '99+' : wishlistCount}
-                </span>
-              ) : null}
-            </Link>
-
-            <Link to="/track-order" onClick={closeOverlays} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Account and order tracking" title="Track order">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+            <Link to="/track-order" onClick={closeOverlays} className={iconButtonClass} aria-label="Track order" title="Track order">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
               </svg>
             </Link>
 
-            <button
-              type="button"
-              onClick={() => {
-                closeOverlays()
-                openCart()
-              }}
+            <Link
+              to="/cart"
+              onClick={closeOverlays}
               className={`${iconButtonClass} relative`}
               aria-label={`Shopping bag, ${itemCount} items`}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <svg viewBox="0 0 24 24" className="h-5 w-5 md:h-[22px] md:w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                 <path d="M3 6h18" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {itemCount > 0 ? (
-                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#111111] px-1 text-[9px] font-semibold text-white">
+                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-950 px-1 text-[9px] font-semibold text-white">
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               ) : null}
-            </button>
+            </Link>
           </div>
         </div>
-      </header>
 
-      {isSearchOpen ? (
-        <>
-          <button
-            type="button"
-            aria-label="Close search"
-            className="luxury-fade-in fixed inset-0 z-[80] bg-black/40"
-            onClick={() => setIsSearchOpen(false)}
-          />
-          <aside className="luxury-sheet-up fixed inset-x-0 top-0 z-[90] border-b border-neutral-200 bg-white px-4 py-5 sm:px-8">
-            <div className="mx-auto flex w-full max-w-[720px] items-center gap-3">
+        {isSearchOpen ? (
+          <div className="luxury-fade-in border-t border-[#eeeeee] bg-white">
+            <div className="mx-auto flex w-full max-w-[1400px] gap-2 px-4 py-3 sm:px-6 md:px-10">
               <label htmlFor="site-search" className="sr-only">
                 Search products
               </label>
               <input
                 id="site-search"
-                ref={searchInputRef}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 onKeyDown={(event) => {
@@ -365,19 +334,19 @@ export default function Navbar() {
                   }
                 }}
                 placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                className="lux-input bg-white px-0 py-3 text-base"
+                className="w-full border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-900"
               />
               <button
                 type="button"
                 onClick={runSearch}
-                className="shrink-0 bg-[#111111] px-4 py-3 text-[11px] font-semibold tracking-[0.16em] text-white uppercase"
+                className="ui-interactive shrink-0 border border-neutral-950 bg-neutral-950 px-4 py-2.5 text-xs font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800"
               >
                 Search
               </button>
             </div>
-          </aside>
-        </>
-      ) : null}
+          </div>
+        ) : null}
+      </header>
 
       {isMenuOpen ? (
         <>
@@ -388,17 +357,9 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          <aside className="luxury-sheet-up fixed inset-y-0 left-0 z-50 flex w-[min(22rem,88vw)] flex-col bg-white px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[18px_0_48px_rgba(0,0,0,0.12)]">
-            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-              <p className="text-[11px] font-medium tracking-[0.18em] text-neutral-400 uppercase">Menu</p>
-              <button type="button" onClick={() => setIsMenuOpen(false)} className={iconButtonClass} aria-label="Close menu">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
-                  <path d="M6 6 18 18" />
-                  <path d="M18 6 6 18" />
-                </svg>
-              </button>
-            </div>
-            <div className="mt-2 flex-1 overflow-y-auto" aria-label="Site menu">
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
+            <p className="px-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Menu</p>
+            <div className="mt-2 grid gap-2" aria-label="Site menu">
               {mobileMenuGroups.map((group) => (
                 <MobileAccordionGroup
                   key={group.key}
@@ -411,11 +372,6 @@ export default function Navbar() {
                   onNavigate={closeOverlays}
                 />
               ))}
-              <div className="mt-6 grid gap-3 text-sm text-neutral-600">
-                <Link to="/track-order" onClick={closeOverlays} className="hover:text-[#111111]">Track order</Link>
-                <Link to="/about" onClick={closeOverlays} className="hover:text-[#111111]">About</Link>
-                <Link to="/contact" onClick={closeOverlays} className="hover:text-[#111111]">Contact</Link>
-              </div>
             </div>
           </aside>
         </>

@@ -46,7 +46,7 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="border-t border-neutral-200 bg-[var(--color-studio)]">
+    <footer className="border-t border-black/10 bg-white">
       <Container className="py-8 sm:py-10">
         <div className="grid gap-8 md:grid-cols-3 md:gap-10">
           <div>

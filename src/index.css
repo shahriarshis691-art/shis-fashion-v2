@@ -2,7 +2,7 @@
 @import 'tailwindcss';
 
 :root {
-  font-family: 'Inter', 'Montserrat', 'Segoe UI', sans-serif;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
   --tracking-label: 0.14em;
   --tracking-heading: -0.02em;
   line-height: 1.55;

@@ -12,11 +12,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'min-h-12 rounded-none border border-[#111111] bg-[#111111] px-6 py-3 text-[12px] font-semibold tracking-[0.16em] uppercase !text-white hover:bg-neutral-800 sm:text-[13px]',
+    'min-h-12 rounded-full border border-[#1f1f1f] bg-[linear-gradient(180deg,#1a1a1a,#000000)] px-6 py-3 text-[15px] !text-white shadow-[0_14px_34px_rgba(0,0,0,0.28)] hover:-translate-y-0.5 hover:border-[rgba(255,255,255,0.25)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.34)] sm:text-base',
   secondary:
-    'min-h-12 rounded-none border border-neutral-200 bg-white px-6 py-3 text-[12px] font-semibold tracking-[0.16em] uppercase text-[#111111] hover:border-[#111111] sm:text-[13px]',
+    'min-h-12 rounded-full border border-[var(--color-border)] bg-[rgba(0,0,0,0.03)] px-6 py-3 text-[15px] text-[var(--color-text)] hover:-translate-y-0.5 hover:border-[rgba(0,0,0,0.3)] hover:bg-[rgba(0,0,0,0.06)] hover:text-[var(--color-text)] sm:text-base',
   ghost:
-    'min-h-12 rounded-none border border-transparent bg-transparent px-6 py-3 text-[12px] font-semibold tracking-[0.16em] uppercase text-[#111111] hover:bg-[var(--color-sand)] sm:text-[13px]',
+    'min-h-12 rounded-full border border-transparent bg-transparent px-6 py-3 text-[15px] text-[var(--color-text)] hover:bg-[rgba(0,0,0,0.05)] hover:text-[var(--color-text)] sm:text-base',
   cta: 'btn-glass-cta',
 }
 
