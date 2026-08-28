@@ -8,6 +8,7 @@ import { useListingWishlist } from '../hooks/useListingWishlist'
 import { getManagedImageEntries, getProductImage, isDemoImageUrl } from '../utils/media'
 import LuxuryImage from '../components/common/LuxuryImage'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { filterListingProducts } from '../utils/listingProducts'
 import { normalizeSizes } from '../utils/sizes'
 import { subscribeToHomepageContent, subscribeToProducts, type AdminProduct, type FeaturedCollectionPage, type HomepageContent } from '../firebase/adminService'
 import { featuredCollectionCovers } from '../data/featuredCollectionCovers'
@@ -116,9 +117,10 @@ export default function CollectionListingPage() {
 
   const collectionProducts = useMemo(() => {
     const relatedCategories = (activeCollection?.relatedCategorySlugs ?? []).map((item) => item.trim().toLowerCase())
-    return relatedCategories.length
+    const matched = relatedCategories.length
       ? products.filter((item) => relatedCategories.includes(item.category.trim().toLowerCase()))
       : []
+    return filterListingProducts(matched)
   }, [activeCollection?.relatedCategorySlugs, products])
 
   const collectionImages = useMemo(

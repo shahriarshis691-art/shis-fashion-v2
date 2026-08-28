@@ -1,4 +1,5 @@
 import type { ShopProduct } from './shopData'
+import { filterListingProducts } from '../utils/listingProducts'
 
 export const WESTERN_OUTFITS_LISTING_PATH = '/women?sub=western-outfits'
 export const WESTERN_OUTFIT_SIZES = ['S', 'M', 'L', 'XL'] as const
@@ -144,5 +145,5 @@ export function mergeWesternOutfitsCatalog(liveProducts: ShopProduct[]): ShopPro
     (product) => !taken.has(product.slug.toLowerCase()),
   )
 
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return filterListingProducts(extras.length ? [...liveProducts, ...extras] : liveProducts)
 }

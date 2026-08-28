@@ -1,4 +1,5 @@
 import { formatBDT, parseBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import {
   getLuxuryBadgeForPrice,
   LUXURY_PRICE_FILTER_MAX,
@@ -321,7 +322,7 @@ export function mergeKurtisCatalog(liveProducts: ShopProduct[]): ShopProduct[] {
     (product) => !taken.has(product.slug.toLowerCase()),
   )
 
-  return extras.length ? [...withoutLegacyKurtis, ...extras] : withoutLegacyKurtis
+  return filterListingProducts(extras.length ? [...withoutLegacyKurtis, ...extras] : withoutLegacyKurtis)
 }
 
 export function resolveKurtiListingPriceLabel(product: KurtiProduct): string {

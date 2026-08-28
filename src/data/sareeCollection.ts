@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import type { ShopProduct } from './shopData'
 
 export interface SareeProduct extends ShopProduct {
@@ -702,7 +703,7 @@ export function mergeSareeCatalog(liveProducts: ShopProduct[]): SareeProduct[] {
   const liveSarees = liveProducts.filter(isSareeProduct).map(toSareeProduct)
   const taken = new Set(liveSarees.map((product) => product.slug.trim().toLowerCase()).filter(Boolean))
   const extras = sareeCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
-  return extras.length ? [...liveSarees, ...extras] : liveSarees
+  return filterListingProducts(extras.length ? [...liveSarees, ...extras] : liveSarees)
 }
 
 export function getSareeProductBySlug(slug: string, catalog: SareeProduct[] = sareeCollectionProducts): SareeProduct | undefined {

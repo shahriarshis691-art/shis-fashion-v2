@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import type { ShopProduct } from './shopData'
 
 export type KidsGenderCategory = 'Kids Boy' | 'Kids Girl' | 'Unisex'
@@ -216,7 +217,7 @@ export function mergeKidsOversizedTeeCatalog(liveProducts: ShopProduct[]): KidsO
   const liveKids = liveProducts.filter(isKidsOversizedTeeProduct).map(toKidsOversizedTeeProduct)
   const taken = new Set(liveKids.map((product) => product.slug.trim().toLowerCase()).filter(Boolean))
   const extras = kidsOversizedTeeProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
-  return extras.length ? [...liveKids, ...extras] : liveKids
+  return filterListingProducts(extras.length ? [...liveKids, ...extras] : liveKids)
 }
 
 export const KIDS_PRODUCT_FABRIC = 'Premium heavy cotton (soft hand-feel, breathable, everyday durable)'

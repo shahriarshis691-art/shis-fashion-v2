@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import { isMensBottomSubCategory } from './categoryTaxonomy'
 import type { ShopProduct } from './shopData'
 
@@ -471,5 +472,5 @@ export function mergeMensBaggyDenimCatalog(liveProducts: ShopProduct[]): ShopPro
     (product) => !taken.has(product.slug.toLowerCase()),
   )
 
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return filterListingProducts(extras.length ? [...liveProducts, ...extras] : liveProducts)
 }

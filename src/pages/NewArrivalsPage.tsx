@@ -5,6 +5,7 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { subscribeToProducts, type AdminProduct } from '../firebase/adminService'
 import type { ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { filterListingProducts } from '../utils/listingProducts'
 import { resolveCanonicalSubcategorySlug } from '../data/categoryTaxonomy'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 
@@ -31,7 +32,7 @@ export default function NewArrivalsPage() {
   }, [])
 
   const newArrivals = useMemo(
-    () => products.filter((product) => product.newArrival),
+    () => filterListingProducts(products.filter((product) => product.newArrival)),
     [products],
   )
   const pagedProducts = newArrivals.slice(0, visibleCount)

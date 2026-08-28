@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import type { ShopProduct } from './shopData'
 
 export interface HalfShirtProduct extends ShopProduct {
@@ -185,5 +186,5 @@ export function mergeHalfShirtCatalog(liveProducts: ShopProduct[]): ShopProduct[
   )
 
   const extras = halfShirtCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return filterListingProducts(extras.length ? [...liveProducts, ...extras] : liveProducts)
 }

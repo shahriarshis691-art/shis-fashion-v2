@@ -54,6 +54,7 @@ import {
   type AdminProduct,
 } from '../firebase/adminService'
 import { parseBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import {
   type ShopSegment,
   getSegmentDescription,
@@ -810,7 +811,7 @@ export default function ShopPage() {
     : byFilter
 
   const visibleProducts = (() => {
-    const sorted = [...bySearch]
+    const sorted = [...filterListingProducts(bySearch)]
     if (sortBy === 'new') {
       sorted.sort((left, right) => Number(Boolean(right.newArrival)) - Number(Boolean(left.newArrival)))
       return sorted

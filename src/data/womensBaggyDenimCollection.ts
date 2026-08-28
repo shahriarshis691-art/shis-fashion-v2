@@ -1,4 +1,5 @@
 import { formatBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import type { ShopProduct } from './shopData'
 
 export const WOMENS_BAGGY_DENIM_SIZES = ['26', '28', '30', '32', '34'] as const
@@ -350,21 +351,7 @@ const womensBaggyJeanEntries: WomensBaggyJeanEntry[] = [
   },
 ]
 
-const womensBaggyTeeEntries: WomensBaggyTeeEntry[] = [
-  {
-    id: 'womens-baggy-tee-01',
-    slug: 'coffee-brown-oversized-graphic-tee',
-    name: 'Coffee Brown Oversized Daily Graphic Tee',
-    sku: 'SHIS-WBT-001',
-    filename: 'Coffee Colour oversize T-shirt for daily wear use🤎🤌🏻.jpg',
-    price: 1090,
-    originalPrice: 1390,
-    colors: ['Coffee Brown'],
-    description: 'Coffee brown oversized tee with a minimalist line-art graphic — soft cotton for daily wear.',
-    stock: 22,
-    featured: true,
-  },
-]
+const womensBaggyTeeEntries: WomensBaggyTeeEntry[] = []
 
 export const womensBaggyDenimCollectionProducts: WomensBaggyDenimProduct[] = [
   ...womensBaggyJeanEntries.map(createWomensBaggyJean),
@@ -414,5 +401,5 @@ export function mergeWomensBaggyDenimCatalog(liveProducts: ShopProduct[]): ShopP
     (product) => !taken.has(product.slug.toLowerCase()),
   )
 
-  return extras.length ? [...liveProducts, ...extras] : liveProducts
+  return filterListingProducts(extras.length ? [...liveProducts, ...extras] : liveProducts)
 }

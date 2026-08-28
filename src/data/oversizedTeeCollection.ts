@@ -1,4 +1,5 @@
 import type { ShopProduct } from './shopData'
+import { filterListingProducts } from '../utils/listingProducts'
 
 export const OVERSIZED_TEE_SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const
 export const OVERSIZED_TEE_FIT = 'Oversized Boxy Fit'
@@ -200,5 +201,5 @@ export function mergeOversizedTeeCatalog(liveProducts: ShopProduct[]): ShopProdu
   )
 
   const extras = oversizedTeeCollectionProducts.filter((product) => !taken.has(product.slug.toLowerCase()))
-  return extras.length ? [...realLive, ...extras] : realLive
+  return filterListingProducts(extras.length ? [...realLive, ...extras] : realLive)
 }

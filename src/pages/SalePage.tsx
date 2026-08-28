@@ -7,6 +7,7 @@ import { subscribeToProducts, type AdminProduct } from '../firebase/adminService
 import type { ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { parseBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 
 function mapProduct(product: AdminProduct): ShopProduct {
@@ -34,7 +35,7 @@ export default function SalePage() {
   }, [])
 
   const saleProducts = useMemo(
-    () => products.filter(isSaleProduct),
+    () => filterListingProducts(products.filter(isSaleProduct)),
     [products],
   )
 

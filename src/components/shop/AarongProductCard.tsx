@@ -3,7 +3,8 @@ import PrefetchLink from '../common/PrefetchLink'
 import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
-import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../../utils/media'
+import { hasListingRenderableImage } from '../../utils/listingProducts'
+import { catalogImageAttrs } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 import { getVariantStock } from '../../utils/variantStock'
 
@@ -21,6 +22,7 @@ export interface AarongProductCardProduct {
   description?: string
   stock?: number
   variants?: ShopProduct['variants']
+  isPlaceholder?: boolean
 }
 
 export interface AarongProductCardProps {
@@ -38,6 +40,7 @@ export interface AarongProductCardProps {
 }
 
 const DEFAULT_PREFETCH = () => import('../../pages/ProductDetailPage')
+const LISTING_CARD_SIZES = '(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
 
 const SWATCH_TONES: Record<string, string> = {
   black: '#111111',
@@ -81,7 +84,7 @@ function swatchBackground(color: string): string {
 }
 
 /**
- * Universal Aarong-style listing card — tall 2:3 portrait frame, no crop, centered meta.
+ * Universal listing card — uniform 3:4 portrait frame, centered meta, no placeholder tiles.
  */
 const AarongProductCard = memo(function AarongProductCard({
   product,
@@ -94,10 +97,10 @@ const AarongProductCard = memo(function AarongProductCard({
 }: AarongProductCardProps) {
   const { addToCart } = useCart()
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
-  const cardSizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
   const image = useMemo(
-    () => catalogImageAttrs(product.image, 640, 960, cardSizes, [320, 480, 640], 'contain'),
+    () => catalogImageAttrs(product.image, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
     [product.image],
   )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
@@ -107,6 +110,10 @@ const AarongProductCard = memo(function AarongProductCard({
   }, [product.colors])
   const sizes = useMemo(() => (product.sizes ?? []).map((size) => size.trim()).filter(Boolean), [product.sizes])
   const defaultColor = product.colors?.[0]?.trim() || 'Default'
+
+  if (!hasListingRenderableImage(product) || imageFailed) {
+    return null
+  }
 
   const addWithSize = (event: MouseEvent, size: string) => {
     event.preventDefault()
@@ -158,29 +165,25 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame">
+        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none bg-neutral-100/60">
           <img
-            src={image.src || CATALOG_IMAGE_PLACEHOLDER}
+            src={image.src || product.image}
             srcSet={image.srcSet}
             sizes={image.sizes}
             alt={product.name}
             width={640}
-            height={960}
+            height={853}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media h-full w-full object-contain object-center"
-            onError={(event) => {
-              event.currentTarget.removeAttribute('srcset')
-              event.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
-            }}
+            className="product-card-media absolute inset-0 h-full w-full object-cover object-center"
+            onError={() => setImageFailed(true)}
           />
           {luxuryBadge ? (
             <span className="product-card-badge" aria-label={luxuryBadge}>
               {luxuryBadge}
             </span>
           ) : null}
-          {/* Desktop hover-only Quick Add. Hidden on mobile so the image stays unobstructed. */}
           <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
             {sizePickerOpen && sizes.length > 1 ? (
               <div className="flex w-full flex-wrap justify-center gap-1 bg-white/95 p-1.5" role="group" aria-label="Select size">
@@ -207,7 +210,7 @@ const AarongProductCard = memo(function AarongProductCard({
           </div>
         </div>
 
-        <div className="product-card-meta">
+        <div className="product-card-meta min-h-[48px]">
           <h3 className="product-card-title">{product.name}</h3>
           <p className="product-card-price">
             {product.comparePrice ? (

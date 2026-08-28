@@ -4,7 +4,7 @@ interface ProductListingGridProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
 }
 
-/** Aarong catalog grid — 2×2 luxury mobile, 3 cols tablet, 4 cols desktop. */
+/** Global catalog grid — uniform 2-col mobile, 3-col tablet, 4-col desktop. */
 export default function ProductListingGrid({ children, className = '', ...props }: ProductListingGridProps) {
   return (
     <div
@@ -12,8 +12,8 @@ export default function ProductListingGrid({ children, className = '', ...props 
         'product-grid',
         'mx-auto grid min-w-0 w-full max-w-7xl',
         'grid-cols-2 gap-x-3 gap-y-7 px-3',
-        'md:grid-cols-3 md:gap-6 md:px-0',
-        'lg:grid-cols-4',
+        'md:grid-cols-3 md:gap-x-6 md:gap-y-10 md:px-4',
+        'lg:grid-cols-4 md:px-8',
         className,
       ]
         .filter(Boolean)
