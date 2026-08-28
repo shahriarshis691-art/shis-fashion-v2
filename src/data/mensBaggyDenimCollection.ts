@@ -36,11 +36,14 @@ const MENS_BAGGY_IMAGE_DIR = '/collections/mens-baggy'
 export interface MensBaggyDenimProduct extends ShopProduct {
   sku: string
   subCategory: 'denim' | 'baggy' | 'pants'
-  fit: 'Baggy' | 'Wide Leg' | 'Loose'
+  fit: 'Baggy' | 'Wide Leg' | 'Loose' | 'Straight' | 'Slim' | 'Relaxed'
   fabric: string
   tags: string[]
   inStock: boolean
 }
+
+export const MENS_PANTS_EDIT_SIZES = ['30', '32', '34', '36'] as const
+const MENS_PANTS_SAREE_IMAGE_DIR = '/saree'
 
 function baggyImage(index: number) {
   return `${MENS_BAGGY_IMAGE_DIR}/mens-baggy${index}.jpg`
@@ -88,6 +91,56 @@ function createBaggyJean(
     fabric: options.fabric ?? 'Cotton Denim',
     tags: ['baggy', 'men', 'denim'],
     inStock: stock > 0,
+  }
+}
+
+function pantsSareeImage(filename: string) {
+  return `${MENS_PANTS_SAREE_IMAGE_DIR}/${filename}.jpg`
+}
+
+function createMensPantsJean(
+  index: number,
+  filename: string,
+  slug: string,
+  name: string,
+  sku: string,
+  price: number,
+  comparePrice: number,
+  colors: string[],
+  description: string,
+  options: {
+    fit?: MensBaggyDenimProduct['fit']
+    fabric?: string
+    featured?: boolean
+    newArrival?: boolean
+    stock?: number
+  } = {},
+): MensBaggyDenimProduct {
+  const image = pantsSareeImage(filename)
+  const stock = options.stock ?? 16
+
+  return {
+    id: `mens-pants-${String(index).padStart(2, '0')}`,
+    sku,
+    slug,
+    name,
+    price: formatBDT(price),
+    comparePrice: formatBDT(comparePrice),
+    category: 'men',
+    subCategory: 'pants',
+    brand: 'SHIS Fashion',
+    image,
+    galleryImages: [image],
+    description,
+    sizes: [...MENS_PANTS_EDIT_SIZES],
+    colors,
+    stock,
+    featured: options.featured ?? true,
+    newArrival: options.newArrival ?? true,
+    fit: options.fit ?? 'Straight',
+    fabric: options.fabric ?? 'Cotton Denim',
+    tags: ['pants', 'denim', 'men'],
+    inStock: true,
   }
 }
 
@@ -202,6 +255,78 @@ export const mensBaggyDenimCollectionProducts: MensBaggyDenimProduct[] = [
     ['Deep Indigo'],
     'Premium baggy denim in deep indigo with a refined finish and generous everyday fit.',
     { fit: 'Baggy', featured: true, stock: 12, comparePrice: 3190 },
+  ),
+  createMensPantsJean(
+    1,
+    '0c99a7cfbb396c6df26e7731d7f97093',
+    'shis-classic-indigo-regular-fit-jeans',
+    'SHIS Classic Indigo Regular Fit Jeans',
+    'SHIS-MP-001',
+    1950,
+    2750,
+    ['Dark Indigo'],
+    'Dark indigo slim-straight jeans in a clean flat-lay finish — a refined everyday denim staple.',
+    { fit: 'Slim', featured: true, newArrival: true, stock: 18 },
+  ),
+  createMensPantsJean(
+    2,
+    '2bd684d29ce395273392088b3ba63aae',
+    'shis-deep-wash-classic-denim',
+    'SHIS Deep Wash Classic Denim',
+    'SHIS-MP-002',
+    1850,
+    2650,
+    ['Deep Wash'],
+    'Deep-wash classic denim with a structured straight fall and a premium cotton hand-feel.',
+    { fit: 'Straight', stock: 20 },
+  ),
+  createMensPantsJean(
+    3,
+    '8c514f00452fdc48d6f436885fe41735',
+    'shis-dark-wash-relaxed-fit-denim',
+    'SHIS Dark Wash Relaxed Fit Denim',
+    'SHIS-MP-003',
+    2150,
+    2950,
+    ['Dark Wash'],
+    'Dark-wash relaxed-fit denim styled with white sneakers — easy drape for all-day street comfort.',
+    { fit: 'Relaxed', featured: true, newArrival: true, stock: 16 },
+  ),
+  createMensPantsJean(
+    4,
+    '41e60ad2797dbbd173dd5d35c1f5a058',
+    'shis-authentic-mid-blue-straight-jeans',
+    'SHIS Authentic Mid-Blue Straight Jeans',
+    'SHIS-MP-004',
+    2250,
+    3050,
+    ['Mid Blue'],
+    'Authentic mid-blue straight-fit denim on a clean model crop — versatile for work and weekend edits.',
+    { fit: 'Straight', featured: true, stock: 17 },
+  ),
+  createMensPantsJean(
+    5,
+    '135b3767fbc344aa77335f2a06c25c48',
+    'shis-vintage-washed-grey-denim',
+    'SHIS Vintage Washed Grey Denim',
+    'SHIS-MP-005',
+    2350,
+    3100,
+    ['Washed Grey'],
+    'Vintage washed grey wide-leg denim with a soft fade and a relaxed, contemporary silhouette.',
+    { fit: 'Wide Leg', featured: true, newArrival: true, stock: 14 },
+  ),
+  createMensPantsJean(
+    6,
+    '6315a8287fbc1c8417bfe669ea6f98f9',
+    'shis-midnight-black-straight-fit-denim',
+    'SHIS Midnight Black Straight Fit Denim',
+    'SHIS-MP-006',
+    2450,
+    3200,
+    ['Charcoal Black'],
+    'Classic midnight-black charcoal straight-fit denim — a sharp, versatile bottom for night and day.',
+    { fit: 'Straight', featured: true, stock: 15 },
   ),
 ]
 

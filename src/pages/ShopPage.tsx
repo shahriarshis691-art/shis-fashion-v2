@@ -1405,6 +1405,22 @@ export default function ShopPage() {
               ) : null}
             </>
           ) : null
+        ) : isPantsListing ? (
+          visibleProducts.length > 0 ? (
+            <ProductListingGrid className="mt-6">
+              {visibleProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  href={`/product/${product.slug}`}
+                  variant="studio"
+                  priority={index < 4}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(product.id))}
+                />
+              ))}
+            </ProductListingGrid>
+          ) : null
         ) : isWomenListing ? (
           <ProductListingGrid className="mt-6">
             {visibleProducts.map((product, index) => (

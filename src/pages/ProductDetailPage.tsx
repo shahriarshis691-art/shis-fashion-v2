@@ -32,7 +32,7 @@ import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
-import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollection'
+import { mensBaggyDenimCollectionProducts, getMensBaggyDenimProductBySlug } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
 import { kurtisCollectionProducts, getKurtiColorGallery, getKurtiVariantPrice, getKurtiProductBySlug, type KurtiColorVariant } from '../data/kurtisCollection'
@@ -179,6 +179,11 @@ export default function ProductDetailPage() {
     const baggy = getWomensBaggyDenimProductBySlug(decodedSlug)
     if (baggy) {
       return fromCatalogProduct(baggy)
+    }
+
+    const mensPants = getMensBaggyDenimProductBySlug(decodedSlug)
+    if (mensPants) {
+      return fromCatalogProduct(mensPants)
     }
 
     const kurti = getKurtiProductBySlug(decodedSlug)
