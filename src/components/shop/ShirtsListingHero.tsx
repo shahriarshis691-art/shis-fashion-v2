@@ -35,7 +35,7 @@ export default function ShirtsListingHero() {
       aria-label="Men's Shirts collection banner"
     >
       <div
-        className="relative w-full overflow-hidden max-md:[aspect-ratio:var(--hero-aspect)] md:aspect-[16/9]"
+        className="relative w-full overflow-hidden max-md:[aspect-ratio:var(--hero-aspect)]"
         style={{
           '--hero-aspect': `${MENS_SHIRTS_HERO_WIDTH} / ${MENS_SHIRTS_HERO_HEIGHT}`,
           backgroundColor: MENS_SHIRTS_HERO_BACKGROUND,

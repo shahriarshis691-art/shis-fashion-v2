@@ -31,9 +31,7 @@ export interface ResponsiveHeroBannerProps {
   objectPosition?: string
   children?: React.ReactNode
   overlayClassName?: string
-  /** Desktop: viewport-height contain frame (homepage saree). Mobile unchanged when false. */
-  desktopViewportContain?: boolean
-  /** Override mobile aspect ratio, e.g. `4/5`. */
+  /** Override mobile aspect ratio, e.g. `4/5`. Desktop layout is unchanged. */
   mobileAspectRatio?: string
 }
 
@@ -65,7 +63,6 @@ export default function ResponsiveHeroBanner({
   objectPosition = 'center',
   children,
   overlayClassName,
-  desktopViewportContain = false,
   mobileAspectRatio,
 }: ResponsiveHeroBannerProps) {
   const bgColor = resolveHeroBackground(background)
@@ -90,9 +87,7 @@ export default function ResponsiveHeroBanner({
 
   const imageClassName = [
     'gpu-media block h-full w-full max-w-full object-contain',
-    desktopViewportContain
-      ? 'md:h-full md:w-auto md:max-h-full md:max-w-full'
-      : 'md:h-auto md:w-full md:max-w-full',
+    'md:h-auto md:w-full md:max-w-none',
   ].filter(Boolean).join(' ')
 
   const imageStyle: React.CSSProperties = {
@@ -102,10 +97,7 @@ export default function ResponsiveHeroBanner({
   const frameClassName = [
     'relative w-full overflow-hidden',
     'max-md:[aspect-ratio:var(--hero-aspect)]',
-    desktopViewportContain
-      ? 'md:flex md:h-[88vh] md:items-center md:justify-center md:overflow-hidden'
-      : '',
-  ].filter(Boolean).join(' ')
+  ].join(' ')
 
   const frameStyle = {
     '--hero-aspect': aspectRatio,

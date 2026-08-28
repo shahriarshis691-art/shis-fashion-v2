@@ -34,7 +34,6 @@ export const Hero: React.FC<HeroProps> = () => {
         sectionClassName="mb-3 md:mb-0"
         ariaLabel="SHIS Fashion hero banner"
         objectPosition="center top"
-        desktopViewportContain
         mobileAspectRatio="4/5"
       />
     </>
