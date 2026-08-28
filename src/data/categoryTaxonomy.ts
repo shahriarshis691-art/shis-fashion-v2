@@ -39,13 +39,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
 
 const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [
   { slug: 'kurti', label: 'Kurti', aliases: ['kurti', 'kurtis', 'salwar', 'salwar-kameez', 'salwar kameez', 'three-piece', 'three piece', '3-piece'] },
-  { slug: 'tops', label: 'Tops', aliases: ['tops', 'women-tees', 'womens-tees', 'women-tee', 'womens-tee'] },
   { slug: 'dresses', label: 'Dresses', aliases: ['dresses', 'women-dresses', 'womens-dresses', 'women-shirt', 'women-shirts', 'womens-shirt', 'womens-shirts'] },
-  {
-    slug: 'western-outfits',
-    label: 'Western Outfits',
-    aliases: ['western-outfits', 'western', 'western-outfit', 'womens-western', 'women-western'],
-  },
   {
     slug: 'womens-baggy',
     label: "Women's Baggy",
@@ -91,7 +85,7 @@ const KIDS_SUBCATEGORIES: SubcategoryConfig[] = [
   },
 ]
 
-const WOMEN_HUB_PRIORITY_SLUGS = ['kurti', 'womens-baggy', 'oversized-tee', 'dresses', 'western-outfits'] as const
+const WOMEN_HUB_PRIORITY_SLUGS = ['kurti', 'womens-baggy', 'oversized-tee', 'dresses'] as const
 
 const SEGMENTS: SegmentConfig[] = [
   {

@@ -301,24 +301,22 @@ img.pdp-main-image {
   }
 }
 
-/* Homepage hero — adaptive luxury frame with 2-slide carousel */
+/* Homepage hero — adaptive luxury frame with campaign carousel */
 .homepage-hero-frame {
   overflow: hidden;
   isolation: isolate;
   contain: layout paint;
   width: 100%;
   min-height: 70vh;
-  max-height: 85vh;
-  aspect-ratio: 4 / 5;
+  height: 75vh;
   background-color: #0a0a0a;
 }
 
 @media (min-width: 768px) {
   .homepage-hero-frame {
-    aspect-ratio: auto;
-    min-height: 0;
-    max-height: none;
+    min-height: 75vh;
     height: 75vh;
+    width: 100%;
   }
 }
 
@@ -326,7 +324,7 @@ img.pdp-main-image {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 700ms ease-in-out;
   pointer-events: none;
   z-index: 0;
 }
@@ -348,6 +346,12 @@ img.homepage-hero-image {
   object-position: center center;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+}
+
+@media (min-width: 768px) {
+  img.homepage-hero-image--saree {
+    object-position: var(--hero-desktop-object-position) !important;
+  }
 }
 
 .homepage-hero-dots {

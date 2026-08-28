@@ -2,9 +2,7 @@ import { categoryStripCovers } from './featuredCollectionCovers'
 
 const WOMEN_COVERS: Record<string, string> = {
   kurti: '/images/products/kurtis/Nairah Porcelain Blue - M.jpg',
-  tops: '/images/products/kurtis/White summer outfit.jpg',
   dresses: '/images/products/kurtis/Beautiful dress.jpg',
-  'western-outfits': '/images/products/kurtis/Elegant Black Floral Embroidered Dress _ Stylish & Chic by Pink Tulip _ Model PR-0284.jpg',
   'womens-baggy': categoryStripCovers['womens-baggy'] || categoryStripCovers.western,
   'oversized-tee': categoryStripCovers['oversized-tee'],
   saree: categoryStripCovers.saree,

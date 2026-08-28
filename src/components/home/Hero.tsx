@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-const AUTOPLAY_MS = 5500
+const AUTOPLAY_MS = 2800
 const SWIPE_THRESHOLD_PX = 48
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 
@@ -9,9 +9,17 @@ type HeroSlide = {
   fallbacks: string[]
   alt: string
   objectPosition: string
+  desktopObjectPosition?: string
 }
 
 const HERO_SLIDES: HeroSlide[] = [
+  {
+    src: '/homepage/40e0b639-d95a-42d5-aa38-f3d42a8e5589.png',
+    fallbacks: ['/homepage/40e0b639-d95a-42d5-aa38-f3d42a8e5589.jpg'],
+    alt: 'SHIS Fashion Exclusive Launch Saree — campaign banner',
+    objectPosition: 'center center',
+    desktopObjectPosition: 'center 62%',
+  },
   {
     src: '/hero/panjabi.jpg',
     fallbacks: ['/hero/panjabi.jpg.jpg'],
@@ -119,7 +127,7 @@ export const Hero: React.FC<HeroProps> = () => {
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
       <div
-        className="homepage-hero-frame relative w-full touch-pan-y overflow-hidden bg-neutral-950"
+        className="homepage-hero-frame relative h-[75vh] min-h-[70vh] w-full touch-pan-y overflow-hidden bg-neutral-950 md:h-[75vh] md:min-h-[75vh] md:w-full"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onFocusCapture={() => setIsPaused(true)}
@@ -133,7 +141,7 @@ export const Hero: React.FC<HeroProps> = () => {
           return (
             <div
               key={slide.src}
-              className={`homepage-hero-slide ${isActive ? 'is-active' : ''}`}
+              className={`homepage-hero-slide transition-all duration-700 ease-in-out ${isActive ? 'is-active' : ''}`}
               aria-hidden={!isActive}
             >
               <img
@@ -142,8 +150,13 @@ export const Hero: React.FC<HeroProps> = () => {
                 width={900}
                 height={1600}
                 sizes="100vw"
-                className="homepage-hero-image"
-                style={{ objectPosition: slide.objectPosition }}
+                className={`homepage-hero-image object-cover object-center ${slide.desktopObjectPosition ? 'homepage-hero-image--saree' : ''}`}
+                style={{
+                  objectPosition: slide.objectPosition,
+                  ...(slide.desktopObjectPosition
+                    ? { ['--hero-desktop-object-position' as string]: slide.desktopObjectPosition }
+                    : {}),
+                }}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 fetchPriority={index === 0 ? 'high' : undefined}
                 decoding={index === 0 ? 'sync' : 'async'}

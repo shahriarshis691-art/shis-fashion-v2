@@ -3188,7 +3188,7 @@ export default function AdminPage({ initialView = 'login' }: AdminPageProps) {
                             value={section.href}
                             onChange={(event) => updateHomepageCategorySection(section.key, { href: event.target.value })}
                             className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none"
-                            placeholder="Section route (example: /women?sub=western-outfits)"
+                            placeholder="Section route (example: /women/womens-baggy)"
                           />
                           <p className="sm:col-span-2 -mt-1 text-[11px] text-[var(--color-muted)]">
                             {SECTION_ROUTE_HINTS[section.key]}
