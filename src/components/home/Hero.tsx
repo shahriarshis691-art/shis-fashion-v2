@@ -47,7 +47,7 @@ export const Hero: React.FC<HeroProps> = () => {
     >
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
 
-      <div className="relative w-full md:flex md:h-[80vh] md:items-center md:justify-center md:overflow-hidden md:bg-[#f6f2ec] lg:h-[88vh]">
+      <div className="relative w-full md:flex md:h-[88vh] md:items-center md:justify-center md:overflow-hidden md:bg-[#f6f2ec] lg:h-[90vh]">
         <img
           src={HERO_IMAGE}
           alt="SHIS Fashion Exclusive Launch Saree — campaign banner"
