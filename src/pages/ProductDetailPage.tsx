@@ -32,6 +32,7 @@ import { getProductSlug } from '../utils/productIdentity'
 import { getCatalogContentId } from '../utils/catalogIdentity'
 import { getProductStockTotal, getVariantStock, type ProductVariantStock } from '../utils/variantStock'
 import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
+import { mensShirtCollectionProducts, getMensShirtProductBySlug } from '../data/mensShirtCollection'
 import { mensBaggyDenimCollectionProducts, getMensBaggyDenimProductBySlug } from '../data/mensBaggyDenimCollection'
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
@@ -131,7 +132,7 @@ export default function ProductDetailPage() {
   const { addToRecentlyViewed } = useRecentlyViewed()
 
   const [products, setProducts] = useState<ReturnType<typeof fromCatalogProduct>[]>(() =>
-    [...halfShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts, ...kurtisCollectionProducts].map(fromCatalogProduct),
+    [...halfShirtCollectionProducts, ...mensShirtCollectionProducts, ...mensBaggyDenimCollectionProducts, ...womensBaggyDenimCollectionProducts, ...oversizedTeeCollectionProducts, ...westernOutfitsCollectionProducts, ...kurtisCollectionProducts].map(fromCatalogProduct),
   )
   const [ready, setReady] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
@@ -158,6 +159,7 @@ export default function ProductDetailPage() {
       const taken = new Set(live.map((entry) => entry.slug))
       const local = [
         ...halfShirtCollectionProducts,
+        ...mensShirtCollectionProducts,
         ...mensBaggyDenimCollectionProducts,
         ...womensBaggyDenimCollectionProducts,
         ...oversizedTeeCollectionProducts,
@@ -179,6 +181,11 @@ export default function ProductDetailPage() {
     const baggy = getWomensBaggyDenimProductBySlug(decodedSlug)
     if (baggy) {
       return fromCatalogProduct(baggy)
+    }
+
+    const mensShirt = getMensShirtProductBySlug(decodedSlug)
+    if (mensShirt) {
+      return fromCatalogProduct(mensShirt)
     }
 
     const mensPants = getMensBaggyDenimProductBySlug(decodedSlug)

@@ -7,6 +7,10 @@ import { type ShopProduct } from '../data/shopData'
 import { mapAdminProductToShopProduct } from '../utils/productMapper'
 import { mergeHalfShirtCatalog } from '../data/halfShirtCollection'
 import {
+  isMensShirtProduct,
+  mergeMensShirtCatalog,
+} from '../data/mensShirtCollection'
+import {
   MENS_PANTS_FILTER_OPTIONS,
   isMensPantsProduct,
   matchesMensPantsListingFilter,
@@ -395,7 +399,7 @@ function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, i
           <ProductCard
             key={product.id}
             product={product}
-            href={/half-shirt/i.test(product.category) ? `/product/${product.slug}` : undefined}
+            href={/half-shirt/i.test(product.category) || isMensShirtProduct(product) ? `/product/${product.slug}` : undefined}
             priority={index < 4}
             onToggleWishlist={onToggleWishlist}
             isInWishlist={isInWishlist(String(product.id))}
@@ -416,7 +420,9 @@ export default function ShopPage() {
     mergeKurtisCatalog(
       mergeWomensBaggyDenimCatalog(
         mergeMensBaggyDenimCatalog(
-          mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+          mergeMensShirtCatalog(
+            mergeWesternOutfitsCatalog(mergeOversizedTeeCatalog(mergeHalfShirtCatalog([]))),
+          ),
         ),
       ),
     ),
@@ -480,8 +486,10 @@ export default function ShopPage() {
         mergeKurtisCatalog(
           mergeWomensBaggyDenimCatalog(
             mergeMensBaggyDenimCatalog(
-              mergeWesternOutfitsCatalog(
-                mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+              mergeMensShirtCatalog(
+                mergeWesternOutfitsCatalog(
+                  mergeOversizedTeeCatalog(mergeHalfShirtCatalog(nextProducts.map(mapProduct))),
+                ),
               ),
             ),
           ),
@@ -763,7 +771,8 @@ export default function ShopPage() {
           : isWomensBaggyListing
             ? bySegment.filter(isWomensBaggyDenimProduct)
             : bySegment.filter((product) =>
-              matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category),
+              matchesSubcategoryByAlias(effectiveSegment, effectiveSubcategory, product.category)
+              || (effectiveSubcategory === 'shirts' && isMensShirtProduct(product)),
             )
 
   const byWesternGroup = isWesternOutfitsListing
@@ -1452,8 +1461,11 @@ export default function ShopPage() {
             const productsBySubcategory: Record<string, ShopProduct[]> = {}
             for (const product of visibleProducts) {
               const normalizedCategory = resolveCanonicalSubcategorySlug(product.category)
+              const normalizedSubCategory = resolveCanonicalSubcategorySlug(product.subCategory ?? '')
               const matchedSub = segmentSubcategories.find((sub) =>
-                sub.slug === normalizedCategory || sub.aliases.some((alias) => alias.toLowerCase() === normalizedCategory),
+                sub.slug === normalizedCategory
+                || sub.slug === normalizedSubCategory
+                || sub.aliases.some((alias) => alias.toLowerCase() === normalizedCategory || alias.toLowerCase() === normalizedSubCategory),
               )
               const key = matchedSub?.slug ?? (effectiveSubcategory === 'all' ? 'other' : effectiveSubcategory)
               if (!productsBySubcategory[key]) productsBySubcategory[key] = []
