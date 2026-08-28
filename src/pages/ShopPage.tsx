@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Container from '../components/ui/Container'
+import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { type ShopProduct } from '../data/shopData'
@@ -1127,64 +1128,25 @@ export default function ShopPage() {
   return (
     <section className={`bg-white pb-24 ${isListingWithTopHero ? 'lg:pb-20' : 'pt-6 lg:pb-20 lg:pt-10'}`}>
       {isShirtsListing ? (
-        <div
-          className="relative w-full max-w-[100vw] bg-[#dcdcdc]"
-          style={{ backgroundColor: MENS_SHIRTS_HERO_BACKGROUND }}
-        >
-          <img
-            src={MENS_SHIRTS_HERO_IMAGE}
-            alt="Men's Shirts Collection — SHIS Fashion"
-            width={736}
-            height={414}
-            sizes="100vw"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            draggable={false}
-            className="block h-auto w-full max-w-full object-contain object-center"
-            onError={(event) => {
-              const image = event.currentTarget
-              if (image.dataset.fallback === 'done') {
-                return
-              }
-              if (image.dataset.fallback !== 'jpeg') {
-                image.dataset.fallback = 'jpeg'
-                image.src = MENS_SHIRTS_HERO_IMAGE_FALLBACK
-                return
-              }
-              image.dataset.fallback = 'done'
-              image.src = '/og-image.svg'
-            }}
-          />
-        </div>
+        <ResponsiveHeroBanner
+          src={MENS_SHIRTS_HERO_IMAGE}
+          alt="Men's Shirts Collection — SHIS Fashion"
+          width={736}
+          height={414}
+          fallbacks={[MENS_SHIRTS_HERO_IMAGE_FALLBACK]}
+          background={MENS_SHIRTS_HERO_BACKGROUND}
+          ariaLabel="Men's Shirts collection banner"
+        />
       ) : isWomensBaggyListing ? (
-        <div className="listing-hero-frame relative w-full max-w-[100vw] overflow-hidden bg-neutral-100">
-          <img
-            src={WOMENS_BAGGY_HERO_IMAGE}
-            alt="Women's Baggy Jeans — SHIS Fashion"
-            width={1536}
-            height={1024}
-            sizes="100vw"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            draggable={false}
-            className="listing-hero-motion gpu-media"
-            onError={(event) => {
-              const image = event.currentTarget
-              if (image.dataset.fallback === 'done') {
-                return
-              }
-              if (image.dataset.fallback !== 'jpeg') {
-                image.dataset.fallback = 'jpeg'
-                image.src = WOMENS_BAGGY_HERO_IMAGE_FALLBACK
-                return
-              }
-              image.dataset.fallback = 'done'
-              image.src = '/og-image.svg'
-            }}
-          />
-        </div>
+        <ResponsiveHeroBanner
+          src={WOMENS_BAGGY_HERO_IMAGE}
+          alt="Women's Baggy Jeans — SHIS Fashion"
+          width={1536}
+          height={1024}
+          fallbacks={[WOMENS_BAGGY_HERO_IMAGE_FALLBACK]}
+          background="neutral"
+          ariaLabel="Women's Baggy Jeans collection banner"
+        />
       ) : null}
 
       <Container className={isShirtsListing ? 'px-4 py-4' : isListingWithTopHero ? 'pt-6 lg:pt-10' : undefined}>

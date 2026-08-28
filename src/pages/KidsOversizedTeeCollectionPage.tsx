@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AarongProductCard from '../components/shop/AarongProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
+import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
@@ -232,23 +233,16 @@ export default function KidsOversizedTeeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      <div className="relative flex w-full items-end justify-center overflow-hidden bg-neutral-950 aspect-[4/5] sm:aspect-auto sm:h-[75vh] sm:items-center lg:h-[80vh]">
-        <img
-          src="/hero/kids/kids-hero2.jpg"
-          alt="Kids Collection"
-          width={1920}
-          height={2400}
-          sizes="100vw"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
-          onError={(event) => {
-            event.currentTarget.src = '/og-image.svg'
-          }}
-        />
-
-        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
+      <ResponsiveHeroBanner
+        src="/hero/kids/kids-hero2.jpg"
+        alt="Kids Collection"
+        width={1920}
+        height={2400}
+        background="dark"
+        objectPosition="center top"
+        overlayClassName="absolute inset-0 z-10 flex items-end justify-center sm:items-center"
+      >
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
           <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/90 uppercase sm:text-xs">
             Exclusive Launch
           </span>
@@ -272,7 +266,7 @@ export default function KidsOversizedTeeCollectionPage() {
             Shop Now
           </a>
         </div>
-      </div>
+      </ResponsiveHeroBanner>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <nav aria-label="Breadcrumb" className="pt-6 text-[12px] font-normal tracking-wide text-neutral-400">

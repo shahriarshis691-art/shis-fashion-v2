@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
+import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
 import { mergeSareeCatalog, type SareeProduct } from '../data/sareeCollection'
 import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
@@ -103,32 +104,17 @@ export default function SareeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      {/* Portrait campaign poster — framed per breakpoint; no CTA overlay */}
-      <div className="saree-listing-hero md:aspect-auto md:h-[70vh] md:max-h-[600px] md:min-h-0 md:w-full md:max-w-full">
-        <picture className="md:absolute md:inset-0 md:block md:h-full md:w-full">
-          <source srcSet={SAREE_LISTING_HERO.webp} type="image/webp" sizes="100vw" />
-          <img
-            src={SAREE_LISTING_HERO.jpg}
-            alt={SAREE_LISTING_HERO.alt}
-            width={SAREE_LISTING_HERO.width}
-            height={SAREE_LISTING_HERO.height}
-            sizes="100vw"
-            className="saree-listing-hero__image md:h-full md:w-full md:max-w-none md:object-cover md:object-[center_25%]"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            onError={(event) => {
-              const image = event.currentTarget
-              const src = image.src
-              if (src.includes('hero-soft-cotton-saree.jpg') && !src.endsWith('.webp')) {
-                image.src = SAREE_LISTING_HERO.webp
-                return
-              }
-              image.src = '/og-image.svg'
-            }}
-          />
-        </picture>
-      </div>
+      <ResponsiveHeroBanner
+        src={SAREE_LISTING_HERO.jpg}
+        alt={SAREE_LISTING_HERO.alt}
+        width={SAREE_LISTING_HERO.width}
+        height={SAREE_LISTING_HERO.height}
+        sources={[{ srcSet: SAREE_LISTING_HERO.webp, type: 'image/webp' }]}
+        fallbacks={[SAREE_LISTING_HERO.webp]}
+        background="dark"
+        ariaLabel="Saree collection banner"
+        objectPosition="center top"
+      />
 
       <div className="mx-auto w-full max-w-7xl px-3 pt-6 md:px-6 lg:pt-10">
         <nav aria-label="Breadcrumb" className="text-[12px] font-normal tracking-wide text-neutral-400">
