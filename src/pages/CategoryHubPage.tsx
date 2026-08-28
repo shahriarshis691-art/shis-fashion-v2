@@ -53,36 +53,40 @@ export default function CategoryHubPage() {
   }
 
   const allProductsHref = getSegmentAllProductsHref(segment)
+  const showHubHero = segment === 'kids'
+  const collectionHeading = `Explore ${heading.title.toLowerCase()} collections`
 
   return (
     <section className="overflow-x-hidden bg-white pb-16 sm:pb-20">
-      <div className="relative flex min-h-[36vh] items-end overflow-hidden bg-neutral-950 sm:min-h-[42vh]">
-        <img
-          src={SEGMENT_HUB_COVERS[segment]}
-          alt=""
-          aria-hidden
-          width={1600}
-          height={900}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-[center_top]"
-        />
-        <Container className="relative z-10 pb-8 pt-16 sm:pb-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]">Collections</p>
-          <h1
-            className="mt-2 text-4xl font-semibold uppercase tracking-[0.18em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl"
-            style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
-          >
-            {heading.title}
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] sm:text-base">
-            {heading.description}
-          </p>
-        </Container>
-      </div>
+      {showHubHero ? (
+        <div className="relative flex min-h-[36vh] items-end overflow-hidden bg-neutral-950 sm:min-h-[42vh]">
+          <img
+            src={SEGMENT_HUB_COVERS[segment]}
+            alt=""
+            aria-hidden
+            width={1600}
+            height={900}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover object-[center_top]"
+          />
+          <Container className="relative z-10 pb-8 pt-16 sm:pb-10">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]">Collections</p>
+            <h1
+              className="mt-2 text-4xl font-semibold uppercase tracking-[0.18em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-5xl"
+              style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
+            >
+              {heading.title}
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] sm:text-base">
+              {heading.description}
+            </p>
+          </Container>
+        </div>
+      ) : null}
 
-      <Container className="pt-6 sm:pt-10">
+      <Container className={showHubHero ? 'pt-6 sm:pt-10' : 'pt-6 lg:pt-10'}>
         <nav
           className="mb-6 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-black/55"
           aria-label="Breadcrumb"
@@ -95,7 +99,11 @@ export default function CategoryHubPage() {
         <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-caption uppercase tracking-[0.14em] text-black/55">Shop by category</p>
-            <h2 className="mt-1 text-h2 text-black">Explore {heading.title.toLowerCase()} collections</h2>
+            {showHubHero ? (
+              <h2 className="mt-1 text-h2 text-black">{collectionHeading}</h2>
+            ) : (
+              <h1 className="mt-1 text-h2 text-black">{collectionHeading}</h1>
+            )}
           </div>
           <Link
             to={allProductsHref}

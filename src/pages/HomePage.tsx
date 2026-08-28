@@ -20,7 +20,7 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: categoryStripCovers.saree, imagePosition: 'center top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
+  { key: 'kids', label: 'KID', href: '/collections/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
@@ -148,7 +148,7 @@ const defaultHomepage: HomepageContent = {
     kids: {
       key: 'kids',
       label: 'KID',
-      href: '/kids',
+      href: '/collections/kids',
       enabled: true,
       order: 30,
       coverImage: SEGMENT_HUB_COVERS.kids,
@@ -270,6 +270,7 @@ export default function HomePage() {
         const isWomensBaggyCard = fallback.key === 'western'
         const isMenCard = fallback.key === 'men'
         const isPantsCard = fallback.key === 'denim'
+        const isKidsCard = fallback.key === 'kids'
         const resolvedCover = isHalfShirtsCard
           ? categoryStripCovers['half-shirts']
           : isOversizedTeeCard
@@ -294,7 +295,9 @@ export default function HomePage() {
                 ? "WOMEN'S BAGGY"
                 : isPantsCard
                   ? 'Pants'
-                  : liveLooksLikeDenim ? fallback.label : liveLabel,
+                  : isKidsCard
+                    ? 'KID'
+                    : liveLooksLikeDenim ? fallback.label : liveLabel,
           href: isHalfShirtsCard
             ? '/men/half-shirts'
             : isOversizedTeeCard
@@ -303,7 +306,9 @@ export default function HomePage() {
                 ? '/women/womens-baggy'
                 : isPantsCard
                   ? '/men/pants'
-                  : liveLooksLikeDenim ? fallback.href : liveHref,
+                  : isKidsCard
+                    ? '/collections/kids'
+                    : liveLooksLikeDenim ? fallback.href : liveHref,
           image: normalizeCatalogImageUrl(resolvedCover, categoryStripCardImage.width, categoryStripCardImage.height),
           imagePosition: fallback.imagePosition,
         }
@@ -324,7 +329,7 @@ export default function HomePage() {
       return {
         key,
         name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : strip?.label || (key === 'men' ? 'Men' : 'KID'),
-        href: strip?.href || `/${key}`,
+        href: key === 'kids' ? '/collections/kids' : (strip?.href || `/${key}`),
         image: strip?.image || fallbackImage,
         imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : 'center top'),
       }
