@@ -168,26 +168,10 @@ main {
 .product-grid {
   content-visibility: auto;
   contain-intrinsic-size: 0 600px;
-  column-gap: 0.625rem;
-  row-gap: 1.25rem;
 }
 
 .product-grid > * {
   min-width: 0;
-}
-
-@media (min-width: 768px) {
-  .product-grid {
-    column-gap: 1rem;
-    row-gap: 1.75rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .product-grid {
-    column-gap: 1.25rem;
-    row-gap: 2rem;
-  }
 }
 
 /* Form Elements Premium */

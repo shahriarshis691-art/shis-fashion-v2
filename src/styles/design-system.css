@@ -273,22 +273,36 @@ button,
   }
 }
 
-/* Mobile micro-pass: tighter image gaps for <=420px screens */
-@media (max-width: 420px) {
+/* Mobile micro-pass: luxury 2×2 listing card typography */
+@media (max-width: 767px) {
+  .product-card .studio-media-frame > img.product-card-media {
+    object-position: center center;
+  }
+
   .product-card .product-card-meta {
-    padding-top: 0.25rem;
+    margin-top: 0.75rem;
+    text-align: center;
   }
 
-  .product-card .product-card-meta h3 {
-    margin-top: 0;
+  .product-card .product-card-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #171717;
   }
 
-  .product-card .product-card-meta p {
-    margin-top: 0.125rem;
+  .product-card .product-card-price {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-align: center;
+    color: #525252;
   }
 
-  .tight-mobile-grid {
-    gap: 0.5rem 0.25rem;
+  .product-card .product-card-swatches {
+    justify-content: center;
   }
 }
 
