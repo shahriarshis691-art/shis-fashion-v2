@@ -84,6 +84,7 @@ export default function ResponsiveHeroBanner({
 
   const imageClassName = [
     'gpu-media block h-full w-full max-w-full object-contain',
+    'md:h-auto md:w-full md:max-w-full',
   ].filter(Boolean).join(' ')
 
   const imageStyle: React.CSSProperties = {
@@ -93,8 +94,6 @@ export default function ResponsiveHeroBanner({
   const frameClassName = [
     'relative w-full overflow-hidden',
     'max-md:[aspect-ratio:var(--hero-aspect)]',
-    'md:flex md:h-[80vh] md:items-center md:justify-center md:[aspect-ratio:auto]',
-    'lg:h-[85vh]',
   ].join(' ')
 
   const frameStyle = {
@@ -115,7 +114,6 @@ export default function ResponsiveHeroBanner({
       onError: handleError,
       className: [
         imageClassName,
-        'md:h-full md:w-auto md:max-h-full',
         className,
       ].filter(Boolean).join(' '),
       style: imageStyle,
@@ -123,7 +121,7 @@ export default function ResponsiveHeroBanner({
 
     if (sources?.length) {
       return (
-        <picture className="flex h-full w-full items-center justify-center">
+        <picture className="flex h-full w-full items-center justify-center md:block md:h-auto md:w-full">
           {sources.map((source) => (
             <source key={source.type} srcSet={source.srcSet} type={source.type} sizes={sizes} />
           ))}
