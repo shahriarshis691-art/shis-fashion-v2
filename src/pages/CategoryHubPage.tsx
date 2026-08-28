@@ -122,8 +122,7 @@ export default function CategoryHubPage() {
               image={getSubcategoryCover(segment, subcategory.slug)}
               priority={index < 2}
               variant="portrait"
-              imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' || subcategory.slug === 'polos' || subcategory.slug === 'shirts' ? 'center center' : 'center top'}
-              imageFit={subcategory.slug === 'shirts' ? 'contain' : 'cover'}
+              imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' || subcategory.slug === 'polos' ? 'center center' : 'center top'}
               showOverlay={subcategory.slug === 'womens-baggy'}
               plainFrame={subcategory.slug === 'panjabi'}
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
