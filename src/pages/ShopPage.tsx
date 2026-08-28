@@ -83,7 +83,6 @@ const MEN_ONLY_CATEGORY_SLUGS = new Set([
   'panjabi',
   't-shirts',
   'pants',
-  'jackets',
 ])
 
 const MEN_EXCLUSION_KEYWORDS = [

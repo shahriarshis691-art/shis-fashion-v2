@@ -70,7 +70,6 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
     ],
     path: '/men/pants',
   },
-  { slug: 'jackets', label: 'Jackets', aliases: ['jackets'] },
 ]
 
 const WOMEN_SUBCATEGORIES: SubcategoryConfig[] = [

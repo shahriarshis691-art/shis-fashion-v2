@@ -64,7 +64,6 @@ const KNOWN_LISTING_SLUGS = new Set([
   't-shirts',
   'denim',
   'pants',
-  'jackets',
   'kurti',
   'dresses',
   'women-dresses',

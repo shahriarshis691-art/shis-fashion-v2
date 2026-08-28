@@ -17,7 +17,6 @@ const MEN_COVERS: Record<string, string> = {
   'oversized-tee': categoryStripCovers['oversized-tee'],
   denim: '/collections/mens-baggy/mens-baggy1.jpg',
   pants: '/collections/featured-denim-collection.jpg',
-  jackets: categoryStripCovers.men,
 }
 
 const KIDS_COVERS: Record<string, string> = {
