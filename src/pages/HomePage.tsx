@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
+import HomeProductGrid from '../components/home/HomeProductGrid'
+import EditorialBanner from '../components/home/EditorialBanner'
 import { homeCategoryItems } from '../data/homeCategories'
 import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
 import { categoryStripCover, categoryStripCovers } from '../data/featuredCollectionCovers'
@@ -9,11 +11,16 @@ import { incidentAlerts } from '../services/incidentAlerts'
 import {
   isLiveHomepageBackend,
   subscribeToHomepageContent,
+  subscribeToProducts,
+  type AdminProduct,
   type HomepageCategorySection,
   type HomepageCategorySections,
   type HomepageContent,
 } from '../firebase/adminService'
 import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../utils/media'
+import { mapAdminProductToShopProduct } from '../utils/productMapper'
+import { resolveCanonicalSubcategorySlug } from '../data/categoryTaxonomy'
+import type { ShopProduct } from '../data/shopData'
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: categoryStripCovers.saree, imagePosition: 'center top' },
@@ -224,6 +231,7 @@ function hasValidSectionHref(section: HomepageCategorySection) {
 
 export default function HomePage() {
   const [homepageContent, setHomepageContent] = useState<HomepageContent>(defaultHomepage)
+  const [catalogProducts, setCatalogProducts] = useState<ShopProduct[]>([])
   const lastSectionIntegritySignalRef = useRef('')
 
   useEffect(() => {
@@ -238,6 +246,18 @@ export default function HomePage() {
         sareeCoverImage: content.categorySections?.saree?.coverImage || '(empty)',
       })
       setHomepageContent(content)
+    })
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts((nextProducts: AdminProduct[]) => {
+      setCatalogProducts(nextProducts.map((product) => {
+        const canonicalCategory = resolveCanonicalSubcategorySlug(product.category)
+        return mapAdminProductToShopProduct(product, {
+          category: canonicalCategory && canonicalCategory !== 'all' ? canonicalCategory : product.category.trim().toLowerCase(),
+        })
+      }))
     })
     return unsubscribe
   }, [])
@@ -307,24 +327,26 @@ export default function HomePage() {
     return uniqueVisibleCategoryStrips(strips)
   }, [homepageContent.categorySections])
 
-  const hubCategoryItems = useMemo(() => {
-    const byKey = new Map(categoryStrips.map((item) => [item.key, item]))
-    return (['men', 'women', 'kids'] as const).map((key) => {
-      const strip = byKey.get(key)
-      const fallbackImage = key === 'kids'
-        ? SEGMENT_HUB_COVERS.kids
-        : key === 'men'
-          ? categoryStripCovers.men
-          : categoryStripCovers.saree
-      return {
-        key,
-        name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : strip?.label || (key === 'men' ? 'Men' : 'KID'),
-        href: strip?.href || `/${key}`,
-        image: strip?.image || fallbackImage,
-        imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : 'center top'),
-      }
-    })
-  }, [categoryStrips])
+  const collectionGridItems = useMemo(
+    () => categoryStrips.slice(0, 8).map((item) => ({
+      key: item.key,
+      name: item.label,
+      href: item.href,
+      image: item.image,
+      imagePosition: item.imagePosition,
+    })),
+    [categoryStrips],
+  )
+
+  const newArrivalProducts = useMemo(() => {
+    const marked = catalogProducts.filter((product) => product.newArrival)
+    return (marked.length ? marked : catalogProducts).slice(0, 8)
+  }, [catalogProducts])
+
+  const featuredProducts = useMemo(() => {
+    const marked = catalogProducts.filter((product) => product.featured)
+    return (marked.length ? marked : catalogProducts).slice(0, 8)
+  }, [catalogProducts])
 
   useEffect(() => {
     const sectionEntries = Object.values(homepageContent.categorySections ?? {})
@@ -375,7 +397,14 @@ export default function HomePage() {
 
   const heroEnabled = homepageContent.sections.find((section) => section.key === 'hero')?.enabled !== false
   const shopByCategoryEnabled = homepageContent.sections.find((section) => section.key === 'featuredCollection')?.enabled !== false
+  const newArrivalsEnabled = homepageContent.sections.find((section) => section.key === 'newArrivals')?.enabled !== false
+  const bestSellersEnabled = homepageContent.sections.find((section) => section.key === 'bestSellers')?.enabled !== false
   const brandPromiseEnabled = homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false
+  const editorialImage = normalizeCatalogImageUrl(
+    homepageContent.bannerImage || categoryStripCovers.saree || SEGMENT_HUB_COVERS.kids,
+    1400,
+    1600,
+  )
 
   return (
     <div className="relative isolate overflow-x-hidden bg-white">
@@ -383,33 +412,42 @@ export default function HomePage() {
 
       {shopByCategoryEnabled ? (
         <ShopByCategorySection
-          items={hubCategoryItems}
+          items={collectionGridItems}
           eyebrow={homepageContent.featuredCollectionEyebrow ?? 'Featured collections'}
-          title={homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
+          title={homepageContent.featuredCollectionTitle?.trim() || 'Shop by category'}
+        />
+      ) : null}
+
+      {newArrivalsEnabled ? (
+        <HomeProductGrid
+          products={newArrivalProducts}
+          eyebrow={homepageContent.newArrivalsEyebrow ?? 'Latest edit'}
+          title={homepageContent.newArrivalsTitle?.trim() || 'New arrivals'}
+          href="/shop/new-arrivals"
         />
       ) : null}
 
       {brandPromiseEnabled ? (
-        <section
-          id="brand-promise"
-          className="bg-white px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
-          aria-labelledby="brand-promise-title"
-        >
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
-            {homepageContent.brandPromiseEyebrow ?? 'BRAND PROMISE'}
-          </p>
-          <h2
-            id="brand-promise-title"
-            className="mb-3 font-serif text-2xl leading-tight text-gray-900 sm:text-3xl"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            {homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
-          </h2>
-          <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
-            {homepageContent.brandPromiseDescription
-              ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}
-          </p>
-        </section>
+        <EditorialBanner
+          image={editorialImage}
+          eyebrow={homepageContent.brandPromiseEyebrow ?? 'Brand story'}
+          title={homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
+          description={
+            homepageContent.brandPromiseDescription
+            ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'
+          }
+          cta={homepageContent.heroCta || 'Shop now'}
+          href={homepageContent.heroPrimaryLink || '/shop'}
+        />
+      ) : null}
+
+      {bestSellersEnabled ? (
+        <HomeProductGrid
+          products={featuredProducts}
+          eyebrow={homepageContent.bestSellerEyebrow ?? 'Best sellers'}
+          title={homepageContent.featuredTitle?.trim() || 'Most-loved pieces'}
+          href="/shop"
+        />
       ) : null}
     </div>
   )

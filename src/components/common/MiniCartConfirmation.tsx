@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
+import { useCartDrawer } from '../../context/CartDrawerContext'
 import { subscribeToHomepageContent } from '../../firebase/adminService'
 import { formatBDT } from '../../utils/currency'
 import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../../utils/bangladeshAddress'
@@ -60,6 +61,7 @@ function triggerHapticAndTone() {
 export default function MiniCartConfirmation() {
   const { pathname } = useLocation()
   const { recentAddition, dismissRecentAddition } = useCart()
+  const { openCart } = useCartDrawer()
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(DEFAULT_FREE_DELIVERY_THRESHOLD)
   const liftForCta = hasStickyMobileCta(pathname)
 
@@ -177,13 +179,16 @@ export default function MiniCartConfirmation() {
             </div>
 
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Link
-                to="/cart"
-                onClick={dismissRecentAddition}
+              <button
+                type="button"
+                onClick={() => {
+                  dismissRecentAddition()
+                  openCart()
+                }}
                 className="btn-glass-cta w-full"
               >
                 View cart
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={dismissRecentAddition}

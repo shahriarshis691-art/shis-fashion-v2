@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const AUTOPLAY_MS = 5500
 const SWIPE_THRESHOLD_PX = 48
@@ -30,13 +31,14 @@ export interface HeroContentInput {
   heroTitle?: string
   heroCta?: string
   heroPrimaryLink?: string
+  heroSecondaryCta?: string
+  heroSecondaryLink?: string
   heroImage?: string
   heroImageTitle?: string
   heroImageDescription?: string
 }
 
 interface HeroProps {
-  /** Reserved for layout compatibility; homepage hero uses a fixed campaign carousel. */
   content?: HeroContentInput
 }
 
@@ -57,7 +59,7 @@ function handleSlideImageError(event: React.SyntheticEvent<HTMLImageElement>, fa
   image.src = DEFAULT_OG_IMAGE
 }
 
-export const Hero: React.FC<HeroProps> = () => {
+export const Hero: React.FC<HeroProps> = ({ content }) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const touchStartX = useRef<number | null>(null)
@@ -153,6 +155,34 @@ export const Hero: React.FC<HeroProps> = () => {
             </div>
           )
         })}
+
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center px-5 pb-16 text-center md:pb-20">
+          {content?.heroTitle ? (
+            <p
+              className="max-w-2xl text-3xl leading-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] md:text-5xl"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {content.heroTitle}
+            </p>
+          ) : null}
+          <div className="pointer-events-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to={content?.heroPrimaryLink || '/shop'}
+              className="inline-flex min-h-11 items-center border border-white bg-white px-6 text-[11px] font-semibold tracking-[0.18em] text-[#111111] uppercase"
+            >
+              {content?.heroCta || 'Shop now'}
+            </Link>
+            {content?.heroSecondaryCta ? (
+              <Link
+                to={content.heroSecondaryLink || '/shop/new-arrivals'}
+                className="inline-flex min-h-11 items-center border border-white/80 bg-transparent px-6 text-[11px] font-semibold tracking-[0.18em] text-white uppercase"
+              >
+                {content.heroSecondaryCta}
+              </Link>
+            ) : null}
+          </div>
+        </div>
 
         {HERO_SLIDES.length > 1 ? (
           <div

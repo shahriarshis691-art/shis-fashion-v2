@@ -8,6 +8,7 @@ import { createOrder, isOrderBackendReady, subscribeToHomepageContent } from '..
 import { formatBDT, parseBDT } from '../utils/currency'
 import { bangladeshDivisions, DEFAULT_FREE_DELIVERY_THRESHOLD, formatBangladeshPhoneInput, getDeliveryCharge, getDistrictsForDivision, getUpazilasForDistrict, normalizeBangladeshPhone, type BangladeshDivision } from '../utils/bangladeshAddress'
 import { STORE_POLICY, SUPPORT_WHATSAPP_HREF } from '../data/storePolicy'
+import { buildWhatsAppOrderHref } from '../utils/whatsappOrder'
 import { PAYMENT_METHOD_COD } from '../utils/orderComms'
 import { quoteCouponDiscount } from '../utils/coupon'
 import {
@@ -118,6 +119,7 @@ export default function CheckoutPage() {
   const backendReady = isOrderBackendReady()
   const summaryLabel = formatBDT(effectiveGrandTotal)
   const supportWhatsAppHref = SUPPORT_WHATSAPP_HREF
+  const whatsappOrderHref = buildWhatsAppOrderHref(items, effectiveGrandTotal)
   const normalizedPhone = useMemo(() => normalizeBangladeshPhone(form.phone), [form.phone])
   const isPhoneValid = normalizedPhone !== null
   const phoneHasValue = form.phone.trim().length > 0
@@ -391,6 +393,13 @@ export default function CheckoutPage() {
     <section className="bg-white px-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-4 text-[var(--color-text)] sm:px-6 lg:px-8 lg:pb-24 lg:pt-10">
       <Container>
         <div className="mx-auto max-w-[760px]">
+          <header className="mb-8 border-b border-neutral-200 pb-6">
+            <p className="text-[10px] font-medium tracking-[0.22em] text-[var(--color-gold)] uppercase">Checkout</p>
+            <h1 className="mt-2 text-3xl text-[#111111] md:text-4xl" style={{ fontFamily: 'var(--font-display)' }}>
+              Complete your order
+            </h1>
+            <p className="mt-2 text-sm text-neutral-500">One page. Cash on delivery. WhatsApp confirmation if you prefer.</p>
+          </header>
           <form id="checkout-form" className="space-y-8" onSubmit={handleSubmit}>
             <div className="hidden" aria-hidden>
               <label htmlFor="checkout-website">Website</label>
@@ -672,10 +681,18 @@ export default function CheckoutPage() {
               ) : null}
             </div>
 
-            <div className="sticky bottom-3 z-[55] bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
-              <Button type="submit" variant="cta" className="w-full" disabled={!canSubmit}>
+            <div className="sticky bottom-3 z-[55] space-y-2 bg-white/95 pb-1 pt-1 backdrop-blur-sm sm:static sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+              <Button type="submit" variant="primary" className="w-full" disabled={!canSubmit}>
                 {isSubmitting ? 'Placing order...' : 'Place Order'}
               </Button>
+              <a
+                href={whatsappOrderHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-neutral-200 text-[12px] font-semibold tracking-[0.16em] text-[#111111] uppercase"
+              >
+                Order via WhatsApp
+              </a>
             </div>
 
             {submitError ? <p className="text-sm text-red-600" role="alert">{submitError}</p> : null}

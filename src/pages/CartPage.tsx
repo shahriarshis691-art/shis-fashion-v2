@@ -10,6 +10,7 @@ import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../utils/media'
 import { subscribeToHomepageContent } from '../firebase/adminService'
 import { DEFAULT_FREE_DELIVERY_THRESHOLD, getAmountToFreeDelivery } from '../utils/bangladeshAddress'
 import CouponApplyField from '../components/shop/CouponApplyField'
+import { buildWhatsAppOrderHref } from '../utils/whatsappOrder'
 
 function getWhatsAppHref() {
   return 'https://wa.me/8801887848304'
@@ -52,6 +53,10 @@ export default function CartPage() {
   const totalLabel = formatBDT(grandTotal)
   const supportWhatsAppHref = getWhatsAppHref()
   const remainingForFreeDelivery = getAmountToFreeDelivery(subtotal, freeDeliveryThreshold)
+  const progressPercent = freeDeliveryThreshold > 0
+    ? Math.max(0, Math.min(100, Math.round((subtotal / freeDeliveryThreshold) * 100)))
+    : 100
+  const whatsappOrderHref = buildWhatsAppOrderHref(items, grandTotal)
 
   useEffect(() => {
     const unsubscribe = subscribeToHomepageContent((content) => {
@@ -139,6 +144,16 @@ export default function CartPage() {
               COD checkout · Phone confirm before dispatch ·{' '}
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-neutral-700 hover:text-neutral-900">WhatsApp support</a>
             </p>
+            <div className="mt-4 border border-neutral-200 bg-[var(--color-sand)] px-4 py-3">
+              <p className="text-xs text-neutral-600">
+                {remainingForFreeDelivery > 0
+                  ? `Spend ${formatBDT(remainingForFreeDelivery)} more for free delivery.`
+                  : 'You unlocked free delivery.'}
+              </p>
+              <div className="mt-2 h-1 w-full overflow-hidden bg-white">
+                <div className="h-full gold-progress transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
 
             {items.map((item) => (
               <div
@@ -228,7 +243,15 @@ export default function CartPage() {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button variant="cta" onClick={handleBeginCheckout} className="w-full">Checkout</Button>
+              <Button variant="primary" onClick={handleBeginCheckout} className="w-full">Checkout</Button>
+              <a
+                href={whatsappOrderHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-neutral-200 text-[12px] font-semibold tracking-[0.16em] text-[#111111] uppercase"
+              >
+                Order via WhatsApp
+              </a>
               <Button to="/shop" variant="secondary" className="w-full justify-center">Keep browsing</Button>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3 text-xs uppercase tracking-[0.14em] text-[var(--color-muted)]">
@@ -244,7 +267,7 @@ export default function CartPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Bag total</p>
               <p className="mt-1 text-[1rem] font-semibold text-[var(--color-text)]">{totalLabel}</p>
             </div>
-            <Button variant="cta" onClick={handleBeginCheckout} className="min-w-[8.25rem] px-4">
+            <Button variant="primary" onClick={handleBeginCheckout} className="min-w-[8.25rem] px-4">
               Secure checkout
             </Button>
           </div>

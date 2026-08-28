@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
+import CartDrawer from '../components/layout/CartDrawer'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
@@ -254,6 +255,7 @@ export default function MainLayout() {
       <SmoothScroll />
       <ScrollToTop />
       <Navbar />
+      <CartDrawer />
       {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (
         <Suspense fallback={null}>
           <AbandonedCartBanner isWelcomePopupOpen={isPopupOpen} />

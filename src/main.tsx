@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { ThemeProvider } from './context/ThemeContext'
 import { CartProvider } from './context/CartContext'
+import { CartDrawerProvider } from './context/CartDrawerContext'
 import { WishlistProvider } from './context/WishlistContext'
 import { RecentlyViewedProvider } from './context/RecentlyViewedContext'
 import { CustomerRecoveryProvider } from './context/CustomerRecoveryContext'
@@ -50,11 +51,13 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <CustomerRecoveryProvider>
         <CartProvider>
+          <CartDrawerProvider>
           <WishlistProvider>
             <RecentlyViewedProvider>
               <RouterProvider router={router} />
             </RecentlyViewedProvider>
           </WishlistProvider>
+          </CartDrawerProvider>
         </CartProvider>
       </CustomerRecoveryProvider>
     </ThemeProvider>

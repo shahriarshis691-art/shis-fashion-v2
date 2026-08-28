@@ -1,8 +1,12 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState, type MouseEvent } from 'react'
 import PrefetchLink from '../common/PrefetchLink'
+import { useCart } from '../../context/CartContext'
+import { useCartDrawer } from '../../context/CartDrawerContext'
+import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
 import { catalogImageAttrs, CATALOG_IMAGE_PLACEHOLDER } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
+import { getVariantStock } from '../../utils/variantStock'
 
 export interface AarongProductCardProduct {
   id: string | number
@@ -14,6 +18,14 @@ export interface AarongProductCardProduct {
   comparePrice?: string
   /** Distinct design colors for listing swatches (kurti design groups). */
   colors?: string[]
+  galleryImages?: string[]
+  sizes?: string[]
+  description?: string
+  stock?: number
+  variants?: ShopProduct['variants']
+  brand?: string
+  featured?: boolean
+  newArrival?: boolean
 }
 
 export interface AarongProductCardProps {
@@ -73,9 +85,29 @@ function swatchBackground(color: string): string {
   return '#d4d4d4'
 }
 
+function toShopProduct(product: AarongProductCardProduct): ShopProduct {
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    comparePrice: product.comparePrice,
+    category: product.category,
+    brand: product.brand,
+    image: product.image,
+    description: product.description ?? '',
+    galleryImages: product.galleryImages,
+    sizes: product.sizes,
+    colors: product.colors,
+    variants: product.variants,
+    stock: product.stock,
+    featured: product.featured,
+    newArrival: product.newArrival,
+  }
+}
+
 /**
- * Universal Aarong-style listing card — single source of truth for all category grids.
- * Full-bleed 3/4 studio frame, outline wishlist, bold title + BDT price.
+ * Universal listing card — 3/4 studio frame, hover image, quick add, bold price.
  */
 const AarongProductCard = memo(function AarongProductCard({
   product,
@@ -86,17 +118,54 @@ const AarongProductCard = memo(function AarongProductCard({
   isInWishlist = false,
   onProductClick,
 }: AarongProductCardProps) {
+  const { addToCart } = useCart()
+  const { openCart } = useCartDrawer()
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [selectedSize, setSelectedSize] = useState('')
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
   const cardSizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
   const image = useMemo(
     () => catalogImageAttrs(product.image, 640, 853, cardSizes, [320, 480, 640]),
     [product.image],
   )
+  const hoverImageUrl = useMemo(() => {
+    const next = (product.galleryImages ?? []).find((url) => url && url !== product.image)
+    return next || ''
+  }, [product.galleryImages, product.image])
+  const hoverImage = useMemo(
+    () => (hoverImageUrl ? catalogImageAttrs(hoverImageUrl, 640, 853, cardSizes, [320, 480, 640]) : null),
+    [hoverImageUrl],
+  )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
   const colorSwatches = useMemo(() => {
     const colors = (product.colors ?? []).map((color) => color.trim()).filter(Boolean)
     return colors.slice(0, 5)
   }, [product.colors])
+  const sizes = useMemo(() => (product.sizes ?? []).map((size) => size.trim()).filter(Boolean), [product.sizes])
+  const defaultColor = product.colors?.[0]?.trim() || 'Default'
+
+  const handleQuickAdd = (event: MouseEvent, sizeOverride?: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const size = sizeOverride || selectedSize || sizes[0] || 'M'
+    const color = defaultColor
+    if (getVariantStock(product, size, color) <= 0 && (product.stock ?? 1) <= 0) {
+      return
+    }
+    addToCart(toShopProduct(product), { size, color, quantity: 1 })
+    setQuickAddOpen(false)
+    openCart()
+  }
+
+  const handleToggleQuickAdd = (event: MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (sizes.length <= 1) {
+      handleQuickAdd(event, sizes[0] || 'M')
+      return
+    }
+    setQuickAddOpen((value) => !value)
+  }
 
   return (
     <article className="product-card luxury-tap group relative">
@@ -124,26 +193,66 @@ const AarongProductCard = memo(function AarongProductCard({
               event.currentTarget.src = CATALOG_IMAGE_PLACEHOLDER
             }}
           />
+          {hoverImage ? (
+            <img
+              src={hoverImage.src}
+              srcSet={hoverImage.srcSet}
+              sizes={hoverImage.sizes}
+              alt=""
+              width={640}
+              height={853}
+              loading="lazy"
+              decoding="async"
+              className="product-card-media-hover"
+              aria-hidden
+            />
+          ) : null}
           {luxuryBadge ? (
             <span className="product-card-badge" aria-label={luxuryBadge}>
               {luxuryBadge}
             </span>
           ) : null}
-          {/* Desktop-only subtle VIEW — disabled on mobile so the card itself opens PDP */}
-          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-500 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
-            <span className="btn-glass-cta w-full min-h-10 px-3 py-2 text-[10px] tracking-[0.16em] sm:text-[11px]">
-              View
-            </span>
+
+          <div className={`product-card-quick-add ${quickAddOpen ? 'is-open' : ''}`}>
+            {sizes.length > 1 && quickAddOpen ? (
+              <div className="flex flex-wrap gap-1" role="group" aria-label="Select size">
+                {sizes.slice(0, 6).map((size) => {
+                  const inStock = getVariantStock(product, size, defaultColor) > 0 || (product.stock ?? 1) > 0
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      disabled={!inStock}
+                      onClick={(event) => {
+                        setSelectedSize(size)
+                        handleQuickAdd(event, size)
+                      }}
+                      className={`product-card-size ${selectedSize === size ? 'is-active' : ''}`}
+                    >
+                      {size}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleToggleQuickAdd}
+                className="w-full min-h-9 bg-[#111111] text-[10px] font-semibold tracking-[0.16em] text-white uppercase"
+              >
+                Quick add
+              </button>
+            )}
           </div>
         </div>
 
         <div className="product-card-meta">
           <h3 className="product-card-title">{product.name}</h3>
           <p className="product-card-price">
+            <span>{formatBDT(product.price)}</span>
             {product.comparePrice ? (
               <span className="is-compare">{formatBDT(product.comparePrice)}</span>
             ) : null}
-            <span>{formatBDT(product.price)}</span>
           </p>
           {colorSwatches.length > 1 ? (
             <ul className="product-card-swatches" aria-label={`${colorSwatches.length} color options`}>
