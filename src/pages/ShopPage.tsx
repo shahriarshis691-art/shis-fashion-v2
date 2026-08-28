@@ -1378,6 +1378,7 @@ export default function ShopPage() {
               <ProductCard
                 key={product.id}
                 product={product}
+                href={isWomensBaggyDenimProduct(product) ? `/product/${product.slug}` : undefined}
                 priority={index < 4}
                 onToggleWishlist={handleToggleWishlist}
                 isInWishlist={isInWishlist(String(product.id))}

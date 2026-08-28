@@ -12,7 +12,7 @@ const WOMENS_BAGGY_IMAGE_DIR = '/collections/womens-baggy'
 
 export interface WomensBaggyDenimProduct extends ShopProduct {
   sku: string
-  fit: 'Baggy' | 'Wide Leg' | 'Loose'
+  fit: 'Baggy' | 'Wide Leg' | 'Loose' | 'Relaxed Wide-Leg'
   fabric: string
   tags: string[]
   inStock: boolean
@@ -30,6 +30,7 @@ interface WomensBaggyJeanEntry {
   name: string
   sku: string
   filename: string
+  galleryFilenames?: string[]
   price: number
   originalPrice: number
   colors: string[]
@@ -59,6 +60,10 @@ interface WomensBaggyTeeEntry {
 
 function createWomensBaggyJean(entry: WomensBaggyJeanEntry): WomensBaggyDenimProduct {
   const image = womensBaggySrc(entry.filename)
+  const galleryImages = [
+    image,
+    ...(entry.galleryFilenames ?? []).map(womensBaggySrc),
+  ].filter((src, index, all) => all.indexOf(src) === index)
   const originalPrice = formatBDT(entry.originalPrice)
   const stock = entry.stock ?? 16
 
@@ -74,7 +79,7 @@ function createWomensBaggyJean(entry: WomensBaggyJeanEntry): WomensBaggyDenimPro
     subCategory: 'baggy',
     brand: 'SHIS Fashion',
     image,
-    galleryImages: [image],
+    galleryImages,
     description: entry.description,
     sizes: [...WOMENS_BAGGY_DENIM_SIZES],
     colors: entry.colors,
@@ -84,7 +89,7 @@ function createWomensBaggyJean(entry: WomensBaggyJeanEntry): WomensBaggyDenimPro
     fit: entry.fit ?? 'Baggy',
     fabric: entry.fabric ?? 'Cotton Denim',
     tags: ['baggy', 'women', 'womens-baggy', 'denim'],
-    inStock: stock > 0,
+    inStock: true,
   }
 }
 
@@ -287,6 +292,59 @@ const womensBaggyJeanEntries: WomensBaggyJeanEntry[] = [
     fit: 'Baggy',
     description: 'Medium-wash high-waist baggy jeans with a straight wide leg and premium cotton denim.',
     stock: 16,
+  },
+  {
+    id: 'womens-baggy-13',
+    slug: 'studio-vintage-relaxed-wide-leg-baggy-jeans',
+    name: 'Studio Vintage Relaxed Wide-Leg Baggy Jeans',
+    sku: 'SHIS-WB-013',
+    filename: 'download (35).jpg',
+    galleryFilenames: [
+      '909867930974949942.jpg',
+      '909867930974949936.jpg',
+      '909867930974949935.jpg',
+    ],
+    price: 2890,
+    originalPrice: 3990,
+    colors: ['Medium Blue', 'Light Wash'],
+    fit: 'Relaxed Wide-Leg',
+    fabric: 'Premium Vintage Denim',
+    description: 'Relaxed wide-leg baggy jeans in premium vintage denim — studio looks spanning denim jacket, gingham crop, and alternate wash styling.',
+    stock: 14,
+    featured: true,
+    newArrival: true,
+  },
+  {
+    id: 'womens-baggy-14',
+    slug: 'leather-layer-cargo-baggy-denim',
+    name: 'Leather-Layer Cargo Baggy Denim',
+    sku: 'SHIS-WB-014',
+    filename: '722053752806686466.jpg',
+    price: 3250,
+    originalPrice: 4500,
+    colors: ['Vintage Indigo'],
+    fit: 'Relaxed Wide-Leg',
+    fabric: 'Premium Vintage Denim',
+    description: 'Streetwear cargo baggy denim with a relaxed wide-leg fall — leather-jacket layering and utility pockets in a vintage indigo wash.',
+    stock: 12,
+    featured: true,
+    newArrival: true,
+  },
+  {
+    id: 'womens-baggy-15',
+    slug: 'college-light-wash-relaxed-baggy-jeans',
+    name: 'College Light-Wash Relaxed Baggy Jeans',
+    sku: 'SHIS-WB-015',
+    filename: 'college trendy outfit.jpg',
+    price: 2450,
+    originalPrice: 3600,
+    colors: ['Light Blue'],
+    fit: 'Relaxed Wide-Leg',
+    fabric: 'Premium Vintage Denim',
+    description: 'Light-wash relaxed wide-leg baggy jeans with a vintage fade — easy college layering over a white tank and open shirt.',
+    stock: 15,
+    featured: true,
+    newArrival: true,
   },
 ]
 

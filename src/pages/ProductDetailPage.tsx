@@ -36,7 +36,7 @@ import { mensBaggyDenimCollectionProducts } from '../data/mensBaggyDenimCollecti
 import { oversizedTeeCollectionProducts } from '../data/oversizedTeeCollection'
 import { westernOutfitsCollectionProducts } from '../data/westernOutfitsCollection'
 import { kurtisCollectionProducts, getKurtiColorGallery, getKurtiVariantPrice, getKurtiProductBySlug, type KurtiColorVariant } from '../data/kurtisCollection'
-import { womensBaggyDenimCollectionProducts } from '../data/womensBaggyDenimCollection'
+import { womensBaggyDenimCollectionProducts, getWomensBaggyDenimProductBySlug } from '../data/womensBaggyDenimCollection'
 import type { ShopProduct } from '../data/shopData'
 
 const InstantCheckoutSheet = lazy(() => import('../components/shop/InstantCheckoutSheet'))
@@ -176,6 +176,11 @@ export default function ProductDetailPage() {
   const product = products.find((entry) =>
     entry.slug === decodedSlug || String(entry.id) === decodedSlug,
   ) ?? (() => {
+    const baggy = getWomensBaggyDenimProductBySlug(decodedSlug)
+    if (baggy) {
+      return fromCatalogProduct(baggy)
+    }
+
     const kurti = getKurtiProductBySlug(decodedSlug)
     return kurti ? fromCatalogProduct(kurti) : undefined
   })()
