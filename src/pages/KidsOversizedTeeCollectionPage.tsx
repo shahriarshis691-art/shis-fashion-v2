@@ -173,9 +173,7 @@ export default function KidsOversizedTeeCollectionPage() {
   const activeFilterCount = Number(sizeFilter !== 'all') + Number(Boolean(searchQuery.trim()))
 
   useEffect(() => {
-    const canonicalPath = location.pathname.startsWith('/collections/')
-      ? location.pathname
-      : '/kids'
+    const canonicalPath = '/kids'
 
     const itemListSchema = {
       '@context': 'https://schema.org',
@@ -217,7 +215,7 @@ export default function KidsOversizedTeeCollectionPage() {
       keywords: 'kids oversized tee, kids t-shirt Bangladesh, SHIS Fashion kids',
       schema: [itemListSchema, ...productSchemas],
     })
-  }, [location.pathname, products])
+  }, [products])
 
   useEffect(() => {
     if (!sizeGuideOpen && !filterDrawerOpen) {

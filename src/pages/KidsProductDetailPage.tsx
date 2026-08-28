@@ -283,7 +283,7 @@ export default function KidsProductDetailPage() {
           <p className="mt-3 max-w-lg text-sm leading-7 text-neutral-600">
             This kids oversized tee is no longer available or the link is incorrect.
           </p>
-          <Button to="/collections/kids-oversized-tee" variant="cta" className="mt-6">
+          <Button to="/kids" variant="cta" className="mt-6">
             Back to Kids Collection
           </Button>
         </Container>

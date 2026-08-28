@@ -120,7 +120,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'kids',
-        element: withSuspense(<SegmentLandingPage />),
+        element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },
       {
         path: 'kids/:productSlug',
@@ -216,11 +216,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'collections/kids',
-        element: withSuspense(<KidsOversizedTeeCollectionPage />),
+        element: <RedirectPreserveSearch to="/kids" />,
       },
       {
         path: 'collections/kids-oversized-tee',
-        element: withSuspense(<KidsOversizedTeeCollectionPage />),
+        element: <RedirectPreserveSearch to="/kids" />,
       },
       {
         path: 'collections/:slug',

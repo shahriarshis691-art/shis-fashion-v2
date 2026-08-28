@@ -97,25 +97,25 @@ const KIDS_SUBCATEGORIES: SubcategoryConfig[] = [
     slug: 'kids-oversized-tee',
     label: 'Oversized Tee',
     aliases: ['kids-tee', 'kids-oversized', 'kids oversized tee', 'kids-oversized-tee'],
-    path: '/collections/kids-oversized-tee',
+    path: '/kids',
   },
   {
     slug: 'kids-boys',
     label: 'Boys',
     aliases: ['kids-boy', 'kids boy'],
-    path: '/collections/kids-oversized-tee?gender=Kids%20Boy',
+    path: '/kids?gender=Kids%20Boy',
   },
   {
     slug: 'kids-girls',
     label: 'Girls',
     aliases: ['kids-girl', 'kids girl'],
-    path: '/collections/kids-oversized-tee?gender=Kids%20Girl',
+    path: '/kids?gender=Kids%20Girl',
   },
   {
     slug: 'kids-unisex',
     label: 'Unisex',
     aliases: ['kids unisex'],
-    path: '/collections/kids-oversized-tee?gender=Unisex',
+    path: '/kids?gender=Unisex',
   },
 ]
 
@@ -244,7 +244,7 @@ export function getHubSubcategories(segment: Exclude<ShopSegment, 'all'>) {
 
 export function getSegmentAllProductsHref(segment: Exclude<ShopSegment, 'all'>) {
   if (segment === 'kids') {
-    return '/collections/kids-oversized-tee'
+    return '/kids'
   }
 
   return `/shop?segment=${segment}`
