@@ -167,7 +167,7 @@ main {
 /* Performance: contain layout for long product grids */
 .product-grid {
   content-visibility: auto;
-  contain-intrinsic-size: 0 600px;
+  contain-intrinsic-size: 0 900px;
 }
 
 .product-grid > * {
@@ -183,15 +183,6 @@ main {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     column-gap: 0.5rem;
-    row-gap: 1.25rem;
-  }
-}
-
-@media (min-width: 640px) and (max-width: 767px) {
-  .product-grid {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    column-gap: 1rem;
     row-gap: 2rem;
   }
 }

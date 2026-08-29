@@ -273,18 +273,20 @@ button,
   }
 }
 
-/* Listing cards — 2:3 mobile / 3:4 desktop, edge-to-edge cover */
+/* Listing cards — tall 2-col portrait on mobile; 3:4 from md up */
 .listing-media-frame {
   position: relative;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 1 / 2;
   width: 100%;
+  min-height: 52svh;
   overflow: hidden;
   background-color: #f7f7f7;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .listing-media-frame {
     aspect-ratio: 3 / 4;
+    min-height: 0;
   }
 }
 
@@ -354,6 +356,8 @@ button,
 
 @media (max-width: 767px) {
   .listing-media-frame {
+    aspect-ratio: 1 / 2;
+    min-height: 52svh;
     background-color: #f7f7f7;
   }
 
@@ -404,7 +408,7 @@ button,
 
   .product-card .product-card-title {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
     white-space: normal;
@@ -412,7 +416,7 @@ button,
     font-family: var(--font-display);
     font-size: 0.75rem;
     font-weight: 400;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     text-align: center;
     color: #171717;
@@ -421,7 +425,7 @@ button,
   .product-card .product-card-price {
     margin-top: 0.25rem;
     text-align: center;
-    color: #525252;
+    color: #404040;
   }
 
   .product-card .product-card-swatches {

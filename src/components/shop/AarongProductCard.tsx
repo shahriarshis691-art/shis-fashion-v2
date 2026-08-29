@@ -173,7 +173,7 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame relative w-full aspect-[2/3] overflow-hidden bg-[#f7f7f7] sm:aspect-[3/4]">
+        <div className="listing-media-frame relative w-full overflow-hidden bg-[#f7f7f7]">
           <img
             key={displaySrc}
             src={displaySrc}
