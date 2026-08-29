@@ -62,17 +62,15 @@ export default function ShopByCategorySection({
         </div>
       </div>
 
-      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:gap-6 md:px-6 md:pb-0 lg:grid-cols-4">
+      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-stretch md:gap-4 md:px-6 md:pb-0 lg:grid-cols-4">
         {hubItems.map((item, index) => {
           const isSareeCard = item.key.trim().toLowerCase() === 'saree'
 
           return (
             <article
               key={item.key}
-              className={`relative z-10 isolate overflow-hidden ${
-                isSareeCard
-                  ? 'h-[calc(100svh-14rem)] min-h-[28rem] bg-[#e8cbb1] md:h-auto md:min-h-0 md:aspect-[4/5]'
-                  : 'h-[calc(100svh-14rem)] min-h-[28rem] md:h-auto md:min-h-0 md:aspect-[3/4]'
+              className={`relative z-10 isolate h-[calc(100svh-14rem)] min-h-[28rem] w-full overflow-hidden md:aspect-[3/4] md:h-auto md:min-h-0 ${
+                isSareeCard ? 'bg-[#e8cbb1]' : ''
               }`}
             >
               <CategoryHeroCard
@@ -87,7 +85,6 @@ export default function ShopByCategorySection({
                 imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
                 frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : undefined}
                 imgClassName={isSareeCard ? 'origin-left object-left' : undefined}
-                labelClassName={isSareeCard ? 'drop-shadow-md' : undefined}
                 imageHoverScale={!isSareeCard}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
                 showOverlay={item.key.trim().toLowerCase() === 'kids'}

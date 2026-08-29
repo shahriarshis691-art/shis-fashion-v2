@@ -82,7 +82,7 @@ export default function CategoryHeroCard({
           imgClassName={imageObjectClass}
           onError={onError}
         />
-        <div className="pointer-events-none absolute inset-0 z-30 flex flex-col justify-end">
+        <div className="pointer-events-none absolute inset-0 z-30">
           {showOverlay ? (
             <div
               className="absolute inset-0 z-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10"
@@ -90,20 +90,20 @@ export default function CategoryHeroCard({
             />
           ) : null}
           <div
-            className={`relative z-10 flex flex-col items-center text-center ${
+            className={
               isFeed
-                ? 'px-5 pb-[max(3.25rem,calc(1.5rem+env(safe-area-inset-bottom)))] pt-20 md:px-4 md:pb-5 md:pt-10'
-                : 'px-3 pb-4 pt-10 sm:px-4'
-            }`}
+                ? 'absolute bottom-4 left-0 right-0 z-10 text-center'
+                : 'relative z-10 flex flex-col items-center px-3 pb-4 pt-10 text-center sm:px-4'
+            }
           >
             <span
               className={`relative font-semibold uppercase ${
                 isContained
                   ? 'text-neutral-900'
-                  : `text-white ${labelClassName ?? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'}`
+                  : `text-white ${labelClassName ?? (isFeed ? 'drop-shadow-md' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]')}`
               } ${
                 isFeed
-                  ? 'text-3xl tracking-[0.22em] md:text-sm md:tracking-[0.18em] lg:text-base'
+                  ? 'text-xs tracking-widest md:text-sm'
                   : 'text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.18em]'
               }`}
               style={isFeed ? { fontFamily: "'Cormorant Garamond', 'Cinzel', serif" } : undefined}
