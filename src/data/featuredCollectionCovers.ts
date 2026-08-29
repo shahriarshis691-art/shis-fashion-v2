@@ -9,6 +9,8 @@ export const SAREE_HOMEPAGE_COVER_ASPECT = {
   width: 960,
   height: 640,
 } as const
+export const SAREE_HOMEPAGE_COVER_POSITION = 'left center'
+export const SAREE_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e8cbb1]'
 export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
 
 export const categoryStripCovers: Record<string, string> = {

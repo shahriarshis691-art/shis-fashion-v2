@@ -13,6 +13,8 @@ export interface CategoryHeroCardProps {
   imageWidth?: number
   imageHeight?: number
   imgClassName?: string
+  labelClassName?: string
+  imageHoverScale?: boolean
   sizes?: string
   showOverlay?: boolean
   /** Skip studio-media-frame overlay while keeping cover crop. */
@@ -32,6 +34,8 @@ export default function CategoryHeroCard({
   imageWidth,
   imageHeight,
   imgClassName,
+  labelClassName,
+  imageHoverScale = true,
   sizes,
   showOverlay = false,
   plainFrame = false,
@@ -51,7 +55,8 @@ export default function CategoryHeroCard({
     ? (imgClassName ?? '')
     : [
       imgClassName,
-      'min-h-full min-w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out',
+      'min-h-full min-w-full object-cover',
+      imageHoverScale ? 'group-hover:scale-105 transition-transform duration-500 ease-out' : '',
     ].filter(Boolean).join(' ')
 
   return (
@@ -95,7 +100,7 @@ export default function CategoryHeroCard({
               className={`relative font-semibold uppercase ${
                 isContained
                   ? 'text-neutral-900'
-                  : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
+                  : `text-white ${labelClassName ?? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'}`
               } ${
                 isFeed
                   ? 'text-3xl tracking-[0.22em] md:text-sm md:tracking-[0.18em] lg:text-base'
