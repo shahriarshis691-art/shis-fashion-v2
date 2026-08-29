@@ -5,6 +5,7 @@ export const featuredCollectionCovers: Record<string, string> = {
 }
 
 export const SAREE_HOMEPAGE_COVER = '/homepage/category.png'
+export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
 
 export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.jpg',
