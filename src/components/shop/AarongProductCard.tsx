@@ -169,11 +169,11 @@ const AarongProductCard = memo(function AarongProductCard({
       <PrefetchLink
         to={detailHref}
         prefetchModule={prefetchModule}
-        className="block"
+        className="flex w-full flex-col items-center"
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none border-0 bg-neutral-100/70">
+        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none border-0 bg-neutral-100">
           <img
             key={displaySrc}
             src={displaySrc}
@@ -185,7 +185,7 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-top"
+            className="product-card-media absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-center"
             onError={() => {
               if (imageFailed) {
                 return
@@ -236,9 +236,9 @@ const AarongProductCard = memo(function AarongProductCard({
           </div>
         </div>
 
-        <div className="product-card-meta mt-2 px-0.5">
+        <div className="product-card-meta w-full px-0 pt-3 text-center">
           <div className="product-card-meta-row">
-            <div className="product-card-meta-copy min-w-0 flex-1">
+            <div className="product-card-meta-copy min-w-0 w-full">
               <h3 className="product-card-title">{product.name}</h3>
               <p className="product-card-price">
                 {product.comparePrice ? (
@@ -247,17 +247,6 @@ const AarongProductCard = memo(function AarongProductCard({
                 <span>{formatBDT(product.price)}</span>
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleQuickAdd}
-              className="product-card-bag md:hidden"
-              aria-label={`Add ${product.name} to bag`}
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 8h12l-1 12H7L6 8Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 8V7a3 3 0 0 1 6 0v1" />
-              </svg>
-            </button>
           </div>
           {colorSwatches.length > 1 ? (
             <ul className="product-card-swatches" aria-label={`${colorSwatches.length} color options`}>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import CategoryHeroCard from '../components/common/CategoryHeroCard'
+import ProductListingGrid from '../components/shop/ProductListingGrid'
 import Container from '../components/ui/Container'
 import {
   type ShopSegment,
@@ -113,7 +114,7 @@ export default function CategoryHubPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 md:gap-x-5 md:gap-y-8 lg:grid-cols-4 lg:gap-x-6">
+        <ProductListingGrid>
           {subcategories.map((subcategory, index) => (
             <CategoryHeroCard
               key={subcategory.slug}
@@ -123,11 +124,11 @@ export default function CategoryHubPage() {
               priority={index < 2}
               variant="portrait"
               imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' || subcategory.slug === 'polos' ? 'center center' : 'center top'}
-              plainFrame={subcategory.slug === 'panjabi'}
+              plainFrame
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
             />
           ))}
-        </div>
+        </ProductListingGrid>
       </Container>
     </section>
   )

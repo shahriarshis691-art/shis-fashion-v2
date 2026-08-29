@@ -44,11 +44,11 @@ export default function CategoryHeroCard({
   const isFeed = variant === 'feed'
   const isContained = !isFeed && imageFit === 'contain'
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
-  const imageFrameClass = isContained
-    ? 'relative w-full aspect-[3/4] overflow-hidden bg-white'
-    : plainFrame
-      ? 'relative w-full aspect-[3/4] overflow-hidden bg-neutral-100'
-      : 'studio-media-frame w-full'
+  const imageFrameClass = isFeed && !plainFrame
+    ? 'studio-media-frame w-full'
+    : isContained
+      ? 'relative w-full aspect-[3/4] overflow-hidden bg-white'
+      : 'relative w-full aspect-[3/4] overflow-hidden bg-neutral-100'
   const resolvedImageWidth = imageWidth ?? 960
   const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1200)
   const imageObjectClass = isContained
@@ -56,8 +56,11 @@ export default function CategoryHeroCard({
     : [
       imgClassName,
       'min-h-full min-w-full object-cover object-center',
-      imageHoverScale ? 'transition-transform duration-500 ease-out group-hover:scale-105' : '',
+      imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
     ].filter(Boolean).join(' ')
+  const titleClass = isFeed
+    ? 'line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black'
+    : 'line-clamp-2 text-xs font-normal tracking-[0.18em] text-neutral-900 uppercase sm:text-sm md:text-base'
 
   return (
     <Link
@@ -86,7 +89,8 @@ export default function CategoryHeroCard({
 
       <div className="w-full pt-3 pb-1 text-center">
         <h3
-          className={`line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black ${labelClassName ?? ''}`.trim()}
+          className={`${titleClass} ${labelClassName ?? ''}`.trim()}
+          style={isFeed ? undefined : { fontFamily: 'var(--font-display)' }}
         >
           {name}
         </h3>

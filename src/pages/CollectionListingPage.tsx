@@ -193,7 +193,7 @@ export default function CollectionListingPage() {
         </header>
 
         {collectionImages.length ? (
-          <div className="mt-8 grid grid-cols-2 items-start gap-x-1.5 gap-y-4 sm:grid-cols-4 sm:gap-x-2.5 sm:gap-y-5">
+          <div className="product-grid mt-8 grid grid-cols-2 items-start gap-x-2.5 gap-y-6 px-2 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-8 sm:px-4">
             {collectionImages.map((image, index) => (
               <LuxuryImage
                 key={`${activeCollection.slug}-look-${index}`}

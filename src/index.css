@@ -182,8 +182,17 @@ main {
     margin-right: 0;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    column-gap: 0.5rem;
+    column-gap: 0.625rem;
     row-gap: 1.5rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  .product-grid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    column-gap: 1rem;
+    row-gap: 2rem;
   }
 }
 
