@@ -13,13 +13,14 @@ export const SAREE_HOMEPAGE_COVER_POSITION = '62% top'
 export const SAREE_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e8cbb1]'
 export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
 export const MEN_HOMEPAGE_COVER = '/collections/men-feature.png'
+export const WOMENS_BAGGY_CATEGORY_COVER = `/collections/womens-baggy/${encodeURIComponent('download (17).jpg')}`
 
 export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.jpg',
   saree: '/collections/saree-category-new.jpg',
   denim: '/collections/featured-denim-collection.jpg',
-  western: '/collections/featured-denim-collection.jpg',
-  'womens-baggy': '/hero/womens-baggy/1119918632363621348.jpg',
+  western: WOMENS_BAGGY_CATEGORY_COVER,
+  'womens-baggy': WOMENS_BAGGY_CATEGORY_COVER,
   'half-shirts': '/hero/half-shirt-1.jpg',
   'oversized-tee': '/hero/oversized-tee.jpg',
 }
