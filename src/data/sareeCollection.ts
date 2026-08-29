@@ -1,6 +1,30 @@
 import { formatBDT } from '../utils/currency'
 import { filterListingProducts } from '../utils/listingProducts'
+import { SAREE_LENS_DETAIL_IMAGES } from './sareeLensDetails.generated'
 import type { ShopProduct } from './shopData'
+
+function lensDetailPaths(slug: string): string[] {
+  return SAREE_LENS_DETAIL_IMAGES[slug.trim().toLowerCase()] ?? []
+}
+
+function uniqueGallery(...groups: Array<string | readonly string[] | undefined>): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+
+  for (const group of groups) {
+    const items = typeof group === 'string' ? [group] : group ?? []
+    for (const src of items) {
+      const path = src.trim()
+      if (!path || seen.has(path)) {
+        continue
+      }
+      seen.add(path)
+      out.push(path)
+    }
+  }
+
+  return out
+}
 
 export interface SareeProduct extends ShopProduct {
   fabric: string
@@ -22,13 +46,6 @@ const SAREE_IMAGE_EXT: Record<number, 'jpg' | 'png'> = {
 function sareeImage(index: number) {
   const ext = SAREE_IMAGE_EXT[index] ?? 'jpg'
   return `/saree/saree.${index}.${ext}`
-}
-
-function sareeDetailImages(index: number) {
-  return [
-    `/saree/saree.${index}-texture.jpg`,
-    `/saree/saree.${index}-border.jpg`,
-  ] as const
 }
 
 function createSaree(
@@ -56,7 +73,7 @@ function createSaree(
     category: 'Saree',
     brand: 'SHIS Fashion',
     image,
-    galleryImages: [image, ...sareeDetailImages(index)],
+    galleryImages: uniqueGallery(image, lensDetailPaths(slug)),
     fabric,
     blousePiece: 'Included (Unstitched)',
     inStock: true,
@@ -156,7 +173,11 @@ interface JamdaniFolderEntry {
 
 function createJamdaniFolderSaree(entry: JamdaniFolderEntry): SareeProduct {
   const image = jamdaniSrc(entry.filename)
-  const galleryImages = [image, ...(entry.galleryFilenames ?? []).map(jamdaniSrc)]
+  const galleryImages = uniqueGallery(
+    image,
+    lensDetailPaths(entry.slug),
+    (entry.galleryFilenames ?? []).map(jamdaniSrc),
+  )
   const originalPrice = formatBDT(entry.originalPrice)
 
   return {

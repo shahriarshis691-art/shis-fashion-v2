@@ -12,21 +12,30 @@ interface PdpThumbnailStripProps {
   activeIndex: number
   onSelect: (index: number) => void
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
+  className?: string
+  orientation?: 'horizontal' | 'vertical'
 }
 
 const THUMB_SIZES = '(max-width: 639px) 22vw, 120px'
 
 /** Horizontal thumbnail row under the PDP hero — uses existing gallery srcs only. */
-export default function PdpThumbnailStrip({ items, activeIndex, onSelect, onError }: PdpThumbnailStripProps) {
+export default function PdpThumbnailStrip({
+  items,
+  activeIndex,
+  onSelect,
+  onError,
+  className,
+  orientation = 'horizontal',
+}: PdpThumbnailStripProps) {
   if (items.length < 2) {
     return null
   }
 
-  const columns = Math.min(items.length, 4)
+  const columns = orientation === 'vertical' ? 1 : Math.min(items.length, 4)
 
   return (
     <div
-      className="pdp-thumb-strip"
+      className={className ?? 'pdp-thumb-strip'}
       style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
       role="tablist"
       aria-label="Product images"

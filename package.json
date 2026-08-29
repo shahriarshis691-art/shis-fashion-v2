@@ -12,6 +12,8 @@
     "fetch:western-images": "node scripts/fetch-western-images.mjs",
     "fetch:kurti-images": "node scripts/fetch-kurti-images.mjs",
     "generate:kurtis-catalog": "node scripts/generate-kurtis-catalog.mjs",
+    "scrape:saree-details": "node scripts/scrape-saree-details.mjs",
+    "generate:saree-details": "node scripts/generate-saree-lens-details.mjs",
     "prebuild": "node scripts/generate-kurtis-catalog.mjs",
     "deploy:rules": "firebase deploy --only firestore:rules"
   },
@@ -37,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
+    "dotenv": "^16.6.1",
     "sharp": "^0.35.3",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.62.0",

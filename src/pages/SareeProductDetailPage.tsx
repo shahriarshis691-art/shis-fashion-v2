@@ -6,8 +6,7 @@ import AarongProductCard from '../components/shop/AarongProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import PdpAccordion from '../components/shop/PdpAccordion'
 import PdpActionButtons from '../components/shop/PdpActionButtons'
-import PdpGalleryNav from '../components/shop/PdpGalleryNav'
-import PdpThumbnailStrip from '../components/shop/PdpThumbnailStrip'
+import ProductDetailGallery, { getProductDetailViewCount } from '../components/shop/ProductDetailGallery'
 import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
 import PdpShareButton from '../components/shop/PdpShareButton'
 import { useCart, writeBuyNowCheckout, type CartItem } from '../context/CartContext'
@@ -155,7 +154,10 @@ export default function SareeProductDetailPage() {
   }, [isZoomOpen])
 
   const gallery = product?.galleryImages?.length ? product.galleryImages : product ? [product.image] : []
-  const activeImage = gallery[activeImageIndex] ?? product?.image ?? '/og-image.svg'
+  const galleryViewCount = getProductDetailViewCount(gallery)
+  const activeImage = gallery.length >= 2
+    ? (gallery[activeImageIndex] ?? product?.image ?? '/og-image.svg')
+    : (gallery[0] ?? product?.image ?? '/og-image.svg')
   const galleryAlt = (index: number) => {
     if (!product) {
       return 'Saree'
@@ -164,7 +166,7 @@ export default function SareeProductDetailPage() {
       return `${product.name} fabric texture`
     }
     if (index === 2) {
-      return `${product.name} border and zari detail`
+      return `${product.name} drape and border detail`
     }
     return product.name
   }
@@ -197,11 +199,11 @@ export default function SareeProductDetailPage() {
   }, [catalog, product])
 
   const setPreviousImage = () => {
-    setActiveImageIndex((current) => (current - 1 + gallery.length) % gallery.length)
+    setActiveImageIndex((current) => (current - 1 + galleryViewCount) % Math.max(galleryViewCount, 1))
   }
 
   const setNextImage = () => {
-    setActiveImageIndex((current) => (current + 1) % gallery.length)
+    setActiveImageIndex((current) => (current + 1) % Math.max(galleryViewCount, 1))
   }
 
   const handleAddToBag = () => {
@@ -329,11 +331,21 @@ export default function SareeProductDetailPage() {
 
       <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-2">
         <div>
-          <div
-            className="studio-media-frame"
+          <ProductDetailGallery
+            name={product.name}
+            images={gallery}
+            altForIndex={galleryAlt}
+            activeIndex={activeImageIndex}
+            onSelect={setActiveImageIndex}
+            onPrev={setPreviousImage}
+            onNext={setNextImage}
+            onZoom={() => setIsZoomOpen(true)}
+            onError={(event) => {
+              event.currentTarget.src = '/og-image.svg'
+            }}
             onTouchStart={(event) => setTouchStartX(event.changedTouches[0]?.clientX ?? null)}
             onTouchEnd={(event) => {
-              if (touchStartX == null || gallery.length < 2) {
+              if (touchStartX == null || galleryViewCount < 2) {
                 setTouchStartX(null)
                 return
               }
@@ -344,46 +356,6 @@ export default function SareeProductDetailPage() {
                 setNextImage()
               }
               setTouchStartX(null)
-            }}
-          >
-            <button
-              type="button"
-              className="absolute inset-0 z-[1]"
-              onClick={() => setIsZoomOpen(true)}
-              aria-label={`Zoom ${product.name}`}
-            >
-              <img
-                src={activeImage}
-                alt={galleryAlt(activeImageIndex)}
-                width={960}
-                height={1280}
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                className="pdp-main-image"
-                onError={(event) => {
-                  event.currentTarget.src = '/og-image.svg'
-                }}
-              />
-            </button>
-            <PdpGalleryNav
-              count={gallery.length}
-              index={activeImageIndex}
-              onPrev={setPreviousImage}
-              onNext={setNextImage}
-              onSelect={setActiveImageIndex}
-            />
-          </div>
-          <PdpThumbnailStrip
-            items={gallery.map((src, index) => ({
-              src,
-              alt: galleryAlt(index),
-            }))}
-            activeIndex={activeImageIndex}
-            onSelect={setActiveImageIndex}
-            onError={(event) => {
-              event.currentTarget.src = '/og-image.svg'
             }}
           />
         </div>
@@ -546,7 +518,7 @@ export default function SareeProductDetailPage() {
                 loading="eager"
                 decoding="async"
               />
-              {gallery.length > 1 ? (
+              {galleryViewCount > 1 ? (
                 <>
                   <button
                     type="button"
