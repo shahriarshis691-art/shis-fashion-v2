@@ -201,13 +201,8 @@ const AarongProductCard = memo(function AarongProductCard({
               setImageFailed(true)
             }}
           />
-          {product.newArrival ? (
-            <span className="product-card-badge product-card-badge-new md:hidden" aria-label="New in">
-              NEW IN
-            </span>
-          ) : null}
           {luxuryBadge ? (
-            <span className={`product-card-badge${product.newArrival ? ' max-md:hidden' : ''}`} aria-label={luxuryBadge}>
+            <span className="product-card-badge" aria-label={luxuryBadge}>
               {luxuryBadge}
             </span>
           ) : null}
