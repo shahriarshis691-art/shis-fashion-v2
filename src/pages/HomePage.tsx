@@ -3,7 +3,7 @@ import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
-import { categoryStripCover, categoryStripCovers, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers, MEN_HOMEPAGE_COVER, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -18,7 +18,7 @@ import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../util
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: WOMEN_HOMEPAGE_COVER, imagePosition: 'center center' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: 'left center' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: MEN_HOMEPAGE_COVER, imagePosition: 'center center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center top' },
@@ -131,7 +131,7 @@ const defaultHomepage: HomepageContent = {
       href: '/men',
       enabled: true,
       order: 20,
-      coverImage: categoryStripCovers.men,
+      coverImage: MEN_HOMEPAGE_COVER,
       images: [],
       updatedAt: null,
     },
@@ -280,7 +280,7 @@ export default function HomePage() {
             : isWomensBaggyCard
               ? categoryStripCovers.western
               : isMenCard
-                ? categoryStripCovers.men
+                ? MEN_HOMEPAGE_COVER
                 : isSareeCard
                   ? SAREE_HOMEPAGE_COVER
                   : isWomenCard
@@ -330,7 +330,7 @@ export default function HomePage() {
       const fallbackImage = key === 'kids'
         ? SEGMENT_HUB_COVERS.kids
         : key === 'men'
-          ? categoryStripCovers.men
+          ? MEN_HOMEPAGE_COVER
           : key === 'saree'
             ? SAREE_HOMEPAGE_COVER
             : key === 'women'
@@ -342,7 +342,7 @@ export default function HomePage() {
         name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : key === 'saree' ? 'Saree' : strip?.label || 'Men',
         href: key === 'kids' ? '/kids' : (strip?.href || fallbackHref),
         image: strip?.image || fallbackImage,
-        imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : key === 'saree' ? 'left center' : key === 'women' ? 'center center' : 'center top'),
+        imagePosition: strip?.imagePosition || (key === 'men' ? 'center center' : key === 'saree' ? 'left center' : key === 'women' ? 'center center' : 'center top'),
       }
     })
   }, [categoryStrips])
