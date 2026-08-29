@@ -119,6 +119,10 @@ export const router = createBrowserRouter([
         element: withSuspense(<ShopPage />),
       },
       {
+        path: 'men/panjabi',
+        element: withSuspense(<ShopPage />),
+      },
+      {
         path: 'kids',
         element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },

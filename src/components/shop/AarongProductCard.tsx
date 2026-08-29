@@ -3,7 +3,7 @@ import PrefetchLink from '../common/PrefetchLink'
 import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
-import { hasListingRenderableImage } from '../../utils/listingProducts'
+import { hasListingRenderableImage, listingProductImageCandidates } from '../../utils/listingProducts'
 import { catalogImageAttrs } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 import { getVariantStock } from '../../utils/variantStock'
@@ -21,6 +21,7 @@ export interface AarongProductCardProduct {
   sizes?: string[]
   description?: string
   stock?: number
+  galleryImages?: string[]
   variants?: ShopProduct['variants']
   isPlaceholder?: boolean
 }
@@ -97,11 +98,13 @@ const AarongProductCard = memo(function AarongProductCard({
 }: AarongProductCardProps) {
   const { addToCart } = useCart()
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
-  const [imageFailed, setImageFailed] = useState(false)
+  const [imageCandidateIndex, setImageCandidateIndex] = useState(0)
+  const imageCandidates = useMemo(() => listingProductImageCandidates(product), [product])
+  const activeImage = imageCandidates[imageCandidateIndex] ?? product.image
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
   const image = useMemo(
-    () => catalogImageAttrs(product.image, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
-    [product.image],
+    () => catalogImageAttrs(activeImage, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
+    [activeImage],
   )
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
   const colorSwatches = useMemo(() => {
@@ -111,7 +114,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const sizes = useMemo(() => (product.sizes ?? []).map((size) => size.trim()).filter(Boolean), [product.sizes])
   const defaultColor = product.colors?.[0]?.trim() || 'Default'
 
-  if (!hasListingRenderableImage(product) || imageFailed) {
+  if (!hasListingRenderableImage(product) && imageCandidates.length === 0) {
     return null
   }
 
@@ -177,7 +180,14 @@ const AarongProductCard = memo(function AarongProductCard({
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
             className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
-            onError={() => setImageFailed(true)}
+            onError={() => {
+              setImageCandidateIndex((current) => {
+                if (current < imageCandidates.length - 1) {
+                  return current + 1
+                }
+                return current
+              })
+            }}
           />
           {luxuryBadge ? (
             <span className="product-card-badge" aria-label={luxuryBadge}>

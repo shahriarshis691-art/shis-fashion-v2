@@ -111,6 +111,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/sarees',
     '/men',
     '/men/half-shirts',
+    '/men/panjabi',
     '/men/pants',
     '/collections/oversized-tee',
     '/oversized-tee',
@@ -246,6 +247,9 @@ function buildBreadcrumbItems(pathname: string) {
     items.push({ name: 'Men', item: `${SITE_URL}/men` })
     if (segments[1] === 'half-shirts') {
       items.push({ name: 'Half Shirts', item: `${SITE_URL}/men/half-shirts` })
+    }
+    if (segments[1] === 'panjabi') {
+      items.push({ name: 'Panjabi', item: `${SITE_URL}/men/panjabi` })
     }
     if (segments[1] === 'pants') {
       items.push({ name: 'Pants', item: `${SITE_URL}/men/pants` })
@@ -634,6 +638,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Shop men\'s half shirts from SHIS Fashion Bangladesh — breathable everyday edits with fast delivery and cash on delivery.',
       keywords: 'half shirt Bangladesh, mens half shirt, SHIS half shirts, casual shirt Dhaka',
       canonicalPath: '/men/half-shirts',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/men/panjabi') {
+    return {
+      title: "Men's Panjabi | SHIS Fashion Bangladesh",
+      description: 'Shop men\'s panjabi from SHIS Fashion Bangladesh — refined occasion and everyday edits with fast delivery and cash on delivery.',
+      keywords: 'panjabi Bangladesh, mens panjabi, SHIS panjabi, punjabi Dhaka',
+      canonicalPath: '/men/panjabi',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',

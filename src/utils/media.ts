@@ -6,6 +6,7 @@ export const CATALOG_IMAGE_PLACEHOLDER =
 
 export interface ManagedImageSource {
   images?: string[]
+  galleryImages?: string[]
   image?: string
   featuredImage?: string
   thumbnail?: string
@@ -136,12 +137,16 @@ function collectProductImageCandidates(source: ManagedImageSource) {
   const arrayImages = Array.isArray(source.images)
     ? source.images.map((entry) => toTrimmedString(entry)).filter(Boolean)
     : []
+  const galleryImages = Array.isArray(source.galleryImages)
+    ? source.galleryImages.map((entry) => toTrimmedString(entry)).filter(Boolean)
+    : []
 
   const priority = [
     toTrimmedString(source.featuredImage),
     toTrimmedString(source.thumbnail),
     toTrimmedString(source.coverImage),
     ...arrayImages,
+    ...galleryImages,
     toTrimmedString(source.image),
   ]
 

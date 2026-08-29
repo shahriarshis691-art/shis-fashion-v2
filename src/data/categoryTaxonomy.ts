@@ -44,7 +44,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
     path: '/men/half-shirts',
   },
   { slug: 'polos', label: 'Polos', aliases: ['polos'] },
-  { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi'] },
+  { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi', 'punjabi'], path: '/men/panjabi' },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee', 'unisex-tee', 'unisex-oversized-t-shirts'], path: '/collections/oversized-tee' },
   {
     slug: 'pants',
@@ -291,6 +291,16 @@ export function getDedicatedListingFromPath(pathname: string) {
     }
   }
 
+  if (normalized === '/men/panjabi') {
+    return {
+      segment: 'men' as const,
+      subcategory: 'panjabi',
+      eyebrow: "Men's Panjabi Collection",
+      title: 'Panjabi',
+      description: 'Refined panjabi edits focused on comfort, fit, and occasion-ready wear.',
+    }
+  }
+
   if (
     normalized === '/women/womens-baggy' ||
     normalized === '/women/womens-baggy-jeans' ||
@@ -323,6 +333,10 @@ export function getDedicatedListingPath(segment: ShopSegment, subcategory: strin
 
   if (segment === 'men' && (subcategory === 'half-shirts' || subcategory === 'half-shirt')) {
     return '/men/half-shirts'
+  }
+
+  if (segment === 'men' && (subcategory === 'panjabi' || subcategory === 'punjabi')) {
+    return '/men/panjabi'
   }
 
   if (segment === 'women' && (subcategory === 'womens-baggy' || subcategory === 'womens-baggy-jeans')) {

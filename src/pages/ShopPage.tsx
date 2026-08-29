@@ -324,6 +324,24 @@ function segmentMatchesProduct(segment: ShopSegment, category: string) {
   return matchesSegmentByAlias(segment, category)
 }
 
+function isPanjabiProduct(product: ShopProduct) {
+  const extendedProduct = product as ShopProduct & { tags?: string[] }
+  const category = product.category.trim().toLowerCase()
+  const subCategory = (product.subCategory ?? '').trim().toLowerCase()
+  const tags = (extendedProduct.tags ?? []).map((tag) => tag.trim().toLowerCase())
+  const text = [product.name, product.slug, category, subCategory, tags.join(' ')].join(' ').toLowerCase()
+
+  return (
+    category === 'panjabi'
+    || category === 'punjabi'
+    || subCategory === 'panjabi'
+    || subCategory === 'punjabi'
+    || tags.includes('panjabi')
+    || tags.includes('punjabi')
+    || /\bpanjabis?\b|\bpunjabis?\b/.test(text)
+  )
+}
+
 function isHalfShirtProduct(product: ShopProduct) {
   if (matchesSubcategoryByAlias('men', 'half-shirts', product.category)) {
     return true
@@ -404,7 +422,7 @@ function SubcategoryCarousel({ title, viewAllHref, products, onToggleWishlist, i
           <ProductCard
             key={product.id}
             product={product}
-            href={/half-shirt/i.test(product.category) || isMensShirtProduct(product) ? `/product/${product.slug}` : undefined}
+            href={/half-shirt|panjabi/i.test(product.category) || isMensShirtProduct(product) || isPanjabiProduct(product) ? `/product/${product.slug}` : undefined}
             priority={index < 4}
             onToggleWishlist={onToggleWishlist}
             isInWishlist={isInWishlist(String(product.id))}
@@ -691,12 +709,22 @@ export default function ShopPage() {
   const isHalfShirtListing = dedicatedListing?.subcategory === 'half-shirts' ||
     (effectiveSegment === 'men' && effectiveSubcategory === 'half-shirts')
 
+  const isPanjabiListing = dedicatedListing?.subcategory === 'panjabi' ||
+    (effectiveSegment === 'men' && effectiveSubcategory === 'panjabi')
+
   const isShirtsListing = effectiveSegment === 'men' && effectiveSubcategory === 'shirts'
 
   const halfShirtHeading = isHalfShirtListing
     ? {
       title: "MEN'S HALF SHIRTS",
       description: 'Refined half-shirt edits focused on comfort, fit, and repeat wear.',
+    }
+    : null
+
+  const panjabiHeading = isPanjabiListing
+    ? {
+      title: 'Panjabi',
+      description: 'Refined panjabi edits focused on comfort, fit, and occasion-ready wear.',
     }
     : null
 
@@ -773,7 +801,9 @@ export default function ShopPage() {
       ? bySegment
       : isHalfShirtListing
         ? bySegment.filter(isHalfShirtProduct)
-        : isPantsListing
+        : isPanjabiListing
+          ? bySegment.filter(isPanjabiProduct)
+          : isPantsListing
           ? bySegment.filter(isMensPantsProduct)
           : isWomensBaggyListing
             ? bySegment.filter(isWomensBaggyDenimProduct)
@@ -1178,8 +1208,8 @@ export default function ShopPage() {
           </>
         ) : (
           <div>
-            <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
-            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
+            <h1 className="text-h1 text-black">{dedicatedListing?.title ?? kurtiHeading?.title ?? westernHeading?.title ?? womensBaggyHeading?.title ?? oversizedTeeHeading?.title ?? pantsHeading?.title ?? panjabiHeading?.title ?? halfShirtHeading?.title ?? legacyHeading?.title ?? heading.title}</h1>
+            <p className="mt-3 max-w-2xl text-body text-black/72">{dedicatedListing?.description ?? kurtiHeading?.description ?? westernHeading?.description ?? womensBaggyHeading?.description ?? oversizedTeeHeading?.description ?? pantsHeading?.description ?? panjabiHeading?.description ?? halfShirtHeading?.description ?? legacyHeading?.description ?? heading.description}</p>
             {searchQuery ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-black/70">Showing results for “{searchQuery}”</p>
@@ -1425,6 +1455,22 @@ export default function ShopPage() {
             </>
           ) : null
         ) : isPantsListing ? (
+          visibleProducts.length > 0 ? (
+            <ProductListingGrid className="mt-6">
+              {visibleProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  href={`/product/${product.slug}`}
+                  variant="studio"
+                  priority={index < 4}
+                  onToggleWishlist={handleToggleWishlist}
+                  isInWishlist={isInWishlist(String(product.id))}
+                />
+              ))}
+            </ProductListingGrid>
+          ) : null
+        ) : isPanjabiListing ? (
           visibleProducts.length > 0 ? (
             <ProductListingGrid className="mt-6">
               {visibleProducts.map((product, index) => (

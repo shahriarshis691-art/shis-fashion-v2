@@ -23,8 +23,16 @@ const BLOCKED_LISTING_SLUGS = new Set([
   'coffee-brown-oversized-graphic-tee',
 ])
 
+export function listingProductImageCandidates(product: ListingProductLike): string[] {
+  const candidates = [product.image, ...(product.galleryImages ?? []), getProductImage(product)]
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter((item) => isPersistableMediaUrl(item) && !isListingPlaceholderImage(item))
+
+  return Array.from(new Set(candidates))
+}
+
 export function resolveListingProductImage(product: ListingProductLike): string {
-  return getProductImage(product)
+  return listingProductImageCandidates(product)[0] ?? getProductImage(product)
 }
 
 export function isListingPlaceholderImage(image: string): boolean {
@@ -62,12 +70,7 @@ export function hasListingRenderableImage(product: ListingProductLike): boolean 
     return false
   }
 
-  const image = resolveListingProductImage(product)
-  if (!isPersistableMediaUrl(image)) {
-    return false
-  }
-
-  return !isListingPlaceholderImage(image)
+  return listingProductImageCandidates(product).length > 0
 }
 
 export function filterListingProducts<T extends ListingProductLike>(products: T[]): T[] {
