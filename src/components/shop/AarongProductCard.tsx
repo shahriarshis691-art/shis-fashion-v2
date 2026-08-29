@@ -165,7 +165,7 @@ const AarongProductCard = memo(function AarongProductCard({
 
   return (
     <article
-      className="product-card luxury-tap group relative"
+      className="product-card luxury-tap group relative border-0"
       onMouseLeave={() => setSizePickerOpen(false)}
     >
       <PrefetchLink
@@ -175,7 +175,7 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none bg-[#f6f6f6] md:bg-neutral-100/60">
+        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none border-0 bg-neutral-100/70">
           <img
             key={displaySrc}
             src={displaySrc}
@@ -187,7 +187,7 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-contain object-center md:object-cover md:object-top"
+            className="product-card-media absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-top"
             onError={() => {
               if (imageFailed) {
                 return
@@ -202,7 +202,7 @@ const AarongProductCard = memo(function AarongProductCard({
             }}
           />
           {product.newArrival ? (
-            <span className="product-card-badge md:hidden" aria-label="New in">
+            <span className="product-card-badge product-card-badge-new md:hidden" aria-label="New in">
               NEW IN
             </span>
           ) : null}
@@ -243,7 +243,7 @@ const AarongProductCard = memo(function AarongProductCard({
           </div>
         </div>
 
-        <div className="product-card-meta">
+        <div className="product-card-meta mt-2 px-0.5">
           <div className="product-card-meta-row">
             <div className="product-card-meta-copy min-w-0 flex-1">
               <h3 className="product-card-title">{product.name}</h3>
@@ -298,7 +298,7 @@ const AarongProductCard = memo(function AarongProductCard({
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="studio-wishlist top-3 right-3 z-10"
+          className="studio-wishlist top-2.5 right-2.5 z-10"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
