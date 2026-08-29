@@ -193,18 +193,18 @@ export default function CollectionListingPage() {
         </header>
 
         {collectionImages.length ? (
-          <div className="product-grid mt-8 grid grid-cols-2 items-start gap-x-2.5 gap-y-6 px-2 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-8 sm:px-4">
+          <div className="product-grid mt-8 grid grid-cols-2 items-start gap-x-2 gap-y-5 px-2 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-8 sm:px-4">
             {collectionImages.map((image, index) => (
               <LuxuryImage
                 key={`${activeCollection.slug}-look-${index}`}
                 src={image}
                 alt={`${activeCollection.title} look ${index + 1}`}
                 width={960}
-                height={1200}
+                height={1440}
                 sizes="(max-width: 639px) 50vw, 25vw"
                 widths={[320, 480, 768, 960]}
-                className="min-w-0 bg-[#f4f4f4]"
-                aspectClassName="aspect-[3/4] sm:aspect-[4/5]"
+                className="min-w-0 bg-[#f7f7f7]"
+                aspectClassName="aspect-[2/3] sm:aspect-[3/4]"
                 objectFit="cover"
                 objectPosition="center top"
                 hover

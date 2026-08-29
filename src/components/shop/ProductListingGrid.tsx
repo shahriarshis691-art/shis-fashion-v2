@@ -11,7 +11,7 @@ export default function ProductListingGrid({ children, className = '', ...props 
       className={[
         'product-grid',
         'mx-auto grid min-w-0 w-full max-w-7xl',
-        'grid-cols-2 gap-x-2.5 gap-y-6 px-2',
+        'grid-cols-2 gap-x-2 gap-y-5 px-2',
         'sm:gap-x-4 sm:gap-y-8 sm:px-4',
         'md:grid-cols-3',
         'lg:grid-cols-4',

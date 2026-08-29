@@ -273,18 +273,18 @@ button,
   }
 }
 
-/* Listing cards — 3:4 / 4:5 portrait, edge-to-edge cover (no side gutters) */
+/* Listing cards — 2:3 mobile / 3:4 desktop, edge-to-edge cover */
 .listing-media-frame {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 2 / 3;
   width: 100%;
   overflow: hidden;
-  background-color: #f4f4f4;
+  background-color: #f7f7f7;
 }
 
 @media (min-width: 640px) {
   .listing-media-frame {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
   }
 }
 
@@ -307,7 +307,7 @@ button,
 .product-card .product-card-meta {
   margin-top: 0;
   min-height: 0;
-  padding-top: 0.75rem;
+  padding-top: 0.625rem;
   text-align: center;
 }
 
@@ -354,7 +354,7 @@ button,
 
 @media (max-width: 767px) {
   .listing-media-frame {
-    background-color: #f4f4f4;
+    background-color: #f7f7f7;
   }
 
   .listing-media-frame > img.product-card-media {
@@ -702,7 +702,7 @@ button,
 .product-card-meta {
   margin-top: 0;
   min-height: 0;
-  padding-top: 0.75rem;
+  padding-top: 0.625rem;
   text-align: center;
 }
 

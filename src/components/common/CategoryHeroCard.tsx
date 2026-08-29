@@ -46,9 +46,9 @@ export default function CategoryHeroCard({
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
   const imageFrameClass = isFeed && !plainFrame
     ? 'studio-media-frame w-full'
-    : 'relative w-full aspect-[3/4] overflow-hidden bg-[#f4f4f4] sm:aspect-[4/5]'
+    : 'relative w-full aspect-[2/3] overflow-hidden bg-[#f7f7f7] sm:aspect-[3/4]'
   const resolvedImageWidth = imageWidth ?? 960
-  const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1200)
+  const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1440)
   const imageObjectClass = isFeed
     ? [
       imgClassName,
@@ -62,7 +62,7 @@ export default function CategoryHeroCard({
     ].filter(Boolean).join(' ')
   const titleClass = isFeed
     ? 'line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black'
-    : 'line-clamp-2 px-1 text-xs font-normal tracking-[0.14em] text-neutral-900 uppercase sm:text-sm'
+    : 'line-clamp-2 px-1 pt-2.5 text-xs font-normal tracking-[0.14em] text-neutral-900 uppercase sm:text-sm'
 
   return (
     <Link
@@ -79,7 +79,7 @@ export default function CategoryHeroCard({
           sizes={resolvedSizes}
           widths={isFeed ? [480, 768, 1080, 1440] : [320, 480, 768, 960]}
           className="h-full w-full"
-          wrapperBackgroundClassName={frameBackground ?? (isFeed ? undefined : 'bg-[#f4f4f4]')}
+          wrapperBackgroundClassName={frameBackground ?? (isFeed ? undefined : 'bg-[#f7f7f7]')}
           aspectClassName="relative z-0 h-full w-full"
           objectPosition={imagePosition}
           objectFit={listingFit}
