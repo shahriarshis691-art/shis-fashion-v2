@@ -6,6 +6,7 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import { halfShirtCollectionProducts } from '../data/halfShirtCollection'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { parseBDT } from '../utils/currency'
+import { filterListingProducts } from '../utils/listingProducts'
 import { applySeoMetadata } from '../utils/seo'
 
 type SortOption = 'featured' | 'newest' | 'price-low' | 'price-high'
@@ -36,7 +37,7 @@ export default function HalfShirtCollectionPage() {
   }, [])
 
   const visibleProducts = useMemo(() => {
-    const filtered = halfShirtCollectionProducts.filter((product) => {
+    const filtered = filterListingProducts(halfShirtCollectionProducts).filter((product) => {
       if (selectedSize !== 'all' && !(product.sizes ?? []).includes(selectedSize)) {
         return false
       }

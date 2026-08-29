@@ -10,6 +10,8 @@ import {
 
 export type ListingProductLike = Pick<ShopProduct, 'slug' | 'image' | 'galleryImages'> & {
   isPlaceholder?: boolean
+  images?: string[]
+  imageUrl?: string
 }
 
 const BLOCKED_IMAGE_FRAGMENTS = [
@@ -17,12 +19,35 @@ const BLOCKED_IMAGE_FRAGMENTS = [
   'featured-men-collection',
   'category-saree-blue',
   'shis-media-tone',
+  'og-image.svg',
+  'og-image.png',
 ] as const
 
 /** Live-catalog slugs with missing/broken assets — never render on listing grids. */
 const BLOCKED_LISTING_SLUGS = new Set([
   'coffee-brown-oversized-graphic-tee',
+  'cream-crimson-leaf-handloom-saree',
+  'ivory-black-temple-border-handloom-saree',
+  'ivory-diamond-buti-jamdani-saree',
+  'ivory-sunflower-sketch-cotton-saree',
+  'temple-paisley-gold-border-saree',
+  'warli-motif-soft-cotton-saree',
+  'white-lotus-applique-cotton-saree',
 ])
+
+function collectListingImageSources(product: ListingProductLike): string[] {
+  const sources = [
+    product.image,
+    product.imageUrl,
+    ...(product.images ?? []),
+    ...(product.galleryImages ?? []),
+    getProductImage(product),
+  ]
+
+  return sources
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter(Boolean)
+}
 
 export function listingProductImageCandidates(product: ListingProductLike): string[] {
   const candidates = [product.image, ...(product.galleryImages ?? []), getProductImage(product)]
@@ -39,6 +64,10 @@ export function resolveListingProductImage(product: ListingProductLike): string 
 export function isListingPlaceholderImage(image: string): boolean {
   const normalized = image.trim().toLowerCase()
   if (!normalized) {
+    return true
+  }
+
+  if (normalized.includes('placeholder')) {
     return true
   }
 
@@ -68,6 +97,24 @@ export function hasListingRenderableImage(product: ListingProductLike): boolean 
   }
 
   if (isPlaceholderOversizedTeeProduct(product)) {
+    return false
+  }
+
+  const rawSources = collectListingImageSources(product)
+  const hasImageSource = rawSources.some((source) => {
+    if (typeof source !== 'string') {
+      return false
+    }
+
+    const trimmed = source.trim()
+    if (!trimmed) {
+      return false
+    }
+
+    return !isListingPlaceholderImage(trimmed)
+  })
+
+  if (!hasImageSource) {
     return false
   }
 

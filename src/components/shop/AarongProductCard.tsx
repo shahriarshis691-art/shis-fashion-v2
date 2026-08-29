@@ -4,7 +4,7 @@ import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
 import { hasListingRenderableImage, listingProductImageCandidates } from '../../utils/listingProducts'
-import { CATALOG_IMAGE_PLACEHOLDER, catalogImageAttrs } from '../../utils/media'
+import { catalogImageAttrs } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 import { getVariantStock } from '../../utils/variantStock'
 
@@ -108,9 +108,7 @@ const AarongProductCard = memo(function AarongProductCard({
     () => catalogImageAttrs(activeImage, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
     [activeImage],
   )
-  const displaySrc = imageFailed
-    ? CATALOG_IMAGE_PLACEHOLDER
-    : (image.src || activeImage || CATALOG_IMAGE_PLACEHOLDER)
+  const displaySrc = image.src || activeImage
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
   const colorSwatches = useMemo(() => {
     const colors = (product.colors ?? []).map((color) => color.trim()).filter(Boolean)
@@ -119,7 +117,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const sizes = useMemo(() => (product.sizes ?? []).map((size) => size.trim()).filter(Boolean), [product.sizes])
   const defaultColor = product.colors?.[0]?.trim() || 'Default'
 
-  if (!hasListingRenderableImage(product) && imageCandidates.length === 0) {
+  if (!hasListingRenderableImage(product) || imageFailed || !displaySrc) {
     return null
   }
 
