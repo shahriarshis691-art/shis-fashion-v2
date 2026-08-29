@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import {
+  applyUncroppedListingFit,
   buildLqipUrl,
   CATALOG_IMAGE_PLACEHOLDER,
   catalogImageAttrs,
@@ -21,6 +22,7 @@ interface LuxuryImageProps {
   cinematicFill?: boolean
   priority?: boolean
   hover?: boolean
+  preserveFullSubject?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
 }
 
@@ -45,19 +47,22 @@ export default function LuxuryImage({
   cinematicFill = false,
   priority = false,
   hover = false,
+  preserveFullSubject = false,
   onError,
 }: LuxuryImageProps) {
   const [loaded, setLoaded] = useState(priority)
-  const image = catalogImageAttrs(src, width, height, sizes, widths)
+  const isContained = objectFit === 'contain'
+  const image = catalogImageAttrs(src, width, height, sizes, widths, preserveFullSubject || isContained ? 'contain' : 'cover')
   const imageSrc = image.src || CATALOG_IMAGE_PLACEHOLDER
   const lqip = !priority && !cinematicFill ? buildLqipUrl(src) : ''
-  const isContained = objectFit === 'contain'
-  const imageStyle: CSSProperties | undefined = objectPosition || isContained
-    ? {
-      ...(objectPosition ? { objectPosition } : {}),
-      ...(isContained ? { objectFit: 'contain' } : { objectFit: 'cover' }),
-    }
-    : undefined
+  const imageStyle: CSSProperties | undefined = preserveFullSubject
+    ? { objectPosition: objectPosition || 'center top' }
+    : objectPosition || isContained
+      ? {
+        ...(objectPosition ? { objectPosition } : {}),
+        ...(isContained ? { objectFit: 'contain' } : { objectFit: 'cover' }),
+      }
+      : undefined
   const wrapperBackgroundClass = wrapperBackgroundClassName
     ?? (cinematicFill ? 'bg-black' : isContained ? 'bg-white' : 'bg-black/5')
 
@@ -104,7 +109,12 @@ export default function LuxuryImage({
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : undefined}
         decoding="async"
-        onLoad={() => setLoaded(true)}
+        onLoad={(event) => {
+          setLoaded(true)
+          if (preserveFullSubject) {
+            applyUncroppedListingFit(event.currentTarget)
+          }
+        }}
         onError={(event) => {
           setLoaded(true)
           if (onError) {

@@ -29,7 +29,7 @@ export default function CategoryHeroCard({
   image,
   priority = false,
   variant = 'portrait',
-  imagePosition = 'center center',
+  imagePosition = 'center top',
   imageFit = 'cover',
   frameBackground,
   imageWidth,
@@ -42,25 +42,27 @@ export default function CategoryHeroCard({
   onError,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
-  const isContained = !isFeed && imageFit === 'contain'
+  const listingFit = isFeed ? imageFit : 'cover'
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
   const imageFrameClass = isFeed && !plainFrame
     ? 'studio-media-frame w-full'
-    : isContained
-      ? 'relative w-full aspect-[3/4] overflow-hidden bg-white'
-      : 'relative w-full aspect-[3/4] overflow-hidden bg-neutral-100'
+    : 'relative flex w-full aspect-[2/3] items-center justify-center overflow-hidden bg-[#f8f8f8] sm:aspect-[3/4]'
   const resolvedImageWidth = imageWidth ?? 960
-  const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1200)
-  const imageObjectClass = isContained
-    ? (imgClassName ?? '')
+  const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1440)
+  const imageObjectClass = isFeed
+    ? [
+      imgClassName,
+      'min-h-full min-w-full object-cover',
+      imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
+    ].filter(Boolean).join(' ')
     : [
       imgClassName,
-      'min-h-full min-w-full object-cover object-center',
+      'h-full w-full object-cover object-top',
       imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
     ].filter(Boolean).join(' ')
   const titleClass = isFeed
     ? 'line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black'
-    : 'line-clamp-2 text-xs font-normal tracking-[0.18em] text-neutral-900 uppercase sm:text-sm md:text-base'
+    : 'line-clamp-2 px-1 text-xs font-normal tracking-[0.14em] text-neutral-900 uppercase sm:text-sm'
 
   return (
     <Link
@@ -77,10 +79,11 @@ export default function CategoryHeroCard({
           sizes={resolvedSizes}
           widths={isFeed ? [480, 768, 1080, 1440] : [320, 480, 768, 960]}
           className="h-full w-full"
-          wrapperBackgroundClassName={frameBackground}
+          wrapperBackgroundClassName={frameBackground ?? (isFeed ? undefined : 'bg-[#f8f8f8]')}
           aspectClassName="relative z-0 h-full w-full"
           objectPosition={imagePosition}
-          objectFit={imageFit}
+          objectFit={listingFit}
+          preserveFullSubject={!isFeed}
           priority={priority}
           imgClassName={imageObjectClass}
           onError={onError}
