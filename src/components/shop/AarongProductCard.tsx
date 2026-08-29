@@ -4,7 +4,7 @@ import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
 import { hasListingRenderableImage, listingProductImageCandidates } from '../../utils/listingProducts'
-import { catalogImageAttrs, applyUncroppedListingFit } from '../../utils/media'
+import { catalogImageAttrs } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 import { getVariantStock } from '../../utils/variantStock'
 
@@ -105,7 +105,7 @@ const AarongProductCard = memo(function AarongProductCard({
   const activeImage = imageCandidates[imageCandidateIndex] ?? product.image
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
   const image = useMemo(
-    () => catalogImageAttrs(activeImage, 640, 960, LISTING_CARD_SIZES, [320, 480, 640, 768], 'contain'),
+    () => catalogImageAttrs(activeImage, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
     [activeImage],
   )
   const displaySrc = image.src || activeImage
@@ -173,7 +173,7 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame relative flex aspect-[2/3] w-full items-center justify-center overflow-hidden rounded-none border-0 bg-[#f8f8f8] sm:aspect-[3/4]">
+        <div className="listing-media-frame relative w-full aspect-[3/4] overflow-hidden rounded-none border-0 bg-[#f4f4f4] sm:aspect-[4/5]">
           <img
             key={displaySrc}
             src={displaySrc}
@@ -181,17 +181,11 @@ const AarongProductCard = memo(function AarongProductCard({
             sizes={imageFailed ? undefined : image.sizes}
             alt={imageFailed ? '' : product.name}
             width={640}
-            height={960}
+            height={853}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
             className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
-            ref={(node) => {
-              if (node?.complete && node.naturalWidth > 0) {
-                applyUncroppedListingFit(node)
-              }
-            }}
-            onLoad={(event) => applyUncroppedListingFit(event.currentTarget)}
             onError={() => {
               if (imageFailed) {
                 return

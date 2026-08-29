@@ -454,31 +454,6 @@ export function catalogImageAttrs(
   }
 }
 
-/** Cover the frame unless the photo is taller — then contain so heads and hems stay in view. */
-export function applyUncroppedListingFit(image: HTMLImageElement) {
-  const apply = () => {
-    const frame = image.parentElement
-    if (!frame || image.naturalWidth < 2) {
-      return
-    }
-
-    const sourceRatio = image.naturalHeight / image.naturalWidth
-    const frameRatio = frame.clientHeight / Math.max(frame.clientWidth, 1)
-    if (frameRatio <= 0) {
-      return
-    }
-
-    image.classList.toggle('is-taller-subject', sourceRatio > frameRatio + 0.03)
-  }
-
-  if (image.parentElement && image.parentElement.clientHeight > 0) {
-    apply()
-    return
-  }
-
-  requestAnimationFrame(apply)
-}
-
 export function buildLqipUrl(url: string) {
   if (!url || url.startsWith('data:')) {
     return ''

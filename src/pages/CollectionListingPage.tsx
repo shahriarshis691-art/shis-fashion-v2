@@ -200,13 +200,12 @@ export default function CollectionListingPage() {
                 src={image}
                 alt={`${activeCollection.title} look ${index + 1}`}
                 width={960}
-                height={1440}
+                height={1200}
                 sizes="(max-width: 639px) 50vw, 25vw"
                 widths={[320, 480, 768, 960]}
-                className="min-w-0 bg-[#f8f8f8]"
-                aspectClassName="aspect-[2/3] sm:aspect-[3/4]"
+                className="min-w-0 bg-[#f4f4f4]"
+                aspectClassName="aspect-[3/4] sm:aspect-[4/5]"
                 objectFit="cover"
-                preserveFullSubject
                 objectPosition="center top"
                 hover
                 imgClassName={isDemoImageUrl(image) ? 'shis-media-tone' : ''}

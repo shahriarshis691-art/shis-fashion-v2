@@ -273,18 +273,18 @@ button,
   }
 }
 
-/* Listing cards — tall portrait frame, full garment in view (no head/hem crop) */
+/* Listing cards — 3:4 / 4:5 portrait, edge-to-edge cover (no side gutters) */
 .listing-media-frame {
   position: relative;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   width: 100%;
   overflow: hidden;
-  background-color: #f8f8f8;
+  background-color: #f4f4f4;
 }
 
 @media (min-width: 640px) {
   .listing-media-frame {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
   }
 }
 
@@ -302,11 +302,6 @@ button,
   will-change: transform;
   object-fit: cover;
   object-position: center top;
-}
-
-img.is-taller-subject {
-  object-fit: contain !important;
-  object-position: center top !important;
 }
 
 .product-card .product-card-meta {
@@ -359,7 +354,7 @@ img.is-taller-subject {
 
 @media (max-width: 767px) {
   .listing-media-frame {
-    background-color: #f8f8f8;
+    background-color: #f4f4f4;
   }
 
   .listing-media-frame > img.product-card-media {
