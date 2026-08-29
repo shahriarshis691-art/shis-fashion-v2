@@ -16,6 +16,7 @@ export interface CategoryHeroCardProps {
   labelClassName?: string
   imageHoverScale?: boolean
   sizes?: string
+  /** @deprecated Titles sit below the image; overlay is no longer used. */
   showOverlay?: boolean
   /** Skip studio-media-frame overlay while keeping cover crop. */
   plainFrame?: boolean
@@ -37,35 +38,34 @@ export default function CategoryHeroCard({
   labelClassName,
   imageHoverScale = true,
   sizes,
-  showOverlay = false,
   plainFrame = false,
   onError,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
   const isContained = !isFeed && imageFit === 'contain'
   const resolvedSizes = sizes ?? (isFeed ? '(max-width: 767px) 100vw, 33vw' : '(max-width: 767px) 50vw, 33vw')
-  const portraitFrameClass = isContained
-    ? 'aspect-[3/4] bg-white'
+  const imageFrameClass = isContained
+    ? 'relative w-full aspect-[3/4] overflow-hidden bg-white'
     : plainFrame
-      ? 'aspect-[3/4] overflow-hidden bg-neutral-100'
-      : 'studio-media-frame'
+      ? 'relative w-full aspect-[3/4] overflow-hidden bg-neutral-100'
+      : 'studio-media-frame w-full'
   const resolvedImageWidth = imageWidth ?? 960
   const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1200)
   const imageObjectClass = isContained
     ? (imgClassName ?? '')
     : [
       imgClassName,
-      'min-h-full min-w-full object-cover',
-      imageHoverScale ? 'group-hover:scale-105 transition-transform duration-500 ease-out' : '',
+      'min-h-full min-w-full object-cover object-center',
+      imageHoverScale ? 'transition-transform duration-500 ease-out group-hover:scale-105' : '',
     ].filter(Boolean).join(' ')
 
   return (
     <Link
       to={href}
-      className={`group luxury-tap relative z-0 isolate ${isFeed ? 'block' : 'flex'} h-full w-full min-w-0 cursor-pointer overflow-hidden`}
+      className="group luxury-tap relative z-0 flex w-full min-w-0 cursor-pointer flex-col items-center"
       aria-label={name}
     >
-      <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? frameBackground ?? '' : portraitFrameClass}`}>
+      <div className={imageFrameClass}>
         <LuxuryImage
           src={image}
           alt={`${name} collection`}
@@ -75,43 +75,21 @@ export default function CategoryHeroCard({
           widths={isFeed ? [480, 768, 1080, 1440] : [320, 480, 768, 960]}
           className="h-full w-full"
           wrapperBackgroundClassName={frameBackground}
-          aspectClassName={isFeed ? 'absolute inset-0 z-0 h-full w-full' : 'relative z-0 aspect-[3/4]'}
+          aspectClassName="relative z-0 h-full w-full"
           objectPosition={imagePosition}
           objectFit={imageFit}
           priority={priority}
           imgClassName={imageObjectClass}
           onError={onError}
         />
-        <div className="pointer-events-none absolute inset-0 z-30">
-          {showOverlay ? (
-            <div
-              className="absolute inset-0 z-0 bg-gradient-to-t from-black/85 via-black/45 to-black/10"
-              aria-hidden
-            />
-          ) : null}
-          <div
-            className={
-              isFeed
-                ? 'absolute bottom-4 left-0 right-0 z-10 text-center'
-                : 'relative z-10 flex flex-col items-center px-3 pb-4 pt-10 text-center sm:px-4'
-            }
-          >
-            <span
-              className={`relative font-semibold uppercase ${
-                isContained
-                  ? 'text-neutral-900'
-                  : `text-white ${labelClassName ?? (isFeed ? 'drop-shadow-md' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]')}`
-              } ${
-                isFeed
-                  ? 'text-xs tracking-widest md:text-sm'
-                  : 'text-xs tracking-[0.16em] sm:text-sm sm:tracking-[0.18em]'
-              }`}
-              style={isFeed ? { fontFamily: "'Cormorant Garamond', 'Cinzel', serif" } : undefined}
-            >
-              {name}
-            </span>
-          </div>
-        </div>
+      </div>
+
+      <div className="w-full pt-3 pb-1 text-center">
+        <h3
+          className={`line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black ${labelClassName ?? ''}`.trim()}
+        >
+          {name}
+        </h3>
       </div>
     </Link>
   )

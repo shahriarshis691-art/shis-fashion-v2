@@ -62,17 +62,12 @@ export default function ShopByCategorySection({
         </div>
       </div>
 
-      <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-stretch md:gap-4 md:px-6 md:pb-0 lg:grid-cols-4">
+      <div className="relative z-10 isolate flex flex-col gap-8 px-4 pb-8 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-start md:gap-x-4 md:gap-y-8 md:px-6 md:pb-0 lg:grid-cols-4">
         {hubItems.map((item, index) => {
           const isSareeCard = item.key.trim().toLowerCase() === 'saree'
 
           return (
-            <article
-              key={item.key}
-              className={`relative z-10 isolate h-[calc(100svh-14rem)] min-h-[28rem] w-full overflow-hidden md:aspect-[3/4] md:h-auto md:min-h-0 ${
-                isSareeCard ? 'bg-[#e8cbb1]' : ''
-              }`}
-            >
+            <article key={item.key} className="relative z-10 isolate w-full min-w-0">
               <CategoryHeroCard
                 name={item.name}
                 href={item.href}
@@ -87,7 +82,6 @@ export default function ShopByCategorySection({
                 imgClassName={isSareeCard ? 'object-top' : undefined}
                 imageHoverScale={!isSareeCard}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                showOverlay={item.key.trim().toLowerCase() === 'kids'}
               />
             </article>
           )

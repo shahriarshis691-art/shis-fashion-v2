@@ -113,7 +113,7 @@ export default function CategoryHubPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 md:gap-x-5 md:gap-y-8 lg:grid-cols-4 lg:gap-x-6">
           {subcategories.map((subcategory, index) => (
             <CategoryHeroCard
               key={subcategory.slug}
@@ -123,7 +123,6 @@ export default function CategoryHubPage() {
               priority={index < 2}
               variant="portrait"
               imagePosition={subcategory.slug === 'womens-baggy' || subcategory.slug === 'panjabi' || subcategory.slug === 'pants' || subcategory.slug === 'polos' ? 'center center' : 'center top'}
-              showOverlay={subcategory.slug === 'womens-baggy'}
               plainFrame={subcategory.slug === 'panjabi'}
               sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
             />
