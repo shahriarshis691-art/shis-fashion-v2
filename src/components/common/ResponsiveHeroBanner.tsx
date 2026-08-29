@@ -33,6 +33,9 @@ export interface ResponsiveHeroBannerProps {
   overlayClassName?: string
   /** Override mobile aspect ratio, e.g. `4/5`. Desktop layout is unchanged. */
   mobileAspectRatio?: string
+  /** When true, render only the inner media frame (for carousel slides). */
+  embed?: boolean
+  objectFit?: 'contain' | 'cover'
 }
 
 function resolveHeroBackground(background: ResponsiveHeroBannerProps['background']) {
@@ -64,6 +67,8 @@ export default function ResponsiveHeroBanner({
   children,
   overlayClassName,
   mobileAspectRatio,
+  embed = false,
+  objectFit = 'contain',
 }: ResponsiveHeroBannerProps) {
   const bgColor = resolveHeroBackground(background)
   const aspectRatio = mobileAspectRatio ?? `${width} / ${height}`
@@ -86,8 +91,9 @@ export default function ResponsiveHeroBanner({
   }, [fallbacks])
 
   const imageClassName = [
-    'gpu-media block h-full w-full max-w-full object-contain',
+    objectFit === 'cover' ? 'gpu-media block h-full w-full max-w-full object-cover' : 'gpu-media block h-full w-full max-w-full object-contain',
     'md:h-auto md:w-full md:max-w-none',
+    embed ? 'md:h-full' : '',
   ].filter(Boolean).join(' ')
 
   const imageStyle: React.CSSProperties = {
@@ -96,7 +102,7 @@ export default function ResponsiveHeroBanner({
 
   const frameClassName = [
     'relative w-full overflow-hidden',
-    'max-md:[aspect-ratio:var(--hero-aspect)]',
+    embed ? 'h-full' : 'max-md:[aspect-ratio:var(--hero-aspect)]',
   ].join(' ')
 
   const frameStyle = {
@@ -124,7 +130,7 @@ export default function ResponsiveHeroBanner({
 
     if (sources?.length) {
       return (
-        <picture className="flex h-full w-full items-center justify-center md:block md:h-auto md:w-full">
+        <picture className={`flex h-full w-full items-center justify-center ${embed ? '' : 'md:block md:h-auto md:w-full'}`}>
           {sources.map((source) => (
             <source key={source.type} srcSet={source.srcSet} type={source.type} sizes={sizes} />
           ))}
@@ -136,6 +142,25 @@ export default function ResponsiveHeroBanner({
     return <img src={src} {...sharedProps} />
   }
 
+  const frameContent = (
+    <>
+      {renderImage()}
+      {children ? (
+        <div className={overlayClassName ?? 'absolute inset-0 z-10'}>
+          {children}
+        </div>
+      ) : null}
+    </>
+  )
+
+  if (embed) {
+    return (
+      <div className={frameClassName} style={frameStyle}>
+        {frameContent}
+      </div>
+    )
+  }
+
   return (
     <section
       className={['relative z-0 isolate w-full max-w-[100vw] overflow-x-hidden', sectionClassName]
@@ -145,12 +170,7 @@ export default function ResponsiveHeroBanner({
       aria-label={ariaLabel ?? alt}
     >
       <div className={frameClassName} style={frameStyle}>
-        {renderImage()}
-        {children ? (
-          <div className={overlayClassName ?? 'absolute inset-0 z-10'}>
-            {children}
-          </div>
-        ) : null}
+        {frameContent}
       </div>
     </section>
   )

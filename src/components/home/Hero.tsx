@@ -1,10 +1,5 @@
 import React from 'react'
-import ResponsiveHeroBanner from '../common/ResponsiveHeroBanner'
-
-const HERO_IMAGE = '/hero/saree-heroimage/homepage-hero-image.png'
-const HERO_IMAGE_FALLBACKS = ['/hero/saree-heroimage/homepage-hero-image.png.jpg']
-const HERO_IMAGE_WIDTH = 2244
-const HERO_IMAGE_HEIGHT = 2804
+import HomeHeroCarousel from './HomeHeroCarousel'
 
 export interface HeroContentInput {
   heroTitle?: string
@@ -24,18 +19,7 @@ export const Hero: React.FC<HeroProps> = () => {
   return (
     <>
       <h1 className="sr-only">SHIS Fashion Bangladesh</h1>
-      <ResponsiveHeroBanner
-        src={HERO_IMAGE}
-        alt="SHIS Fashion Exclusive Launch Saree — campaign banner"
-        width={HERO_IMAGE_WIDTH}
-        height={HERO_IMAGE_HEIGHT}
-        fallbacks={HERO_IMAGE_FALLBACKS}
-        background="cream"
-        sectionClassName="mb-3 md:mb-0"
-        ariaLabel="SHIS Fashion hero banner"
-        objectPosition="center top"
-        mobileAspectRatio="4/5"
-      />
+      <HomeHeroCarousel />
     </>
   )
 }
