@@ -5,6 +5,7 @@ import {
   getProductImage,
   isOutdatedHardcodedMediaUrl,
   isPersistableMediaUrl,
+  sanitizeCatalogAssetUrl,
 } from './media'
 
 export type ListingProductLike = Pick<ShopProduct, 'slug' | 'image' | 'galleryImages'> & {
@@ -25,7 +26,7 @@ const BLOCKED_LISTING_SLUGS = new Set([
 
 export function listingProductImageCandidates(product: ListingProductLike): string[] {
   const candidates = [product.image, ...(product.galleryImages ?? []), getProductImage(product)]
-    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .map((item) => (typeof item === 'string' ? sanitizeCatalogAssetUrl(item.trim()) : ''))
     .filter((item) => isPersistableMediaUrl(item) && !isListingPlaceholderImage(item))
 
   return Array.from(new Set(candidates))

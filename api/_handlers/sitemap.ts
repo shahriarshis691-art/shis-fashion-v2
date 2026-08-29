@@ -25,6 +25,7 @@ const STATIC_PATHS = [
   '/men',
   '/men/half-shirts',
   '/men/panjabi',
+  '/men/polos',
   '/collections/oversized-tee',
   '/oversized-tee',
   '/kids',

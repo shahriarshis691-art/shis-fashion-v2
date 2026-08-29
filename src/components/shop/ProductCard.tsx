@@ -27,7 +27,7 @@ const ProductCard = memo(function ProductCard({
   prefetchModule,
   variant = 'default',
 }: ProductCardProps) {
-  const detailHref = href ?? (/half-shirt|oversized-tee|unisex-tee|western|kurti|panjabi/i.test(product.category) || product.subCategory === 'shirts' || product.subCategory === 'panjabi' ? `/product/${product.slug}` : undefined)
+  const detailHref = href ?? (/half-shirt|oversized-tee|unisex-tee|western|kurti|panjabi|polo/i.test(product.category) || product.subCategory === 'shirts' || product.subCategory === 'panjabi' || product.subCategory === 'polos' ? `/product/${product.slug}` : undefined)
 
   return (
     <AarongProductCard

@@ -99,6 +99,9 @@ const AarongProductCard = memo(function AarongProductCard({
   const { addToCart } = useCart()
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
   const [imageCandidateIndex, setImageCandidateIndex] = useState(0)
+  const [srcSetDisabled, setSrcSetDisabled] = useState(false)
+  const [useOriginalSrc, setUseOriginalSrc] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
   const imageCandidates = useMemo(() => listingProductImageCandidates(product), [product])
   const activeImage = imageCandidates[imageCandidateIndex] ?? product.image
   const detailHref = href ?? `/shop/${product.category}/${product.slug}`
@@ -106,6 +109,8 @@ const AarongProductCard = memo(function AarongProductCard({
     () => catalogImageAttrs(activeImage, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
     [activeImage],
   )
+  const transformedSrc = image.src || product.image
+  const displaySrc = useOriginalSrc ? activeImage : transformedSrc
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
   const colorSwatches = useMemo(() => {
     const colors = (product.colors ?? []).map((color) => color.trim()).filter(Boolean)
@@ -169,26 +174,41 @@ const AarongProductCard = memo(function AarongProductCard({
         onClick={() => onProductClick?.(product)}
       >
         <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none bg-neutral-100/60">
-          <img
-            src={image.src || product.image}
-            srcSet={image.srcSet}
-            sizes={image.sizes}
-            alt={product.name}
-            width={640}
-            height={853}
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : 'low'}
-            decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
-            onError={() => {
-              setImageCandidateIndex((current) => {
-                if (current < imageCandidates.length - 1) {
-                  return current + 1
+          {!imageFailed ? (
+            <img
+              key={`${activeImage}|${srcSetDisabled}|${useOriginalSrc}`}
+              src={displaySrc}
+              srcSet={srcSetDisabled || useOriginalSrc ? undefined : image.srcSet}
+              sizes={srcSetDisabled || useOriginalSrc ? undefined : image.sizes}
+              alt={product.name}
+              width={640}
+              height={853}
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'low'}
+              decoding="async"
+              className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
+              onError={() => {
+                if (!srcSetDisabled && image.srcSet) {
+                  setSrcSetDisabled(true)
+                  return
                 }
-                return current
-              })
-            }}
-          />
+
+                if (!useOriginalSrc && activeImage && activeImage !== transformedSrc) {
+                  setUseOriginalSrc(true)
+                  return
+                }
+
+                if (imageCandidateIndex < imageCandidates.length - 1) {
+                  setSrcSetDisabled(false)
+                  setUseOriginalSrc(false)
+                  setImageCandidateIndex((current) => current + 1)
+                  return
+                }
+
+                setImageFailed(true)
+              }}
+            />
+          ) : null}
           {luxuryBadge ? (
             <span className="product-card-badge" aria-label={luxuryBadge}>
               {luxuryBadge}

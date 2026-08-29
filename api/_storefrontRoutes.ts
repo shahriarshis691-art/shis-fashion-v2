@@ -13,6 +13,7 @@ const STATIC_PATHS = new Set([
   '/men',
   '/men/half-shirts',
   '/men/panjabi',
+  '/men/polos',
   '/collections/oversized-tee',
   '/oversized-tee',
   '/kids',

@@ -123,6 +123,14 @@ export const router = createBrowserRouter([
         element: withSuspense(<ShopPage />),
       },
       {
+        path: 'men/polos',
+        element: withSuspense(<ShopPage />),
+      },
+      {
+        path: 'men/polo',
+        element: <Navigate to="/men/polos" replace />,
+      },
+      {
         path: 'kids',
         element: withSuspense(<KidsOversizedTeeCollectionPage />),
       },

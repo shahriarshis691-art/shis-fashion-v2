@@ -269,13 +269,51 @@ export function normalizeCloudinaryImageUrl(
   }
 }
 
+function encodeUrlPathSegment(segment: string) {
+  if (!segment) {
+    return segment
+  }
+
+  try {
+    return encodeURIComponent(decodeURIComponent(segment))
+  } catch {
+    return encodeURIComponent(segment)
+  }
+}
+
+export function sanitizeCatalogAssetUrl(url: string) {
+  const trimmed = url.trim()
+  if (!trimmed || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return trimmed
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed)
+      parsed.pathname = parsed.pathname
+        .split('/')
+        .map((segment) => encodeUrlPathSegment(segment))
+        .join('/')
+      return parsed.toString()
+    } catch {
+      return trimmed
+    }
+  }
+
+  return trimmed
+    .split('/')
+    .map((segment, index) => (index === 0 && segment === '' ? '' : encodeUrlPathSegment(segment)))
+    .join('/')
+}
+
 export function normalizeCatalogImageUrl(
   url: string,
   width: number,
   height: number,
   fit: CatalogImageFit = 'cover',
 ) {
-  const cloudinaryUrl = normalizeCloudinaryImageUrl(url, width, height, fit)
+  const sanitized = sanitizeCatalogAssetUrl(url)
+  const cloudinaryUrl = normalizeCloudinaryImageUrl(sanitized, width, height, fit)
   return normalizeDemoImageUrl(cloudinaryUrl, width, height, fit)
 }
 

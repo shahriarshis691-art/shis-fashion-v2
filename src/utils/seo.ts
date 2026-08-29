@@ -112,6 +112,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/men',
     '/men/half-shirts',
     '/men/panjabi',
+    '/men/polos',
     '/men/pants',
     '/collections/oversized-tee',
     '/oversized-tee',
@@ -250,6 +251,9 @@ function buildBreadcrumbItems(pathname: string) {
     }
     if (segments[1] === 'panjabi') {
       items.push({ name: 'Panjabi', item: `${SITE_URL}/men/panjabi` })
+    }
+    if (segments[1] === 'polos' || segments[1] === 'polo') {
+      items.push({ name: 'Polos', item: `${SITE_URL}/men/polos` })
     }
     if (segments[1] === 'pants') {
       items.push({ name: 'Pants', item: `${SITE_URL}/men/pants` })
@@ -650,6 +654,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       description: 'Shop men\'s panjabi from SHIS Fashion Bangladesh — refined occasion and everyday edits with fast delivery and cash on delivery.',
       keywords: 'panjabi Bangladesh, mens panjabi, SHIS panjabi, punjabi Dhaka',
       canonicalPath: '/men/panjabi',
+      ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/men/polos' || normalizedPath === '/men/polo') {
+    return {
+      title: "Men's Polos | SHIS Fashion Bangladesh",
+      description: 'Shop men\'s polo shirts from SHIS Fashion Bangladesh — premium everyday polos with fast delivery and cash on delivery.',
+      keywords: 'polo shirt Bangladesh, mens polo, SHIS polo, premium polo Dhaka',
+      canonicalPath: '/men/polos',
       ogImage: DEFAULT_OG_IMAGE,
       type: 'collection',
       robots: 'index,follow',

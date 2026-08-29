@@ -43,7 +43,7 @@ const MEN_SUBCATEGORIES: SubcategoryConfig[] = [
     aliases: ['half-shirt', 'half-shirts', 'half shirt', 'mens-half-shirt', 'mens-half-shirts'],
     path: '/men/half-shirts',
   },
-  { slug: 'polos', label: 'Polos', aliases: ['polos'] },
+  { slug: 'polos', label: 'Polos', aliases: ['polos', 'polo', 'polo-shirt', 'polo-shirts', 'polo-t-shirts'], path: '/men/polos' },
   { slug: 'panjabi', label: 'Panjabi', aliases: ['panjabi', 'punjabi'], path: '/men/panjabi' },
   { slug: 'oversized-tee', label: 'Oversized Tee', aliases: ['oversized-tee', 'oversize-tee', 'unisex-tee', 'unisex-oversized-t-shirts'], path: '/collections/oversized-tee' },
   {
@@ -301,6 +301,16 @@ export function getDedicatedListingFromPath(pathname: string) {
     }
   }
 
+  if (normalized === '/men/polos' || normalized === '/men/polo') {
+    return {
+      segment: 'men' as const,
+      subcategory: 'polos',
+      eyebrow: "Men's Polo Collection",
+      title: 'Polos',
+      description: 'Premium polo shirts cut for everyday polish, comfort, and repeat wear.',
+    }
+  }
+
   if (
     normalized === '/women/womens-baggy' ||
     normalized === '/women/womens-baggy-jeans' ||
@@ -337,6 +347,10 @@ export function getDedicatedListingPath(segment: ShopSegment, subcategory: strin
 
   if (segment === 'men' && (subcategory === 'panjabi' || subcategory === 'punjabi')) {
     return '/men/panjabi'
+  }
+
+  if (segment === 'men' && (subcategory === 'polos' || subcategory === 'polo')) {
+    return '/men/polos'
   }
 
   if (segment === 'women' && (subcategory === 'womens-baggy' || subcategory === 'womens-baggy-jeans')) {
