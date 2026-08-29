@@ -5,6 +5,10 @@ export const featuredCollectionCovers: Record<string, string> = {
 }
 
 export const SAREE_HOMEPAGE_COVER = '/homepage/category.png'
+export const SAREE_HOMEPAGE_COVER_ASPECT = {
+  width: 960,
+  height: 640,
+} as const
 export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
 
 export const categoryStripCovers: Record<string, string> = {

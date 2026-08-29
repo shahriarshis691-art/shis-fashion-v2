@@ -10,6 +10,9 @@ export interface CategoryHeroCardProps {
   imagePosition?: string
   imageFit?: 'cover' | 'contain'
   frameBackground?: string
+  imageWidth?: number
+  imageHeight?: number
+  imgClassName?: string
   sizes?: string
   showOverlay?: boolean
   /** Skip studio-media-frame overlay while keeping cover crop. */
@@ -26,6 +29,9 @@ export default function CategoryHeroCard({
   imagePosition = 'center center',
   imageFit = 'cover',
   frameBackground,
+  imageWidth,
+  imageHeight,
+  imgClassName,
   sizes,
   showOverlay = false,
   plainFrame = false,
@@ -39,22 +45,27 @@ export default function CategoryHeroCard({
     : plainFrame
       ? 'aspect-[3/4] overflow-hidden bg-neutral-100'
       : 'studio-media-frame'
+  const resolvedImageWidth = imageWidth ?? 960
+  const resolvedImageHeight = imageHeight ?? (isFeed ? 1600 : 1200)
   const imageObjectClass = isContained
-    ? ''
-    : 'group-hover:scale-105 transition-transform duration-500 ease-out'
+    ? (imgClassName ?? '')
+    : [
+      imgClassName,
+      'min-h-full min-w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out',
+    ].filter(Boolean).join(' ')
 
   return (
     <Link
       to={href}
-      className="group luxury-tap relative z-0 isolate flex h-full w-full min-w-0 cursor-pointer overflow-hidden"
+      className={`group luxury-tap relative z-0 isolate ${isFeed ? 'block' : 'flex'} h-full w-full min-w-0 cursor-pointer overflow-hidden`}
       aria-label={name}
     >
       <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? frameBackground ?? '' : portraitFrameClass}`}>
         <LuxuryImage
           src={image}
           alt={`${name} collection`}
-          width={960}
-          height={isFeed ? 1600 : 1200}
+          width={resolvedImageWidth}
+          height={resolvedImageHeight}
           sizes={resolvedSizes}
           widths={isFeed ? [480, 768, 1080, 1440] : [320, 480, 768, 960]}
           className="h-full w-full"

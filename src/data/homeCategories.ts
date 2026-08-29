@@ -35,7 +35,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     name: 'Saree',
     href: '/sarees',
     image: SAREE_HOMEPAGE_COVER,
-    imagePosition: '25% center',
+    imagePosition: 'left center',
   },
   {
     key: 'denim',

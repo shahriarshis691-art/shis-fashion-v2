@@ -17,7 +17,7 @@ import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../util
 
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: WOMEN_HOMEPAGE_COVER, imagePosition: 'center center' },
-  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: '25% center' },
+  { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: 'left center' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: categoryStripCovers.men, imagePosition: 'center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
@@ -342,7 +342,7 @@ export default function HomePage() {
         name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : key === 'saree' ? 'Saree' : strip?.label || 'Men',
         href: key === 'kids' ? '/kids' : (strip?.href || fallbackHref),
         image: strip?.image || fallbackImage,
-        imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : key === 'saree' ? '25% center' : key === 'women' ? 'center center' : 'center top'),
+        imagePosition: strip?.imagePosition || (key === 'men' ? 'center' : key === 'saree' ? 'left center' : key === 'women' ? 'center center' : 'center top'),
       }
     })
   }, [categoryStrips])

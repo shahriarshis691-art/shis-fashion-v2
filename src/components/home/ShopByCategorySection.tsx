@@ -1,4 +1,5 @@
 import CategoryHeroCard from '../common/CategoryHeroCard'
+import { SAREE_HOMEPAGE_COVER_ASPECT } from '../../data/featuredCollectionCovers'
 
 export interface ShopByCategoryItem {
   key: string
@@ -78,8 +79,12 @@ export default function ShopByCategorySection({
                 image={item.image}
                 priority={index === 0}
                 variant="feed"
-                imagePosition={isSareeCard ? (item.imagePosition ?? '25% center') : item.imagePosition}
+                imagePosition={isSareeCard ? (item.imagePosition ?? 'left center') : item.imagePosition}
+                imageFit="cover"
+                imageWidth={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.width : undefined}
+                imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
                 frameBackground={isSareeCard ? 'bg-[#e8cbb1]' : undefined}
+                imgClassName={isSareeCard ? 'object-left' : undefined}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
                 showOverlay={item.key.trim().toLowerCase() === 'kids'}
               />

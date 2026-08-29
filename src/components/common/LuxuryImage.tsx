@@ -55,7 +55,7 @@ export default function LuxuryImage({
   const imageStyle: CSSProperties | undefined = objectPosition || isContained
     ? {
       ...(objectPosition ? { objectPosition } : {}),
-      ...(isContained ? { objectFit: 'contain' } : {}),
+      ...(isContained ? { objectFit: 'contain' } : { objectFit: 'cover' }),
     }
     : undefined
   const wrapperBackgroundClass = wrapperBackgroundClassName
