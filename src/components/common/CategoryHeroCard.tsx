@@ -9,6 +9,7 @@ export interface CategoryHeroCardProps {
   variant?: 'feed' | 'portrait'
   imagePosition?: string
   imageFit?: 'cover' | 'contain'
+  frameBackground?: string
   sizes?: string
   showOverlay?: boolean
   /** Skip studio-media-frame overlay while keeping cover crop. */
@@ -24,6 +25,7 @@ export default function CategoryHeroCard({
   variant = 'portrait',
   imagePosition = 'center center',
   imageFit = 'cover',
+  frameBackground,
   sizes,
   showOverlay = false,
   plainFrame = false,
@@ -47,7 +49,7 @@ export default function CategoryHeroCard({
       className="group luxury-tap relative z-0 isolate flex h-full w-full min-w-0 cursor-pointer overflow-hidden"
       aria-label={name}
     >
-      <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? '' : portraitFrameClass}`}>
+      <div className={`relative isolate z-0 h-full w-full overflow-hidden ${isFeed ? frameBackground ?? '' : portraitFrameClass}`}>
         <LuxuryImage
           src={image}
           alt={`${name} collection`}
@@ -56,6 +58,7 @@ export default function CategoryHeroCard({
           sizes={resolvedSizes}
           widths={isFeed ? [480, 768, 1080, 1440] : [320, 480, 768, 960]}
           className="h-full w-full"
+          wrapperBackgroundClassName={frameBackground}
           aspectClassName={isFeed ? 'absolute inset-0 z-0 h-full w-full' : 'relative z-0 aspect-[3/4]'}
           objectPosition={imagePosition}
           objectFit={imageFit}

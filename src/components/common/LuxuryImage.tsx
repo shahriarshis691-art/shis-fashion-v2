@@ -17,6 +17,7 @@ interface LuxuryImageProps {
   imgClassName?: string
   objectPosition?: string
   objectFit?: 'cover' | 'contain'
+  wrapperBackgroundClassName?: string
   cinematicFill?: boolean
   priority?: boolean
   hover?: boolean
@@ -40,6 +41,7 @@ export default function LuxuryImage({
   imgClassName = '',
   objectPosition,
   objectFit = 'cover',
+  wrapperBackgroundClassName,
   cinematicFill = false,
   priority = false,
   hover = false,
@@ -56,6 +58,9 @@ export default function LuxuryImage({
       ...(isContained ? { objectFit: 'contain' } : {}),
     }
     : undefined
+  const wrapperBackgroundClass = wrapperBackgroundClassName
+    ?? (cinematicFill ? 'bg-black' : isContained ? 'bg-white' : 'bg-black/5')
+
   const wrapperStyle: CSSProperties | undefined = lqip
     ? {
       backgroundImage: `url("${lqip}")`,
@@ -66,7 +71,7 @@ export default function LuxuryImage({
 
   return (
     <div
-      className={`relative overflow-hidden ${cinematicFill ? 'bg-black' : isContained ? 'bg-white' : 'bg-black/5'} ${aspectClassName} ${className}`.trim()}
+      className={`relative overflow-hidden ${wrapperBackgroundClass} ${aspectClassName} ${className}`.trim()}
       style={wrapperStyle}
     >
       {cinematicFill ? (

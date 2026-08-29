@@ -62,23 +62,30 @@ export default function ShopByCategorySection({
       </div>
 
       <div className="relative z-10 isolate flex flex-col gap-3 px-0 pb-3 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:gap-6 md:px-6 md:pb-0 lg:grid-cols-4">
-        {hubItems.map((item, index) => (
-          <article
-            key={item.key}
-            className="relative z-10 isolate h-[calc(100svh-14rem)] min-h-[28rem] overflow-hidden md:h-auto md:min-h-0 md:aspect-[3/4]"
-          >
-            <CategoryHeroCard
-              name={item.name}
-              href={item.href}
-              image={item.image}
-              priority={index === 0}
-              variant="feed"
-              imagePosition={item.imagePosition}
-              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
-              showOverlay={item.key.trim().toLowerCase() === 'kids'}
-            />
-          </article>
-        ))}
+        {hubItems.map((item, index) => {
+          const isSareeCard = item.key.trim().toLowerCase() === 'saree'
+
+          return (
+            <article
+              key={item.key}
+              className={`relative z-10 isolate h-[calc(100svh-14rem)] min-h-[28rem] overflow-hidden md:h-auto md:min-h-0 md:aspect-[3/4] ${
+                isSareeCard ? 'bg-[#e8cbb1]' : ''
+              }`}
+            >
+              <CategoryHeroCard
+                name={item.name}
+                href={item.href}
+                image={item.image}
+                priority={index === 0}
+                variant="feed"
+                imagePosition={isSareeCard ? (item.imagePosition ?? '25% center') : item.imagePosition}
+                frameBackground={isSareeCard ? 'bg-[#e8cbb1]' : undefined}
+                sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                showOverlay={item.key.trim().toLowerCase() === 'kids'}
+              />
+            </article>
+          )
+        })}
       </div>
     </section>
   )
