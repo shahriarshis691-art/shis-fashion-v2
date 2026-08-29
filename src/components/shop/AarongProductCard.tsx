@@ -4,7 +4,7 @@ import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
 import { formatBDT } from '../../utils/currency'
 import { hasListingRenderableImage, listingProductImageCandidates } from '../../utils/listingProducts'
-import { catalogImageAttrs } from '../../utils/media'
+import { CATALOG_IMAGE_PLACEHOLDER, catalogImageAttrs } from '../../utils/media'
 import { getLuxuryBadgeForPrice } from '../../utils/luxuryBadge'
 import { getVariantStock } from '../../utils/variantStock'
 
@@ -24,6 +24,7 @@ export interface AarongProductCardProduct {
   galleryImages?: string[]
   variants?: ShopProduct['variants']
   isPlaceholder?: boolean
+  newArrival?: boolean
 }
 
 export interface AarongProductCardProps {
@@ -99,8 +100,6 @@ const AarongProductCard = memo(function AarongProductCard({
   const { addToCart } = useCart()
   const [sizePickerOpen, setSizePickerOpen] = useState(false)
   const [imageCandidateIndex, setImageCandidateIndex] = useState(0)
-  const [srcSetDisabled, setSrcSetDisabled] = useState(false)
-  const [useOriginalSrc, setUseOriginalSrc] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
   const imageCandidates = useMemo(() => listingProductImageCandidates(product), [product])
   const activeImage = imageCandidates[imageCandidateIndex] ?? product.image
@@ -109,8 +108,9 @@ const AarongProductCard = memo(function AarongProductCard({
     () => catalogImageAttrs(activeImage, 640, 853, LISTING_CARD_SIZES, [320, 480, 640, 768], 'cover'),
     [activeImage],
   )
-  const transformedSrc = image.src || product.image
-  const displaySrc = useOriginalSrc ? activeImage : transformedSrc
+  const displaySrc = imageFailed
+    ? CATALOG_IMAGE_PLACEHOLDER
+    : (image.src || activeImage || CATALOG_IMAGE_PLACEHOLDER)
   const luxuryBadge = useMemo(() => getLuxuryBadgeForPrice(product.price), [product.price])
   const colorSwatches = useMemo(() => {
     const colors = (product.colors ?? []).map((color) => color.trim()).filter(Boolean)
@@ -161,6 +161,8 @@ const AarongProductCard = memo(function AarongProductCard({
     addWithSize(event, sizes[0] || 'M')
   }
 
+  const sizePickerVisible = sizePickerOpen && sizes.length > 1
+
   return (
     <article
       className="product-card luxury-tap group relative"
@@ -173,49 +175,50 @@ const AarongProductCard = memo(function AarongProductCard({
         aria-label={`View ${product.name}`}
         onClick={() => onProductClick?.(product)}
       >
-        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none bg-neutral-100/60">
-          {!imageFailed ? (
-            <img
-              key={`${activeImage}|${srcSetDisabled}|${useOriginalSrc}`}
-              src={displaySrc}
-              srcSet={srcSetDisabled || useOriginalSrc ? undefined : image.srcSet}
-              sizes={srcSetDisabled || useOriginalSrc ? undefined : image.sizes}
-              alt={product.name}
-              width={640}
-              height={853}
-              loading={priority ? 'eager' : 'lazy'}
-              fetchPriority={priority ? 'high' : 'low'}
-              decoding="async"
-              className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
-              onError={() => {
-                if (!srcSetDisabled && image.srcSet) {
-                  setSrcSetDisabled(true)
-                  return
-                }
+        <div className="listing-media-frame relative aspect-[3/4] w-full overflow-hidden rounded-none bg-[#f6f6f6] md:bg-neutral-100/60">
+          <img
+            key={displaySrc}
+            src={displaySrc}
+            srcSet={imageFailed ? undefined : image.srcSet}
+            sizes={imageFailed ? undefined : image.sizes}
+            alt={imageFailed ? '' : product.name}
+            width={640}
+            height={853}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'low'}
+            decoding="async"
+            className="product-card-media absolute inset-0 h-full w-full object-contain object-center md:object-cover md:object-top"
+            onError={() => {
+              if (imageFailed) {
+                return
+              }
 
-                if (!useOriginalSrc && activeImage && activeImage !== transformedSrc) {
-                  setUseOriginalSrc(true)
-                  return
-                }
+              if (imageCandidateIndex < imageCandidates.length - 1) {
+                setImageCandidateIndex((current) => current + 1)
+                return
+              }
 
-                if (imageCandidateIndex < imageCandidates.length - 1) {
-                  setSrcSetDisabled(false)
-                  setUseOriginalSrc(false)
-                  setImageCandidateIndex((current) => current + 1)
-                  return
-                }
-
-                setImageFailed(true)
-              }}
-            />
+              setImageFailed(true)
+            }}
+          />
+          {product.newArrival ? (
+            <span className="product-card-badge md:hidden" aria-label="New in">
+              NEW IN
+            </span>
           ) : null}
           {luxuryBadge ? (
-            <span className="product-card-badge" aria-label={luxuryBadge}>
+            <span className={`product-card-badge${product.newArrival ? ' max-md:hidden' : ''}`} aria-label={luxuryBadge}>
               {luxuryBadge}
             </span>
           ) : null}
-          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100">
-            {sizePickerOpen && sizes.length > 1 ? (
+          <div
+            className={
+              sizePickerVisible
+                ? 'absolute inset-x-2 bottom-2 z-[2] flex'
+                : 'pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100'
+            }
+          >
+            {sizePickerVisible ? (
               <div className="flex w-full flex-wrap justify-center gap-1 bg-white/95 p-1.5" role="group" aria-label="Select size">
                 {sizes.slice(0, 6).map((size) => (
                   <button
@@ -240,14 +243,29 @@ const AarongProductCard = memo(function AarongProductCard({
           </div>
         </div>
 
-        <div className="product-card-meta min-h-[48px]">
-          <h3 className="product-card-title">{product.name}</h3>
-          <p className="product-card-price">
-            {product.comparePrice ? (
-              <span className="is-compare">{formatBDT(product.comparePrice)}</span>
-            ) : null}
-            <span>{formatBDT(product.price)}</span>
-          </p>
+        <div className="product-card-meta">
+          <div className="product-card-meta-row">
+            <div className="product-card-meta-copy min-w-0 flex-1">
+              <h3 className="product-card-title">{product.name}</h3>
+              <p className="product-card-price">
+                {product.comparePrice ? (
+                  <span className="is-compare">{formatBDT(product.comparePrice)}</span>
+                ) : null}
+                <span>{formatBDT(product.price)}</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              className="product-card-bag md:hidden"
+              aria-label={`Add ${product.name} to bag`}
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 8h12l-1 12H7L6 8Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 8V7a3 3 0 0 1 6 0v1" />
+              </svg>
+            </button>
+          </div>
           {colorSwatches.length > 1 ? (
             <ul className="product-card-swatches" aria-label={`${colorSwatches.length} color options`}>
               {colorSwatches.map((color) => (
@@ -280,7 +298,7 @@ const AarongProductCard = memo(function AarongProductCard({
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="studio-wishlist top-2.5 right-2.5 z-10"
+          className="studio-wishlist top-3 right-3 z-10"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>

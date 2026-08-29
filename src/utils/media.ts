@@ -172,6 +172,51 @@ export function isDemoImageUrl(url?: string) {
 
 export type CatalogImageFit = 'cover' | 'contain'
 
+export function isSiteRelativeMediaUrl(url: string) {
+  const trimmed = url.trim()
+  return trimmed.startsWith('/') && !trimmed.startsWith('//')
+}
+
+export function isAbsoluteHttpUrl(url: string) {
+  return /^https?:\/\//i.test(url.trim())
+}
+
+/** Cloudinary folder/id with no protocol, slash prefix, or file extension. */
+export function isRawCloudinaryPublicId(url: string) {
+  const trimmed = url.trim()
+  if (
+    !trimmed
+    || isSiteRelativeMediaUrl(trimmed)
+    || isAbsoluteHttpUrl(trimmed)
+    || trimmed.startsWith('data:')
+    || trimmed.startsWith('blob:')
+    || trimmed.startsWith('//')
+    || /[?#\s]/.test(trimmed)
+    || /\.(jpe?g|png|webp|gif|avif|svg)$/i.test(trimmed)
+  ) {
+    return false
+  }
+
+  return /^[\w-]+(?:\/[\w.-]+)+$/.test(trimmed)
+}
+
+function encodePathnamePreservingSafeChars(pathname: string) {
+  return pathname
+    .split('/')
+    .map((segment, index) => {
+      if (index === 0 && segment === '') {
+        return ''
+      }
+
+      try {
+        return encodeURI(decodeURIComponent(segment))
+      } catch {
+        return encodeURI(segment)
+      }
+    })
+    .join('/')
+}
+
 export function normalizeDemoImageUrl(
   url: string,
   width: number,
@@ -269,41 +314,97 @@ export function normalizeCloudinaryImageUrl(
   }
 }
 
-function encodeUrlPathSegment(segment: string) {
-  if (!segment) {
-    return segment
-  }
-
-  try {
-    return encodeURIComponent(decodeURIComponent(segment))
-  } catch {
-    return encodeURIComponent(segment)
-  }
-}
-
 export function sanitizeCatalogAssetUrl(url: string) {
   const trimmed = url.trim()
   if (!trimmed || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
     return trimmed
   }
 
-  if (/^https?:\/\//i.test(trimmed)) {
+  if (isAbsoluteHttpUrl(trimmed)) {
+    if (!trimmed.includes(' ') && !trimmed.includes('\n')) {
+      return trimmed
+    }
+
     try {
       const parsed = new URL(trimmed)
-      parsed.pathname = parsed.pathname
-        .split('/')
-        .map((segment) => encodeUrlPathSegment(segment))
-        .join('/')
+      parsed.pathname = encodePathnamePreservingSafeChars(parsed.pathname)
       return parsed.toString()
     } catch {
-      return trimmed
+      return trimmed.replace(/ /g, '%20')
     }
   }
 
+  if (isSiteRelativeMediaUrl(trimmed) || trimmed.startsWith('./') || trimmed.startsWith('../')) {
+    const hashIndex = trimmed.indexOf('#')
+    const queryIndex = trimmed.indexOf('?')
+    const end = Math.min(
+      hashIndex === -1 ? trimmed.length : hashIndex,
+      queryIndex === -1 ? trimmed.length : queryIndex,
+    )
+    const pathname = trimmed.slice(0, end)
+    const rest = trimmed.slice(end)
+    return `${encodePathnamePreservingSafeChars(pathname)}${rest}`
+  }
+
   return trimmed
-    .split('/')
-    .map((segment, index) => (index === 0 && segment === '' ? '' : encodeUrlPathSegment(segment)))
-    .join('/')
+}
+
+function buildCloudinaryUrlFromPublicId(
+  publicId: string,
+  width: number,
+  height: number,
+  fit: CatalogImageFit,
+) {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+  if (!cloudName) {
+    return publicId
+  }
+
+  const w = Math.max(1, Math.round(width))
+  const transformations =
+    fit === 'contain'
+      ? `f_auto,q_auto,c_limit,w_${w}`
+      : `f_auto,q_auto,c_fill,g_top,w_${w},h_${Math.max(1, Math.round(height))}`
+
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}`
+}
+
+/**
+ * Safe listing/PDP image resolver:
+ * - `/collections/...`, `/saree/...`, `/images/...` stay site-relative
+ * - `http(s):` URLs load as stored (Cloudinary, Firebase, etc.)
+ * - Cloudinary transforms apply only to raw public IDs
+ */
+export function resolveCatalogImageSrc(
+  url: string,
+  width = 640,
+  height = 853,
+  fit: CatalogImageFit = 'cover',
+) {
+  const sanitized = sanitizeCatalogAssetUrl(url)
+  if (!sanitized) {
+    return sanitized
+  }
+
+  if (
+    isSiteRelativeMediaUrl(sanitized)
+    || sanitized.startsWith('./')
+    || sanitized.startsWith('../')
+    || sanitized.startsWith('data:')
+    || sanitized.startsWith('blob:')
+  ) {
+    return sanitized
+  }
+
+  if (isAbsoluteHttpUrl(sanitized)) {
+    return sanitized
+  }
+
+  if (isRawCloudinaryPublicId(sanitized)) {
+    return buildCloudinaryUrlFromPublicId(sanitized, width, height, fit)
+  }
+
+  return sanitized
 }
 
 export function normalizeCatalogImageUrl(
@@ -312,9 +413,7 @@ export function normalizeCatalogImageUrl(
   height: number,
   fit: CatalogImageFit = 'cover',
 ) {
-  const sanitized = sanitizeCatalogAssetUrl(url)
-  const cloudinaryUrl = normalizeCloudinaryImageUrl(sanitized, width, height, fit)
-  return normalizeDemoImageUrl(cloudinaryUrl, width, height, fit)
+  return resolveCatalogImageSrc(url, width, height, fit)
 }
 
 const DEFAULT_SRCSET_WIDTHS = [320, 480, 640, 768, 960]
@@ -326,7 +425,7 @@ export function buildCatalogSrcSet(
   widths: number[] = DEFAULT_SRCSET_WIDTHS,
   fit: CatalogImageFit = 'cover',
 ) {
-  if (!url) {
+  if (!url || !isRawCloudinaryPublicId(url.trim())) {
     return undefined
   }
 
