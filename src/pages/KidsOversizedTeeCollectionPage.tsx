@@ -293,9 +293,6 @@ export default function KidsOversizedTeeCollectionPage() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-baseline gap-3">
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">Shop</h2>
-              <span className="text-xs font-normal text-neutral-400">
-                {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
-              </span>
             </div>
 
             <div className="flex items-center gap-1 self-end sm:gap-2">

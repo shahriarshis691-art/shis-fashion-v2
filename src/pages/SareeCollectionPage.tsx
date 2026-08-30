@@ -142,9 +142,6 @@ export default function SareeCollectionPage() {
         <header className="mt-8 sm:mt-10">
           <div className="flex flex-wrap items-baseline gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Saree Collection</h1>
-            <span className="text-xs font-normal text-neutral-400">
-              {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
-            </span>
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.

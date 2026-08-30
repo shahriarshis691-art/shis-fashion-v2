@@ -114,9 +114,6 @@ export default function HalfShirtCollectionPage() {
             <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">
               Men&apos;s Half Shirt Collection
             </h1>
-            <span className="text-xs font-normal text-neutral-400">
-              {visibleProducts.length} Product{visibleProducts.length === 1 ? '' : 's'}
-            </span>
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Breathable fabrics, relaxed fits &amp; effortless everyday styling.

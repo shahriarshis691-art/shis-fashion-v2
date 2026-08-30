@@ -45,11 +45,6 @@ export default function SalePage() {
         <div>
           <div className="flex flex-wrap items-baseline gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Sale</h1>
-            {ready ? (
-              <span className="text-xs font-normal text-neutral-400">
-                {saleProducts.length} Product{saleProducts.length === 1 ? '' : 's'}
-              </span>
-            ) : null}
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Reduced-price pieces from the current SHIS Fashion catalog.

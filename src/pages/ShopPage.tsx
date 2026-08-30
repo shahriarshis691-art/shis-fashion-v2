@@ -1371,9 +1371,6 @@ export default function ShopPage() {
               </span>
             ) : null}
           </button>
-          <p className="text-xs font-normal text-neutral-400 sm:hidden">
-            Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
-          </p>
 
           <div className="hidden flex-wrap items-center gap-4 sm:flex">
             <div className="flex items-center gap-2">
@@ -1393,12 +1390,6 @@ export default function ShopPage() {
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="hidden sm:block">
-            <p className="text-xs font-normal text-neutral-400">
-              Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
-            </p>
           </div>
         </div>
 

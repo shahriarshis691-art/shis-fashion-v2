@@ -173,10 +173,7 @@ export default function OversizedTeeCollectionPage() {
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between border-b border-neutral-100 pb-3">
-              <p className="text-xs font-normal text-neutral-400">
-                Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'item' : 'items'}
-              </p>
+            <div className="mt-5 flex items-center justify-end border-b border-neutral-100 pb-3">
               <div className="flex items-center gap-2">
                 <label htmlFor="oversized-tee-sort" className="text-xs font-medium text-neutral-400">
                   Sort

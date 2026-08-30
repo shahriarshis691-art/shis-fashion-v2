@@ -43,9 +43,6 @@ export default function NewArrivalsPage() {
         <header className="mt-2 sm:mt-4">
           <div className="flex flex-wrap items-baseline gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">New Arrivals</h1>
-            <span className="text-xs font-normal text-neutral-400">
-              {newArrivals.length} Product{newArrivals.length === 1 ? '' : 's'}
-            </span>
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             The latest pieces from SHIS Fashion, curated for a premium, modern wardrobe.

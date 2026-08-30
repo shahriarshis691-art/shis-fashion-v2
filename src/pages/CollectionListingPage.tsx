@@ -215,9 +215,8 @@ export default function CollectionListingPage() {
         ) : null}
 
         <div className="mt-10">
-          <div className="mb-5 flex items-end justify-between gap-4">
+          <div className="mb-5">
             <h2 className="text-h2 text-black">The collection</h2>
-            <p className="text-caption uppercase tracking-[0.12em] text-black/55">{collectionProducts.length} items</p>
           </div>
 
           {collectionProducts.length ? (
