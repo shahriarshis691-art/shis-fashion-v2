@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
-import {
-  WEDDING_HOMEPAGE_COVER,
-  WEDDING_HOMEPAGE_COVER_BACKGROUND,
-  WEDDING_HOMEPAGE_COVER_HEIGHT,
-  WEDDING_HOMEPAGE_COVER_WIDTH,
-} from '../../data/featuredCollectionCovers'
+
+const WEDDING_CARD_IMAGE = '/hero/hero-images/wedding.image.png'
+const WEDDING_CARD_IMAGE_WIDTH = 1472
+const WEDDING_CARD_IMAGE_HEIGHT = 2616
+const WEDDING_CARD_BACKGROUND = '#0b0b0b'
 
 export default function WeddingShowcaseSection() {
   return (
@@ -27,20 +26,20 @@ export default function WeddingShowcaseSection() {
         aria-label="Explore the Wedding collection"
       >
         <div
-          className="relative aspect-[4/5] w-full overflow-hidden md:aspect-[16/9]"
-          style={{ backgroundColor: WEDDING_HOMEPAGE_COVER_BACKGROUND }}
+          className="relative aspect-[4/5] w-full overflow-hidden"
+          style={{ backgroundColor: WEDDING_CARD_BACKGROUND }}
         >
           <img
-            src={WEDDING_HOMEPAGE_COVER}
-            alt="THE DREAM STORY — SHIS Fashion wedding collection"
-            width={WEDDING_HOMEPAGE_COVER_WIDTH}
-            height={WEDDING_HOMEPAGE_COVER_HEIGHT}
+            src={WEDDING_CARD_IMAGE}
+            alt="SHIS Fashion wedding collection — bridal fireworks under the floral arch"
+            width={WEDDING_CARD_IMAGE_WIDTH}
+            height={WEDDING_CARD_IMAGE_HEIGHT}
             className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
             loading="eager"
             fetchPriority="high"
             decoding="async"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center px-6 pb-8 text-center md:pb-12">
             <p
               className="text-2xl tracking-[0.18em] text-white uppercase md:text-4xl"
