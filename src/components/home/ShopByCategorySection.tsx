@@ -81,7 +81,7 @@ export default function ShopByCategorySection({
                 imageWidth={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.width : undefined}
                 imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
                 frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : isKidsCard ? KIDS_HOMEPAGE_COVER_BACKGROUND : undefined}
-                imgClassName={isSareeCard ? 'object-top' : isKidsCard ? 'object-center' : isMenCard ? 'h-full w-full object-cover object-top' : undefined}
+                imgClassName={isSareeCard ? 'object-top' : isKidsCard ? 'h-full w-full object-cover object-top' : isMenCard ? 'h-full w-full object-cover object-top' : undefined}
                 imageHoverScale={!isSareeCard}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
               />
