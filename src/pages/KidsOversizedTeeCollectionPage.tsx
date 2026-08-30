@@ -23,7 +23,7 @@ type SortOption = 'newest' | 'price-low' | 'price-high'
 
 const SITE_URL = 'https://www.shisfashion.com'
 const KIDS_LISTING_HERO = `/collections/kid-hero/${encodeURIComponent('Shis Fashion Streetwear Editorial.png')}`
-const KIDS_LISTING_HERO_BACKGROUND = '#dfc5af'
+const KIDS_LISTING_HERO_BACKGROUND = '#c5a383'
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
   if (genderFilter === 'all') {
@@ -238,18 +238,16 @@ export default function KidsOversizedTeeCollectionPage() {
         aria-label="Kids collection banner"
       >
         <h1 className="sr-only">Kids Collection</h1>
-        <div className="relative aspect-[16/9] w-full">
-          <img
-            src={KIDS_LISTING_HERO}
-            alt="Shis Fashion Streetwear Editorial — Kids Collection"
-            width={1920}
-            height={1080}
-            className="h-full w-full object-cover object-center"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-        </div>
+        <img
+          src={KIDS_LISTING_HERO}
+          alt="Shis Fashion Streetwear Editorial — Kids Collection"
+          width={1536}
+          height={1024}
+          className="block h-auto w-full object-contain object-center"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
       </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
