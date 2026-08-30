@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AarongProductCard from '../components/shop/AarongProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
-import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
 import {
   KIDS_COLOR_LABELS,
   KIDS_OVERSIZED_SIZES,
@@ -23,6 +22,8 @@ type GenderFilter = 'all' | KidsGenderCategory
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
 const SITE_URL = 'https://www.shisfashion.com'
+const KIDS_LISTING_HERO = `/collections/kid-hero/${encodeURIComponent('Shis Fashion Streetwear Editorial.png')}`
+const KIDS_LISTING_HERO_BACKGROUND = '#dfc5af'
 
 function matchesGenderFilter(product: KidsOversizedTeeProduct, genderFilter: GenderFilter) {
   if (genderFilter === 'all') {
@@ -231,40 +232,25 @@ export default function KidsOversizedTeeCollectionPage() {
 
   return (
     <section className="bg-white pb-24">
-      <ResponsiveHeroBanner
-        src="/hero/kids/kids-hero2.jpg"
-        alt="Kids Collection"
-        width={1920}
-        height={2400}
-        background="dark"
-        objectPosition="center top"
-        overlayClassName="absolute inset-0 z-10 flex items-end justify-center sm:items-center"
+      <section
+        className="relative z-0 isolate w-full overflow-hidden"
+        style={{ backgroundColor: KIDS_LISTING_HERO_BACKGROUND }}
+        aria-label="Kids collection banner"
       >
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 text-center sm:pb-0">
-          <span className="mb-2 text-[11px] font-medium tracking-[0.25em] text-white/90 uppercase sm:text-xs">
-            Exclusive Launch
-          </span>
-          <h1
-            style={{ color: '#ffffff' }}
-            className="!text-white text-center text-3xl font-serif font-bold tracking-[0.2em] uppercase drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)] sm:text-5xl lg:text-6xl"
-          >
-            KIDS COLLECTION
-          </h1>
-          <p className="mt-2 max-w-md text-center text-xs font-light text-neutral-200 sm:text-sm">
-            Premium heavy cotton, relaxed drop-shoulder fits for modern kids.
-          </p>
-          <a
-            href="#kids-grid"
-            onClick={(event) => {
-              event.preventDefault()
-              document.getElementById('kids-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
-            className="btn-glass-cta mt-5"
-          >
-            Shop Now
-          </a>
+        <h1 className="sr-only">Kids Collection</h1>
+        <div className="relative aspect-[16/9] w-full">
+          <img
+            src={KIDS_LISTING_HERO}
+            alt="Shis Fashion Streetwear Editorial — Kids Collection"
+            width={1920}
+            height={1080}
+            className="h-full w-full object-cover object-center"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
         </div>
-      </ResponsiveHeroBanner>
+      </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <nav aria-label="Breadcrumb" className="pt-6 text-[12px] font-normal tracking-wide text-neutral-400">
