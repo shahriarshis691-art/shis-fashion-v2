@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
-import { categoryStripCover, categoryStripCovers, KIDS_HOMEPAGE_COVER, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers, KIDS_HOMEPAGE_COVER, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER, MEN_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -17,7 +17,7 @@ import { normalizeCatalogImageUrl, pickPreferredCategoryCoverUrl } from '../util
 const fallbackCategoryStrips = [
   { key: 'women', label: 'Women', href: '/women', order: 10, image: WOMEN_HOMEPAGE_COVER, imagePosition: 'center center' },
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: '62% top' },
-  { key: 'men', label: 'Men', href: '/men', order: 20, image: MEN_HOMEPAGE_COVER, imagePosition: 'center center' },
+  { key: 'men', label: 'Men', href: '/men', order: 20, image: MEN_HOMEPAGE_COVER, imagePosition: MEN_HOMEPAGE_COVER_POSITION },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
   { key: 'kids', label: 'KID', href: '/kids', order: 30, image: KIDS_HOMEPAGE_COVER, imagePosition: KIDS_HOMEPAGE_COVER_POSITION },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center center' },
@@ -343,7 +343,7 @@ export default function HomePage() {
         name: key === 'women' ? 'Women' : key === 'kids' ? 'KID' : key === 'saree' ? 'Saree' : strip?.label || 'Men',
         href: key === 'kids' ? '/kids' : (strip?.href || fallbackHref),
         image: strip?.image || fallbackImage,
-        imagePosition: strip?.imagePosition || (key === 'kids' ? KIDS_HOMEPAGE_COVER_POSITION : key === 'men' ? 'center center' : key === 'saree' ? '62% top' : key === 'women' ? 'center center' : 'center top'),
+        imagePosition: strip?.imagePosition || (key === 'kids' ? KIDS_HOMEPAGE_COVER_POSITION : key === 'men' ? MEN_HOMEPAGE_COVER_POSITION : key === 'saree' ? '62% top' : key === 'women' ? 'center center' : 'center top'),
       }
     })
   }, [categoryStrips])

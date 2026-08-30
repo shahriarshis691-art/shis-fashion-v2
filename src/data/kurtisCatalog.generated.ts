@@ -19,7 +19,7 @@ export interface GeneratedKurtiCatalogEntry {
   stock: number
 }
 
-export const KURTI_CATALOG_GENERATED_AT = "2026-08-30T02:25:22.812Z"
+export const KURTI_CATALOG_GENERATED_AT = "2026-08-30T02:34:30.832Z"
 export const KURTI_CATALOG_IMAGE_COUNT = 58
 
 export const kurtiCatalogEntries: GeneratedKurtiCatalogEntry[] = [
