@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
+import { useCallback, useRef, useState, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import ResponsiveHeroBanner, { type HeroBackgroundTone } from '../common/ResponsiveHeroBanner'
-import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
-const HERO_AUTOPLAY_MS = 2000
 const HERO_SWIPE_THRESHOLD_PX = 40
 
 const HOME_HERO_SLIDES = [
@@ -48,11 +46,9 @@ function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
 }
 
 export default function HomeHeroCarousel() {
-  const prefersReducedMotion = usePrefersReducedMotion()
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const touchStartX = useRef<number | null>(null)
-  const touchDeltaX = useRef(0)
+  const pointerStartX = useRef<number | null>(null)
+  const pointerDeltaX = useRef(0)
   const didSwipe = useRef(false)
   const slideCount = HOME_HERO_SLIDES.length
 
@@ -68,33 +64,33 @@ export default function HomeHeroCarousel() {
     setActiveIndex((current) => (current - 1 + slideCount) % slideCount)
   }, [slideCount])
 
-  useEffect(() => {
-    if (slideCount <= 1 || isPaused || prefersReducedMotion) {
+  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) {
       return
     }
 
-    const timer = window.setInterval(goNext, HERO_AUTOPLAY_MS)
-    return () => window.clearInterval(timer)
-  }, [activeIndex, goNext, isPaused, prefersReducedMotion, slideCount])
+    const target = event.target as HTMLElement | null
+    if (target?.closest('button')) {
+      return
+    }
 
-  const onTouchStart = (event: TouchEvent<HTMLElement>) => {
-    touchStartX.current = event.changedTouches[0]?.clientX ?? null
-    touchDeltaX.current = 0
+    pointerStartX.current = event.clientX
+    pointerDeltaX.current = 0
     didSwipe.current = false
   }
 
-  const onTouchMove = (event: TouchEvent<HTMLElement>) => {
-    if (touchStartX.current == null) {
+  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (pointerStartX.current == null) {
       return
     }
 
-    touchDeltaX.current = (event.changedTouches[0]?.clientX ?? 0) - touchStartX.current
+    pointerDeltaX.current = event.clientX - pointerStartX.current
   }
 
-  const onTouchEnd = () => {
-    const delta = touchDeltaX.current
-    touchStartX.current = null
-    touchDeltaX.current = 0
+  const onPointerUp = () => {
+    const delta = pointerDeltaX.current
+    pointerStartX.current = null
+    pointerDeltaX.current = 0
 
     if (Math.abs(delta) < HERO_SWIPE_THRESHOLD_PX) {
       return
@@ -115,17 +111,10 @@ export default function HomeHeroCarousel() {
       style={{ backgroundColor: '#f6f2ec' }}
       aria-roledescription="carousel"
       aria-label="SHIS Fashion homepage hero carousel"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocusCapture={() => setIsPaused(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setIsPaused(false)
-        }
-      }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onClickCapture={(event) => {
         if (!didSwipe.current) {
           return
@@ -161,25 +150,18 @@ export default function HomeHeroCarousel() {
             <div
               key={slide.id}
               className={[
-                'absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+                'absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
                 isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0',
               ].join(' ')}
               aria-hidden={!isActive}
             >
-              <div
-                className={[
-                  'h-full w-full origin-center transform-gpu',
-                  isActive && !prefersReducedMotion ? 'hero-ken-burns' : '',
-                ].join(' ')}
-              >
-                {'href' in slide && slide.href ? (
-                  <Link to={slide.href} className="block h-full w-full" aria-label={slide.ariaLabel}>
-                    {frame}
-                  </Link>
-                ) : (
-                  frame
-                )}
-              </div>
+              {'href' in slide && slide.href ? (
+                <Link to={slide.href} className="block h-full w-full" aria-label={slide.ariaLabel}>
+                  {frame}
+                </Link>
+              ) : (
+                frame
+              )}
             </div>
           )
         })}
