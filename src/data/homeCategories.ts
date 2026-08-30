@@ -49,7 +49,7 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     name: 'KID',
     href: '/kids',
     image: KIDS_HOMEPAGE_COVER,
-    imagePosition: 'center top',
+    imagePosition: 'right center',
   },
   {
     key: 'western',
