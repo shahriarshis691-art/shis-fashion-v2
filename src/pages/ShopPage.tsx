@@ -77,11 +77,11 @@ interface ProductFilters {
   newOnly: boolean
 }
 
-const PANJABI_LISTING_HERO = '/hero/panjabi-hero-image/panjabi-hero.png'
-const PANJABI_LISTING_HERO_FALLBACK = `/hero/panjabi-hero-image/${encodeURIComponent('ChatGPT Image Aug 30, 2026, 08_54_25 AM.png')}`
-const PANJABI_LISTING_HERO_WIDTH = 1734
-const PANJABI_LISTING_HERO_HEIGHT = 907
-const PANJABI_LISTING_HERO_BACKGROUND = '#ded3c4'
+const PANJABI_LISTING_HERO = '/hero/panjabi-hero-image/panjabi-hero-main.png'
+const PANJABI_LISTING_HERO_FALLBACK = '/hero/panjabi-hero-image/3cb91c65-0c83-4044-8224-d4713d26b0a3.png'
+const PANJABI_LISTING_HERO_WIDTH = 1536
+const PANJABI_LISTING_HERO_HEIGHT = 1024
+const PANJABI_LISTING_HERO_BACKGROUND = '#8c7b6b'
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'featured', label: 'Featured' },
@@ -1209,7 +1209,7 @@ export default function ShopPage() {
       ) : isPanjabiListing ? (
         <ResponsiveHeroBanner
           src={PANJABI_LISTING_HERO}
-          alt="Timeless Elegance — Men's Panjabi collection, SHIS Fashion"
+          alt="Refined Simplicity — Men's Panjabi collection, SHIS Fashion"
           width={PANJABI_LISTING_HERO_WIDTH}
           height={PANJABI_LISTING_HERO_HEIGHT}
           fallbacks={[PANJABI_LISTING_HERO_FALLBACK]}
