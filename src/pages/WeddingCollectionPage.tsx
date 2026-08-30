@@ -5,8 +5,10 @@ import {
   WEDDING_LISTING_HERO_BACKGROUND,
   WEDDING_LISTING_HERO_HEIGHT,
   WEDDING_LISTING_HERO_WIDTH,
-  weddingLookbook,
+  weddingProductCover,
+  weddingProducts,
 } from '../data/weddingCollection'
+import { formatBDT } from '../utils/currency'
 import { applySeoMetadata } from '../utils/seo'
 
 export default function WeddingCollectionPage() {
@@ -95,32 +97,50 @@ export default function WeddingCollectionPage() {
           id="wedding-grid"
           className="mt-8 grid grid-cols-2 gap-x-[2px] gap-y-6 px-1 md:grid-cols-3 md:gap-x-4 md:gap-y-10 md:px-0 lg:grid-cols-4"
         >
-          {weddingLookbook.map((item) => (
-            <article key={item.id} className="group min-w-0">
-              <div className="relative aspect-[3/4] overflow-hidden bg-[#f4efe8]">
-                <img
-                  src={item.image}
-                  alt={`${item.title} — SHIS Fashion wedding lookbook`}
-                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                  style={{ objectPosition: item.imagePosition ?? 'center center' }}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 text-[9px] font-medium tracking-[0.18em] text-neutral-800 uppercase">
-                  {item.tag}
-                </span>
-              </div>
-              <div className="px-1 pt-3 text-center">
-                <h3
-                  className="text-[11px] font-medium tracking-[0.16em] text-neutral-900 uppercase md:text-xs"
-                  style={{ fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)" }}
-                >
-                  {item.title}
-                </h3>
-                <p className="mt-1.5 text-xs tracking-wide text-neutral-500">{item.price}</p>
-              </div>
-            </article>
-          ))}
+          {weddingProducts.map((item) => {
+            const coverImage = weddingProductCover(item)
+            const formattedPrice = item.price > 0 ? formatBDT(item.price) : null
+
+            return (
+              <article key={item.id} className="group min-w-0">
+                <div className="relative aspect-[3/4] overflow-hidden bg-[#f4efe8]">
+                  {coverImage ? (
+                    <img
+                      src={coverImage}
+                      alt={`${item.title} — SHIS Fashion wedding collection`}
+                      className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.style.visibility = 'hidden'
+                      }}
+                    />
+                  ) : null}
+                  {item.tag ? (
+                    <span className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 text-[9px] font-medium tracking-[0.18em] text-neutral-800 uppercase">
+                      {item.tag}
+                    </span>
+                  ) : null}
+                  {item.inStock === false ? (
+                    <span className="absolute right-3 bottom-3 bg-black/80 px-2.5 py-1 text-[9px] font-medium tracking-[0.18em] text-white uppercase">
+                      Sold out
+                    </span>
+                  ) : null}
+                </div>
+                <div className="px-1 pt-3 text-center">
+                  <h3
+                    className="text-[11px] font-medium tracking-[0.16em] text-neutral-900 uppercase md:text-xs"
+                    style={{ fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)" }}
+                  >
+                    {item.title}
+                  </h3>
+                  {formattedPrice ? (
+                    <p className="mt-1.5 text-xs tracking-wide text-neutral-500">{formattedPrice}</p>
+                  ) : null}
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

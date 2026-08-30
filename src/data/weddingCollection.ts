@@ -1,6 +1,5 @@
 import { isSareeProduct } from './sareeCollection'
 import type { ShopProduct } from './shopData'
-import { WEDDING_HOMEPAGE_COVER } from './featuredCollectionCovers'
 import { filterListingProducts } from '../utils/listingProducts'
 
 export const WEDDING_LISTING_PATH = '/wedding'
@@ -8,6 +7,7 @@ export const WEDDING_LISTING_HERO = '/collections/wedding/wedding-banner.jpg'
 export const WEDDING_LISTING_HERO_WIDTH = 1536
 export const WEDDING_LISTING_HERO_HEIGHT = 1024
 export const WEDDING_LISTING_HERO_BACKGROUND = '#8c7b6b'
+export const WEDDING_PRODUCT_MEDIA_DIR = '/collections/wedding'
 
 const GENERAL_CASUAL_SLUGS = new Set([
   'half-shirt',
@@ -29,64 +29,43 @@ const GENERAL_CASUAL_SLUGS = new Set([
   'kurtis',
 ])
 
-export interface WeddingLookbookItem {
+export interface WeddingProduct {
   id: string
   title: string
-  price: string
-  image: string
-  tag: string
-  imagePosition?: string
+  price: number
+  tag?: string
+  images: string[]
+  inStock?: boolean
 }
 
-/** Isolated bridal/groom lookbook — dedicated wedding assets only. */
-export const weddingLookbook: WeddingLookbookItem[] = [
+function weddingProductImage(fileName: string) {
+  return `${WEDDING_PRODUCT_MEDIA_DIR}/${fileName}`
+}
+
+export function weddingProductCover(product: WeddingProduct) {
+  return product.images.find((src) => src.trim().length > 0)?.trim() ?? ''
+}
+
+/**
+ * Dedicated wedding listing catalog.
+ * Drop product photos in `public/collections/wedding/` and add or edit entries here.
+ */
+export const weddingProducts: WeddingProduct[] = [
   {
-    id: 'w1',
-    title: 'Ivory Royal Bridal Silk',
-    price: '৳ 18,500',
-    image: WEDDING_LISTING_HERO,
-    tag: 'Bridal Heritage',
-    imagePosition: '68% center',
+    id: 'wedding-01',
+    title: 'Exclusive Wedding Item 01',
+    price: 0,
+    tag: 'EXCLUSIVE',
+    images: [weddingProductImage('wedding-product-1.jpg')],
+    inStock: true,
   },
   {
-    id: 'w2',
-    title: 'Crimson Velvet Bridal Couture',
-    price: '৳ 22,000',
-    image: WEDDING_HOMEPAGE_COVER,
-    tag: 'Exclusive',
-    imagePosition: '62% center',
-  },
-  {
-    id: 'w3',
-    title: 'Ivory Embroidered Groom Panjabi',
-    price: '৳ 16,800',
-    image: WEDDING_LISTING_HERO,
-    tag: 'Groom Edit',
-    imagePosition: '28% center',
-  },
-  {
-    id: 'w4',
-    title: 'Royal Sherwani Heritage',
-    price: '৳ 19,200',
-    image: WEDDING_HOMEPAGE_COVER,
-    tag: 'Groom Couture',
-    imagePosition: '32% center',
-  },
-  {
-    id: 'w5',
-    title: 'Banarasi Silk Couple Edit',
-    price: '৳ 24,500',
-    image: WEDDING_LISTING_HERO,
-    tag: 'Wedding Atelier',
-    imagePosition: 'center center',
-  },
-  {
-    id: 'w6',
-    title: 'The Dream Story Lehenga',
-    price: '৳ 26,000',
-    image: WEDDING_HOMEPAGE_COVER,
-    tag: 'Bridal Lehenga',
-    imagePosition: 'center 42%',
+    id: 'wedding-02',
+    title: 'Exclusive Wedding Item 02',
+    price: 0,
+    tag: 'BRIDAL EDIT',
+    images: [weddingProductImage('wedding-product-2.jpg')],
+    inStock: true,
   },
 ]
 
