@@ -4,6 +4,7 @@ import ProductCard from '../components/shop/ProductCard'
 import ProductListingGrid from '../components/shop/ProductListingGrid'
 import ResponsiveHeroBanner from '../components/common/ResponsiveHeroBanner'
 import { mergeSareeCatalog, type SareeProduct } from '../data/sareeCollection'
+import { isWeddingExclusiveProduct } from '../data/weddingCollection'
 import { subscribeToProducts } from '../firebase/adminService'
 import { useListingWishlist } from '../hooks/useListingWishlist'
 import { parseBDT } from '../utils/currency'
@@ -31,12 +32,18 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
 
 export default function SareeCollectionPage() {
   const { handleToggleWishlist, isInWishlist } = useListingWishlist()
-  const [products, setProducts] = useState<SareeProduct[]>(() => mergeSareeCatalog([]))
+  const [products, setProducts] = useState<SareeProduct[]>(() =>
+    mergeSareeCatalog([]).filter((product) => !isWeddingExclusiveProduct(product)),
+  )
   const [sortBy, setSortBy] = useState<SortOption>('featured')
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
-      setProducts(mergeSareeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
+      setProducts(
+        mergeSareeCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))).filter(
+          (product) => !isWeddingExclusiveProduct(product),
+        ),
+      )
     })
 
     return unsubscribe

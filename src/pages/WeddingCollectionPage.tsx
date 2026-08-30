@@ -176,7 +176,18 @@ export default function WeddingCollectionPage() {
               ))}
             </ProductListingGrid>
           ) : (
-            <p className="mt-10 text-center text-sm text-neutral-500">Wedding pieces will appear here as they are added to the catalog.</p>
+            <div className="mt-16 px-4 py-16 text-center">
+              <p className="font-sans text-xs tracking-[0.3em] text-neutral-400 uppercase">Coming Soon</p>
+              <p
+                className="mt-4 text-2xl tracking-widest text-neutral-900 uppercase md:text-3xl"
+                style={{ fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)", fontWeight: 400 }}
+              >
+                The Wedding Edit
+              </p>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-neutral-500">
+                Dedicated bridal and groom pieces will appear here as they are added to the collection.
+              </p>
+            </div>
           )}
         </div>
       </div>

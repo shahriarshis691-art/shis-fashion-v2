@@ -265,7 +265,7 @@ export function getDedicatedListingFromPath(pathname: string) {
   if (normalized === '/wedding' || normalized === '/collections/wedding') {
     return {
       segment: 'women' as const,
-      subcategory: 'saree',
+      subcategory: 'wedding',
       eyebrow: 'Wedding Collection',
       title: 'Wedding',
       description: 'Timeless bridal and groom elegance — refined sarees and panjabi edits for the wedding season.',
@@ -340,6 +340,10 @@ export function getDedicatedListingFromPath(pathname: string) {
 }
 
 export function getDedicatedListingPath(segment: ShopSegment, subcategory: string) {
+  if (subcategory === 'wedding') {
+    return '/wedding'
+  }
+
   if (segment === 'women' && subcategory === 'saree') {
     return '/sarees'
   }

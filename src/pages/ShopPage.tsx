@@ -68,6 +68,7 @@ import {
 } from '../data/categoryTaxonomy'
 import { getCatalogContentId, getCatalogContentIds } from '../utils/catalogIdentity'
 import { applyNotFoundSeo } from '../utils/seo'
+import { isWeddingExclusiveProduct, isWeddingProduct } from '../data/weddingCollection'
 import NotFoundPage from './NotFoundPage'
 
 type SortOption = 'featured' | 'popular' | 'new' | 'price-low' | 'price-high' | 'best-selling'
@@ -375,6 +376,30 @@ function isHalfShirtProduct(product: ShopProduct) {
   return /half[\s_-]?shirts?/.test(text)
 }
 
+function isWeddingListingRequest(pathname: string, searchParams: URLSearchParams) {
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+  if (
+    normalized === '/wedding'
+    || normalized === '/shop/wedding'
+    || normalized === '/collections/wedding'
+    || normalized.startsWith('/wedding/')
+  ) {
+    return true
+  }
+
+  const requestedCategory = (
+    searchParams.get('category')
+    ?? searchParams.get('sub')
+    ?? ''
+  ).trim().toLowerCase()
+
+  return requestedCategory === 'wedding'
+}
+
+function allowsWeddingExclusiveInGeneralListing(searchQuery: string) {
+  return /\bwedding\b|\bbridal\b|\bgroom\b/.test(searchQuery.trim().toLowerCase())
+}
+
 function getLegacyCategorySlug(pathname: string) {
   const parts = pathname.split('/').filter(Boolean)
   if (parts[0] !== 'shop' || parts.length < 2) {
@@ -591,6 +616,19 @@ export default function ShopPage() {
     }
 
     const rawCategory = params.get('category')?.trim().toLowerCase() ?? ''
+    const rawSubForWedding = params.get('sub')?.trim().toLowerCase() ?? ''
+    if (rawCategory === 'wedding' || rawSubForWedding === 'wedding') {
+      params.delete('category')
+      params.delete('sub')
+      params.delete('segment')
+      replaceWithCanonical(
+        '/wedding',
+        params.toString() ? `?${params.toString()}` : '',
+        'dedicated-collection-route',
+      )
+      return
+    }
+
     if (rawCategory) {
       if (!params.get('segment') && (rawCategory === 'women' || rawCategory === 'men' || rawCategory === 'kids' || rawCategory === 'all')) {
         params.set('segment', rawCategory)
@@ -816,21 +854,28 @@ export default function ShopPage() {
   const kurtiCatalogProducts = getKurtiListingProducts()
 
   const listingPool = isKurtiListing ? kurtiCatalogProducts : products
+  const isWeddingListing = isWeddingListingRequest(location.pathname, searchParams)
+    || dedicatedListing?.title === 'Wedding'
 
   const bySegment = isKurtiListing
     ? listingPool
-    : products.filter((product) => {
-      if (isWomenListing) {
-        return isWomenListingProduct(product)
-      }
-      if (isMenListing) {
-        return isMenListingProduct(product)
-      }
-      return segmentMatchesProduct(effectiveSegment, product.category)
-    })
+    : isWeddingListing
+      ? listingPool.filter(isWeddingProduct)
+      : products.filter((product) => {
+        if (isWeddingExclusiveProduct(product) && !allowsWeddingExclusiveInGeneralListing(searchQuery)) {
+          return false
+        }
+        if (isWomenListing) {
+          return isWomenListingProduct(product)
+        }
+        if (isMenListing) {
+          return isMenListingProduct(product)
+        }
+        return segmentMatchesProduct(effectiveSegment, product.category)
+      })
 
-  const bySubcategory = isKurtiListing
-    ? listingPool
+  const bySubcategory = isKurtiListing || isWeddingListing
+    ? (isWeddingListing ? bySegment : listingPool)
     : effectiveSubcategory === 'all'
       ? bySegment
       : isHalfShirtListing
