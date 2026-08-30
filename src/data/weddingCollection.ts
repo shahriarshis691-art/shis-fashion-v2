@@ -4,6 +4,7 @@ import { filterListingProducts } from '../utils/listingProducts'
 
 export const WEDDING_LISTING_PATH = '/wedding'
 export const WEDDING_LISTING_HERO = '/collections/wedding/wedding-banner.jpg'
+export const WEDDING_LISTING_HERO_VIDEO = '/wedding/wedding-listed-oroducts/0ba88353f261803897d3b7fecb1a1876_720w.mp4'
 export const WEDDING_LISTING_HERO_WIDTH = 1536
 export const WEDDING_LISTING_HERO_HEIGHT = 1024
 export const WEDDING_LISTING_HERO_BACKGROUND = '#8c7b6b'

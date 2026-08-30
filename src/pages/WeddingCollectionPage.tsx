@@ -1,10 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   WEDDING_LISTING_HERO,
-  WEDDING_LISTING_HERO_BACKGROUND,
-  WEDDING_LISTING_HERO_HEIGHT,
-  WEDDING_LISTING_HERO_WIDTH,
+  WEDDING_LISTING_HERO_VIDEO,
   weddingProductCover,
   weddingProducts,
 } from '../data/weddingCollection'
@@ -12,6 +10,8 @@ import { formatBDT } from '../utils/currency'
 import { applySeoMetadata } from '../utils/seo'
 
 export default function WeddingCollectionPage() {
+  const heroVideoRef = useRef<HTMLVideoElement>(null)
+
   useEffect(() => {
     applySeoMetadata('/wedding', {
       title: 'Wedding Collection | SHIS Fashion Bangladesh',
@@ -22,53 +22,87 @@ export default function WeddingCollectionPage() {
     })
   }, [])
 
+  useEffect(() => {
+    const video = heroVideoRef.current
+    if (!video) {
+      return
+    }
+
+    video.muted = true
+    video.defaultMuted = true
+    video.playsInline = true
+
+    const playHero = () => {
+      void video.play().catch(() => {})
+    }
+
+    playHero()
+    video.addEventListener('canplay', playHero)
+    video.addEventListener('loadeddata', playHero)
+
+    return () => {
+      video.removeEventListener('canplay', playHero)
+      video.removeEventListener('loadeddata', playHero)
+    }
+  }, [])
+
   return (
     <section className="bg-white pt-0 pb-24">
       <section
-        className="relative z-0 isolate flex min-h-screen w-full items-center justify-center overflow-hidden md:h-screen"
-        style={{ backgroundColor: WEDDING_LISTING_HERO_BACKGROUND }}
+        className="relative z-0 isolate flex h-screen min-h-[90vh] w-full items-center justify-center overflow-hidden bg-black md:min-h-screen"
         aria-label="Wedding collection banner"
       >
-        <img
-          src={WEDDING_LISTING_HERO}
-          alt="THE DREAM STORY — SHIS Fashion wedding collection, timeless bridal and groom elegance"
-          width={WEDDING_LISTING_HERO_WIDTH}
-          height={WEDDING_LISTING_HERO_HEIGHT}
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/65" />
+        <video
+          ref={heroVideoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster={WEDDING_LISTING_HERO}
+          disablePictureInPicture
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
+        >
+          <source src={WEDDING_LISTING_HERO_VIDEO} type="video/mp4" />
+        </video>
+        <div className="pointer-events-none absolute inset-0 bg-black/25" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/50" />
         <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center">
           <p
-            className="font-sans text-xs uppercase"
-            style={{ letterSpacing: '0.3em', color: 'rgba(255,255,255,0.8)' }}
+            className="font-sans text-[11px] uppercase md:text-xs"
+            style={{ letterSpacing: '0.42em', color: 'rgba(255,255,255,0.82)' }}
           >
-            Wedding Collection
+            Wedding Couture
           </p>
           <h1
             className="mt-5 text-3xl uppercase md:text-5xl lg:text-6xl"
             style={{
               fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)",
               fontWeight: 400,
-              letterSpacing: '0.12em',
+              letterSpacing: '0.16em',
               color: '#ffffff',
             }}
           >
-            The Dream Story
+            The Wedding Edit
           </h1>
-          <p className="mt-4 max-w-md text-sm tracking-[0.08em] text-white/80">
-            Timeless Bridal &amp; Groom Elegance
-          </p>
-          <a
-            href="#wedding-grid"
-            className="mt-8 inline-block border border-white/80 px-8 py-3 text-xs uppercase transition-all duration-300 hover:bg-white hover:!text-black"
-            style={{ letterSpacing: '0.2em', color: '#ffffff' }}
-          >
-            Explore Collection
-          </a>
         </div>
+        <a
+          href="#wedding-grid"
+          className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-white/80 transition-opacity duration-300 hover:text-white"
+          style={{ letterSpacing: '0.32em' }}
+        >
+          <span className="font-sans text-[10px] uppercase">Scroll</span>
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="h-4 w-4 animate-bounce"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </a>
       </section>
 
       <div className="mx-auto w-full max-w-7xl px-3 pt-6 md:px-6 lg:pt-10">
