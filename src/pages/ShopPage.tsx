@@ -77,6 +77,12 @@ interface ProductFilters {
   newOnly: boolean
 }
 
+const PANJABI_LISTING_HERO = '/hero/panjabi-hero-image/panjabi-hero.png'
+const PANJABI_LISTING_HERO_FALLBACK = `/hero/panjabi-hero-image/${encodeURIComponent('ChatGPT Image Aug 30, 2026, 08_54_25 AM.png')}`
+const PANJABI_LISTING_HERO_WIDTH = 1734
+const PANJABI_LISTING_HERO_HEIGHT = 907
+const PANJABI_LISTING_HERO_BACKGROUND = '#ded3c4'
+
 const sortOptions: Array<{ value: SortOption; label: string }> = [
   { value: 'featured', label: 'Featured' },
   { value: 'new', label: 'New Arrivals' },
@@ -1180,7 +1186,7 @@ export default function ShopPage() {
     })
   }
 
-  const isListingWithTopHero = isWomensBaggyListing || isShirtsListing
+  const isListingWithTopHero = isWomensBaggyListing || isShirtsListing || isPanjabiListing
 
   if (isInvalidListing) {
     return <NotFoundPage />
@@ -1199,6 +1205,18 @@ export default function ShopPage() {
           fallbacks={[WOMENS_BAGGY_HERO_IMAGE_FALLBACK]}
           background="neutral"
           ariaLabel="Women's Baggy Jeans collection banner"
+        />
+      ) : isPanjabiListing ? (
+        <ResponsiveHeroBanner
+          src={PANJABI_LISTING_HERO}
+          alt="Timeless Elegance — Men's Panjabi collection, SHIS Fashion"
+          width={PANJABI_LISTING_HERO_WIDTH}
+          height={PANJABI_LISTING_HERO_HEIGHT}
+          fallbacks={[PANJABI_LISTING_HERO_FALLBACK]}
+          background={PANJABI_LISTING_HERO_BACKGROUND}
+          objectFit="cover"
+          objectPosition="center"
+          ariaLabel="Panjabi collection banner"
         />
       ) : null}
 
