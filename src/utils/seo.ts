@@ -109,6 +109,7 @@ function isRecognizedStorefrontPath(pathname: string) {
     '/sale',
     '/women',
     '/sarees',
+    '/wedding',
     '/men',
     '/men/half-shirts',
     '/men/panjabi',
@@ -277,6 +278,11 @@ function buildBreadcrumbItems(pathname: string) {
     return items
   }
 
+  if (segments[0] === 'wedding') {
+    items.push({ name: 'Wedding', item: `${SITE_URL}/wedding` })
+    return items
+  }
+
   if (segments[0] === 'new-arrivals') {
     items.push({ name: 'New Arrivals', item: `${SITE_URL}/shop/new-arrivals` })
     return items
@@ -378,7 +384,7 @@ function buildBaseSchemas(pathname: string, canonicalUrl: string, metadata: SeoM
     })
   }
 
-  if (['/women', '/men', '/kids', '/sarees'].includes(pathname)) {
+  if (['/women', '/men', '/kids', '/sarees', '/wedding'].includes(pathname)) {
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
@@ -607,6 +613,18 @@ export function getRouteMetadata(pathname: string): SeoMetadata {
       keywords: 'Saree Bangladesh, SHIS saree, women saree collection, premium saree Dhaka',
       canonicalPath: '/sarees',
       ogImage: DEFAULT_OG_IMAGE,
+      type: 'collection',
+      robots: 'index,follow',
+    }
+  }
+
+  if (normalizedPath === '/wedding' || normalizedPath === '/collections/wedding') {
+    return {
+      title: 'Wedding Collection | SHIS Fashion Bangladesh',
+      description: 'Shop the SHIS Fashion wedding collection — timeless bridal sarees and groom panjabi edits with fast delivery and cash on delivery.',
+      keywords: 'wedding collection Bangladesh, bridal saree, groom panjabi, SHIS wedding',
+      canonicalPath: '/wedding',
+      ogImage: `${SITE_URL}/collections/wedding/wedding-banner.jpg`,
       type: 'collection',
       robots: 'index,follow',
     }

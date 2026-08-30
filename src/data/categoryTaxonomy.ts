@@ -150,7 +150,7 @@ export const SEGMENT_TABS: Array<{ key: ShopSegment; label: string; path: string
   { key: 'all', label: 'All', path: '/shop' },
 ]
 
-const RESERVED_SHOP_SLUGS = new Set(['new-arrivals', 'best-sellers', 'saree', 'sarees'])
+const RESERVED_SHOP_SLUGS = new Set(['new-arrivals', 'best-sellers', 'saree', 'sarees', 'wedding'])
 
 export function isKnownListingSlug(slug: string) {
   const normalized = slug.trim().toLowerCase()
@@ -259,6 +259,16 @@ export function getDedicatedListingFromPath(pathname: string) {
       eyebrow: "Women's Saree Collection",
       title: 'Sarees',
       description: 'Refined weaves and fluid drapes for celebrations, evenings, and considered everyday elegance.',
+    }
+  }
+
+  if (normalized === '/wedding' || normalized === '/collections/wedding') {
+    return {
+      segment: 'women' as const,
+      subcategory: 'saree',
+      eyebrow: 'Wedding Collection',
+      title: 'Wedding',
+      description: 'Timeless bridal and groom elegance — refined sarees and panjabi edits for the wedding season.',
     }
   }
 
