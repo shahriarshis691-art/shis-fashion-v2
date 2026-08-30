@@ -13,6 +13,9 @@ export const SAREE_HOMEPAGE_COVER_POSITION = '62% top'
 export const SAREE_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e8cbb1]'
 export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
 export const MEN_HOMEPAGE_COVER = '/collections/men-feature.png'
+export const KIDS_HOMEPAGE_COVER = '/collections/kid-hero/kid-category.png'
+export const KIDS_HOMEPAGE_COVER_POSITION = 'center top'
+export const KIDS_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e6d2be]'
 export const WOMENS_BAGGY_CATEGORY_COVER = `/collections/womens-baggy/${encodeURIComponent('download (17).jpg')}`
 
 export const categoryStripCovers: Record<string, string> = {

@@ -1,5 +1,5 @@
 import CategoryHeroCard from '../common/CategoryHeroCard'
-import { SAREE_HOMEPAGE_COVER_ASPECT, SAREE_HOMEPAGE_COVER_BACKGROUND, SAREE_HOMEPAGE_COVER_POSITION } from '../../data/featuredCollectionCovers'
+import { KIDS_HOMEPAGE_COVER_BACKGROUND, KIDS_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER_ASPECT, SAREE_HOMEPAGE_COVER_BACKGROUND, SAREE_HOMEPAGE_COVER_POSITION } from '../../data/featuredCollectionCovers'
 
 export interface ShopByCategoryItem {
   key: string
@@ -65,6 +65,7 @@ export default function ShopByCategorySection({
       <div className="relative z-10 isolate flex flex-col gap-8 px-4 pb-8 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-start md:gap-x-4 md:gap-y-8 md:px-6 md:pb-0 lg:grid-cols-4">
         {hubItems.map((item, index) => {
           const isSareeCard = item.key.trim().toLowerCase() === 'saree'
+          const isKidsCard = item.key.trim().toLowerCase() === 'kids'
 
           return (
             <article key={item.key} className="relative z-10 isolate w-full min-w-0">
@@ -74,12 +75,12 @@ export default function ShopByCategorySection({
                 image={item.image}
                 priority={index === 0}
                 variant="feed"
-                imagePosition={isSareeCard ? (item.imagePosition ?? SAREE_HOMEPAGE_COVER_POSITION) : item.imagePosition}
+                imagePosition={isSareeCard ? (item.imagePosition ?? SAREE_HOMEPAGE_COVER_POSITION) : isKidsCard ? (item.imagePosition ?? KIDS_HOMEPAGE_COVER_POSITION) : item.imagePosition}
                 imageFit="cover"
                 imageWidth={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.width : undefined}
                 imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
-                frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : undefined}
-                imgClassName={isSareeCard ? 'object-top' : undefined}
+                frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : isKidsCard ? KIDS_HOMEPAGE_COVER_BACKGROUND : undefined}
+                imgClassName={(isSareeCard || isKidsCard) ? 'object-top' : undefined}
                 imageHoverScale={!isSareeCard}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
               />

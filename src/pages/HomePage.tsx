@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import { homeCategoryItems } from '../data/homeCategories'
-import { SEGMENT_HUB_COVERS } from '../data/categoryHubCovers'
-import { categoryStripCover, categoryStripCovers, MEN_HOMEPAGE_COVER, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
+import { categoryStripCover, categoryStripCovers, KIDS_HOMEPAGE_COVER, MEN_HOMEPAGE_COVER, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
 import { incidentAlerts } from '../services/incidentAlerts'
 import {
@@ -20,7 +19,7 @@ const fallbackCategoryStrips = [
   { key: 'saree', label: 'Saree', href: '/sarees', order: 15, image: SAREE_HOMEPAGE_COVER, imagePosition: '62% top' },
   { key: 'men', label: 'Men', href: '/men', order: 20, image: MEN_HOMEPAGE_COVER, imagePosition: 'center center' },
   { key: 'denim', label: 'Pants', href: '/men/pants', order: 25, image: categoryStripCovers.denim, imagePosition: 'center top' },
-  { key: 'kids', label: 'KID', href: '/kids', order: 30, image: SEGMENT_HUB_COVERS.kids, imagePosition: 'center top' },
+  { key: 'kids', label: 'KID', href: '/kids', order: 30, image: KIDS_HOMEPAGE_COVER, imagePosition: 'center top' },
   { key: 'western', label: "WOMEN'S BAGGY", href: '/women/womens-baggy', order: 40, image: categoryStripCovers.western, imagePosition: 'center center' },
   { key: 'sale', label: 'HALF SHIRTS', href: '/men/half-shirts', order: 50, image: categoryStripCovers['half-shirts'], imagePosition: 'center top' },
   { key: 'new-arrivals', label: 'OVERSIZED TEE', href: '/collections/oversized-tee', order: 60, image: categoryStripCovers['oversized-tee'], imagePosition: 'center top' },
@@ -151,7 +150,7 @@ const defaultHomepage: HomepageContent = {
       href: '/kids',
       enabled: true,
       order: 30,
-      coverImage: SEGMENT_HUB_COVERS.kids,
+      coverImage: KIDS_HOMEPAGE_COVER,
       images: [],
       updatedAt: null,
     },
@@ -285,6 +284,8 @@ export default function HomePage() {
                   ? SAREE_HOMEPAGE_COVER
                   : isWomenCard
                     ? WOMEN_HOMEPAGE_COVER
+                    : isKidsCard
+                      ? KIDS_HOMEPAGE_COVER
                     : pickPreferredCategoryCoverUrl(
                     section?.coverImage,
                     section?.images,
@@ -328,7 +329,7 @@ export default function HomePage() {
     return (['men', 'women', 'kids', 'saree'] as const).map((key) => {
       const strip = byKey.get(key)
       const fallbackImage = key === 'kids'
-        ? SEGMENT_HUB_COVERS.kids
+        ? KIDS_HOMEPAGE_COVER
         : key === 'men'
           ? MEN_HOMEPAGE_COVER
           : key === 'saree'

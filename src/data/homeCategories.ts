@@ -1,4 +1,4 @@
-import { SAREE_HOMEPAGE_COVER, WOMENS_BAGGY_CATEGORY_COVER } from './featuredCollectionCovers'
+import { KIDS_HOMEPAGE_COVER, SAREE_HOMEPAGE_COVER, WOMENS_BAGGY_CATEGORY_COVER } from './featuredCollectionCovers'
 
 export interface HomeCategoryItem {
   key: 'mens' | 'womens' | 'kids' | 'western' | 'denim' | 'oversized-tee' | 'saree'
@@ -48,7 +48,8 @@ export const homeCategoryItems: HomeCategoryItem[] = [
     key: 'kids',
     name: 'KID',
     href: '/kids',
-    image: '/hero/kid-homepage.jpg',
+    image: KIDS_HOMEPAGE_COVER,
+    imagePosition: 'center top',
   },
   {
     key: 'western',
