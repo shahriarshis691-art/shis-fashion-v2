@@ -22,11 +22,11 @@ export default function WeddingShowcaseSection() {
 
       <Link
         to="/wedding"
-        className="group relative block w-full"
+        className="group relative mx-auto block w-full max-w-5xl"
         aria-label="Explore the Wedding collection"
       >
         <div
-          className="relative aspect-[4/5] w-full overflow-hidden"
+          className="relative w-full min-h-[75vh] aspect-[9/16] overflow-hidden rounded-none bg-black md:min-h-[85vh]"
           style={{ backgroundColor: WEDDING_CARD_BACKGROUND }}
         >
           <img
@@ -34,28 +34,30 @@ export default function WeddingShowcaseSection() {
             alt="SHIS Fashion wedding collection — bridal fireworks under the floral arch"
             width={WEDDING_CARD_IMAGE_WIDTH}
             height={WEDDING_CARD_IMAGE_HEIGHT}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+            className="absolute inset-0 h-full w-full object-contain object-center"
             loading="eager"
             fetchPriority="high"
             decoding="async"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center px-6 pb-8 text-center md:pb-12">
-            <p
-              className="text-2xl tracking-[0.18em] text-white uppercase md:text-4xl"
-              style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}
-            >
-              The Dream Story
-            </p>
-            <p className="mt-2 text-[11px] font-medium tracking-[0.28em] text-white/85 uppercase">
-              Wedding Collection
-            </p>
-            <p className="mt-3 text-xs tracking-[0.08em] text-white/80 md:text-sm">
-              Timeless Bridal &amp; Groom Elegance
-            </p>
-            <span className="mt-6 inline-block border border-white/85 px-8 py-3 text-[11px] tracking-[0.22em] text-white uppercase transition-colors duration-300 group-hover:bg-white group-hover:text-black">
-              Explore Collection
-            </span>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-transparent" />
+          <div className="absolute inset-x-0 top-[28%] z-10 flex flex-col items-center px-4 text-center md:top-[38%]">
+            <div className="flex flex-col items-center bg-gradient-to-b from-black/50 via-black/25 to-transparent px-4 pb-8 pt-4">
+              <p
+                className="mb-1 font-serif text-2xl tracking-[0.2em] text-white uppercase drop-shadow-md md:text-4xl"
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}
+              >
+                The Dream Story
+              </p>
+              <p className="mb-1 text-xs tracking-widest text-white/80 uppercase md:text-sm">
+                Wedding Collection
+              </p>
+              <p className="mb-5 text-xs text-white/70 italic">
+                Timeless Bridal &amp; Groom Elegance
+              </p>
+              <span className="inline-block border border-white/80 px-6 py-2.5 text-xs tracking-widest text-white uppercase backdrop-blur-sm transition-all duration-300 group-hover:bg-white group-hover:text-black">
+                Explore Collection
+              </span>
+            </div>
           </div>
         </div>
       </Link>
