@@ -166,6 +166,12 @@ main {
   main {
     animation: none;
   }
+
+  .hero-ken-burns {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
 }
 
 @keyframes fadeIn {
@@ -237,6 +243,22 @@ img.navbar-brand-logo {
   overflow: hidden;
   isolation: isolate;
   contain: layout paint;
+}
+
+@keyframes hero-slow-pan-zoom {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: scale(1.08) translate3d(-1%, -1%, 0);
+  }
+}
+
+.hero-ken-burns {
+  animation: hero-slow-pan-zoom 2.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 img.hero-slide-image {

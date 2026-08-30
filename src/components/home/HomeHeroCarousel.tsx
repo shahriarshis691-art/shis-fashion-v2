@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
 import { Link } from 'react-router-dom'
 import ResponsiveHeroBanner, { type HeroBackgroundTone } from '../common/ResponsiveHeroBanner'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
-const HERO_AUTOPLAY_MS = 5500
+const HERO_AUTOPLAY_MS = 2000
+const HERO_SWIPE_THRESHOLD_PX = 40
 
 const HOME_HERO_SLIDES = [
   {
@@ -46,8 +48,12 @@ function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
 }
 
 export default function HomeHeroCarousel() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+  const touchDeltaX = useRef(0)
+  const didSwipe = useRef(false)
   const slideCount = HOME_HERO_SLIDES.length
 
   const goToSlide = useCallback((index: number) => {
@@ -55,25 +61,53 @@ export default function HomeHeroCarousel() {
   }, [slideCount])
 
   const goNext = useCallback(() => {
-    goToSlide(activeIndex + 1)
-  }, [activeIndex, goToSlide])
+    setActiveIndex((current) => (current + 1) % slideCount)
+  }, [slideCount])
 
   const goPrevious = useCallback(() => {
-    goToSlide(activeIndex - 1)
-  }, [activeIndex, goToSlide])
+    setActiveIndex((current) => (current - 1 + slideCount) % slideCount)
+  }, [slideCount])
 
   useEffect(() => {
-    if (slideCount <= 1 || isPaused) {
+    if (slideCount <= 1 || isPaused || prefersReducedMotion) {
       return
     }
 
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const timer = window.setInterval(goNext, HERO_AUTOPLAY_MS)
+    return () => window.clearInterval(timer)
+  }, [activeIndex, goNext, isPaused, prefersReducedMotion, slideCount])
+
+  const onTouchStart = (event: TouchEvent<HTMLElement>) => {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null
+    touchDeltaX.current = 0
+    didSwipe.current = false
+  }
+
+  const onTouchMove = (event: TouchEvent<HTMLElement>) => {
+    if (touchStartX.current == null) {
       return
     }
 
-    const timer = window.setTimeout(goNext, HERO_AUTOPLAY_MS)
-    return () => window.clearTimeout(timer)
-  }, [activeIndex, goNext, isPaused, slideCount])
+    touchDeltaX.current = (event.changedTouches[0]?.clientX ?? 0) - touchStartX.current
+  }
+
+  const onTouchEnd = () => {
+    const delta = touchDeltaX.current
+    touchStartX.current = null
+    touchDeltaX.current = 0
+
+    if (Math.abs(delta) < HERO_SWIPE_THRESHOLD_PX) {
+      return
+    }
+
+    didSwipe.current = true
+    if (delta < 0) {
+      goNext()
+      return
+    }
+
+    goPrevious()
+  }
 
   return (
     <section
@@ -89,8 +123,20 @@ export default function HomeHeroCarousel() {
           setIsPaused(false)
         }
       }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onClickCapture={(event) => {
+        if (!didSwipe.current) {
+          return
+        }
+
+        event.preventDefault()
+        event.stopPropagation()
+        didSwipe.current = false
+      }}
     >
-      <div className="relative w-full max-md:aspect-[4/5] md:aspect-[4/5]">
+      <div className="hero-slider-frame relative w-full overflow-hidden max-md:aspect-[4/5] md:aspect-[4/5]">
         {HOME_HERO_SLIDES.map((slide, index) => {
           const isActive = index === activeIndex
           const frame = (
@@ -115,18 +161,25 @@ export default function HomeHeroCarousel() {
             <div
               key={slide.id}
               className={[
-                'absolute inset-0 h-full w-full transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                'absolute inset-0 h-full w-full overflow-hidden transition-opacity duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
                 isActive ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0',
               ].join(' ')}
               aria-hidden={!isActive}
             >
-              {'href' in slide && slide.href ? (
-                <Link to={slide.href} className="block h-full w-full" aria-label={slide.ariaLabel}>
-                  {frame}
-                </Link>
-              ) : (
-                frame
-              )}
+              <div
+                className={[
+                  'h-full w-full origin-center transform-gpu',
+                  isActive && !prefersReducedMotion ? 'hero-ken-burns' : '',
+                ].join(' ')}
+              >
+                {'href' in slide && slide.href ? (
+                  <Link to={slide.href} className="block h-full w-full" aria-label={slide.ariaLabel}>
+                    {frame}
+                  </Link>
+                ) : (
+                  frame
+                )}
+              </div>
             </div>
           )
         })}
