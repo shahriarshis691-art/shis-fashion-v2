@@ -70,40 +70,48 @@ export default function WeddingCollectionPage() {
   }, [])
 
   return (
-    <section className="bg-white pb-24">
+    <section className="bg-white pt-0 pb-24">
       <section
-        className="relative z-0 isolate w-full overflow-hidden"
+        className="relative z-0 isolate flex min-h-screen w-full items-center justify-center overflow-hidden md:h-screen"
         style={{ backgroundColor: WEDDING_LISTING_HERO_BACKGROUND }}
         aria-label="Wedding collection banner"
       >
-        <div className="relative w-full min-h-[90vh] max-md:min-h-[calc(100dvh-var(--nav-offset))] md:min-h-0 md:h-[480px] lg:h-[580px]">
-          <img
-            src={WEDDING_LISTING_HERO}
-            alt="SHIS Fashion wedding collection — timeless bridal and groom elegance"
-            width={WEDDING_LISTING_HERO_WIDTH}
-            height={WEDDING_LISTING_HERO_HEIGHT}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-black/10" />
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center text-white">
-            <div className="rounded-sm bg-black/20 p-6 backdrop-blur-[2px]">
-              <p className="text-[11px] font-medium tracking-[0.22em] text-white/80 uppercase">
-                Wedding Collection
-              </p>
-              <p
-                className="mt-2 text-3xl font-normal tracking-[0.2em] text-white uppercase drop-shadow-md sm:text-4xl md:text-5xl"
-                style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
-              >
-                Wedding
-              </p>
-              <p className="mt-3 max-w-lg text-sm tracking-[0.06em] text-white/90 sm:text-base">
-                Timeless Bridal & Groom Elegance
-              </p>
-            </div>
-          </div>
+        <img
+          src={WEDDING_LISTING_HERO}
+          alt="SHIS Fashion wedding collection — timeless bridal and groom elegance"
+          width={WEDDING_LISTING_HERO_WIDTH}
+          height={WEDDING_LISTING_HERO_HEIGHT}
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center">
+          <p
+            className="font-sans text-xs uppercase"
+            style={{ letterSpacing: '0.3em', color: 'rgba(255,255,255,0.8)' }}
+          >
+            Wedding Collection
+          </p>
+          <h1
+            className="mt-5 text-3xl uppercase md:text-5xl lg:text-6xl"
+            style={{
+              fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)",
+              fontWeight: 400,
+              letterSpacing: '0.1em',
+              color: '#ffffff',
+            }}
+          >
+            Wedding
+          </h1>
+          <a
+            href="#wedding-grid"
+            className="mt-8 inline-block border border-white/80 px-8 py-3 text-xs uppercase transition-all duration-300 hover:bg-white hover:!text-black"
+            style={{ letterSpacing: '0.2em', color: '#ffffff' }}
+          >
+            Discover the Collection
+          </a>
         </div>
       </section>
 
@@ -123,7 +131,7 @@ export default function WeddingCollectionPage() {
         </nav>
 
         <header className="mt-8 sm:mt-10">
-          <h1 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Wedding Collection</h1>
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Wedding Collection</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
             Timeless bridal and groom elegance — refined sarees and panjabi edits for the wedding season.
           </p>

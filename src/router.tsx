@@ -172,6 +172,10 @@ export const router = createBrowserRouter([
         element: <Navigate to="/wedding" replace />,
       },
       {
+        path: 'shop/wedding',
+        element: <Navigate to="/wedding" replace />,
+      },
+      {
         path: 'shop/new-arrivals',
         element: withSuspense(<NewArrivalsPage />),
       },

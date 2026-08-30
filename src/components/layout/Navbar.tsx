@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import type { HomepageContent } from '../../firebase/adminService'
 import { metaPixel } from '../../services/metaPixel'
@@ -7,6 +7,7 @@ import { googleAnalytics } from '../../services/googleAnalytics'
 import { getSubcategoryLinksForSegment } from '../../data/categoryTaxonomy'
 
 const BRAND_LOGO = '/hero/shis-brand-logo-v2.png'
+const BRAND_LOGO_WHITE = '/hero/shis-brand-logo-white.png'
 
 const primaryLinks = [
   { label: 'Women', href: '/women' },
@@ -128,8 +129,21 @@ function MobileAccordionGroup({
   )
 }
 
-const iconButtonClass =
+const defaultIconButtonClass =
   'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500 md:h-10 md:w-10'
+
+const weddingIconButtonClass =
+  'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-white stroke-white drop-shadow-sm transition-colors hover:text-white/80 md:h-10 md:w-10'
+
+function isWeddingListingPath(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+  return (
+    normalized === '/wedding'
+    || normalized.startsWith('/wedding/')
+    || normalized === '/shop/wedding'
+    || normalized.startsWith('/collections/wedding')
+  )
+}
 
 export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -138,10 +152,22 @@ export default function Navbar() {
     'women',
   )
   const [searchTerm, setSearchTerm] = useState('')
+  const [isPastWeddingHero, setIsPastWeddingHero] = useState(false)
   const lastSearchQueryRef = useRef<string | null>(null)
   const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null)
   const { itemCount } = useCart()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const isWeddingPage = isWeddingListingPath(pathname)
+  const iconButtonClass = isWeddingPage ? weddingIconButtonClass : defaultIconButtonClass
+  const headerClassName = isWeddingPage
+    ? [
+        'fixed top-0 right-0 left-0 z-50 w-full overflow-visible pt-[env(safe-area-inset-top,0px)] transition-all duration-300',
+        isPastWeddingHero
+          ? 'border-b border-white/20 bg-black/55 backdrop-blur-lg'
+          : 'border-b border-white/10 bg-black/20 backdrop-blur-md',
+      ].join(' ')
+    : 'fixed top-0 right-0 left-0 z-50 w-full overflow-visible border-b border-[#eeeeee] bg-white pt-[env(safe-area-inset-top,0px)]'
 
   const closeOverlays = () => {
     setIsSearchOpen(false)
@@ -188,6 +214,26 @@ export default function Navbar() {
     }
   }, [isMenuOpen])
 
+  useEffect(() => {
+    if (!isWeddingPage) {
+      return
+    }
+
+    const updateWeddingNavTone = () => {
+      const hero = document.querySelector('[aria-label="Wedding collection banner"]')
+      const heroHeight = hero instanceof HTMLElement ? hero.offsetHeight : window.innerHeight
+      setIsPastWeddingHero(window.scrollY > Math.max(heroHeight - 80, 120))
+    }
+
+    updateWeddingNavTone()
+    window.addEventListener('scroll', updateWeddingNavTone, { passive: true })
+    window.addEventListener('resize', updateWeddingNavTone)
+    return () => {
+      window.removeEventListener('scroll', updateWeddingNavTone)
+      window.removeEventListener('resize', updateWeddingNavTone)
+    }
+  }, [isWeddingPage])
+
   const runSearch = () => {
     const query = searchTerm.trim()
     if (query && lastSearchQueryRef.current !== query) {
@@ -202,7 +248,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-50 w-full overflow-visible border-b border-[#eeeeee] bg-white pt-[env(safe-area-inset-top,0px)]">
+      <header className={headerClassName}>
         <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-4 sm:px-6 md:h-[70px] md:px-10">
           {/* Left — hamburger (+ desktop nav) */}
           <div className="relative z-10 flex h-full min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
@@ -238,7 +284,13 @@ export default function Navbar() {
                   onClick={closeOverlays}
                   className={({ isActive }) =>
                     `text-[11px] font-medium tracking-[0.16em] uppercase transition-colors ${
-                      isActive ? 'text-neutral-950' : 'text-neutral-600 hover:text-neutral-950'
+                      isWeddingPage
+                        ? isActive
+                          ? 'text-white'
+                          : 'text-white/80 hover:text-white'
+                        : isActive
+                          ? 'text-neutral-950'
+                          : 'text-neutral-600 hover:text-neutral-950'
                     }`
                   }
                 >
@@ -257,17 +309,20 @@ export default function Navbar() {
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
           >
             <img
-              src={BRAND_LOGO}
+              src={isWeddingPage ? BRAND_LOGO_WHITE : BRAND_LOGO}
               alt="SHIS Fashion"
               width={180}
               height={36}
               decoding="async"
               loading="eager"
               fetchPriority="low"
-              className="navbar-brand-logo"
+              className={`navbar-brand-logo ${isWeddingPage ? 'drop-shadow-sm' : ''}`}
               style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
               onError={(event) => {
                 event.currentTarget.src = '/shis-logo.svg'
+                if (isWeddingPage) {
+                  event.currentTarget.classList.add('brightness-0', 'invert')
+                }
               }}
             />
           </Link>
@@ -309,7 +364,7 @@ export default function Navbar() {
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {itemCount > 0 ? (
-                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-950 px-1 text-[9px] font-semibold text-white">
+                <span className={`absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-semibold ${isWeddingPage ? 'bg-white text-neutral-950' : 'bg-neutral-950 text-white'}`}>
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               ) : null}
@@ -347,7 +402,7 @@ export default function Navbar() {
           </div>
         ) : null}
       </header>
-      <div className="w-full shrink-0" style={{ height: 'var(--nav-offset)' }} aria-hidden />
+      {isWeddingPage ? null : <div className="w-full shrink-0" style={{ height: 'var(--nav-offset)' }} aria-hidden />}
 
       {isMenuOpen ? (
         <>
