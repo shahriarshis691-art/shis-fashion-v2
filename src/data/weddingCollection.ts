@@ -1,5 +1,6 @@
 import { isSareeProduct } from './sareeCollection'
 import type { ShopProduct } from './shopData'
+import { WEDDING_HOMEPAGE_COVER } from './featuredCollectionCovers'
 import { filterListingProducts } from '../utils/listingProducts'
 
 export const WEDDING_LISTING_PATH = '/wedding'
@@ -27,6 +28,67 @@ const GENERAL_CASUAL_SLUGS = new Set([
   'kurti',
   'kurtis',
 ])
+
+export interface WeddingLookbookItem {
+  id: string
+  title: string
+  price: string
+  image: string
+  tag: string
+  imagePosition?: string
+}
+
+/** Isolated bridal/groom lookbook — dedicated wedding assets only. */
+export const weddingLookbook: WeddingLookbookItem[] = [
+  {
+    id: 'w1',
+    title: 'Ivory Royal Bridal Silk',
+    price: '৳ 18,500',
+    image: WEDDING_LISTING_HERO,
+    tag: 'Bridal Heritage',
+    imagePosition: '68% center',
+  },
+  {
+    id: 'w2',
+    title: 'Crimson Velvet Bridal Couture',
+    price: '৳ 22,000',
+    image: WEDDING_HOMEPAGE_COVER,
+    tag: 'Exclusive',
+    imagePosition: '62% center',
+  },
+  {
+    id: 'w3',
+    title: 'Ivory Embroidered Groom Panjabi',
+    price: '৳ 16,800',
+    image: WEDDING_LISTING_HERO,
+    tag: 'Groom Edit',
+    imagePosition: '28% center',
+  },
+  {
+    id: 'w4',
+    title: 'Royal Sherwani Heritage',
+    price: '৳ 19,200',
+    image: WEDDING_HOMEPAGE_COVER,
+    tag: 'Groom Couture',
+    imagePosition: '32% center',
+  },
+  {
+    id: 'w5',
+    title: 'Banarasi Silk Couple Edit',
+    price: '৳ 24,500',
+    image: WEDDING_LISTING_HERO,
+    tag: 'Wedding Atelier',
+    imagePosition: 'center center',
+  },
+  {
+    id: 'w6',
+    title: 'The Dream Story Lehenga',
+    price: '৳ 26,000',
+    image: WEDDING_HOMEPAGE_COVER,
+    tag: 'Bridal Lehenga',
+    imagePosition: 'center 42%',
+  },
+]
 
 type WeddingTaggedProduct = ShopProduct & { tags?: string[] }
 
@@ -66,18 +128,11 @@ export function isWeddingExclusiveProduct(product: ShopProduct) {
 }
 
 export function isWeddingProduct(product: ShopProduct) {
-  if (isGeneralCasualProduct(product)) {
+  if (!isWeddingExclusiveProduct(product)) {
     return false
   }
 
-  const { category, subCategory, tags, name, slug } = weddingIdentityFields(product)
-  const isDirectWedding = category === 'wedding' || subCategory === 'wedding' || tags.includes('wedding')
-
-  const identity = [category, subCategory, name, slug, ...tags].join(' ')
-  const isBridalOrGroomItem = /\b(bridal|groom|bride|lehenga|sherwani)\b/.test(identity)
-  const isNamedWedding = /\bwedding\b/.test(identity)
-
-  return isDirectWedding || isBridalOrGroomItem || isNamedWedding
+  return !isGeneralCasualProduct(product)
 }
 
 export function weddingProductHref(product: ShopProduct) {

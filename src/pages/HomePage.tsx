@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
+import WeddingShowcaseSection from '../components/home/WeddingShowcaseSection'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, categoryStripCovers, KIDS_HOMEPAGE_COVER, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER, MEN_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -410,6 +411,8 @@ export default function HomePage() {
           title={homepageContent.featuredCollectionTitle?.trim() || 'SHOP BY CATEGORY'}
         />
       ) : null}
+
+      <WeddingShowcaseSection />
 
       {brandPromiseEnabled ? (
         <section

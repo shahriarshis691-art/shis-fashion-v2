@@ -1,71 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import ProductCard from '../components/shop/ProductCard'
-import ProductListingGrid from '../components/shop/ProductListingGrid'
-import { subscribeToProducts } from '../firebase/adminService'
-import { useListingWishlist } from '../hooks/useListingWishlist'
-import { parseBDT } from '../utils/currency'
-import { mapAdminProductToShopProduct } from '../utils/productMapper'
-import { applySeoMetadata } from '../utils/seo'
 import {
   WEDDING_LISTING_HERO,
   WEDDING_LISTING_HERO_BACKGROUND,
   WEDDING_LISTING_HERO_HEIGHT,
   WEDDING_LISTING_HERO_WIDTH,
-  mergeWeddingCatalog,
-  weddingProductHref,
+  weddingLookbook,
 } from '../data/weddingCollection'
-import type { ShopProduct } from '../data/shopData'
-
-type SortOption = 'featured' | 'price-low' | 'price-high'
-
-const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
-  { value: 'featured', label: 'Featured' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
-]
+import { applySeoMetadata } from '../utils/seo'
 
 export default function WeddingCollectionPage() {
-  const { handleToggleWishlist, isInWishlist } = useListingWishlist()
-  const [products, setProducts] = useState<ShopProduct[]>(() => mergeWeddingCatalog([]))
-  const [sortBy, setSortBy] = useState<SortOption>('featured')
-
-  useEffect(() => {
-    const unsubscribe = subscribeToProducts((nextProducts) => {
-      setProducts(mergeWeddingCatalog(nextProducts.map((product) => mapAdminProductToShopProduct(product))))
-    })
-
-    return unsubscribe
-  }, [])
-
-  const visibleProducts = useMemo(() => {
-    const sorted = [...products]
-
-    if (sortBy === 'price-low') {
-      sorted.sort((left, right) => parseBDT(left.price) - parseBDT(right.price))
-      return sorted
-    }
-
-    if (sortBy === 'price-high') {
-      sorted.sort((left, right) => parseBDT(right.price) - parseBDT(left.price))
-      return sorted
-    }
-
-    sorted.sort(
-      (left, right) =>
-        Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
-        (right.stock ?? 0) - (left.stock ?? 0),
-    )
-    return sorted
-  }, [products, sortBy])
-
   useEffect(() => {
     applySeoMetadata('/wedding', {
       title: 'Wedding Collection | SHIS Fashion Bangladesh',
       description:
-        'Shop the SHIS Fashion wedding collection — timeless bridal sarees and groom panjabi edits with fast delivery and cash on delivery.',
+        'THE DREAM STORY — SHIS Fashion wedding collection. Timeless bridal lehenga, Banarasi silk, and groom sherwani elegance.',
       canonicalPath: '/wedding',
-      keywords: 'wedding collection Bangladesh, bridal saree, groom panjabi, SHIS wedding',
+      keywords: 'wedding collection Bangladesh, bridal saree, groom panjabi, SHIS wedding, THE DREAM STORY',
     })
   }, [])
 
@@ -78,7 +29,7 @@ export default function WeddingCollectionPage() {
       >
         <img
           src={WEDDING_LISTING_HERO}
-          alt="SHIS Fashion wedding collection — timeless bridal and groom elegance"
+          alt="THE DREAM STORY — SHIS Fashion wedding collection, timeless bridal and groom elegance"
           width={WEDDING_LISTING_HERO_WIDTH}
           height={WEDDING_LISTING_HERO_HEIGHT}
           className="absolute inset-0 h-full w-full object-cover object-center"
@@ -86,7 +37,7 @@ export default function WeddingCollectionPage() {
           fetchPriority="high"
           decoding="async"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/65" />
         <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center">
           <p
             className="font-sans text-xs uppercase"
@@ -99,18 +50,21 @@ export default function WeddingCollectionPage() {
             style={{
               fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)",
               fontWeight: 400,
-              letterSpacing: '0.1em',
+              letterSpacing: '0.12em',
               color: '#ffffff',
             }}
           >
-            Wedding
+            The Dream Story
           </h1>
+          <p className="mt-4 max-w-md text-sm tracking-[0.08em] text-white/80">
+            Timeless Bridal &amp; Groom Elegance
+          </p>
           <a
             href="#wedding-grid"
             className="mt-8 inline-block border border-white/80 px-8 py-3 text-xs uppercase transition-all duration-300 hover:bg-white hover:!text-black"
             style={{ letterSpacing: '0.2em', color: '#ffffff' }}
           >
-            Discover the Collection
+            Explore Collection
           </a>
         </div>
       </section>
@@ -133,62 +87,40 @@ export default function WeddingCollectionPage() {
         <header className="mt-8 sm:mt-10">
           <h2 className="text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">Wedding Collection</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-            Timeless bridal and groom elegance — refined sarees and panjabi edits for the wedding season.
+            An exclusive bridal and groom lookbook — Banarasi silk, lehenga couture, and embroidered sherwani edits.
           </p>
         </header>
 
-        <div className="mt-8 flex items-center justify-end border-b border-neutral-100 pb-3 sm:mt-10">
-          <label className="flex items-center gap-2 text-xs font-medium text-neutral-500">
-            <span className="sr-only sm:not-sr-only">Sort</span>
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="appearance-none bg-transparent pr-5 text-xs font-medium text-neutral-700 outline-none hover:text-neutral-900"
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%737373' stroke-width='1.5'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E\")",
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.15rem center',
-              }}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div id="wedding-grid">
-          {visibleProducts.length > 0 ? (
-            <ProductListingGrid className="mt-8">
-              {visibleProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  href={weddingProductHref(product)}
-                  variant="studio"
-                  priority={index < 4}
-                  onToggleWishlist={handleToggleWishlist}
-                  isInWishlist={isInWishlist(String(product.id))}
+        <div
+          id="wedding-grid"
+          className="mt-8 grid grid-cols-2 gap-x-[2px] gap-y-6 px-1 md:grid-cols-3 md:gap-x-4 md:gap-y-10 md:px-0 lg:grid-cols-4"
+        >
+          {weddingLookbook.map((item) => (
+            <article key={item.id} className="group min-w-0">
+              <div className="relative aspect-[3/4] overflow-hidden bg-[#f4efe8]">
+                <img
+                  src={item.image}
+                  alt={`${item.title} — SHIS Fashion wedding lookbook`}
+                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  style={{ objectPosition: item.imagePosition ?? 'center center' }}
+                  loading="lazy"
+                  decoding="async"
                 />
-              ))}
-            </ProductListingGrid>
-          ) : (
-            <div className="mt-16 px-4 py-16 text-center">
-              <p className="font-sans text-xs tracking-[0.3em] text-neutral-400 uppercase">Coming Soon</p>
-              <p
-                className="mt-4 text-2xl tracking-widest text-neutral-900 uppercase md:text-3xl"
-                style={{ fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)", fontWeight: 400 }}
-              >
-                The Wedding Edit
-              </p>
-              <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-neutral-500">
-                Dedicated bridal and groom pieces will appear here as they are added to the collection.
-              </p>
-            </div>
-          )}
+                <span className="absolute top-3 left-3 bg-white/90 px-2.5 py-1 text-[9px] font-medium tracking-[0.18em] text-neutral-800 uppercase">
+                  {item.tag}
+                </span>
+              </div>
+              <div className="px-1 pt-3 text-center">
+                <h3
+                  className="text-[11px] font-medium tracking-[0.16em] text-neutral-900 uppercase md:text-xs"
+                  style={{ fontFamily: "var(--font-display, 'Cormorant Garamond', Georgia, serif)" }}
+                >
+                  {item.title}
+                </h3>
+                <p className="mt-1.5 text-xs tracking-wide text-neutral-500">{item.price}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
