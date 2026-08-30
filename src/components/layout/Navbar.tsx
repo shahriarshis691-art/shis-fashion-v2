@@ -202,7 +202,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-[#eeeeee] bg-white">
+      <header className="fixed top-0 right-0 left-0 z-50 w-full overflow-visible border-b border-[#eeeeee] bg-white pt-[env(safe-area-inset-top,0px)]">
         <div className="relative mx-auto flex h-16 w-full max-w-[1400px] items-center px-4 sm:px-6 md:h-[70px] md:px-10">
           {/* Left — hamburger (+ desktop nav) */}
           <div className="relative z-10 flex h-full min-w-0 flex-1 items-center justify-start gap-1 md:gap-6">
@@ -347,6 +347,7 @@ export default function Navbar() {
           </div>
         ) : null}
       </header>
+      <div className="w-full shrink-0" style={{ height: 'var(--nav-offset)' }} aria-hidden />
 
       {isMenuOpen ? (
         <>
@@ -357,7 +358,7 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          <aside className="luxury-sheet-up fixed inset-x-3 top-[calc(4rem+env(safe-area-inset-top))] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))] md:top-[calc(4.375rem+env(safe-area-inset-top))]">
+          <aside className="luxury-sheet-up fixed inset-x-3 top-[var(--nav-offset)] z-50 max-h-[min(78vh,640px)] overflow-y-auto rounded-sm bg-white p-3 shadow-[0_22px_44px_rgba(0,0,0,0.18)] md:inset-x-auto md:left-6 md:w-[min(24rem,calc(100vw-3rem))]">
             <p className="px-1 text-[11px] font-semibold tracking-[0.14em] text-neutral-400 uppercase">Menu</p>
             <div className="mt-2 grid gap-2" aria-label="Site menu">
               {mobileMenuGroups.map((group) => (

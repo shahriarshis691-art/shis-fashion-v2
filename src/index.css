@@ -5,6 +5,8 @@
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   --tracking-label: 0.14em;
   --tracking-heading: -0.02em;
+  --nav-height: 4rem;
+  --nav-offset: calc(var(--nav-height) + env(safe-area-inset-top, 0px));
   line-height: 1.55;
   font-weight: 400;
   font-synthesis: none;
@@ -15,10 +17,16 @@
   background-color: var(--color-bg);
 }
 
+@media (min-width: 768px) {
+  :root {
+    --nav-height: 70px;
+  }
+}
+
 
 html {
   font-size: 100%;
-  scroll-padding-top: 4.25rem;
+  scroll-padding-top: var(--nav-offset);
   overscroll-behavior: none;
 }
 
@@ -48,6 +56,13 @@ body {
   letter-spacing: 0.005em;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+
+/* `clip` does not create a scroll container, so sticky/fixed headers are not trapped. */
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
 }
 
 * {
