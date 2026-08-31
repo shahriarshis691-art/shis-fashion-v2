@@ -69,7 +69,7 @@ export default function CategoryHeroCard({
   return (
     <Link
       to={href}
-      className="group luxury-tap relative z-0 flex w-full min-w-0 cursor-pointer flex-col items-center"
+      className="group luxury-tap touch-press relative z-0 flex w-full min-w-0 cursor-pointer flex-col items-center"
       aria-label={name}
     >
       <div className={imageFrameClass}>

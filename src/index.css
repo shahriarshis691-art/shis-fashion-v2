@@ -223,6 +223,43 @@ main {
     -webkit-user-drag: none;
     user-drag: none;
   }
+
+  a,
+  button {
+    -webkit-touch-callout: none;
+  }
+}
+
+.sticky,
+[style*='position: fixed'],
+[style*='position:fixed'] {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.interaction-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.interaction-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(0, 0, 0, 0.04) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.interaction-feedback:active::after {
+  opacity: 1;
 }
 
 /* Form Elements Premium */

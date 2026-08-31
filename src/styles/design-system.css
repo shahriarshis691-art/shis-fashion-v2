@@ -228,6 +228,109 @@ button,
   }
 }
 
+.will-transform {
+  will-change: transform;
+}
+
+.will-transform-auto {
+  will-change: auto;
+}
+
+.page-enter {
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 180ms var(--ease-luxury),
+    transform 180ms var(--ease-luxury);
+}
+
+.interactive-scale {
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.interactive-scale:active {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .interactive-scale:hover {
+    transform: scale(1.02);
+  }
+}
+
+.form-input-premium {
+  transition:
+    border-color var(--transition-fast) var(--ease-standard),
+    box-shadow var(--transition-fast) var(--ease-standard),
+    background-color var(--transition-fast) var(--ease-standard);
+}
+
+.form-input-premium:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+.form-input-premium:hover:not(:focus) {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.success-pulse {
+  animation: successPulse 400ms var(--ease-luxury);
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .will-transform,
+  .will-transform-auto,
+  .page-enter,
+  .page-enter-active,
+  .interactive-scale,
+  .interactive-scale:active,
+  .interactive-scale:hover,
+  .form-input-premium,
+  .form-input-premium:focus,
+  .form-input-premium:hover:not(:focus),
+  .loading-shimmer,
+  .success-pulse {
+    transition: none;
+    transform: none;
+    animation: none;
+    box-shadow: none;
+  }
+}
+
 .gpu-media {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;

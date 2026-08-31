@@ -280,7 +280,7 @@ const AarongProductCard = memo(function AarongProductCard({
             event.stopPropagation()
             onToggleWishlist(product)
           }}
-          className="studio-wishlist top-2.5 right-2.5 z-10"
+          className="studio-wishlist touch-press top-2.5 right-2.5 z-10"
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill={isInWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" aria-hidden>
