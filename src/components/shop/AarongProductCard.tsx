@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, type MouseEvent } from 'react'
+import { Fragment, memo, useMemo, useState, type MouseEvent } from 'react'
 import PrefetchLink from '../common/PrefetchLink'
 import { useCart } from '../../context/CartContext'
 import type { ShopProduct } from '../../data/shopData'
@@ -207,21 +207,31 @@ const AarongProductCard = memo(function AarongProductCard({
           <div
             className={
               sizePickerVisible
-                ? 'absolute inset-x-2 bottom-2 z-[2] flex'
+                ? 'absolute inset-x-2 bottom-2 z-[3] flex opacity-100 transition-opacity duration-200'
                 : 'pointer-events-none absolute inset-x-2 bottom-2 z-[2] hidden opacity-0 transition-opacity duration-300 md:flex md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100'
             }
           >
             {sizePickerVisible ? (
-              <div className="flex w-full flex-wrap justify-center gap-1 bg-white/95 p-1.5" role="group" aria-label="Select size">
-                {sizes.slice(0, 6).map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={(event) => addWithSize(event, size)}
-                    className="min-h-8 min-w-8 border border-neutral-200 bg-white px-2 text-[10px] font-semibold tracking-[0.08em] text-neutral-900 uppercase hover:border-neutral-950 hover:bg-neutral-950 hover:text-white"
-                  >
-                    {size}
-                  </button>
+              <div
+                className="flex w-full flex-wrap items-center justify-center gap-1.5 rounded-[0.5rem] bg-white/5 px-2 py-1.5 text-xs font-medium text-neutral-900/85 backdrop-blur-sm"
+                role="group"
+                aria-label="Select size"
+              >
+                {sizes.slice(0, 6).map((size, index) => (
+                  <Fragment key={size}>
+                    {index > 0 ? (
+                      <span className="text-neutral-400/60 select-none" aria-hidden>
+                        |
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={(event) => addWithSize(event, size)}
+                      className="whitespace-nowrap px-1.5 py-0.5 text-neutral-900/80 transition-colors hover:text-neutral-900 focus:outline-none focus:text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
+                    >
+                      {size}
+                    </button>
+                  </Fragment>
                 ))}
               </div>
             ) : (
