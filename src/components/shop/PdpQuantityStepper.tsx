@@ -21,19 +21,19 @@ export default function PdpQuantityStepper({
           type="button"
           onClick={onDecrease}
           disabled={value <= min}
-          className="flex w-11 items-center justify-center text-lg text-neutral-900 disabled:text-neutral-300"
+          className="qty-button flex w-11 items-center justify-center text-lg text-neutral-900 disabled:text-neutral-300"
           aria-label="Decrease quantity"
         >
           −
         </button>
-        <span className="flex flex-1 items-center justify-center border-x border-neutral-900 text-sm font-medium tabular-nums text-neutral-900">
+        <span className="qty-value flex flex-1 items-center justify-center border-x border-neutral-900 text-sm font-medium tabular-nums text-neutral-900">
           {value}
         </span>
         <button
           type="button"
           onClick={onIncrease}
           disabled={value >= max}
-          className="flex w-11 items-center justify-center text-lg text-neutral-900 disabled:text-neutral-300"
+          className="qty-button flex w-11 items-center justify-center text-lg text-neutral-900 disabled:text-neutral-300"
           aria-label="Increase quantity"
         >
           +

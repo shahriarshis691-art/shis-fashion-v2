@@ -135,7 +135,7 @@ export default function CartPage() {
               </div>
               <Link to="/shop" className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-900">Continue shopping</Link>
             </div>
-            <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+            <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-neutral-400 trust-line">
               COD checkout · Phone confirm before dispatch ·{' '}
               <a href={supportWhatsAppHref} target="_blank" rel="noreferrer" className="text-neutral-700 hover:text-neutral-900">WhatsApp support</a>
             </p>
@@ -143,7 +143,7 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="luxury-fade-in border-b border-gray-100 py-5"
+                className="luxury-fade-in cart-item-row border-b border-gray-100 py-5"
               >
                 <div className="flex gap-4">
                   <div className="aspect-square h-20 w-20 shrink-0 overflow-hidden sm:h-28 sm:w-28">
@@ -155,13 +155,13 @@ export default function CartPage() {
                         <h2 className="text-base font-semibold text-[var(--color-text)]">{item.name}</h2>
                         <p className="mt-1 text-sm text-[var(--color-muted)]">{item.color} • {item.size}</p>
                       </div>
-                      <button type="button" onClick={() => removeFromCart(item.id)} className="text-sm font-semibold text-[var(--color-accent)]">Remove</button>
+                      <button type="button" onClick={() => removeFromCart(item.id)} className="text-sm font-semibold text-[var(--color-accent)] transition-colors hover:text-neutral-500">Remove</button>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => updateQuantity(item.id, -1)} className="h-8 w-8 text-lg text-neutral-900">−</button>
-                        <span className="min-w-8 text-center text-sm font-semibold text-neutral-900">{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={item.quantity >= (item.stock ?? 0)} className="h-8 w-8 text-lg text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40">+</button>
+                        <button type="button" onClick={() => updateQuantity(item.id, -1)} className="qty-button h-8 w-8 text-lg text-neutral-900">−</button>
+                        <span className="qty-value min-w-8 text-center text-sm font-semibold text-neutral-900">{item.quantity}</span>
+                        <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={item.quantity >= (item.stock ?? 0)} className="qty-button h-8 w-8 text-lg text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40">+</button>
                       </div>
                       <p className="text-base font-semibold text-[var(--color-accent)]">{formatBDT(parseBDT(item.price) * item.quantity)}</p>
                     </div>

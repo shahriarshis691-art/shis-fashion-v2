@@ -331,6 +331,129 @@ button,
   }
 }
 
+.qty-button {
+  transition:
+    background-color var(--transition-fast) var(--ease-standard),
+    transform var(--transition-fast) var(--ease-standard),
+    opacity var(--transition-fast) var(--ease-standard);
+}
+
+.qty-button:active:not(:disabled) {
+  transform: scale(0.92);
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.qty-button:disabled {
+  transition: opacity var(--transition-fast) var(--ease-standard);
+}
+
+.cart-item-row {
+  transition:
+    opacity var(--transition-base) var(--ease-luxury),
+    transform var(--transition-base) var(--ease-luxury);
+}
+
+.cart-item-row.is-removing {
+  opacity: 0;
+  transform: translate3d(-8px, 0, 0);
+}
+
+.cart-item-row.is-updating {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.qty-value {
+  transition:
+    color var(--transition-fast) var(--ease-standard),
+    transform var(--transition-fast) var(--ease-standard);
+}
+
+.qty-value.is-changing {
+  color: var(--color-accent);
+  transform: scale(1.08);
+}
+
+.added-confirm {
+  animation: addedConfirm 400ms var(--ease-luxury);
+}
+
+@keyframes addedConfirm {
+  0% {
+    background-color: rgba(0, 0, 0, 1);
+  }
+  50% {
+    background-color: rgba(22, 163, 74, 1);
+  }
+  100% {
+    background-color: rgba(0, 0, 0, 1);
+  }
+}
+
+.form-field-error {
+  animation: formFieldError 360ms var(--ease-luxury);
+}
+
+@keyframes formFieldError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.form-success-row {
+  animation: formSuccessRow 300ms var(--ease-luxury);
+}
+
+@keyframes formSuccessRow {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.trust-line {
+  transition: color var(--transition-fast) var(--ease-standard);
+}
+
+.trust-line a {
+  transition: color var(--transition-fast) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .trust-line a:hover {
+    color: var(--color-text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qty-button,
+  .qty-button:active:not(:disabled),
+  .qty-button:disabled,
+  .cart-item-row,
+  .cart-item-row.is-removing,
+  .cart-item-row.is-updating,
+  .qty-value,
+  .qty-value.is-changing,
+  .added-confirm,
+  .form-field-error,
+  .form-success-row,
+  .trust-line,
+  .trust-line a {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+}
+
 .gpu-media {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;

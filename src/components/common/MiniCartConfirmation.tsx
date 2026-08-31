@@ -112,7 +112,7 @@ export default function MiniCartConfirmation() {
             liftForCta ? 'bottom-[5.5rem]' : 'bottom-3'
           }`}
         >
-          <div className="pointer-events-auto mx-auto w-full max-w-xl rounded-[1.2rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:rounded-[1.5rem] sm:p-4">
+          <div className="pointer-events-auto mx-auto w-full max-w-xl rounded-[1.2rem] border border-[var(--color-border)] bg-[rgba(255,255,255,0.97)] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:rounded-[1.5rem] sm:p-4 success-pulse">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">Added to bag</p>
