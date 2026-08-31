@@ -389,12 +389,13 @@ export default function Navbar() {
                   }
                 }}
                 placeholder={homepageContent?.navbarSearchPlaceholder ?? 'Search products'}
-                className="w-full border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-900"
+                autoFocus
+                className="form-input-premium w-full border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-900"
               />
               <button
                 type="button"
                 onClick={runSearch}
-                className="ui-interactive shrink-0 border border-neutral-950 bg-neutral-950 px-4 py-2.5 text-xs font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800"
+                className="ui-interactive shrink-0 border border-neutral-950 bg-neutral-950 px-4 py-2.5 text-xs font-semibold tracking-wider text-white uppercase transition-colors hover:bg-neutral-800 touch-press"
               >
                 Search
               </button>

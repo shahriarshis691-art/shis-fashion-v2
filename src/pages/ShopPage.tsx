@@ -1336,7 +1336,7 @@ export default function ShopPage() {
                       key={option.value}
                       type="button"
                       onClick={() => setWesternFilter(option.value)}
-                      className={`shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
+                      className={`touch-press shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
                         active
                           ? 'bg-black text-white'
                           : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
@@ -1359,7 +1359,7 @@ export default function ShopPage() {
                   <button
                     type="button"
                     onClick={() => navigateWomenSubcategory('all')}
-                    className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                    className={`touch-press shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
                       effectiveSubcategory === 'all'
                         ? 'bg-black text-white'
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
@@ -1374,7 +1374,7 @@ export default function ShopPage() {
                         key={sub.slug}
                         type="button"
                         onClick={() => navigateWomenSubcategory(sub.slug)}
-                        className={`shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
+                        className={`touch-press shrink-0 px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors ${
                           active
                             ? 'bg-black text-white'
                             : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
@@ -1400,7 +1400,7 @@ export default function ShopPage() {
                     key={option.value}
                     type="button"
                     onClick={() => setPantsFilter(option.value)}
-                    className={`shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
+                    className={`touch-press shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
                       active
                         ? 'bg-black text-white'
                         : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900'
@@ -1419,7 +1419,7 @@ export default function ShopPage() {
           <button
             type="button"
             onClick={openFilterSheet}
-            className="ui-interactive flex items-center gap-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 sm:hidden"
+            className="ui-interactive touch-press flex items-center gap-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 sm:hidden"
             aria-label="Filter & Sort"
           >
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -1444,7 +1444,7 @@ export default function ShopPage() {
                 id="desktop-sort"
                 value={sortBy === 'popular' ? 'featured' : sortBy}
                 onChange={(event) => setSortBy(event.target.value as SortOption)}
-                className="bg-transparent text-xs font-medium text-neutral-700 outline-none"
+                className="bg-transparent text-xs font-medium text-neutral-700 outline-none transition-colors duration-150 hover:text-neutral-900"
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -1463,7 +1463,7 @@ export default function ShopPage() {
                 key={badge.key}
                 type="button"
                 onClick={badge.onClear}
-                className="inline-flex items-center gap-1.5 border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-700 hover:border-neutral-400"
+                className="touch-press inline-flex items-center gap-1.5 border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-700 hover:border-neutral-400"
               >
                 {badge.label}
                 <span aria-hidden className="text-neutral-400">×</span>
@@ -1472,12 +1472,19 @@ export default function ShopPage() {
             <button
               type="button"
               onClick={resetAllFilters}
-              className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-900 underline underline-offset-4"
+              className="touch-press text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-900 underline underline-offset-4"
             >
               Clear all
             </button>
           </div>
         ) : null}
+
+        {/* Result count for screen readers */}
+        <p className="sr-only-live" role="status" aria-live="polite">
+          {visibleProducts.length > 0
+            ? `${visibleProducts.length} products found`
+            : ''}
+        </p>
 
         {/* Product Grid */}
         {!ready && !isKurtiListing && products.length === 0 ? (
@@ -1492,7 +1499,7 @@ export default function ShopPage() {
           </ProductListingGrid>
         ) : isWesternOutfitsListing ? (
           visibleProducts.length > 0 ? (
-            <ProductListingGrid className="mt-6">
+            <ProductListingGrid className="mt-6 listing-grid-transition">
               {visibleProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}

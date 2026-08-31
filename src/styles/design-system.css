@@ -454,6 +454,45 @@ button,
   }
 }
 
+.listing-grid-transition {
+  transition: opacity var(--transition-base) var(--ease-luxury);
+}
+
+.listing-grid-transition.is-filtering {
+  opacity: 0.6;
+}
+
+.sr-only-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.touch-press {
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.touch-press:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-grid-transition,
+  .listing-grid-transition.is-filtering,
+  .touch-press,
+  .touch-press:active {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
 .gpu-media {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
