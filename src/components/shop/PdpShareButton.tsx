@@ -27,7 +27,7 @@ export default function PdpShareButton({ title }: PdpShareButtonProps) {
       onClick={() => {
         void handleShare()
       }}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center text-neutral-900"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center text-neutral-900 touch-press"
       aria-label="Share product"
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>

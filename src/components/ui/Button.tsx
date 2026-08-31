@@ -25,7 +25,8 @@ export default function Button({ children, variant = 'primary', to, className = 
   const focusClass = isGlassCta
     ? ''
     : 'luxury-tap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]'
-  const sharedClasses = `inline-flex items-center justify-center font-semibold leading-none transition-all duration-300 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60 ${focusClass} ${variants[variant]} ${className}`
+  const touchClass = isGlassCta ? '' : 'touch-press'
+  const sharedClasses = `inline-flex items-center justify-center font-semibold leading-none transition-all duration-300 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-60 ${focusClass} ${touchClass} ${variants[variant]} ${className}`
   const ariaLabel = props['aria-label'] ?? (typeof children === 'string' ? children : undefined)
 
   if (to) {

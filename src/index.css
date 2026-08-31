@@ -28,6 +28,7 @@ html {
   font-size: 100%;
   scroll-padding-top: var(--nav-offset);
   overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html.luxury-scroll {
@@ -56,9 +57,9 @@ body {
   letter-spacing: 0.005em;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* `clip` does not create a scroll container, so sticky/fixed headers are not trapped. */
 @supports (overflow: clip) {
   body {
     overflow-x: clip;
@@ -97,6 +98,7 @@ textarea,
 select {
   font: inherit;
   font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1,
@@ -166,6 +168,15 @@ main {
   main {
     animation: none;
   }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes fadeIn {
@@ -199,6 +210,18 @@ main {
     padding-right: 0.25rem;
     column-gap: 2px;
     row-gap: 2rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .product-card {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-drag: none;
   }
 }
 

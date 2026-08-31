@@ -130,10 +130,10 @@ function MobileAccordionGroup({
 }
 
 const defaultIconButtonClass =
-  'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500 md:h-10 md:w-10'
+  'ui-interactive touch-press inline-flex h-9 w-9 shrink-0 items-center justify-center text-neutral-900 transition-colors hover:text-neutral-500 md:h-10 md:w-10'
 
 const weddingIconButtonClass =
-  'ui-interactive inline-flex h-9 w-9 shrink-0 items-center justify-center text-white stroke-white drop-shadow-sm transition-colors hover:text-white/80 md:h-10 md:w-10'
+  'ui-interactive touch-press inline-flex h-9 w-9 shrink-0 items-center justify-center text-white stroke-white drop-shadow-sm transition-colors hover:text-white/80 md:h-10 md:w-10'
 
 function isWeddingListingPath(pathname: string) {
   const normalized = pathname.replace(/\/+$/, '') || '/'
@@ -283,7 +283,7 @@ export default function Navbar() {
                   to={link.href}
                   onClick={closeOverlays}
                   className={({ isActive }) =>
-                    `text-[11px] font-medium tracking-[0.16em] uppercase transition-colors ${
+                    `nav-link-underline text-[11px] font-medium tracking-[0.16em] uppercase transition-colors ${
                       isWeddingPage
                         ? isActive
                           ? 'text-white'
@@ -291,7 +291,7 @@ export default function Navbar() {
                         : isActive
                           ? 'text-neutral-950'
                           : 'text-neutral-600 hover:text-neutral-950'
-                    }`
+                    }${isActive ? ' isActive' : ''}`
                   }
                 >
                   {link.label}

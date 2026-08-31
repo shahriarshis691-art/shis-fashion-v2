@@ -144,6 +144,90 @@ button,
   transform: translate3d(0, 0, 0) scale(0.98);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .luxury-tap-hover:hover {
+    transform: translate3d(0, -1px, 0);
+  }
+}
+
+.touch-press {
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.touch-press:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link-underline {
+    position: relative;
+  }
+
+  .nav-link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--transition-base) var(--ease-luxury);
+  }
+
+  .nav-link-underline:hover::after,
+  .nav-link-underline.isActive::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+.img-loading {
+  opacity: 0;
+  transition: opacity 500ms var(--ease-luxury);
+}
+
+.img-loaded {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-lift {
+    transition:
+      transform var(--transition-base) var(--ease-luxury),
+      box-shadow var(--transition-base) var(--ease-luxury);
+  }
+
+  .card-hover-lift:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.focus-luxury:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .touch-press,
+  .touch-press:active,
+  .luxury-tap-hover:hover,
+  .nav-link-underline::after,
+  .nav-link-underline:hover::after,
+  .nav-link-underline.isActive::after,
+  .img-loading,
+  .img-loaded,
+  .card-hover-lift,
+  .card-hover-lift:hover,
+  .focus-luxury:focus-visible {
+    transition: none;
+    transform: none;
+    outline: none;
+  }
+}
+
 .gpu-media {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;

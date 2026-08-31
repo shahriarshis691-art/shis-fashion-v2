@@ -126,7 +126,7 @@ export default function LuxuryImage({
           isContained ? '!object-contain object-center' : 'object-cover',
           objectPosition ? '' : isContained ? 'object-center' : 'object-[center_top]',
           hover ? 'media-hover' : '',
-          loaded || priority ? 'opacity-100' : 'opacity-0',
+          loaded || priority ? 'img-loaded' : 'img-loading',
           priority ? '' : 'transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           imgClassName,
         ].filter(Boolean).join(' ')}
