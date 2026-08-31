@@ -1,4 +1,5 @@
 import CategoryHeroCard from '../common/CategoryHeroCard'
+import Reveal from '../common/Reveal'
 import { KIDS_HOMEPAGE_COVER_BACKGROUND, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER_ASPECT, SAREE_HOMEPAGE_COVER_BACKGROUND, SAREE_HOMEPAGE_COVER_POSITION } from '../../data/featuredCollectionCovers'
 
 export interface ShopByCategoryItem {
@@ -40,26 +41,30 @@ export default function ShopByCategorySection({
         {title}
       </h2>
       <div className="border-t border-black/10 bg-white px-4 py-6 text-center md:hidden">
-        <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
-        <p
-          className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
-          style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
-          aria-hidden
-        >
-          {title}
-        </p>
-      </div>
-      <div className="mx-auto hidden max-w-7xl px-6 md:block">
-        <div className="mb-10 text-center">
+        <Reveal>
           <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
           <p
-            className="mt-1 text-2xl font-normal tracking-[0.2em] text-neutral-900 uppercase md:text-3xl"
+            className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
             style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
             aria-hidden
           >
             {title}
           </p>
-        </div>
+        </Reveal>
+      </div>
+      <div className="mx-auto hidden max-w-7xl px-6 md:block">
+        <Reveal>
+          <div className="mb-10 text-center">
+            <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
+            <p
+              className="mt-1 text-2xl font-normal tracking-[0.2em] text-neutral-900 uppercase md:text-3xl"
+              style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
+              aria-hidden
+            >
+              {title}
+            </p>
+          </div>
+        </Reveal>
       </div>
 
       <div className="relative z-10 isolate flex flex-col gap-8 px-4 pb-8 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-start md:gap-x-4 md:gap-y-8 md:px-6 md:pb-0 lg:grid-cols-4">
@@ -69,23 +74,26 @@ export default function ShopByCategorySection({
           const isMenCard = item.key.trim().toLowerCase() === 'men'
 
           return (
-            <article key={item.key} className="relative z-10 isolate w-full min-w-0">
-              <CategoryHeroCard
-                name={item.name}
-                href={item.href}
-                image={item.image}
-                priority={index === 0}
-                variant="feed"
-                imagePosition={isSareeCard ? (item.imagePosition ?? SAREE_HOMEPAGE_COVER_POSITION) : isKidsCard ? (item.imagePosition ?? KIDS_HOMEPAGE_COVER_POSITION) : isMenCard ? (item.imagePosition ?? MEN_HOMEPAGE_COVER_POSITION) : item.imagePosition}
-                imageFit="cover"
-                imageWidth={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.width : undefined}
-                imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
-                frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : isKidsCard ? KIDS_HOMEPAGE_COVER_BACKGROUND : undefined}
-                imgClassName={isSareeCard ? 'object-top' : isKidsCard ? 'h-full w-full object-cover object-top' : isMenCard ? 'h-full w-full object-cover object-top' : undefined}
-                imageHoverScale={!isSareeCard}
-                sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
-              />
-            </article>
+            <Reveal key={item.key} delayMs={index * 80} className="min-w-0">
+              <article className="relative z-10 isolate w-full min-w-0">
+                <CategoryHeroCard
+                  name={item.name}
+                  href={item.href}
+                  image={item.image}
+                  priority={index === 0}
+                  variant="feed"
+                  imagePosition={isSareeCard ? (item.imagePosition ?? SAREE_HOMEPAGE_COVER_POSITION) : isKidsCard ? (item.imagePosition ?? KIDS_HOMEPAGE_COVER_POSITION) : isMenCard ? (item.imagePosition ?? MEN_HOMEPAGE_COVER_POSITION) : item.imagePosition}
+                  imageFit="cover"
+                  imageWidth={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.width : undefined}
+                  imageHeight={isSareeCard ? SAREE_HOMEPAGE_COVER_ASPECT.height : undefined}
+                  frameBackground={isSareeCard ? SAREE_HOMEPAGE_COVER_BACKGROUND : isKidsCard ? KIDS_HOMEPAGE_COVER_BACKGROUND : undefined}
+                  imgClassName={isSareeCard ? 'object-top' : isKidsCard ? 'h-full w-full object-cover object-top' : isMenCard ? 'h-full w-full object-cover object-top' : undefined}
+                  imageHoverScale={!isSareeCard}
+                  sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                  parallax
+                />
+              </article>
+            </Reveal>
           )
         })}
       </div>

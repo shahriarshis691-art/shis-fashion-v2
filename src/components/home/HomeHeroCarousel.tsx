@@ -129,26 +129,27 @@ export default function HomeHeroCarousel() {
         {HOME_HERO_SLIDES.map((slide, index) => {
           const isActive = index === activeIndex
           const frame = (
-            <ResponsiveHeroBanner
-              src={slide.src}
-              alt={slide.alt}
-              width={slide.width}
-              height={slide.height}
-              fallbacks={'fallbacks' in slide ? [...slide.fallbacks] : []}
-              background={slide.background}
-              priority={index === 0}
-              embed
-              objectFit={slide.objectFit}
-              objectPosition={slide.objectPosition}
-              mobileAspectRatio={slide.mobileAspectRatio}
-              ariaLabel={slide.ariaLabel}
-              className={[
-                'ambient-zoom',
-                slide.objectFit === 'cover' ? 'md:h-full md:object-cover' : undefined,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            />
+              <ResponsiveHeroBanner
+                src={slide.src}
+                alt={slide.alt}
+                width={slide.width}
+                height={slide.height}
+                fallbacks={'fallbacks' in slide ? [...slide.fallbacks] : []}
+                background={slide.background}
+                priority={index === 0}
+                embed
+                objectFit={slide.objectFit}
+                objectPosition={slide.objectPosition}
+                mobileAspectRatio={slide.mobileAspectRatio}
+                ariaLabel={slide.ariaLabel}
+                className={[
+                  'ambient-zoom',
+                  slide.objectFit === 'cover' ? 'md:h-full md:object-cover' : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                parallax
+              />
           )
 
           return (
