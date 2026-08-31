@@ -258,6 +258,33 @@ button,
   }
 }
 
+/* Cinematic ambient motion — subtle, premium, 60fps transform-only */
+.ambient-zoom {
+  animation: luxuryAmbientZoom 14s var(--ease-luxury) infinite alternate;
+}
+
+@keyframes luxuryAmbientZoom {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+}
+
+.ambient-pan-y {
+  animation: luxuryAmbientPanY 16s var(--ease-luxury) infinite alternate;
+}
+
+@keyframes luxuryAmbientPanY {
+  0% {
+    transform: translate3d(0, -1%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 1%, 0) scale(1.02);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .luxury-reveal,
   .luxury-fade-in,
@@ -265,7 +292,9 @@ button,
   .luxury-skeleton,
   .media-hover,
   .product-card-media,
-  .luxury-tap {
+  .luxury-tap,
+  .ambient-zoom,
+  .ambient-pan-y {
     animation: none;
     transition: none;
     transform: none;

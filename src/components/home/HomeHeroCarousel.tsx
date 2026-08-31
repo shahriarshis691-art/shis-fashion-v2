@@ -142,7 +142,12 @@ export default function HomeHeroCarousel() {
               objectPosition={slide.objectPosition}
               mobileAspectRatio={slide.mobileAspectRatio}
               ariaLabel={slide.ariaLabel}
-              className={slide.objectFit === 'cover' ? 'md:h-full md:object-cover' : undefined}
+              className={[
+                'ambient-zoom',
+                slide.objectFit === 'cover' ? 'md:h-full md:object-cover' : undefined,
+              ]
+                .filter(Boolean)
+                .join(' ')}
             />
           )
 
