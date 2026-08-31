@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ShopProduct } from '../data/shopData'
 
 export interface RecentlyViewedItem {
@@ -37,7 +37,7 @@ function RecentlyViewedProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  const addToRecentlyViewed = (product: ShopProduct) => {
+  const addToRecentlyViewed = useCallback((product: ShopProduct) => {
     setItems((currentItems) => {
       const filtered = currentItems.filter((item) => item.product.id !== product.id)
       const nextItems = [
@@ -47,11 +47,11 @@ function RecentlyViewedProvider({ children }: { children: ReactNode }) {
 
       return nextItems
     })
-  }
+  }, [])
 
-  const clearRecentlyViewed = () => {
+  const clearRecentlyViewed = useCallback(() => {
     setItems([])
-  }
+  }, [])
 
   const value = useMemo<RecentlyViewedContextValue>(
     () => ({
@@ -59,7 +59,7 @@ function RecentlyViewedProvider({ children }: { children: ReactNode }) {
       addToRecentlyViewed,
       clearRecentlyViewed,
     }),
-    [items],
+    [items, addToRecentlyViewed, clearRecentlyViewed],
   )
 
   return <RecentlyViewedContext.Provider value={value}>{children}</RecentlyViewedContext.Provider>

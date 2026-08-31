@@ -151,7 +151,7 @@ export default function ProductDetailPage() {
   const [reviewMessage, setReviewMessage] = useState('')
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const lastTrackedProductIdRef = useRef<string | null>(null)
-  const hasTrackedRecentlyViewedRef = useRef(false)
+  const lastRecentlyViewedIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -351,15 +351,21 @@ export default function ProductDetailPage() {
   }, [isZoomOpen])
 
   useEffect(() => {
-    if (!product || hasTrackedRecentlyViewedRef.current) {
+    if (!product || !ready) {
       return
     }
 
+    const productId = String(product.id)
+    if (lastRecentlyViewedIdRef.current === productId) {
+      return
+    }
+
+    lastRecentlyViewedIdRef.current = productId
+
     addToRecentlyViewed(product)
-    hasTrackedRecentlyViewedRef.current = true
 
     googleAnalytics.trackEvent('product_viewed', {
-      item_id: String(product.id),
+      item_id: productId,
       item_name: product.name,
       item_category: product.category,
       value: parseBDT(product.price),

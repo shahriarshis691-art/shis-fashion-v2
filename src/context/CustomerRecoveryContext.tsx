@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 export interface AbandonedCartItem {
   id: string
@@ -104,15 +104,15 @@ function CustomerRecoveryProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEYS.backInStock, JSON.stringify(backInStock))
   }, [backInStock])
 
-  const markCartRecovered = (productId: string) => {
+  const markCartRecovered = useCallback((productId: string) => {
     setAbandonedCart((currentItems) => currentItems.filter((item) => item.productId !== productId))
-  }
+  }, [])
 
-  const clearAbandonedCart = () => {
+  const clearAbandonedCart = useCallback(() => {
     setAbandonedCart([])
-  }
+  }, [])
 
-  const addAbandonedCartItem = (item: AbandonedCartItem) => {
+  const addAbandonedCartItem = useCallback((item: AbandonedCartItem) => {
     setAbandonedCart((currentItems) => {
       const exists = currentItems.some((existingItem) => existingItem.productId === item.productId)
       if (exists) {
@@ -123,9 +123,9 @@ function CustomerRecoveryProvider({ children }: { children: ReactNode }) {
 
       return [...currentItems, item]
     })
-  }
+  }, [])
 
-  const addBackInStockNotification = (productId: string, productName: string, productImage: string, price: string) => {
+  const addBackInStockNotification = useCallback((productId: string, productName: string, productImage: string, price: string) => {
     setBackInStock((currentItems) => {
       const exists = currentItems.some((item) => item.productId === productId)
       if (exists) {
@@ -143,19 +143,19 @@ function CustomerRecoveryProvider({ children }: { children: ReactNode }) {
         },
       ]
     })
-  }
+  }, [])
 
-  const removeBackInStockNotification = (productId: string) => {
+  const removeBackInStockNotification = useCallback((productId: string) => {
     setBackInStock((currentItems) => currentItems.filter((item) => item.productId !== productId))
-  }
+  }, [])
 
-  const markWishlistReminded = (productId: string) => {
+  const markWishlistReminded = useCallback((productId: string) => {
     setWishlistReminders((currentItems) =>
       currentItems.map((item) =>
         item.productId === productId ? { ...item, remindedAt: new Date().toISOString() } : item,
       ),
     )
-  }
+  }, [])
 
   const value = useMemo<CustomerRecoveryContextValue>(
     () => ({
@@ -169,7 +169,7 @@ function CustomerRecoveryProvider({ children }: { children: ReactNode }) {
       removeBackInStockNotification,
       markWishlistReminded,
     }),
-    [abandonedCart, backInStock, wishlistReminders],
+    [abandonedCart, backInStock, wishlistReminders, markCartRecovered, clearAbandonedCart, addAbandonedCartItem, addBackInStockNotification, removeBackInStockNotification, markWishlistReminded],
   )
 
   return <CustomerRecoveryContext.Provider value={value}>{children}</CustomerRecoveryContext.Provider>
