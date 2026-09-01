@@ -116,8 +116,6 @@ export default function SareeCollectionPage() {
         alt={SAREE_LISTING_HERO.alt}
         width={SAREE_LISTING_HERO.width}
         height={SAREE_LISTING_HERO.height}
-        sources={[{ srcSet: SAREE_LISTING_HERO.webp, type: 'image/webp' }]}
-        fallbacks={[SAREE_LISTING_HERO.webp]}
         background="dark"
         ariaLabel="Saree collection banner"
         objectPosition="center top"

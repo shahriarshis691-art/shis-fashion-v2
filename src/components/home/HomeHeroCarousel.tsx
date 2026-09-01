@@ -8,7 +8,6 @@ const HOME_HERO_SLIDES = [
   {
     id: 'saree-launch',
     src: '/hero/saree-heroimage/homepage-hero-image.png',
-    fallbacks: ['/hero/saree-heroimage/homepage-hero-image.png.jpg'],
     alt: 'SHIS Fashion Exclusive Launch Saree — campaign banner',
     width: 2244,
     height: 2804,
@@ -134,7 +133,7 @@ export default function HomeHeroCarousel() {
                 alt={slide.alt}
                 width={slide.width}
                 height={slide.height}
-                fallbacks={'fallbacks' in slide ? [...slide.fallbacks] : []}
+                fallbacks={'fallbacks' in slide ? [...(slide.fallbacks as string[])] : undefined}
                 background={slide.background}
                 priority={index === 0}
                 embed
