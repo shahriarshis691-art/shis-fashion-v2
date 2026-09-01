@@ -499,25 +499,25 @@ button,
 }
 
 .media-hover {
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 520ms var(--ease-luxury);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .group:hover .media-hover,
   .group:focus-visible .media-hover {
     will-change: transform;
-    transform: translate3d(0, 0, 0) scale(1.03);
+    transform: translate3d(0, 0, 0) scale(1.05);
   }
 
   .product-card:hover .product-card-media,
   .group:hover .product-card-media {
-    transform: translate3d(0, 0, 0) scale(1.03);
+    transform: translate3d(0, 0, 0) scale(1.05);
   }
 }
 
 .product-card-media {
   transform: translate3d(0, 0, 0);
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 500ms var(--ease-luxury);
   will-change: transform;
 }
 
@@ -751,7 +751,7 @@ button,
   max-width: none;
   transform: translate3d(0, 0, 0);
   transform-origin: center top;
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 500ms var(--ease-luxury);
   will-change: transform;
   object-fit: cover;
   object-position: center top;
