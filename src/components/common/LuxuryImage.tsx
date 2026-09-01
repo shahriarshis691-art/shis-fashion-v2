@@ -3,6 +3,7 @@ import {
   buildLqipUrl,
   CATALOG_IMAGE_PLACEHOLDER,
   catalogImageAttrs,
+  buildStaticImageSrcSet,
 } from '../../utils/media'
 import { useParallax } from '../../hooks/useParallax'
 
@@ -103,13 +104,13 @@ export default function LuxuryImage({
       ) : null}
       <img
         src={imageSrc}
-        srcSet={image.srcSet}
+        srcSet={image.srcSet || buildStaticImageSrcSet(imageSrc)}
         sizes={image.sizes}
         alt={alt}
         width={width}
         height={height}
         loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : undefined}
+        fetchPriority={priority ? 'high' : 'low'}
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={(event) => {

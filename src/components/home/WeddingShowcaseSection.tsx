@@ -43,8 +43,8 @@ export default function WeddingShowcaseSection() {
             width={WEDDING_CARD_IMAGE_WIDTH}
             height={WEDDING_CARD_IMAGE_HEIGHT}
             className="absolute inset-0 h-full w-full object-contain object-center ambient-pan-y"
-            loading="eager"
-            fetchPriority="high"
+            loading="lazy"
+            fetchPriority="low"
             decoding="async"
           />
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/20 px-4 text-center">

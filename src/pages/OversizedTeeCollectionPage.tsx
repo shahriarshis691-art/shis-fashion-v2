@@ -23,7 +23,7 @@ const SITE_URL = 'https://www.shisfashion.com'
 const prefetchProductDetail = () => import('./ProductDetailPage')
 
 const OVERSIZED_TEE_LISTING_HERO = '/hero/oversized-new-hero.png'
-const OVERSIZED_TEE_LISTING_HERO_FALLBACK = '/hero/oversized-new-hero.png.jpeg'
+const OVERSIZED_TEE_LISTING_HERO_FALLBACK = '/hero/oversized-new-hero.png'
 
 type SortOption = 'newest' | 'price-low' | 'price-high'
 

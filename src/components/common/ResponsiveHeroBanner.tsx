@@ -1,5 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useCallback, useRef } from 'react'
 import { useParallax } from '../../hooks/useParallax'
+import { buildStaticImageSrcSet } from '../../utils/media'
 
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 
@@ -122,7 +124,7 @@ export default function ResponsiveHeroBanner({
       height,
       sizes,
       loading: priority ? ('eager' as const) : ('lazy' as const),
-      fetchPriority: priority ? ('high' as const) : undefined,
+      fetchPriority: priority ? ('high' as const) : ('low' as const),
       decoding: 'async' as const,
       draggable: false,
       onError: handleError,
@@ -133,18 +135,20 @@ export default function ResponsiveHeroBanner({
       style: imageStyle,
     }
 
+    const srcSet = buildStaticImageSrcSet(src)
+
     if (sources?.length) {
       return (
         <picture className={`flex h-full w-full items-center justify-center ${embed ? '' : 'md:block md:h-auto md:w-full'}`}>
           {sources.map((source) => (
             <source key={source.type} srcSet={source.srcSet} type={source.type} sizes={sizes} />
           ))}
-          <img src={src} {...sharedProps} />
+          <img src={src} srcSet={srcSet} {...sharedProps} />
         </picture>
       )
     }
 
-    return <img src={src} {...sharedProps} />
+    return <img src={src} srcSet={srcSet} {...sharedProps} />
   }
 
   const frameContent = (

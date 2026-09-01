@@ -34,13 +34,13 @@ export interface SareeProduct extends ShopProduct {
   originalPrice?: string
 }
 
-const SAREE_IMAGE_EXT: Record<number, 'jpg' | 'png'> = {
-  1: 'jpg',
-  3: 'jpg',
-  4: 'jpg',
-  5: 'png',
-  6: 'png',
-  7: 'png',
+const SAREE_IMAGE_EXT: Record<number, 'webp'> = {
+  1: 'webp',
+  3: 'webp',
+  4: 'webp',
+  5: 'webp',
+  6: 'webp',
+  7: 'webp',
 }
 
 function sareeImage(index: number) {

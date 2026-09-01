@@ -16,9 +16,9 @@ const SITE_URL = 'https://www.shisfashion.com'
 
 const SAREE_LISTING_HERO = {
   jpg: '/hero/kids/hero-soft-cotton-saree.jpg',
-  webp: '/hero/kids/hero-soft-cotton-saree.jpg.webp',
-  width: 1086,
-  height: 1448,
+  webp: '/hero/kids/hero-soft-cotton-saree.webp',
+  width: 1600,
+  height: 2133,
   alt: 'Tat Soft Cotton Saree - SHIS Fashion',
 } as const
 

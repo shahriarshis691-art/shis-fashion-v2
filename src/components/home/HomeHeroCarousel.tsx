@@ -7,10 +7,10 @@ const HERO_SWIPE_THRESHOLD_PX = 40
 const HOME_HERO_SLIDES = [
   {
     id: 'saree-launch',
-    src: '/hero/saree-heroimage/homepage-hero-image.png',
+    src: '/hero/saree-heroimage/homepage-hero-image.webp',
     alt: 'SHIS Fashion Exclusive Launch Saree — campaign banner',
-    width: 2244,
-    height: 2804,
+    width: 1600,
+    height: 1999,
     background: 'cream' as HeroBackgroundTone,
     objectFit: 'contain' as const,
     objectPosition: 'center top',

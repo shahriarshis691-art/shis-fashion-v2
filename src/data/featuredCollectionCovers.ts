@@ -4,17 +4,17 @@ export const featuredCollectionCovers: Record<string, string> = {
   'everyday-wear': '/collections/featured-everyday-wear.jpg',
 }
 
-export const SAREE_HOMEPAGE_COVER = '/homepage/category.png'
+export const SAREE_HOMEPAGE_COVER = '/homepage/category.webp'
 export const SAREE_HOMEPAGE_COVER_ASPECT = {
   width: 960,
   height: 640,
 } as const
 export const SAREE_HOMEPAGE_COVER_POSITION = '62% top'
 export const SAREE_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e8cbb1]'
-export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.png'
-export const MEN_HOMEPAGE_COVER = '/collections/men-2feature-image/men-feature2.png'
+export const WOMEN_HOMEPAGE_COVER = '/collections/women-category-main/women.category.webp'
+export const MEN_HOMEPAGE_COVER = '/collections/men-2feature-image/men-feature2.webp'
 export const MEN_HOMEPAGE_COVER_POSITION = 'center top'
-export const KIDS_HOMEPAGE_COVER = '/collections/kid-hero/kid-category.png'
+export const KIDS_HOMEPAGE_COVER = '/collections/kid-hero/kid-category.webp'
 export const KIDS_HOMEPAGE_COVER_POSITION = 'center top'
 export const KIDS_HOMEPAGE_COVER_BACKGROUND = 'bg-[#e6d2be]'
 export const WEDDING_HOMEPAGE_COVER = `/homepage/${encodeURIComponent('THE DREAM STORY.jpg')}`
@@ -25,7 +25,7 @@ export const WOMENS_BAGGY_CATEGORY_COVER = `/collections/womens-baggy/${encodeUR
 
 export const categoryStripCovers: Record<string, string> = {
   men: '/collections/men-category.jpg',
-  saree: '/collections/saree-category-new.jpg',
+  saree: '/collections/saree-category-new.webp',
   denim: '/collections/featured-denim-collection.jpg',
   western: WOMENS_BAGGY_CATEGORY_COVER,
   'womens-baggy': WOMENS_BAGGY_CATEGORY_COVER,
