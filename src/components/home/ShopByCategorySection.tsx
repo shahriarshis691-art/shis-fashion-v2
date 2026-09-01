@@ -1,5 +1,5 @@
 import CategoryHeroCard from '../common/CategoryHeroCard'
-import Reveal from '../common/Reveal'
+import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { KIDS_HOMEPAGE_COVER_BACKGROUND, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER_ASPECT, SAREE_HOMEPAGE_COVER_BACKGROUND, SAREE_HOMEPAGE_COVER_POSITION } from '../../data/featuredCollectionCovers'
 
 export interface ShopByCategoryItem {
@@ -26,6 +26,7 @@ export default function ShopByCategorySection({
   title?: string
   eyebrow?: string
 }) {
+  const headerRef = useScrollReveal<HTMLDivElement>({ threshold: 0.2 })
   const hubItems = orderHubItems(items)
   if (!hubItems.length) {
     return null
@@ -41,7 +42,11 @@ export default function ShopByCategorySection({
         {title}
       </h2>
       <div className="border-t border-black/10 bg-white px-4 py-6 text-center md:hidden">
-        <Reveal>
+        <div
+          ref={headerRef}
+          className="scroll-reveal-typography"
+          style={{ '--scroll-reveal-delay': '0ms' } as React.CSSProperties}
+        >
           <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
           <p
             className="mt-1 text-xl font-normal tracking-[0.2em] text-neutral-900 uppercase"
@@ -50,21 +55,23 @@ export default function ShopByCategorySection({
           >
             {title}
           </p>
-        </Reveal>
+        </div>
       </div>
       <div className="mx-auto hidden max-w-7xl px-6 md:block">
-        <Reveal>
-          <div className="mb-10 text-center">
-            <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
-            <p
-              className="mt-1 text-2xl font-normal tracking-[0.2em] text-neutral-900 uppercase md:text-3xl"
-              style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
-              aria-hidden
-            >
-              {title}
-            </p>
-          </div>
-        </Reveal>
+        <div
+          ref={headerRef}
+          className="mb-10 text-center scroll-reveal-typography"
+          style={{ '--scroll-reveal-delay': '0ms' } as React.CSSProperties}
+        >
+          <p className="text-caption uppercase tracking-[0.14em] text-black/55">{eyebrow}</p>
+          <p
+            className="mt-1 text-2xl font-normal tracking-[0.2em] text-neutral-900 uppercase md:text-3xl"
+            style={{ fontFamily: "'Cormorant Garamond', 'Cinzel', serif" }}
+            aria-hidden
+          >
+            {title}
+          </p>
+        </div>
       </div>
 
       <div className="relative z-10 isolate flex flex-col gap-8 px-4 pb-8 md:mx-auto md:grid md:max-w-7xl md:grid-cols-2 md:items-start md:gap-x-4 md:gap-y-8 md:px-6 md:pb-0 lg:grid-cols-4">
@@ -74,7 +81,7 @@ export default function ShopByCategorySection({
           const isMenCard = item.key.trim().toLowerCase() === 'men'
 
           return (
-            <Reveal key={item.key} delayMs={index * 80} className="min-w-0">
+            <ScrollRevealCard key={item.key} delayMs={index * 80}>
               <article className="relative z-10 isolate w-full min-w-0">
                 <CategoryHeroCard
                   name={item.name}
@@ -93,10 +100,23 @@ export default function ShopByCategorySection({
                   parallax
                 />
               </article>
-            </Reveal>
+            </ScrollRevealCard>
           )
         })}
       </div>
     </section>
+  )
+}
+
+function ScrollRevealCard({ children, delayMs }: { children: React.ReactNode; delayMs: number }) {
+  const ref = useScrollReveal<HTMLDivElement>({ threshold: 0.15 })
+  return (
+    <div
+      ref={ref}
+      className="scroll-reveal min-w-0"
+      style={{ '--scroll-reveal-delay': `${delayMs}ms` } as React.CSSProperties}
+    >
+      {children}
+    </div>
   )
 }

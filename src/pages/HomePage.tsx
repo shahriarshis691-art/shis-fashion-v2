@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Hero } from '../components/home/Hero'
 import ShopByCategorySection from '../components/home/ShopByCategorySection'
 import WeddingShowcaseSection from '../components/home/WeddingShowcaseSection'
-import Reveal from '../components/common/Reveal'
+import { useScrollReveal } from '../hooks/useScrollReveal'
 import { homeCategoryItems } from '../data/homeCategories'
 import { categoryStripCover, categoryStripCovers, KIDS_HOMEPAGE_COVER, KIDS_HOMEPAGE_COVER_POSITION, MEN_HOMEPAGE_COVER, MEN_HOMEPAGE_COVER_POSITION, SAREE_HOMEPAGE_COVER, WOMEN_HOMEPAGE_COVER } from '../data/featuredCollectionCovers'
 import { googleAnalytics } from '../services/googleAnalytics'
@@ -401,6 +401,8 @@ export default function HomePage() {
   const shopByCategoryEnabled = homepageContent.sections.find((section) => section.key === 'featuredCollection')?.enabled !== false
   const brandPromiseEnabled = homepageContent.sections.find((section) => section.key === 'brandPromise')?.enabled !== false
 
+  const brandPromiseRef = useScrollReveal<HTMLElement>({ threshold: 0.2 })
+
   return (
     <div className="relative isolate overflow-x-hidden bg-white">
       {heroEnabled ? <Hero content={homepageContent} /> : null}
@@ -416,28 +418,27 @@ export default function HomePage() {
       <WeddingShowcaseSection />
 
       {brandPromiseEnabled ? (
-        <Reveal delayMs={200}>
-          <section
-            id="brand-promise"
-            className="bg-[#f7f5f0] px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
-            aria-labelledby="brand-promise-title"
+        <section
+          ref={brandPromiseRef}
+          id="brand-promise"
+          className="scroll-reveal bg-[#f7f5f0] px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
+          aria-labelledby="brand-promise-title"
+        >
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
+            {homepageContent.brandPromiseEyebrow ?? 'BRAND PROMISE'}
+          </p>
+          <h2
+            id="brand-promise-title"
+            className="mb-3 font-serif text-2xl leading-tight text-gray-900 sm:text-3xl"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
-              {homepageContent.brandPromiseEyebrow ?? 'BRAND PROMISE'}
-            </p>
-            <h2
-              id="brand-promise-title"
-              className="mb-3 font-serif text-2xl leading-tight text-gray-900 sm:text-3xl"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
-            </h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
-              {homepageContent.brandPromiseDescription
-                ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}
-            </p>
-          </section>
-        </Reveal>
+            {homepageContent.brandPromiseTitle ?? 'Luxury that feels personal.'}
+          </h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base">
+            {homepageContent.brandPromiseDescription
+              ?? 'SHIS Fashion is shaped by an obsession with texture, ease, and timeless silhouettes that make everyday dressing feel serene and elevated.'}
+          </p>
+        </section>
       ) : null}
     </div>
   )

@@ -634,6 +634,79 @@ button,
   }
 }
 
+/* Scroll-driven reveal animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition:
+    opacity 700ms var(--ease-luxury),
+    transform 700ms var(--ease-luxury);
+  transition-delay: var(--scroll-reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.scroll-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+.scroll-reveal-image {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(1.02);
+  transition:
+    opacity 800ms var(--ease-luxury),
+    transform 800ms var(--ease-luxury);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-image.scroll-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
+}
+
+.scroll-reveal-typography {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition:
+    opacity 600ms var(--ease-luxury),
+    transform 600ms var(--ease-luxury);
+  transition-delay: var(--scroll-reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-typography.scroll-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Subtle parallax for images on scroll */
+.scroll-parallax {
+  transform: translate3d(0, calc(var(--scroll-progress, 0) * -20px), 0);
+  will-change: transform;
+}
+
+/* Subtle scale on scroll for cards */
+.scroll-scale {
+  transform: scale(calc(1 + var(--scroll-visibility, 0) * 0.01));
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-image,
+  .scroll-reveal-typography,
+  .scroll-parallax,
+  .scroll-scale {
+    animation: none;
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .luxury-reveal,
   .luxury-fade-in,
