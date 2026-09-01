@@ -55,12 +55,12 @@ export default function CategoryHeroCard({
     ? [
       imgClassName,
       'min-h-full min-w-full object-cover',
-      imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
+      imageHoverScale ? 'transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]' : '',
     ].filter(Boolean).join(' ')
     : [
       imgClassName,
       'h-full w-full object-cover object-top',
-      imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
+      imageHoverScale ? 'transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]' : '',
     ].filter(Boolean).join(' ')
   const titleClass = isFeed
     ? 'line-clamp-2 min-h-[2.5rem] text-sm font-medium tracking-[0.14em] text-neutral-900 uppercase transition-colors duration-300 sm:text-base group-hover:text-black'
