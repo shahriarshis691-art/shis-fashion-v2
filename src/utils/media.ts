@@ -416,66 +416,7 @@ export function normalizeCatalogImageUrl(
   return resolveCatalogImageSrc(url, width, height, fit)
 }
 
-const DEFAULT_SRCSET_WIDTHS = [320, 480, 640, 768, 960, 1200, 1600]
-
-function buildStaticImageSrcSetInternal(
-  safeUrl: string,
-  widths: number[],
-): string {
-  const lastDotIndex = safeUrl.lastIndexOf('.')
-  const baseName = safeUrl.substring(0, lastDotIndex)
-  const ext = safeUrl.substring(lastDotIndex)
-
-  const entries = widths.map((w) => `${baseName}-${w}w${ext} ${w}w`)
-  return entries.join(', ')
-}
-
-export function buildStaticImageSrcSet(
-  url: string,
-  widths: number[] = DEFAULT_SRCSET_WIDTHS,
-): string | undefined {
-  if (!url || !isSiteRelativeMediaUrl(url) || isRemoteMediaUrl(url)) {
-    return undefined
-  }
-
-  return buildStaticImageSrcSetInternal(url, widths)
-}
-
-export function getResponsiveImageAttrs(
-  url: string,
-  width: number,
-  height: number,
-  sizes: string,
-  widths?: number[],
-  fit: CatalogImageFit = 'cover',
-) {
-  const isCloudinary = isRawCloudinaryPublicId(url.trim())
-
-  if (isCloudinary) {
-    return catalogImageAttrs(url, width, height, sizes, widths, fit)
-  }
-
-  if (isSiteRelativeMediaUrl(url) || url.startsWith('/')) {
-    return {
-      src: url,
-      srcSet: buildStaticImageSrcSet(url, widths),
-      sizes,
-    }
-  }
-
-  return {
-    src: url,
-    srcSet: undefined,
-    sizes,
-  }
-}
-
-export const RESPONSIVE_WIDTHS = {
-  thumbnail: [80, 112, 160],
-  productCard: [320, 480, 640, 768],
-  collection: [480, 768, 1080, 1440],
-  hero: [640, 960, 1200, 1600, 1920],
-}
+const DEFAULT_SRCSET_WIDTHS = [320, 480, 640, 768, 960]
 
 export function buildCatalogSrcSet(
   url: string,

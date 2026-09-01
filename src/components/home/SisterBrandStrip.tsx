@@ -4,10 +4,10 @@ import Container from '../ui/Container'
 import { sisterBrandStrip } from '../../data/brandShowcase'
 
 const LOGO_FALLBACKS: Record<string, string[]> = {
-  '/brands/strip/ceravo.png': ['/brands/strip/ceravo.webp'],
-  '/brands/strip/rangkutir.png': ['/brands/strip/rangkutir.webp'],
-  '/brands/strip/velorix-motors.png': ['/brands/strip/velorix-motors.webp'],
-  '/brands/strip/xeroxii.png': ['/brands/strip/xeroxii.webp'],
+  '/brands/strip/ceravo.png': ['/brands/ceravo.png', '/brands/ceravo.png.jpeg'],
+  '/brands/strip/rangkutir.png': ['/brands/rangkutir.png', '/brands/rangkutir.png.jpeg'],
+  '/brands/strip/velorix-motors.png': ['/brands/velorix-motors.png', '/brands/velorix-motors.png.jpeg'],
+  '/brands/strip/xeroxii.png': ['/brands/xeroxii.png', '/brands/xeroxii.png.png'],
 }
 
 function handleSisterBrandLogoError(event: SyntheticEvent<HTMLImageElement>, primarySrc: string) {

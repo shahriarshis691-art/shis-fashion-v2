@@ -49,19 +49,19 @@ export const KIDS_SIZE_GUIDE_ROWS = [
  * Alternates below are used only as hover/secondary gallery angles.
  */
 type UniqueKidsHero =
-  | 'Kid-Hero-01.webp'
-  | 'Kid-Hero-03.webp'
-  | 'Kid-Hero-05.webp'
-  | 'Kid-Hero-06.webp'
-  | 'Kid-Hero-07.webp'
-  | 'Kid-Hero-08.webp'
-  | 'Kid-Hero-10.webp'
-  | 'Kid-Hero-11.webp'
+  | 'Kid-Hero-01.png'
+  | 'Kid-Hero-03.png'
+  | 'Kid-Hero-05.png'
+  | 'Kid-Hero-06.png'
+  | 'Kid-Hero-07.png'
+  | 'Kid-Hero-08.png'
+  | 'Kid-Hero-10.png'
+  | 'Kid-Hero-11.png'
 
 const HOVER_ALTERNATES: Partial<Record<UniqueKidsHero, string>> = {
-  'Kid-Hero-01.webp': 'Kid-Hero-02.webp',
-  'Kid-Hero-03.webp': 'Kid-Hero-04.webp',
-  'Kid-Hero-08.webp': 'Kid-Hero-13.webp',
+  'Kid-Hero-01.png': 'Kid-Hero-02.png',
+  'Kid-Hero-03.png': 'Kid-Hero-04.png',
+  'Kid-Hero-08.png': 'Kid-Hero-13.png',
 }
 
 const kidsHeroImage = (fileName: string) => `/images/products/kids/${fileName}`
@@ -108,30 +108,30 @@ function tee(
 
 /** 8 distinct designs — one card per unique tee graphic. */
 export const kidsOversizedTeeProducts: KidsOversizedTeeProduct[] = [
-  tee(1, 'Kid-Hero-01.webp', 'Kids Our Daily Graphic Oversized Tee', 'Kids Boy', 950, 1290, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige], {
+  tee(1, 'Kid-Hero-01.png', 'Kids Our Daily Graphic Oversized Tee', 'Kids Boy', 950, 1290, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige], {
     newest: true,
     bestseller: true,
   }),
-  tee(2, 'Kid-Hero-03.webp', 'Kids Racing Club Oversized Tee', 'Kids Boy', 890, 1250, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.navy], {
+  tee(2, 'Kid-Hero-03.png', 'Kids Racing Club Oversized Tee', 'Kids Boy', 890, 1250, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.navy], {
     newest: true,
     stock: 3,
   }),
-  tee(3, 'Kid-Hero-05.webp', 'Kids Jet Stream Oversized Tee', 'Kids Girl', 870, 1220, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.sage], {
+  tee(3, 'Kid-Hero-05.png', 'Kids Jet Stream Oversized Tee', 'Kids Girl', 870, 1220, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.sage], {
     newest: true,
   }),
-  tee(4, 'Kid-Hero-06.webp', 'Junior Speed Racer Oversized Tee', 'Kids Boy', 980, 1350, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], {
+  tee(4, 'Kid-Hero-06.png', 'Junior Speed Racer Oversized Tee', 'Kids Boy', 980, 1350, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], {
     newest: true,
     bestseller: true,
   }),
-  tee(5, 'Kid-Hero-07.webp', 'Kids Smile Graphic Oversized Tee', 'Unisex', 920, 1280, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy], {
+  tee(5, 'Kid-Hero-07.png', 'Kids Smile Graphic Oversized Tee', 'Unisex', 920, 1280, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.navy], {
     stock: 4,
   }),
-  tee(6, 'Kid-Hero-08.webp', 'Kids Anime Action Oversized Tee', 'Kids Boy', 990, 1390, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.black], {
+  tee(6, 'Kid-Hero-08.png', 'Kids Anime Action Oversized Tee', 'Kids Boy', 990, 1390, [KIDS_COLOR_PALETTE.white, KIDS_COLOR_PALETTE.black], {
     newest: true,
     bestseller: true,
   }),
-  tee(7, 'Kid-Hero-10.webp', 'Junior Street Circle Oversized Tee', 'Kids Boy', 940, 1300, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige]),
-  tee(8, 'Kid-Hero-11.webp', 'Kids Number Friends Oversized Tee', 'Unisex', 860, 1200, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], {
+  tee(7, 'Kid-Hero-10.png', 'Junior Street Circle Oversized Tee', 'Kids Boy', 940, 1300, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.beige]),
+  tee(8, 'Kid-Hero-11.png', 'Kids Number Friends Oversized Tee', 'Unisex', 860, 1200, [KIDS_COLOR_PALETTE.black, KIDS_COLOR_PALETTE.gold], {
     newest: true,
     stock: 5,
   }),
