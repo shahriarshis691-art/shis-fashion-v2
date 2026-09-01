@@ -40,6 +40,7 @@ export const ScrollReveal = ({
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, {
     once,
+    amount: 0.1,
   })
 
   // If prefers reduced motion, don't animate
@@ -56,10 +57,11 @@ export const ScrollReveal = ({
   return (
     <motion.div
       ref={ref}
+      style={{ contentVisibility: 'auto' }}
       initial={inView ? whileInView : initial}
       animate={inView ? whileInView : initial}
       transition={finalTransition}
-      className="scroll-reveal"
+      className="will-transform scroll-reveal"
     >
       {children}
     </motion.div>
