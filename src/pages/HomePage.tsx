@@ -419,7 +419,7 @@ export default function HomePage() {
         <Reveal delayMs={200}>
           <section
             id="brand-promise"
-            className="bg-white px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
+            className="bg-[#f7f5f0] px-5 py-10 md:mx-auto md:max-w-3xl md:px-8 md:py-14 lg:max-w-4xl"
             aria-labelledby="brand-promise-title"
           >
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
