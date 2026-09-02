@@ -8,7 +8,7 @@ export const WEDDING_LISTING_HERO_VIDEO = '/wedding/wedding-listed-oroducts/0ba8
 export const WEDDING_LISTING_HERO_WIDTH = 1536
 export const WEDDING_LISTING_HERO_HEIGHT = 1024
 export const WEDDING_LISTING_HERO_BACKGROUND = '#8c7b6b'
-export const WEDDING_PRODUCT_MEDIA_DIR = '/collections/wedding'
+export const WEDDING_PRODUCT_MEDIA_DIR = '/wedding/wedding-listed-oroducts'
 
 const GENERAL_CASUAL_SLUGS = new Set([
   'half-shirt',
@@ -49,7 +49,7 @@ export function weddingProductCover(product: WeddingProduct) {
 
 /**
  * Dedicated wedding listing catalog.
- * Drop product photos in `public/collections/wedding/` and add or edit entries here.
+ * Drop product photos in `public/wedding/wedding-listed-oroducts/` and add or edit entries here.
  */
 export const weddingProducts: WeddingProduct[] = [
   {
@@ -57,7 +57,7 @@ export const weddingProducts: WeddingProduct[] = [
     title: 'Exclusive Wedding Item 01',
     price: 0,
     tag: 'EXCLUSIVE',
-    images: [weddingProductImage('wedding-product-1.jpg')],
+    images: [weddingProductImage('bride/download (55).jpg')],
     inStock: true,
   },
   {
@@ -65,7 +65,7 @@ export const weddingProducts: WeddingProduct[] = [
     title: 'Exclusive Wedding Item 02',
     price: 0,
     tag: 'BRIDAL EDIT',
-    images: [weddingProductImage('wedding-product-2.jpg')],
+    images: [weddingProductImage('for-sisters/download (59).jpg')],
     inStock: true,
   },
 ]

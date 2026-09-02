@@ -13,7 +13,6 @@ import { googleAnalytics } from './services/googleAnalytics'
 import { sessionReplay } from './services/sessionReplay'
 import { errorMonitoring } from './services/errorMonitoring'
 import { incidentAlerts } from './services/incidentAlerts'
-import Lenis from 'lenis'
 
 /**
  * Defer third-party analytics boot so LCP/INP on first paint is not blocked
@@ -42,29 +41,6 @@ function scheduleAnalyticsBoot() {
   }
 
   window.setTimeout(boot, 1800)
-}
-
-// Initialize Lenis for smooth scrolling
-if (typeof window !== 'undefined') {
-const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smoothTouch: false,
-    touchMultiplier: 1.5,
-    infinite: false,
-    wheelEventsTarget: 'window',
-    eventsTarget: ['window'],
-  });
-
-  function raf(time: number) {
-    lenis.raf(time)
-    requestAnimationFrame(raf)
-  }
-
-  requestAnimationFrame(raf)
-}
-
-  requestAnimationFrame(raf)
 }
 
 scheduleAnalyticsBoot()

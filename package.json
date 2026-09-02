@@ -18,7 +18,6 @@
     "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
-    "@studio-freight/lenis": "^1.0.42",
     "@tailwindcss/vite": "^4.3.2",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.2",
