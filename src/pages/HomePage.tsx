@@ -419,9 +419,7 @@ const heroEnabled = homepageContent.sections.find((section) => section.key === '
          </ScrollReveal>
        ) : null}
 
-       <ScrollReveal>
-         <WeddingShowcaseSection />
-       </ScrollReveal>
+       <WeddingShowcaseSection />
 
        {brandPromiseEnabled ? (
          <ScrollReveal>
