@@ -1,33 +1,70 @@
 import { useEffect } from 'react'
+import Lenis from 'lenis'
 import { getPrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
 /**
- * Native compositor scrolling — not Lenis.
- * JS scroll hijacking (Lenis/Locomotive) fights iOS momentum, sticky headers,
- * and Intersection Observer, and typically regresses INP/CLS on mobile.
- * Apple-grade smoothness comes from GPU layers + native overflow, not a scroll library.
+ * Owns the single desktop Lenis instance and preserves native mobile scrolling.
  */
 export default function SmoothScroll() {
   useEffect(() => {
     const root = document.documentElement
+    let frameId: number | null = null
+    let lenis: Lenis | null = null
 
-    const apply = () => {
-      const reduced = getPrefersReducedMotion()
-      root.classList.toggle('luxury-scroll', !reduced)
-      root.classList.toggle('reduce-motion', reduced)
-      if (reduced || window.innerWidth < 768) {
-        root.style.scrollBehavior = 'auto'
+    const stopLenis = () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+        frameId = null
+      }
+      lenis?.destroy()
+      lenis = null
+    }
+
+    const startLenis = () => {
+      if (lenis) {
+        return
+      }
+
+      lenis = new Lenis({
+        duration: 1.2,
+        easing: (time: number) => Math.min(1, 1.001 - Math.pow(2, -10 * time)),
+        touchMultiplier: 1.5,
+        infinite: false,
+      })
+
+      const raf = (time: number) => {
+        lenis?.raf(time)
+        frameId = window.requestAnimationFrame(raf)
+      }
+
+      frameId = window.requestAnimationFrame(raf)
+    }
+
+    const applyMotionPreference = () => {
+      const nextReduced = getPrefersReducedMotion()
+      const useNativeScrolling = nextReduced || window.innerWidth < 768
+
+      root.classList.toggle('luxury-scroll', !nextReduced)
+      root.classList.toggle('reduce-motion', nextReduced)
+      root.style.scrollBehavior = useNativeScrolling ? 'auto' : 'smooth'
+
+      if (useNativeScrolling) {
+        stopLenis()
       } else {
-        root.style.scrollBehavior = 'smooth'
+        startLenis()
       }
     }
 
-    apply()
+    applyMotionPreference()
 
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    media.addEventListener('change', apply)
+    media.addEventListener('change', applyMotionPreference)
+    window.addEventListener('resize', applyMotionPreference)
+
     return () => {
-      media.removeEventListener('change', apply)
+      stopLenis()
+      media.removeEventListener('change', applyMotionPreference)
+      window.removeEventListener('resize', applyMotionPreference)
       root.classList.remove('luxury-scroll', 'reduce-motion')
       root.style.scrollBehavior = ''
     }

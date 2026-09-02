@@ -21,7 +21,6 @@ import {
 } from '../data/mensBaggyDenimCollection'
 import {
   WOMENS_BAGGY_HERO_IMAGE,
-  WOMENS_BAGGY_HERO_IMAGE_FALLBACK,
   WOMENS_BAGGY_HERO_HEIGHT,
   WOMENS_BAGGY_HERO_WIDTH,
   isWomensBaggyDenimProduct,
@@ -503,8 +502,7 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState<SortOption>('featured')
   const [westernFilter, setWesternFilter] = useState<WesternListingFilter>('all')
   const [pantsFilter, setPantsFilter] = useState<MensPantsListingFilter>('all')
-  const [kurtiVisibleCount, setKurtiVisibleCount] = useState(KURTI_PAGE_SIZE)
-  const kurtiListingKeyRef = useRef('')
+  const [kurtiPagination, setKurtiPagination] = useState({ key: '', visibleCount: KURTI_PAGE_SIZE })
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
   const [draftSortBy, setDraftSortBy] = useState<SortOption>('featured')
   const [draftFilters, setDraftFilters] = useState<ProductFilters>({
@@ -957,19 +955,14 @@ export default function ShopPage() {
     return sorted
   })()
 
+  const kurtiListingKey = `${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery}`
+  const kurtiVisibleCount = kurtiPagination.key === kurtiListingKey
+    ? kurtiPagination.visibleCount
+    : KURTI_PAGE_SIZE
   const displayedProducts = isKurtiListing
     ? visibleProducts.slice(0, kurtiVisibleCount)
     : visibleProducts
-
   const canLoadMoreKurtis = isKurtiListing && kurtiVisibleCount < visibleProducts.length
-
-  const kurtiListingKey = `${effectiveSubcategory}|${sortBy}|${filters.inStockOnly}|${filters.newOnly}|${searchQuery}`
-  if (kurtiListingKey !== kurtiListingKeyRef.current) {
-    kurtiListingKeyRef.current = kurtiListingKey
-    if (kurtiVisibleCount !== KURTI_PAGE_SIZE) {
-      setKurtiVisibleCount(KURTI_PAGE_SIZE)
-    }
-  }
 
   useEffect(() => {
     if (!ready) {
@@ -1247,7 +1240,6 @@ export default function ShopPage() {
           alt="Women's Baggy Jeans — SHIS Fashion"
           width={WOMENS_BAGGY_HERO_WIDTH}
           height={WOMENS_BAGGY_HERO_HEIGHT}
-          fallbacks={[WOMENS_BAGGY_HERO_IMAGE_FALLBACK]}
           background="neutral"
           ariaLabel="Women's Baggy Jeans collection banner"
         />
@@ -1536,7 +1528,14 @@ export default function ShopPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setKurtiVisibleCount((current) => current + KURTI_PAGE_SIZE)}
+                    onClick={() => {
+                      setKurtiPagination((current) => {
+                        const visibleCount = current.key === kurtiListingKey
+                          ? current.visibleCount
+                          : KURTI_PAGE_SIZE
+                        return { key: kurtiListingKey, visibleCount: visibleCount + KURTI_PAGE_SIZE }
+                      })
+                    }}
                     className="border border-neutral-900 px-8 py-3 text-xs font-semibold tracking-[0.16em] text-neutral-900 uppercase transition-colors hover:bg-neutral-900 hover:text-white"
                   >
                     Load more

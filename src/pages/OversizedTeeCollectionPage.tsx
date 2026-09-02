@@ -23,7 +23,6 @@ const SITE_URL = 'https://www.shisfashion.com'
 const prefetchProductDetail = () => import('./ProductDetailPage')
 
 const OVERSIZED_TEE_LISTING_HERO = '/hero/oversized-new-hero.png'
-const OVERSIZED_TEE_LISTING_HERO_FALLBACK = '/hero/oversized-new-hero.png.jpeg'
 
 type SortOption = 'newest' | 'price-low' | 'price-high'
 
@@ -130,7 +129,6 @@ export default function OversizedTeeCollectionPage() {
         alt="SHIS Fashion oversized tee collection — premium fashion"
         width={1717}
         height={916}
-        fallbacks={[OVERSIZED_TEE_LISTING_HERO_FALLBACK]}
         background="dark"
         ariaLabel="Oversized Tee collection banner"
       />

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent, type SetStateAction } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
@@ -7,11 +7,12 @@ import ProductListingGrid from '../components/shop/ProductListingGrid'
 import PdpAccordion from '../components/shop/PdpAccordion'
 import PdpActionButtons from '../components/shop/PdpActionButtons'
 import PdpGalleryNav from '../components/shop/PdpGalleryNav'
-import PdpCssCropGallery, {
+import PdpCssCropGallery from '../components/shop/PdpCssCropGallery'
+import {
   HALF_SHIRT_CROP_VIEWS,
   getHalfShirtCropView,
   halfShirtCropImageClass,
-} from '../components/shop/PdpCssCropGallery'
+} from '../components/shop/halfShirtCropViews'
 import PdpThumbnailStrip from '../components/shop/PdpThumbnailStrip'
 import PdpQuantityStepper from '../components/shop/PdpQuantityStepper'
 import PdpShareButton from '../components/shop/PdpShareButton'
@@ -138,7 +139,7 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [activeImageState, setActiveImageState] = useState({ slug: decodedSlug, index: 0 })
   const [isZoomOpen, setIsZoomOpen] = useState(false)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
   const [didAddToBag, setDidAddToBag] = useState(false)
@@ -152,6 +153,14 @@ export default function ProductDetailPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const lastTrackedProductIdRef = useRef<string | null>(null)
   const lastRecentlyViewedIdRef = useRef<string | null>(null)
+  const activeImageIndex = activeImageState.slug === decodedSlug ? activeImageState.index : 0
+  const setActiveImageIndex = useCallback((nextIndex: SetStateAction<number>) => {
+    setActiveImageState((current) => {
+      const currentIndex = current.slug === decodedSlug ? current.index : 0
+      const index = typeof nextIndex === 'function' ? nextIndex(currentIndex) : nextIndex
+      return { slug: decodedSlug, index }
+    })
+  }, [decodedSlug])
 
   useEffect(() => {
     const unsubscribe = subscribeToProducts((nextProducts) => {
@@ -330,10 +339,6 @@ export default function ProductDetailPage() {
       ],
     })
   }, [location.pathname, product, ready])
-
-  useEffect(() => {
-    setActiveImageIndex(0)
-  }, [decodedSlug])
 
   useEffect(() => {
     if (!isZoomOpen) {

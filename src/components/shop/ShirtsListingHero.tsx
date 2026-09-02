@@ -3,7 +3,6 @@ import {
   MENS_SHIRTS_HERO_BACKGROUND,
   MENS_SHIRTS_HERO_HEIGHT,
   MENS_SHIRTS_HERO_IMAGE,
-  MENS_SHIRTS_HERO_IMAGE_FALLBACK,
   MENS_SHIRTS_HERO_SIZES,
   MENS_SHIRTS_HERO_WIDTH,
 } from '../../data/mensShirtCollection'
@@ -13,13 +12,6 @@ const DEFAULT_OG_IMAGE = '/og-image.svg'
 export default function ShirtsListingHero() {
   const handleError = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const image = event.currentTarget
-    const step = Number.parseInt(image.dataset.fallbackStep ?? '0', 10)
-
-    if (step < 1) {
-      image.dataset.fallbackStep = '1'
-      image.src = MENS_SHIRTS_HERO_IMAGE_FALLBACK
-      return
-    }
 
     if (image.src.endsWith(DEFAULT_OG_IMAGE)) {
       return

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, type ComponentProps, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 type PrefetchLinkProps = Omit<ComponentProps<typeof Link>, 'prefetch'> & {
@@ -23,14 +23,14 @@ export default function PrefetchLink({
   const nodeRef = useRef<HTMLAnchorElement | null>(null)
   const prefetchedRef = useRef(false)
 
-  const runPrefetch = () => {
+  const runPrefetch = useCallback(() => {
     if (prefetchedRef.current || !prefetchModule) {
       return
     }
 
     prefetchedRef.current = true
     void prefetchModule()
-  }
+  }, [prefetchModule])
 
   useEffect(() => {
     const node = nodeRef.current
@@ -54,7 +54,7 @@ export default function PrefetchLink({
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [prefetchModule, rootMargin])
+  }, [prefetchModule, rootMargin, runPrefetch])
 
   return (
     <Link
