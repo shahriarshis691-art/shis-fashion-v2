@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { auth } from '../firebase/firebase'
-import { rafThrottle } from './useRafThrottle'
 
 const STORAGE_KEY_COMPLETED = 'shis_popup_completed'
 const STORAGE_KEY_CLOSED = 'shis_popup_closed'
 const STORAGE_KEY_EMAIL = 'shis_popup_email'
 const TRIGGER_DELAY_MS = 8000
-const SCROLL_THRESHOLD = 0.4
 
 function isPopupCompleted(): boolean {
   if (typeof window === 'undefined') {
@@ -112,28 +110,9 @@ export function useWelcomePopup(): UseWelcomePopupResult {
       return
     }
 
-    const onScroll = rafThrottle(() => {
-      if (triggeredRef.current) {
-        return
-      }
-
-      const scrollTop = window.scrollY || window.pageYOffset || 0
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      if (docHeight <= 0) {
-        return
-      }
-
-      const scrollPercent = scrollTop / docHeight
-      if (scrollPercent >= SCROLL_THRESHOLD) {
-        openPopup()
-      }
-    })
-
     timeoutRef.current = window.setTimeout(() => {
       openPopup()
     }, TRIGGER_DELAY_MS)
-
-    window.addEventListener('scroll', onScroll, { passive: true })
 
     return () => {
       if (timeoutRef.current) {
@@ -141,8 +120,6 @@ export function useWelcomePopup(): UseWelcomePopupResult {
         timeoutRef.current = null
       }
 
-      onScroll.cancel()
-      window.removeEventListener('scroll', onScroll)
     }
   }, [])
 

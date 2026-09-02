@@ -27,22 +27,10 @@
 html {
   font-size: 100%;
   scroll-padding-top: var(--nav-offset);
-  overscroll-behavior: none;
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
   -webkit-tap-highlight-color: transparent;
-}
-
-html.luxury-scroll {
-  scroll-behavior: smooth;
-}
-
-html.reduce-motion {
-  scroll-behavior: auto;
-}
-
-@media (min-width: 768px) {
-  html:not(.reduce-motion) {
-    scroll-behavior: smooth;
-  }
 }
 
 @media (max-width: 640px) {
@@ -55,8 +43,9 @@ body {
   overflow-x: hidden;
   font-family: var(--font-sans);
   letter-spacing: 0.005em;
+  scroll-behavior: auto !important;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -214,11 +203,6 @@ main {
 }
 
 @media (hover: none) and (pointer: coarse) {
-  .product-card {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-
   img {
     -webkit-user-drag: none;
     user-drag: none;
@@ -228,13 +212,6 @@ main {
   button {
     -webkit-touch-callout: none;
   }
-}
-
-.sticky,
-[style*='position: fixed'],
-[style*='position:fixed'] {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 
 @supports (padding: env(safe-area-inset-bottom)) {

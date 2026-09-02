@@ -1,10 +1,9 @@
-import { useState, useRef, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import {
   buildLqipUrl,
   CATALOG_IMAGE_PLACEHOLDER,
   catalogImageAttrs,
 } from '../../utils/media'
-import { useParallax } from '../../hooks/useParallax'
 
 interface LuxuryImageProps {
   src: string
@@ -23,7 +22,6 @@ interface LuxuryImageProps {
   priority?: boolean
   hover?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
-  parallax?: boolean
 }
 
 function handleFallback(event: React.SyntheticEvent<HTMLImageElement>) {
@@ -48,7 +46,6 @@ export default function LuxuryImage({
   priority = false,
   hover = false,
   onError,
-  parallax = false,
 }: LuxuryImageProps) {
   const [loaded, setLoaded] = useState(priority)
   const isContained = objectFit === 'contain'
@@ -72,12 +69,8 @@ export default function LuxuryImage({
       }
     : undefined
 
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  useParallax(wrapperRef, 0.03, parallax)
-
   return (
     <div
-      ref={wrapperRef}
       className={`relative overflow-hidden ${wrapperBackgroundClass} ${aspectClassName} ${className}`.trim()}
       style={wrapperStyle}
     >

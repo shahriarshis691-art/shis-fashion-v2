@@ -88,7 +88,6 @@ export default function ShopByCategorySection({
                   imgClassName={isSareeCard ? 'object-top' : isKidsCard ? 'h-full w-full object-cover object-top' : isMenCard ? 'h-full w-full object-cover object-top' : undefined}
                   imageHoverScale={!isSareeCard}
                   sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                  parallax
                 />
               </article>
             </ScrollReveal>

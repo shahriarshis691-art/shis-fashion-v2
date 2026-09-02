@@ -222,7 +222,8 @@ export default function Navbar() {
     const updateWeddingNavTone = () => {
       const hero = document.querySelector('[aria-label="Wedding collection banner"]')
       const heroHeight = hero instanceof HTMLElement ? hero.offsetHeight : window.innerHeight
-      setIsPastWeddingHero(window.scrollY > Math.max(heroHeight - 80, 120))
+      const nextIsPastWeddingHero = window.scrollY > Math.max(heroHeight - 80, 120)
+      setIsPastWeddingHero((current) => current === nextIsPastWeddingHero ? current : nextIsPastWeddingHero)
     }
 
     updateWeddingNavTone()

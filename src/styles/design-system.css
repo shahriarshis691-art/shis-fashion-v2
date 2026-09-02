@@ -493,11 +493,6 @@ button,
   }
 }
 
-.gpu-media {
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-}
-
 .media-hover {
   transition: transform 520ms var(--ease-luxury);
 }
@@ -516,9 +511,7 @@ button,
 }
 
 .product-card-media {
-  transform: translate3d(0, 0, 0);
   transition: transform 500ms var(--ease-luxury);
-  will-change: transform;
 }
 
 .luxury-reveal {
@@ -682,24 +675,10 @@ button,
   will-change: auto;
 }
 
-/* Subtle parallax for images on scroll */
-.scroll-parallax {
-  transform: translate3d(0, calc(var(--scroll-progress, 0) * -20px), 0);
-  will-change: transform;
-}
-
-/* Subtle scale on scroll for cards */
-.scroll-scale {
-  transform: scale(calc(1 + var(--scroll-visibility, 0) * 0.01));
-  will-change: transform;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal,
   .scroll-reveal-image,
-  .scroll-reveal-typography,
-  .scroll-parallax,
-  .scroll-scale {
+  .scroll-reveal-typography {
     animation: none;
     transition: none;
     transform: none;
@@ -749,10 +728,8 @@ button,
   width: 100%;
   height: 100%;
   max-width: none;
-  transform: translate3d(0, 0, 0);
   transform-origin: center top;
   transition: transform 500ms var(--ease-luxury);
-  will-change: transform;
   object-fit: cover;
   object-position: center top;
 }
@@ -912,13 +889,6 @@ button,
   .group:hover .product-card-media,
   .product-card:hover .product-card-media {
     transform: none !important;
-  }
-}
-
-/* Mobile scroll performance */
-@supports (overscroll-behavior: none) {
-  html {
-    overscroll-behavior: none;
   }
 }
 

@@ -43,7 +43,7 @@ export default function ShirtsListingHero() {
           fetchPriority="high"
           decoding="sync"
           draggable={false}
-          className="gpu-media block h-full w-full max-w-full object-contain object-center md:h-auto md:w-full md:max-w-none md:transform-gpu md:[backface-visibility:hidden] md:[image-rendering:auto] md:[transform:translateZ(0)]"
+          className="block h-full w-full max-w-full object-contain object-center md:h-auto md:w-full md:max-w-none md:[image-rendering:auto]"
           style={{ objectPosition: 'center' }}
           onError={handleError}
         />

@@ -147,7 +147,6 @@ export default function HomeHeroCarousel() {
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                parallax
               />
           )
 

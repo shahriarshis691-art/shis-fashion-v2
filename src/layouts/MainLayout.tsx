@@ -4,7 +4,6 @@ import Navbar from '../components/layout/Navbar'
 import ScrollToTop from '../components/common/ScrollToTop'
 import PageTransition from '../components/common/PageTransition'
 import SoftLaunchGate from '../components/common/SoftLaunchGate'
-import SmoothScroll from '../components/common/SmoothScroll'
 import Skeleton from '../components/ui/Skeleton'
 import { useWelcomePopup } from '../hooks/useWelcomePopup'
 import { metaPixel } from '../services/metaPixel'
@@ -251,7 +250,6 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <SmoothScroll />
       <ScrollToTop />
       <Navbar />
       {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/shis-admin') ? (

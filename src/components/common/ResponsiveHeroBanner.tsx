@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useCallback, useRef } from 'react'
-import { useParallax } from '../../hooks/useParallax'
+import React, { useCallback } from 'react'
 
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 
@@ -38,7 +37,6 @@ export interface ResponsiveHeroBannerProps {
   /** When true, render only the inner media frame (for carousel slides). */
   embed?: boolean
   objectFit?: 'contain' | 'cover'
-  parallax?: boolean
 }
 
 function resolveHeroBackground(background: ResponsiveHeroBannerProps['background']) {
@@ -72,12 +70,9 @@ export default function ResponsiveHeroBanner({
   mobileAspectRatio,
   embed = false,
   objectFit = 'contain',
-  parallax = false,
 }: ResponsiveHeroBannerProps) {
   const bgColor = resolveHeroBackground(background)
   const aspectRatio = mobileAspectRatio ?? `${width} / ${height}`
-  const frameRef = useRef<HTMLDivElement>(null)
-  useParallax(frameRef, 0.04, parallax)
 
   const handleError = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const image = event.currentTarget
@@ -161,7 +156,7 @@ export default function ResponsiveHeroBanner({
 
   if (embed) {
     return (
-      <div ref={frameRef} className={frameClassName} style={frameStyle}>
+      <div className={frameClassName} style={frameStyle}>
         {frameContent}
       </div>
     )
@@ -175,7 +170,7 @@ export default function ResponsiveHeroBanner({
       style={{ backgroundColor: bgColor }}
       aria-label={ariaLabel ?? alt}
     >
-      <div ref={frameRef} className={frameClassName} style={frameStyle}>
+      <div className={frameClassName} style={frameStyle}>
         {frameContent}
       </div>
     </section>

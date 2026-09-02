@@ -21,7 +21,6 @@ export interface CategoryHeroCardProps {
   /** Skip studio-media-frame overlay while keeping cover crop. */
   plainFrame?: boolean
   onError?: (event: React.SyntheticEvent<HTMLImageElement>) => void
-  parallax?: boolean
 }
 
 export default function CategoryHeroCard({
@@ -41,7 +40,6 @@ export default function CategoryHeroCard({
   sizes,
   plainFrame = false,
   onError,
-  parallax = false,
 }: CategoryHeroCardProps) {
   const isFeed = variant === 'feed'
   const listingFit = isFeed ? imageFit : 'cover'
@@ -88,7 +86,6 @@ export default function CategoryHeroCard({
           priority={priority}
           imgClassName={imageObjectClass}
           onError={onError}
-          parallax={parallax}
         />
       </div>
 
