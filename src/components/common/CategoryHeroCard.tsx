@@ -52,12 +52,12 @@ export default function CategoryHeroCard({
   const imageObjectClass = isFeed
     ? [
       imgClassName,
-      'min-h-full min-w-full object-cover',
+      'gpu-layer min-h-full min-w-full object-cover',
       imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
     ].filter(Boolean).join(' ')
     : [
       imgClassName,
-      'h-full w-full object-cover object-top',
+      'gpu-layer h-full w-full object-cover object-top',
       imageHoverScale ? 'transition-transform duration-300 ease-out group-hover:scale-105' : '',
     ].filter(Boolean).join(' ')
   const titleClass = isFeed
@@ -67,7 +67,7 @@ export default function CategoryHeroCard({
   return (
     <Link
       to={href}
-      className="group luxury-tap touch-press relative z-0 flex w-full min-w-0 cursor-pointer flex-col items-center"
+      className="group luxury-tap touch-press card-containment card-interactive relative z-0 flex w-full min-w-0 cursor-pointer flex-col items-center"
       aria-label={name}
     >
       <div className={imageFrameClass}>

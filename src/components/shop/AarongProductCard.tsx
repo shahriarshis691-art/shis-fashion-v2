@@ -163,7 +163,7 @@ const AarongProductCard = memo(function AarongProductCard({
 
   return (
     <article
-      className="product-card luxury-tap group relative border-0"
+      className="product-card luxury-tap card-containment card-interactive group relative border-0"
       onMouseLeave={() => setSizePickerOpen(false)}
     >
       <PrefetchLink
@@ -185,7 +185,7 @@ const AarongProductCard = memo(function AarongProductCard({
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'low'}
             decoding="async"
-            className="product-card-media absolute inset-0 h-full w-full object-cover object-top"
+            className="product-card-media gpu-layer absolute inset-0 h-full w-full object-cover object-top"
             onError={() => {
               if (imageFailed) {
                 return

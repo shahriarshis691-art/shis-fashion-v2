@@ -23,13 +23,18 @@
   }
 }
 
+/* Native document scrolling stays browser-owned on every input type. */
+html,
+body {
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  text-rendering: optimizeLegibility;
+}
 
 html {
   font-size: 100%;
   scroll-padding-top: var(--nav-offset);
-  scroll-behavior: auto !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -43,9 +48,6 @@ body {
   overflow-x: hidden;
   font-family: var(--font-sans);
   letter-spacing: 0.005em;
-  scroll-behavior: auto !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -187,6 +189,40 @@ main {
 
 .product-grid > * {
   min-width: 0;
+}
+
+/* Scoped compositor promotion: used only by interactive card media. */
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Isolate card paint and layout work without altering card dimensions. */
+.card-containment {
+  contain: layout paint style;
+}
+
+.card-interactive {
+  transition:
+    transform 550ms cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 400ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    transform: translate3d(0, 0, 0) scale(1.02);
+    will-change: transform;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .card-interactive:active {
+    transform: translate3d(0, 0, 0) scale(0.985);
+    transition-duration: 200ms;
+  }
 }
 
 @media (max-width: 767px) {
