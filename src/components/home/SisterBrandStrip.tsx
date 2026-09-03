@@ -7,7 +7,7 @@ const LOGO_FALLBACKS: Record<string, string[]> = {
   '/brands/strip/ceravo.png': ['/brands/ceravo.png'],
   '/brands/strip/rangkutir.png': ['/brands/rangkutir.png'],
   '/brands/strip/velorix-motors.png': ['/brands/velorix-motors.png'],
-  '/brands/strip/xeroxii.png': ['/brands/xeroxii.png'],
+  '/brands/strip/xeroxii.png': ['/brands/xeroxii.webp'],
 }
 
 function handleSisterBrandLogoError(event: SyntheticEvent<HTMLImageElement>, primarySrc: string) {

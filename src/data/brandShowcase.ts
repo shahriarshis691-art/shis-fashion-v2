@@ -50,7 +50,7 @@ export const brandEntries: BrandEntry[] = [
     tag: 'Luxury Watch Brand',
     summary: 'Precision-crafted luxury watches with bold silhouettes and timeless detailing.',
     details: 'XEROXII focuses on statement timepieces with premium finishing for collectors and modern professionals.',
-    logo: '/brands/xeroxii.png',
+    logo: '/brands/xeroxii.webp',
     contacts: {
       website: 'https://xeroxii.com',
       contact: 'https://wa.me/8801887848304?text=Hi%20XEROXII%2C%20I%20want%20to%20know%20more%20about%20your%20watches.',

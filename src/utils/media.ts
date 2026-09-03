@@ -177,6 +177,75 @@ export function isSiteRelativeMediaUrl(url: string) {
   return trimmed.startsWith('/') && !trimmed.startsWith('//')
 }
 
+const OPTIMIZED_PUBLIC_MEDIA_PATHS = new Set([
+  '/brands/xeroxii.png',
+  '/collections/full=shirts/64a33855-1f44-470a-bfc0-ce02135a94eb.png',
+  '/collections/full=shirts/7131c1a9-6333-4b56-84b3-6ad6b8c0390b.png',
+  '/collections/full=shirts/72d32a26-0458-48bc-a2ea-a3f81f6eeb24.png',
+  '/collections/full=shirts/78fe0eb3-d79f-4470-9269-d8d375ea2c67.png',
+  '/collections/full=shirts/c4c28e17-5096-4217-8cc8-e81ddd408e1d.png',
+  '/collections/full=shirts/c5374993-6bcd-4563-952c-5c2b75a8ad54.png',
+  '/collections/full=shirts/f10ed88f-2fe5-42b5-a248-4cf426f929ac.png',
+  ...Array.from({ length: 13 }, (_, index) => `/collections/half-shirts/half-shirt-${index + 1}.jpg`),
+  '/collections/kid-hero/kid-category.png',
+  '/collections/kid-hero/Shis Fashion Streetwear Editorial.png',
+  '/collections/men-2feature-image/men-feature2.png',
+  '/collections/men-feature.png',
+  '/collections/polo-hero-images/polo-collection-herimage.png',
+  '/collections/saree-category-new.jpg',
+  '/collections/women-category-main/women.category.png',
+  '/hero/denim-homepage.jpg',
+  '/hero/half-shirt-1.jpg',
+  '/hero/hero-images/hero-image2.png',
+  '/hero/hero-images/wedding.image.png',
+  '/hero/kids/hero-soft-cotton-saree.jpg',
+  '/hero/kids/kid-featured (2).png',
+  '/hero/panjabi-hero-image/3cb91c65-0c83-4044-8224-d4713d26b0a3.png',
+  '/hero/panjabi-hero-image/panjabi-hero-main.png',
+  '/hero/saree-heroimage/homepage-hero-image.png',
+  '/hero/shirt-hero-image/shirt-collection-image.png',
+  '/hero/womens-baggy/womens-jeans-listing.png',
+  '/homepage/40e0b639-d95a-42d5-aa38-f3d42a8e5589.png',
+  '/homepage/category.png',
+  ...Array.from({ length: 11 }, (_, index) => `/images/products/kids/Kid-Hero-${index + 1}.png`),
+  '/images/products/kids/Kid-Hero-13.png',
+  '/saree/aba8c50b-3f09-4cc8-93bb-8d89fb37e894.png',
+  '/saree/dd718963-1aed-4441-94dc-8a20b143fdae.png',
+  '/saree/saree.1.jpg',
+  '/saree/saree.3.jpg',
+  '/saree/saree.5.png',
+  '/saree/saree.6.png',
+  '/saree/saree.7.png',
+])
+
+function resolveOptimizedPublicMediaUrl(url: string) {
+  if (!isSiteRelativeMediaUrl(url)) {
+    return url
+  }
+
+  const hashIndex = url.indexOf('#')
+  const queryIndex = url.indexOf('?')
+  const end = Math.min(
+    hashIndex === -1 ? url.length : hashIndex,
+    queryIndex === -1 ? url.length : queryIndex,
+  )
+  const pathname = url.slice(0, end)
+  const suffix = url.slice(end)
+  let decodedPathname = pathname
+
+  try {
+    decodedPathname = decodeURIComponent(pathname)
+  } catch {
+    // Keep malformed URLs unchanged so the existing fallback behavior applies.
+  }
+
+  if (!OPTIMIZED_PUBLIC_MEDIA_PATHS.has(decodedPathname)) {
+    return url
+  }
+
+  return `${encodePathnamePreservingSafeChars(decodedPathname.replace(/\.(jpe?g|png)$/i, '.webp'))}${suffix}`
+}
+
 export function isAbsoluteHttpUrl(url: string) {
   return /^https?:\/\//i.test(url.trim())
 }
@@ -381,7 +450,7 @@ export function resolveCatalogImageSrc(
   height = 853,
   fit: CatalogImageFit = 'cover',
 ) {
-  const sanitized = sanitizeCatalogAssetUrl(url)
+  const sanitized = resolveOptimizedPublicMediaUrl(sanitizeCatalogAssetUrl(url))
   if (!sanitized) {
     return sanitized
   }

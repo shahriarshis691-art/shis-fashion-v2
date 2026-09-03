@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-const WEDDING_CARD_IMAGE = '/hero/hero-images/wedding.image.png'
+const WEDDING_CARD_IMAGE = '/hero/hero-images/wedding.image.webp'
 
 export default function WeddingShowcaseSection() {
   return (

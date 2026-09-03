@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useCallback } from 'react'
+import { resolveCatalogImageSrc } from '../../utils/media'
 
 const DEFAULT_OG_IMAGE = '/og-image.svg'
 
@@ -73,6 +74,7 @@ export default function ResponsiveHeroBanner({
 }: ResponsiveHeroBannerProps) {
   const bgColor = resolveHeroBackground(background)
   const aspectRatio = mobileAspectRatio ?? `${width} / ${height}`
+  const resolvedSrc = resolveCatalogImageSrc(src, width, height, objectFit)
 
   const handleError = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const image = event.currentTarget
@@ -80,7 +82,7 @@ export default function ResponsiveHeroBanner({
 
     if (step < fallbacks.length) {
       image.dataset.fallbackStep = String(step + 1)
-      image.src = fallbacks[step] ?? DEFAULT_OG_IMAGE
+      image.src = resolveCatalogImageSrc(fallbacks[step] ?? DEFAULT_OG_IMAGE, width, height, objectFit)
       return
     }
 
@@ -89,7 +91,7 @@ export default function ResponsiveHeroBanner({
     }
 
     image.src = DEFAULT_OG_IMAGE
-  }, [fallbacks])
+  }, [fallbacks, height, objectFit, width])
 
   const imageClassName = [
     objectFit === 'cover' ? 'gpu-media block h-full w-full max-w-full object-cover' : 'gpu-media block h-full w-full max-w-full object-contain',
@@ -135,12 +137,12 @@ export default function ResponsiveHeroBanner({
           {sources.map((source) => (
             <source key={source.type} srcSet={source.srcSet} type={source.type} sizes={sizes} />
           ))}
-          <img src={src} {...sharedProps} />
+          <img src={resolvedSrc} {...sharedProps} />
         </picture>
       )
     }
 
-    return <img src={src} {...sharedProps} />
+    return <img src={resolvedSrc} {...sharedProps} />
   }
 
   const frameContent = (

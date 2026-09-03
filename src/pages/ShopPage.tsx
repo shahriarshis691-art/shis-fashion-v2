@@ -1311,7 +1311,7 @@ export default function ShopPage() {
         )}
 
         {isWomenListing ? (
-          <div className={`sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md ${
+          <div className={`hidden sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md ${
             isWesternOutfitsListing
               ? '-mx-4 px-4 md:-mx-8 md:px-8'
               : '-mx-4 px-4 sm:-mx-8 sm:px-8'
@@ -1383,7 +1383,7 @@ export default function ShopPage() {
         ) : null}
 
         {isPantsListing ? (
-          <div className="sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 -mx-4 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
+          <div className="hidden sticky top-[calc(var(--nav-offset,3.5rem)+0.25rem)] z-30 mt-6 -mx-4 border-b border-neutral-100 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8">
             <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {MENS_PANTS_FILTER_OPTIONS.map((option) => {
                 const active = pantsFilter === option.value

@@ -190,3 +190,10 @@
     line-height: 1.05;
   }
 }
+
+/* Hide Category / Gender Filter Tabs on Listing Pages */
+[data-testid="filter-bar"],
+.filter-tabs,
+nav[aria-label="Filter tabs"],
+  display: none !important;
+}
