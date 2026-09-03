@@ -338,3 +338,9 @@ img.pdp-main-image.pdp-gallery-center,
     object-position: center top !important;
   }
 }
+
+/* Hide category tabs */
+[data-testid='filter-bar'], div:has(> button:contains('UNISEX')) { display: none !important; }
+
+button:has-text('UNISEX'), div:has(> button:contains('UNISEX')), div:has(> a:contains('UNISEX')) { display: none !important; }
+.filter-tabs, [aria-label='Filter tabs'] { display: none !important; }
